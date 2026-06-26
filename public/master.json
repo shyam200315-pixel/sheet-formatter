@@ -1,0 +1,2594 @@
+{
+  "10040087": {
+    "name": "SAP",
+    "category": "From Catalogue"
+  },
+  "11900109": {
+    "name": "3 Li t r e",
+    "category": "From Catalogue"
+  },
+  "13001478": {
+    "name": "(72 X 130 MTR) TRANSPARENT TAPE",
+    "group": "1Consumable"
+  },
+  "16000019": {
+    "name": "PIGEON`MULTI PIRPOSE KITCHEN SCISSOR",
+    "group": "KITCHEN UTILITY"
+  },
+  "16000022": {
+    "name": "SS KITCHEN KNIFE SET - 3 PCS - BL",
+    "group": "KITCHEN UTILITY"
+  },
+  "16000023": {
+    "name": "HOSE PIPE 1.5 METER",
+    "group": "SPARES"
+  },
+  "16000072": {
+    "name": "BULLET- SDX 1000ML",
+    "group": "WATER BOTTLE"
+  },
+  "16000204": {
+    "name": "LUMINO",
+    "category": "From Catalogue"
+  },
+  "16000205": {
+    "name": "ILLUME",
+    "category": "From Catalogue"
+  },
+  "16000251": {
+    "name": "GLEAM",
+    "category": "From Catalogue"
+  },
+  "16000252": {
+    "name": "DC 12V Input",
+    "category": "From Catalogue"
+  },
+  "16000283": {
+    "name": "THEIA",
+    "category": "From Catalogue"
+  },
+  "16000284": {
+    "name": "Rechargeable Battery",
+    "category": "From Catalogue"
+  },
+  "16000285": {
+    "name": "SOLAR LED LAMP HELIOS",
+    "group": "EMERGENCY LAMPS"
+  },
+  "16000377": {
+    "name": "VEGA",
+    "category": "From Catalogue"
+  },
+  "16000483": {
+    "name": "B+D BXTO1901IN 19L OTG WITH SS BODY",
+    "group": "Black + Decker"
+  },
+  "16000501": {
+    "name": "B+D - BXCJ0101IN - 1L Citrus Juicer",
+    "group": "Black + Decker"
+  },
+  "16000530": {
+    "name": "SS VACUUM BOTTLE AQUA - 1000ML - SILVER",
+    "group": "WATER BOTTLE"
+  },
+  "16000605": {
+    "name": "SHINE",
+    "category": "From Catalogue"
+  },
+  "16000663": {
+    "name": "EMERGENCY LAMP - RIGEL LED TORCH",
+    "group": "EMERGENCY LAMPS"
+  },
+  "16000664": {
+    "name": "RIGEL PLUS LED",
+    "category": "From Catalogue"
+  },
+  "16000665": {
+    "name": "EMERGENCY LAMP - CAPELLA LED",
+    "group": "EMERGENCY LAMPS"
+  },
+  "16000666": {
+    "name": "SIRIUS",
+    "category": "From Catalogue"
+  },
+  "16000780": {
+    "name": "KNIVES 6 PC SET (W/ WOODEN BLOCK)",
+    "group": "KITCHEN UTILITY"
+  },
+  "16000790": {
+    "name": "ILLUME PRO",
+    "category": "From Catalogue"
+  },
+  "16000792": {
+    "name": "LUMINO PRO",
+    "category": "From Catalogue"
+  },
+  "16000797": {
+    "name": "PG-RUBBER GASKET -2/3 LTR - INNER LID",
+    "group": "SPARES"
+  },
+  "16000798": {
+    "name": "PG-RUBBER GASKET -5 LTR - INNER LID",
+    "group": "SPARES"
+  },
+  "16000816": {
+    "name": "SAUCE PAN 160)",
+    "category": "From Catalogue"
+  },
+  "16000830": {
+    "name": "HALO",
+    "category": "From Catalogue"
+  },
+  "16000832": {
+    "name": "PIXO",
+    "category": "From Catalogue"
+  },
+  "16000833": {
+    "name": "TBLAZE TABLE LAMP",
+    "category": "From Catalogue"
+  },
+  "16000834": {
+    "name": "BUBBLE",
+    "category": "From Catalogue"
+  },
+  "16000840": {
+    "name": "SHEARS 4 PC KITCHEN TOOL SET",
+    "category": "From Catalogue"
+  },
+  "16000841": {
+    "name": "CUTTING BOARD",
+    "group": "KITCHEN UTILITY"
+  },
+  "16000935": {
+    "name": "B&D - BXCM0101IN - One Cup Coffee Maker - 1",
+    "group": "Black + Decker"
+  },
+  "16001957": {
+    "name": "CROMA THERMINOX - GALAXY - 600ML BLACK",
+    "category": "From Catalogue"
+  },
+  "16001958": {
+    "name": "800ml",
+    "category": "From Catalogue"
+  },
+  "16001959": {
+    "name": "CROMA THERMINOX - OLIVE - 600ML GREEN",
+    "category": "From Catalogue"
+  },
+  "16001968": {
+    "name": "SHEARS 3 PIECE KNIFE SET ELITE",
+    "category": "From Catalogue"
+  },
+  "16001990": {
+    "name": "800ml",
+    "category": "From Catalogue"
+  },
+  "16001991": {
+    "name": "CROMA THERMINOX - NAVY - 600ML BLUE",
+    "category": "From Catalogue"
+  },
+  "16001992": {
+    "name": "800ml",
+    "category": "From Catalogue"
+  },
+  "16001993": {
+    "name": "CROMA THERMINOX - CORAL - 600ML ORANGE",
+    "category": "From Catalogue"
+  },
+  "16001994": {
+    "name": "800ml",
+    "category": "From Catalogue"
+  },
+  "16001995": {
+    "name": "CROMA THERMINOX - AZURE - 600ML TEAL BLUE",
+    "category": "From Catalogue"
+  },
+  "16001996": {
+    "name": "800ml",
+    "category": "From Catalogue"
+  },
+  "16002016": {
+    "name": "IDLY MAKER (4 PLATES)",
+    "group": "PRESSURE COOKER"
+  },
+  "16002017": {
+    "name": "IDLY MAKER (6 PLATES)",
+    "group": "PRESSURE COOKER"
+  },
+  "16002018": {
+    "name": "BOTTLE - 500ML - PURPLE",
+    "category": "From Catalogue"
+  },
+  "16002019": {
+    "name": "750ml",
+    "category": "From Catalogue"
+  },
+  "16002040": {
+    "name": "BOTTLE - 500ML - YELLOW",
+    "category": "From Catalogue"
+  },
+  "16002041": {
+    "name": "750ml",
+    "category": "From Catalogue"
+  },
+  "16002042": {
+    "name": "BOTTLE - 500ML - BLUE",
+    "category": "From Catalogue"
+  },
+  "16002043": {
+    "name": "750ml",
+    "category": "From Catalogue"
+  },
+  "16002044": {
+    "name": "BOTTLE - 600ML - PINK",
+    "category": "From Catalogue"
+  },
+  "16002045": {
+    "name": "800ml",
+    "category": "From Catalogue"
+  },
+  "16002046": {
+    "name": "BOTTLE - 600ML - BLUE",
+    "category": "From Catalogue"
+  },
+  "16002047": {
+    "name": "800ml",
+    "category": "From Catalogue"
+  },
+  "16002048": {
+    "name": "BOTTLE - 600ML - YELLOW",
+    "category": "From Catalogue"
+  },
+  "16002049": {
+    "name": "800ml",
+    "category": "From Catalogue"
+  },
+  "16002088": {
+    "name": "ENORA - 500 W",
+    "category": "From Catalogue"
+  },
+  "16002092": {
+    "name": "PG SS STEELO MULTI KADAI 280 WITH SB",
+    "group": "NONSTICK COOKWARE"
+  },
+  "16002094": {
+    "name": "STAINLESS STEEL STEELO KADAI 10\" 2MM",
+    "category": "From Catalogue"
+  },
+  "16002095": {
+    "name": "12\"  2m m",
+    "category": "From Catalogue"
+  },
+  "16002096": {
+    "name": "13\"  2mm",
+    "category": "From Catalogue"
+  },
+  "16002097": {
+    "name": "PG SS STEELO KADAI 12 INCH WITH SB",
+    "group": "NONSTICK COOKWARE"
+  },
+  "16002098": {
+    "name": "PG SS STEELO KADAI 13 INCH WITH SB",
+    "group": "NONSTICK COOKWARE"
+  },
+  "16002099": {
+    "name": "PG SS STEELO KADAI 14 INCH WITH SB",
+    "group": "NONSTICK COOKWARE"
+  },
+  "16002100": {
+    "name": "PG SS STEELO KADAI 15 INCH WITH SB",
+    "group": "NONSTICK COOKWARE"
+  },
+  "16002101": {
+    "name": "PG SS STEELO KADAI 16 INCH WITH SB",
+    "group": "NONSTICK COOKWARE"
+  },
+  "16002102": {
+    "name": "WITH SANDWICH BOTTOM",
+    "category": "From Catalogue"
+  },
+  "16002103": {
+    "name": "Sa u c e  Pa n  11\"",
+    "category": "From Catalogue"
+  },
+  "16002104": {
+    "name": "Sauce Pan 12\"",
+    "category": "From Catalogue"
+  },
+  "16002105": {
+    "name": "WITH SANDWICH BOTTOM",
+    "category": "From Catalogue"
+  },
+  "16002106": {
+    "name": "Fr y p a n  12 \"",
+    "category": "From Catalogue"
+  },
+  "16002107": {
+    "name": "Fr y p a n  13 \"",
+    "category": "From Catalogue"
+  },
+  "16002109": {
+    "name": "TOPE SET 10” TO 14”",
+    "category": "From Catalogue"
+  },
+  "16002110": {
+    "name": "PG SS STEELO STEAMER 20 CM",
+    "group": "NONSTICK COOKWARE"
+  },
+  "16002220": {
+    "name": "SS SERVING INSULATED CASSEROLE 1500 ML",
+    "group": "PRESSURE COOKER"
+  },
+  "16002221": {
+    "name": "SS SERVING INSULATED CASSEROLE 2500 ML",
+    "group": "PRESSURE COOKER"
+  },
+  "16002222": {
+    "name": "SS SERVING INSULATED CASSEROLE 3500 ML",
+    "group": "PRESSURE COOKER"
+  },
+  "16002223": {
+    "name": "SS SERVING INSULATED CASSEROLE 4500 ML",
+    "group": "PRESSURE COOKER"
+  },
+  "16002224": {
+    "name": "SS SERVING INSULATED CASSEROLE 5500 ML",
+    "group": "PRESSURE COOKER"
+  },
+  "16002249": {
+    "name": "THERMO CUP 350ML - BLACK",
+    "category": "From Catalogue"
+  },
+  "16002253": {
+    "name": "(IDIYAPPAM)",
+    "category": "From Catalogue"
+  },
+  "16002255": {
+    "name": "HAND STEAMER - BLUE - 1200W",
+    "category": "From Catalogue"
+  },
+  "16002256": {
+    "name": "Pink",
+    "category": "From Catalogue"
+  },
+  "16002259": {
+    "name": "EDGE FLORA SS KNIFE 5 INCH",
+    "group": "KITCHEN UTILITY"
+  },
+  "16002260": {
+    "name": "EDGE FLORA SS KNIFE 6 INCH",
+    "group": "KITCHEN UTILITY"
+  },
+  "16002261": {
+    "name": "EDGE CARBON KNIFE SET 6 PCS",
+    "group": "KITCHEN UTILITY"
+  },
+  "16002262": {
+    "name": "THERMO CUP 350ML - WHITE",
+    "category": "From Catalogue"
+  },
+  "16002263": {
+    "name": "THERMO CUP - 400ML - WHITE",
+    "category": "From Catalogue"
+  },
+  "16002269": {
+    "name": "PIGEON HOB 3 BURNER - LINEA",
+    "group": "HOB"
+  },
+  "16002270": {
+    "name": "THERMO CUP - 400ML - BLACK",
+    "category": "From Catalogue"
+  },
+  "16002273": {
+    "name": "LARGE",
+    "category": "From Catalogue"
+  },
+  "16002280": {
+    "name": "EDGE CERAMIC KNIFE 4 INCH",
+    "group": "KITCHEN UTILITY"
+  },
+  "16002281": {
+    "name": "EDGE CERAMIC KNIFE 5 INCH",
+    "group": "KITCHEN UTILITY"
+  },
+  "16002282": {
+    "name": "EDGE CERAMIC KNIFE 6 INCH",
+    "group": "KITCHEN UTILITY"
+  },
+  "16002295": {
+    "name": "EDGE FLORA SS KNIFE 3PC SET",
+    "group": "KITCHEN UTILITY"
+  },
+  "16002300": {
+    "name": "PIGEON HOB 4 BURNER - LINEA",
+    "group": "HOB"
+  },
+  "16002301": {
+    "name": "PIGEON HOB 4 BURNER XL - LINEA",
+    "group": "HOB"
+  },
+  "16002344": {
+    "name": "THERMINOX LUXE 500ML - BR",
+    "category": "From Catalogue"
+  },
+  "16002345": {
+    "name": "750ml",
+    "category": "From Catalogue"
+  },
+  "16002350": {
+    "name": "THERMINOX LUXE 500ML - BG",
+    "category": "From Catalogue"
+  },
+  "16002351": {
+    "name": "750ml",
+    "category": "From Catalogue"
+  },
+  "16002352": {
+    "name": "THERMINOX LUXE 500ML - BLACK",
+    "category": "From Catalogue"
+  },
+  "16002353": {
+    "name": "750ml",
+    "category": "From Catalogue"
+  },
+  "16002368": {
+    "name": "PIGEON SILICONE 12PCS KITCHEN TOOL SET",
+    "group": "KITCHEN UTILITY"
+  },
+  "16002369": {
+    "name": "PIGEON EDGE CARBON KNIFE SET 3PCS",
+    "group": "KITCHEN UTILITY"
+  },
+  "16002372": {
+    "name": "PIGEON WOODEN CHOPPING BOARD S",
+    "group": "KITCHEN UTILITY"
+  },
+  "16002373": {
+    "name": "PIGEON WOODEN CHOPPING BOARD L",
+    "group": "KITCHEN UTILITY"
+  },
+  "16002380": {
+    "name": "PIGEON EDGE CARBON KNIFE SET 7PCS",
+    "group": "KITCHEN UTILITY"
+  },
+  "16002381": {
+    "name": "PIGEON EDGE 4PCS KNIFE SET",
+    "group": "KITCHEN UTILITY"
+  },
+  "16002387": {
+    "name": "2 j ar s",
+    "category": "From Catalogue"
+  },
+  "16002388": {
+    "name": "PIGEON NUTRI MASTER - 3 JARS",
+    "group": "MIXER GRINDER"
+  },
+  "16002416": {
+    "name": " AURA- 60",
+    "group": "CHIMNEY"
+  },
+  "16002417": {
+    "name": " AURA- 75",
+    "group": "CHIMNEY"
+  },
+  "16002418": {
+    "name": " AURA- 90",
+    "group": "CHIMNEY"
+  },
+  "16002431": {
+    "name": "IDLY MAKER (3 PLATES)",
+    "category": "From Catalogue"
+  },
+  "16002432": {
+    "name": "IDLY MAKER (5 PLATES)",
+    "category": "From Catalogue"
+  },
+  "16002437": {
+    "name": "SS COOKWARE 3PC SET",
+    "group": "NONSTICK COOKWARE"
+  },
+  "16002441": {
+    "name": "MEDIUM",
+    "category": "From Catalogue"
+  },
+  "16002442": {
+    "name": "BOARD COMBO-LARGE",
+    "category": "From Catalogue"
+  },
+  "16002443": {
+    "name": "CHOPPING BOARD SMALL",
+    "category": "From Catalogue"
+  },
+  "16002461": {
+    "name": "PG CLEAR GLASS WATER BOTTLE 750ML - BLUE",
+    "group": "WATER BOTTLE"
+  },
+  "16002462": {
+    "name": "WATER BOTTLE - 750ML GREY",
+    "category": "From Catalogue"
+  },
+  "16002463": {
+    "name": "PG CLEAR GLASS WATER BOTTLE 750ML - YELL",
+    "group": "WATER BOTTLE"
+  },
+  "16002464": {
+    "name": "PG CLEAR GLASS WATER BOTTLE 750ML - RED",
+    "group": "WATER BOTTLE"
+  },
+  "16002466": {
+    "name": "WAVE RECHARGEABLE MINI FAN",
+    "group": "SMALL APPLIANCES"
+  },
+  "16002469": {
+    "name": "ATOM - 3JAR - 500 W",
+    "category": "From Catalogue"
+  },
+  "16002480": {
+    "name": "NYRO - 4 JAR - 550 W",
+    "category": "From Catalogue"
+  },
+  "16002501": {
+    "name": "PIGEON HOB TWINSPARK 3B",
+    "group": "HOB"
+  },
+  "16002520": {
+    "name": "PG Elite - SS Triply Kadai 28Cm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "16002521": {
+    "name": "PG Elite - SS Triply Frypan 26Cm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "16002522": {
+    "name": "PG Elite- SS Triply Tadka Pan 13Cm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "16002540": {
+    "name": "Slender 3 BR - Luxesteel",
+    "group": "HOB"
+  },
+  "16002541": {
+    "name": "Slender 4 BR XL - Luxesteel",
+    "group": "HOB"
+  },
+  "16002551": {
+    "name": "PIGEON WET GRINDER 2 LTRS - NUTROVA",
+    "group": "MIXER GRINDER"
+  },
+  "18008480": {
+    "name": "SILICON SS 3LTR COOKER GASKET - IH",
+    "group": "SPARES"
+  },
+  "18008481": {
+    "name": "SILICON SS 5LTR COOKER GASKET - IH",
+    "group": "SPARES"
+  },
+  "19000002": {
+    "name": "STAINLESS STEEL LSTOVES 2 BR DUO",
+    "group": "COOKTOP"
+  },
+  "19000003": {
+    "name": "JUMBO- 2 BURNER",
+    "category": "From Catalogue"
+  },
+  "19000004": {
+    "name": "TRIO - 3 BURNER",
+    "category": "From Catalogue"
+  },
+  "19000005": {
+    "name": "STAINLESS STEEL LSTOVES- 3 BR 123",
+    "group": "COOKTOP"
+  },
+  "19000006": {
+    "name": "HOB - 4 BURNER",
+    "category": "From Catalogue"
+  },
+  "19000012": {
+    "name": "Cut e Aut o",
+    "category": "From Catalogue"
+  },
+  "19000013": {
+    "name": "Aut o",
+    "category": "From Catalogue"
+  },
+  "19000014": {
+    "name": "Aut o",
+    "category": "From Catalogue"
+  },
+  "19000015": {
+    "name": "INDUCTION BASE STARTER KIT 4 IN 1",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000017": {
+    "name": "ALUMINIUM PRESSURE COOKER 2 LTR",
+    "group": "PRESSURE COOKER"
+  },
+  "19000018": {
+    "name": "ALUMINIUM PRESSURE COOKER 3 LTR",
+    "group": "PRESSURE COOKER"
+  },
+  "19000019": {
+    "name": "ALUMINIUM PRESSURE COOKER 5 LTR",
+    "group": "PRESSURE COOKER"
+  },
+  "19000020": {
+    "name": "ALUMINIUM PRESSURE COOKER 7.5 LTR",
+    "group": "PRESSURE COOKER"
+  },
+  "19000021": {
+    "name": "ALUMINIUM PRESSURE COOKER 10 LTR",
+    "group": "PRESSURE COOKER"
+  },
+  "19000022": {
+    "name": "ALUMINIUM PRESSURE COOKER 12 LTR",
+    "group": "PRESSURE COOKER"
+  },
+  "19000023": {
+    "name": "ALUMINIUM PRESSURE PAN JUNIOR WITH LID",
+    "group": "PRESSURE COOKER"
+  },
+  "19000024": {
+    "name": "ALUMINIUM PRESSURE PAN SENIOR WITH LID",
+    "group": "PRESSURE COOKER"
+  },
+  "19000025": {
+    "name": "ALUMINIUM PRESSURE COOKER IB 3 LTR CAL",
+    "group": "PRESSURE COOKER"
+  },
+  "19000026": {
+    "name": "ALUMINIUM PRESSURE COOKER IB 5 LTR CAL",
+    "group": "PRESSURE COOKER"
+  },
+  "19000029": {
+    "name": "3 Li t r e",
+    "category": "From Catalogue"
+  },
+  "19000030": {
+    "name": "250",
+    "category": "From Catalogue"
+  },
+  "19000031": {
+    "name": "NONSTICK FLAT TAWA280 - 3.8mm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000032": {
+    "name": "NONSTICK FLAT TAWA310 - 3.8mm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000033": {
+    "name": "NONSTICK CONCAVE TAWA260 - 3.8mm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000034": {
+    "name": "NONSTICK CONCAVE TAWA280 - 3.8mm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000035": {
+    "name": "NONSTICK KADAI150 - 3.8mm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000036": {
+    "name": "NONSTICK KADAI200 - 3.8mm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000037": {
+    "name": "NONSTICK KADAI300 - 3.8mm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000039": {
+    "name": "NONSTICK FRY PAN200 - 3.8mm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000040": {
+    "name": "220",
+    "category": "From Catalogue"
+  },
+  "19000041": {
+    "name": "NONSTICK FRY PAN240 - 3.8mm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000042": {
+    "name": "NONSTICK FRY PAN260 - 3.8mm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000043": {
+    "name": "NONSTICK FRY PAN280 - 3.8mm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000047": {
+    "name": "Nonstick Deluxe Fry Pan 240",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000048": {
+    "name": "Nonstick Deluxe Fry Pan 260",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000049": {
+    "name": "275",
+    "category": "From Catalogue"
+  },
+  "19000051": {
+    "name": "Nonstick Apachetty with Lid",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000052": {
+    "name": "NONSTICK TADAKA PAN",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000053": {
+    "name": "NONSTICK FLAT TAWA 280 SPECIAL (",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000054": {
+    "name": "NONSTICK PATHRI TAWA320 - 3.8mm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000058": {
+    "name": "NONSTICK MULTI TAWA 310 - 3.8mm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000059": {
+    "name": "NONSTICK BIRIYANI POT 350",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000060": {
+    "name": "NONSTICK BIRIYANI POT 400",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000061": {
+    "name": "NONSTICK BIRIYANI POT 500",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000062": {
+    "name": "NONSTICK BIRIYANI POT 850",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000064": {
+    "name": "NONSTICK BIRIYANI POT 1100",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000065": {
+    "name": "NONSTICK - GRAVY POT - 3 LTR",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000066": {
+    "name": "NONSTICK - GRAVY POT - 6 LTR",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000067": {
+    "name": "9  Li t r e",
+    "category": "From Catalogue"
+  },
+  "19000068": {
+    "name": "NONSTICK - GRAVY POT - 12 LTR",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000081": {
+    "name": "WONDER CAST FLAT TAWA 280",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000082": {
+    "name": "WONDER CAST PANNIYARKAL ( 7 ROUN",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000083": {
+    "name": "WONDER CAST PANNIYARKAL ( 11 RO",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000084": {
+    "name": "WONDER CAST FLAT TAWA  (with IB)",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000092": {
+    "name": "SMART- 3 BURNER",
+    "category": "From Catalogue"
+  },
+  "19000132": {
+    "name": "SMART- 4 BURNER",
+    "category": "From Catalogue"
+  },
+  "19000150": {
+    "name": "EGNITE - 750 W",
+    "category": "From Catalogue"
+  },
+  "19000173": {
+    "name": "AL PRESSURE COOKER HA TITANIUM 3",
+    "group": "PRESSURE COOKER"
+  },
+  "19000174": {
+    "name": "AL PRESSURE COOKER HA TITANIUM 5",
+    "group": "PRESSURE COOKER"
+  },
+  "19000175": {
+    "name": "AL HARD ANODISED - MULTI KADAI 2",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000178": {
+    "name": "WONDER CAST PANNIYARKAL -12 ROU",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000181": {
+    "name": "COMPACT - 2 BURNER",
+    "category": "From Catalogue"
+  },
+  "19000182": {
+    "name": "MAXIMA - 2 BURNER",
+    "category": "From Catalogue"
+  },
+  "19000183": {
+    "name": "CARBON- 2 BURNER",
+    "category": "From Catalogue"
+  },
+  "19000184": {
+    "name": "CARBON- 3 BURNER",
+    "category": "From Catalogue"
+  },
+  "19000203": {
+    "name": "AMELIA 3 LTR CKR INN LID - HA",
+    "group": "PRESSURE COOKER"
+  },
+  "19000204": {
+    "name": "AMELIA 5 LTR CKR INN LID - HA",
+    "group": "PRESSURE COOKER"
+  },
+  "19000209": {
+    "name": "AL OUTERLID COOKER GASKET - MINI",
+    "group": "SPARES"
+  },
+  "19000210": {
+    "name": "AL OUTERLID COOKER GASKET - JUNIO",
+    "group": "SPARES"
+  },
+  "19000211": {
+    "name": "SPR GASKET OUT LID ALU - SR",
+    "group": "SPARES"
+  },
+  "19000212": {
+    "name": "SPARE SAFETY PLUG OUT LID",
+    "group": "SPARES"
+  },
+  "19000244": {
+    "name": "ALUMINIUM PRESSURE COOKER 2 3 LTR - OUT",
+    "group": "PRESSURE COOKER"
+  },
+  "19000245": {
+    "name": "MIXER GRINDER - SPLENDOUR JX ( 4 JAR)",
+    "group": "MIXER GRINDER"
+  },
+  "19000246": {
+    "name": "INFINITY - 2 BURNER",
+    "category": "From Catalogue"
+  },
+  "19000248": {
+    "name": "INFINITY - 3 BURNER",
+    "category": "From Catalogue"
+  },
+  "19000250": {
+    "name": "HA HANDI PRESSURE COOKER - 2 LTR",
+    "group": "PRESSURE COOKER"
+  },
+  "19000251": {
+    "name": "HA HANDI PRESSURE COOKER - 3 LTR",
+    "group": "PRESSURE COOKER"
+  },
+  "19000252": {
+    "name": "HA HANDI PRESSURE COOKER - 5 LTR",
+    "group": "PRESSURE COOKER"
+  },
+  "19000254": {
+    "name": "ALUMINIUM PRESSURE COOKER STORM 3",
+    "group": "PRESSURE COOKER"
+  },
+  "19000256": {
+    "name": "ALUMINIUM PRESSURE COOKER STORM 5",
+    "group": "PRESSURE COOKER"
+  },
+  "19000257": {
+    "name": "MIXER GRINDER - BLACK PEARL MX7",
+    "group": "MIXER GRINDER"
+  },
+  "19000276": {
+    "name": "MINI COMBI OUT LID IB - SS (2+3)",
+    "group": "PRESSURE COOKER"
+  },
+  "19000304": {
+    "name": "B+D - BXIR2201IN - 2200W Steam Iron with Cordless",
+    "group": "Black + Decker"
+  },
+  "19000305": {
+    "name": "B+D - BXIR2202IN - 2200W Steam Iron with Ceramic Sole Plate",
+    "group": "Black + Decker"
+  },
+  "19000315": {
+    "name": "CLASSIC LITE - 550 W",
+    "category": "From Catalogue"
+  },
+  "19000321": {
+    "name": "250",
+    "category": "From Catalogue"
+  },
+  "19000322": {
+    "name": "STORM SERIES TAWA 280",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000323": {
+    "name": "17 5",
+    "category": "From Catalogue"
+  },
+  "19000324": {
+    "name": "STORM FRY PAN 200",
+    "category": "From Catalogue"
+  },
+  "19000325": {
+    "name": "STORM SERIES FRY PAN 220",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000326": {
+    "name": "240",
+    "category": "From Catalogue"
+  },
+  "19000327": {
+    "name": "260",
+    "category": "From Catalogue"
+  },
+  "19000328": {
+    "name": "STORM KADAI 200",
+    "category": "From Catalogue"
+  },
+  "19000329": {
+    "name": "STORM SERIES TAWA 250 IB",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000330": {
+    "name": "STORM SERIES TAWA 280 IB (BELLY B",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000331": {
+    "name": "STORM SERIES FRY PAN 240 IB",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000332": {
+    "name": "STORM SERIES FRY PAN 260 IB",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000333": {
+    "name": "STORM SERIES KADAI 200 IB",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000334": {
+    "name": "STORM SERIES KADAI 300 IB",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000336": {
+    "name": "INOX CKR 3 LTR OUT LID IB - SS",
+    "group": "PRESSURE COOKER"
+  },
+  "19000338": {
+    "name": "INOX CKR 5 LTR OUT LID IB - SS",
+    "group": "PRESSURE COOKER"
+  },
+  "19000345": {
+    "name": "INFINITY - 4 BURNER",
+    "category": "From Catalogue"
+  },
+  "19000346": {
+    "name": "MIXER - ESPE - 750 WATTS - GREY",
+    "group": "MIXER GRINDER"
+  },
+  "19000400": {
+    "name": "BRIO PLUS - 2100W",
+    "category": "From Catalogue"
+  },
+  "19000406": {
+    "name": "B+D - BXIR1602IN - 1600 Watts Steam Iron",
+    "group": "Black + Decker"
+  },
+  "19000425": {
+    "name": "GLASSTOP AYUSH 3 BR",
+    "group": "COOKTOP"
+  },
+  "19000450": {
+    "name": "Aut o",
+    "category": "From Catalogue"
+  },
+  "19000451": {
+    "name": "Aut o",
+    "category": "From Catalogue"
+  },
+  "19000452": {
+    "name": "Aut o",
+    "category": "From Catalogue"
+  },
+  "19000455": {
+    "name": "PIGEON MIXER GRINDER EVA 3 JAR",
+    "group": "MIXER GRINDER"
+  },
+  "19000456": {
+    "name": "LED JOY BULB 9 WATTS B22 6500K",
+    "group": "LED"
+  },
+  "19000457": {
+    "name": "GLASSTOP AYUSH 2 BR",
+    "group": "COOKTOP"
+  },
+  "19000476": {
+    "name": "IND COOKTOP - ACER PLUS",
+    "group": "INDUCTION COOKTOP"
+  },
+  "19000477": {
+    "name": "MIXER GRINDER - GLORY 550W",
+    "group": "MIXER GRINDER"
+  },
+  "19000629": {
+    "name": "PG - IND COOKTOP - RAPIDO PREMIUM (M)",
+    "group": "INDUCTION COOKTOP"
+  },
+  "19000645": {
+    "name": "HANDY CHOPPER 3 - BLADE (M)",
+    "group": "KITCHEN UTILITY"
+  },
+  "19000650": {
+    "name": "INDUCTION COOKTOP - RAPIDO SLE",
+    "group": "INDUCTION COOKTOP"
+  },
+  "19000660": {
+    "name": "LED JOY BULB 5 WATTS B22 6500K (M)",
+    "group": "LED"
+  },
+  "19000661": {
+    "name": "LED JOY BULB 15 WATTS B22 6500K",
+    "group": "LED"
+  },
+  "19000667": {
+    "name": "STORM SERIES KADAI 200 IB (BELLY",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000687": {
+    "name": "SUPER CKR 3 LTR OUT LID IB- HA",
+    "group": "PRESSURE COOKER"
+  },
+  "19000689": {
+    "name": "SUPER CKR 5 LTR OUT LID IB- HA",
+    "group": "PRESSURE COOKER"
+  },
+  "19000691": {
+    "name": "SUPER CKR VP OUT IB- HA (3+5)",
+    "group": "PRESSURE COOKER"
+  },
+  "19000694": {
+    "name": "IND COOKTOP - RAPIDO TOUCH DX (M)",
+    "group": "INDUCTION COOKTOP"
+  },
+  "19000697": {
+    "name": "ANTI SKID - 2100W",
+    "category": "From Catalogue"
+  },
+  "19000700": {
+    "name": "SMART- 2 BURNER",
+    "category": "From Catalogue"
+  },
+  "19000745": {
+    "name": "NONSTICK 4 PC- CARLO",
+    "category": "From Catalogue"
+  },
+  "19000809": {
+    "name": "FLAT TAWA 250 + FRY PAN 220",
+    "category": "From Catalogue"
+  },
+  "19000818": {
+    "name": "Flat  Tawa + Fry Pan 20 0",
+    "category": "From Catalogue"
+  },
+  "19000841": {
+    "name": "CHEF DELIGHT GIFT SET 7 PCS",
+    "category": "From Catalogue"
+  },
+  "19000870": {
+    "name": "FLAT TAWA 250 + FRY PAN 240",
+    "category": "From Catalogue"
+  },
+  "19000885": {
+    "name": "CLASSIC 5 LITRE IB",
+    "category": "From Catalogue"
+  },
+  "19000909": {
+    "name": "TITANIUM CKR 5 LTR INN IB - HA",
+    "group": "PRESSURE COOKER"
+  },
+  "19000936": {
+    "name": "JUICE JAR",
+    "group": "MIXER GRINDER SPARE"
+  },
+  "19000953": {
+    "name": "PG HA TITANIUM CONCAVE TAWA 260",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19000978": {
+    "name": "TITANIUM CKR 5 LTR INN IB - HA",
+    "group": "PRESSURE COOKER"
+  },
+  "19001022": {
+    "name": "VITA 4 PC GIFT SET",
+    "category": "From Catalogue"
+  },
+  "19001023": {
+    "name": "- ALBA 4 PCS IB GIFT SET TAWA 250",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19001065": {
+    "name": "- EASY CLEAN - SPIN MOP WITH WHEE",
+    "group": "MOPS"
+  },
+  "19001069": {
+    "name": "NONSTICK APPACHETTY WITH LID SP",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19001080": {
+    "name": "MILA 2 LTR CKR INN LID IB",
+    "group": "PRESSURE COOKER"
+  },
+  "19001081": {
+    "name": "MILA 3 LTR CKR INN LID IB",
+    "group": "PRESSURE COOKER"
+  },
+  "19001082": {
+    "name": "MILA 5 LTR CKR INN LID IB",
+    "group": "PRESSURE COOKER"
+  },
+  "19001093": {
+    "name": "INOX PLUS CKR 3 LTR OUT IB - SS",
+    "group": "PRESSURE COOKER"
+  },
+  "19001094": {
+    "name": "INOX PLUS CKR 5 LTR OUT IB - SS",
+    "group": "PRESSURE COOKER"
+  },
+  "19001100": {
+    "name": "INOX PLUS CKR 3 LTR INN LID - SS",
+    "group": "PRESSURE COOKER"
+  },
+  "19001101": {
+    "name": "INOX PLUS CKR 5 LTR INN LID - SS",
+    "group": "PRESSURE COOKER"
+  },
+  "19001102": {
+    "name": "AMELIA 2 LTR CKR INN LID - HA",
+    "group": "PRESSURE COOKER"
+  },
+  "19001178": {
+    "name": "HOT KETTLE 1.5 LTRS",
+    "group": "KETTLE"
+  },
+  "19001180": {
+    "name": "XL - 900 ML",
+    "category": "From Catalogue"
+  },
+  "19001181": {
+    "name": "LITRE - 650 ML",
+    "category": "From Catalogue"
+  },
+  "19001243": {
+    "name": "ULTIMATE - 3 BURNER",
+    "category": "From Catalogue"
+  },
+  "19001285": {
+    "name": "HANDY CHOPPER PRO - M - 400ML (M)",
+    "group": "KITCHEN UTILITY"
+  },
+  "19001286": {
+    "name": "PRO LITRE - 650 ML",
+    "category": "From Catalogue"
+  },
+  "19001287": {
+    "name": "HANDY CHOPPER PRO - XL- 900ML (M)",
+    "group": "KITCHEN UTILITY"
+  },
+  "19001293": {
+    "name": "B+D - BXIC0101IN - Induction Cook top",
+    "group": "Black + Decker"
+  },
+  "19001296": {
+    "name": "PACK (MINI+XL)",
+    "category": "From Catalogue"
+  },
+  "19001302": {
+    "name": "Modern Cuchina",
+    "group": "SMALL APPLIANCES"
+  },
+  "19001327": {
+    "name": "INOX SS OUTER LID CKR - 2 LTR",
+    "group": "PRESSURE COOKER"
+  },
+  "19001337": {
+    "name": "RC CASSEROLE NON IB W/GL -180 MM",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19001338": {
+    "name": "RC CASSEROLE NON IB W/GL -200 MM",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19001339": {
+    "name": "RC CASSEROLE NON IB W/GL -220 MM",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19001341": {
+    "name": "IND COOKTOP - RADIANT INFRA",
+    "group": "INDUCTION COOKTOP"
+  },
+  "19001345": {
+    "name": "SLEEK - 3 BURNER",
+    "category": "From Catalogue"
+  },
+  "19001350": {
+    "name": "RC CASSEROLE NON IB W/GL -240 MM",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19001352": {
+    "name": "TORNADO TURBO FOOD PROCESSOR",
+    "group": "KITCHEN UTILITY"
+  },
+  "19001392": {
+    "name": "VENUS - 3 BURNER",
+    "category": "From Catalogue"
+  },
+  "19001418": {
+    "name": "INOX SS INNER LID CKR 2 LTR",
+    "group": "PRESSURE COOKER"
+  },
+  "19001423": {
+    "name": "SS CHUTNEY JAR 0.5 L",
+    "group": "MIXER GRINDER SPARE"
+  },
+  "19001433": {
+    "name": "SLEEK - 2 BURNER",
+    "category": "From Catalogue"
+  },
+  "19001435": {
+    "name": "SLEEK - 4 BURNER",
+    "category": "From Catalogue"
+  },
+  "19001456": {
+    "name": "LED JOY BULB GLOW 0.5W - WHITE",
+    "group": "LED"
+  },
+  "19001457": {
+    "name": "LED JOY BULB GLOW 0.5W - YELLOW",
+    "group": "LED"
+  },
+  "19001487": {
+    "name": "WONDER CAST PANNIYARKAL(12 ROUNDS) W/L",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19001488": {
+    "name": "MULTI KADAI - RED",
+    "category": "From Catalogue"
+  },
+  "19001489": {
+    "name": "YELLOW",
+    "category": "From Catalogue"
+  },
+  "19001507": {
+    "name": "ERC JOY UNLIMITED 1.8 LTR DX",
+    "group": "ERC"
+  },
+  "19001508": {
+    "name": "ERC JOY UNLIMITED 1 LTR DX",
+    "group": "ERC"
+  },
+  "19001509": {
+    "name": "ERC JOY UNLIMITED 1 LTR SDX",
+    "group": "ERC"
+  },
+  "19001510": {
+    "name": "ERC JOY UNLIMITED 2.8 LTR SDX",
+    "group": "ERC"
+  },
+  "19001511": {
+    "name": "ERC BLOSSOM UNLIMITED 1.8 LTR SDX",
+    "group": "ERC"
+  },
+  "19001517": {
+    "name": "SS CHUTNEY JAR 0.4 L",
+    "group": "MIXER GRINDER SPARE"
+  },
+  "19001520": {
+    "name": "MULTI KADAI - GREY",
+    "category": "From Catalogue"
+  },
+  "19001659": {
+    "name": "GLASSTOP - 2BR AYUSH BLK",
+    "group": "COOKTOP"
+  },
+  "19001663": {
+    "name": "MULTIPURPOSE KESSEL 1.2 LTR ",
+    "group": "KETTLE"
+  },
+  "19001714": {
+    "name": "FEMME- 750 W - BLUE",
+    "category": "From Catalogue"
+  },
+  "19001717": {
+    "name": "SPIN MOP POLE_BISLERI GREEN",
+    "group": "MOPS"
+  },
+  "19001766": {
+    "name": "PG ERC RUBY 1.8 LTR DX",
+    "group": "ERC"
+  },
+  "19001767": {
+    "name": "1 Lit re Double Pot",
+    "category": "From Catalogue"
+  },
+  "19001874": {
+    "name": "SPARE GASKET OUT LID SS- SMALL",
+    "group": "SPARES"
+  },
+  "19001875": {
+    "name": "SPARE GASKET OUT LID SS- MEDIUM",
+    "group": "SPARES"
+  },
+  "19001889": {
+    "name": "RIO 3 LITRE",
+    "category": "From Catalogue"
+  },
+  "19001899": {
+    "name": "INOX PRO SS CKR 3LTR OUTER",
+    "group": "PRESSURE COOKER"
+  },
+  "19001901": {
+    "name": "ESPECIAL- 750 W",
+    "category": "From Catalogue"
+  },
+  "19001902": {
+    "name": "ELITE SHINE 3PLY CKR 2LTR OUTER",
+    "group": "PRESSURE COOKER"
+  },
+  "19001903": {
+    "name": "ELITE SHINE 3PLY CKR 3LTR OUTER",
+    "group": "PRESSURE COOKER"
+  },
+  "19001905": {
+    "name": "PIGEON ELITE SHINE 3PLY CKR 5LTR OUTER",
+    "group": "PRESSURE COOKER"
+  },
+  "19001907": {
+    "name": "FEMME 750 W 3 JAR MAGENTA",
+    "group": "MIXER GRINDER"
+  },
+  "19001910": {
+    "name": "INOX PRO SS CKR 5LTR OUTER",
+    "group": "PRESSURE COOKER"
+  },
+  "19001920": {
+    "name": "FEMME 750 W 3 JAR BLACK",
+    "group": "MIXER GRINDER"
+  },
+  "19001922": {
+    "name": "FEMME- 750 W - RED",
+    "category": "From Catalogue"
+  },
+  "19001932": {
+    "name": "+FRY PAN 200-MINT GREEN",
+    "category": "From Catalogue"
+  },
+  "19001933": {
+    "name": "Yellow",
+    "category": "From Catalogue"
+  },
+  "19001934": {
+    "name": "Pi n k",
+    "category": "From Catalogue"
+  },
+  "19001935": {
+    "name": "Blue",
+    "category": "From Catalogue"
+  },
+  "19001936": {
+    "name": "PG - CLASSIC AL CKR 8 LTR INNER LID",
+    "group": "PRESSURE COOKER"
+  },
+  "19001937": {
+    "name": "10  Li t r e",
+    "category": "From Catalogue"
+  },
+  "19001951": {
+    "name": "PG - CLASSIC AL CKR 12 LTR INNER LID",
+    "group": "PRESSURE COOKER"
+  },
+  "19002174": {
+    "name": "IMPERI CAST IRON DOSA TAWA 300",
+    "group": "CAST IRON"
+  },
+  "19002176": {
+    "name": "IMPERI CAST IRON LONG HANDLE TAWA 250",
+    "group": "CAST IRON"
+  },
+  "19002210": {
+    "name": "STAINLESS STEEL COOKWARE SET",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19002212": {
+    "name": "FLASH MOP",
+    "category": "From Catalogue"
+  },
+  "19002686": {
+    "name": "INOX HYDRA WATER BOTTLE 700",
+    "group": "WATER BOTTLE"
+  },
+  "19002687": {
+    "name": "INOX HYDRA PLUS WATER BOTTLE 700",
+    "group": "WATER BOTTLE"
+  },
+  "19002688": {
+    "name": "INOX HYDRA WATER BOTTLE 1000",
+    "group": "WATER BOTTLE"
+  },
+  "19002689": {
+    "name": "INOX HYDRA PLUS WATER BOTTLE 900",
+    "group": "WATER BOTTLE"
+  },
+  "19002699": {
+    "name": "PG ELITE - SS TRIPLY FRYPAN 20cm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19002700": {
+    "name": "PG ELITE - SS TRIPLY FRYPAN 22cm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19002701": {
+    "name": "PG ELITE - SS TRIPLY FRYPAN 24cm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19002702": {
+    "name": "PG ELITE - SS TRIPLY KADAI 20cm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19002703": {
+    "name": "PG ELITE - SS TRIPLY KADAI 22cm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19002704": {
+    "name": "PG ELITE - SS TRIPLY KADAI 24cm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19002705": {
+    "name": "PG ELITE - SS TRIPLY KADAI 26cm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19002707": {
+    "name": "PG ELITE - SS TRIPLY SAUCEPAN 16cm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19002708": {
+    "name": "PG ELITE - SS TRIPLY SAUCEPAN 18cm",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19002716": {
+    "name": "PIGEON AMELIA CKR 7 LTR INNER LID HA",
+    "group": "PRESSURE COOKER"
+  },
+  "19002717": {
+    "name": "PIGEON MILA ALUMINIUM CKR 7 LTR INNER LI",
+    "group": "PRESSURE COOKER"
+  },
+  "19002861": {
+    "name": "2.5 LTR HA COOKER",
+    "group": "PRESSURE COOKER"
+  },
+  "19002863": {
+    "name": "3 LITRE COMBO",
+    "category": "From Catalogue"
+  },
+  "19003040": {
+    "name": "HEALTHIFRY DIGITAL AIR FRYER - 4.2 L",
+    "group": "SMALL APPLIANCES"
+  },
+  "19003043": {
+    "name": "WONDER CAST FLAT TAWA 310",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19003050": {
+    "name": "AYUSH - 2 BURNER AUTO",
+    "category": "From Catalogue"
+  },
+  "19003051": {
+    "name": "AYUSH - 3 BURNER AUTO",
+    "category": "From Catalogue"
+  },
+  "19003055": {
+    "name": "ORB 750 W 3 JAR",
+    "group": "MIXER GRINDER"
+  },
+  "19003057": {
+    "name": "PG 1.2 LTR SPARK DOUBLE-WALLED KETTLE",
+    "group": "KETTLE"
+  },
+  "19003233": {
+    "name": "COMFY DRY IRON - GREY - 1000W",
+    "category": "From Catalogue"
+  },
+  "19003238": {
+    "name": "PIGEON ELECTRIC HEAVY WEIGHT IRON - GALE",
+    "group": "SMALL APPLIANCES"
+  },
+  "19003244": {
+    "name": "X-CORD 1 FLEX BOX - RED",
+    "category": "From Catalogue"
+  },
+  "19003278": {
+    "name": "EVA INFRARED COOKTOP",
+    "group": "INDUCTION COOKTOP"
+  },
+  "19003279": {
+    "name": "PIGEON INOX PRO SS 3L INNER LID CKR",
+    "group": "PRESSURE COOKER"
+  },
+  "19003280": {
+    "name": "PIGEON INOX PRO SS 5L INNER LID CKR",
+    "group": "PRESSURE COOKER"
+  },
+  "19003315": {
+    "name": "PG HEAT N TREAT LUNCH BOX PK 4 - BLUE",
+    "group": "LUNCH BOX"
+  },
+  "19003319": {
+    "name": "ZOOM CHOPPER 350 ML",
+    "group": "KITCHEN UTILITY"
+  },
+  "19003327": {
+    "name": "CHOPPER UTILITY COMBO",
+    "category": "From Catalogue"
+  },
+  "19003328": {
+    "name": "PG HA TITANIUM CONCAVE TAWA 230 4MM",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19003329": {
+    "name": "PG HA TITANIUM CONCAVE TAWA 260 5MM",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19003330": {
+    "name": "ZOOM CHOPPER 250 ML",
+    "group": "KITCHEN UTILITY"
+  },
+  "19003340": {
+    "name": "PG HA TITANIUM CONCAVE TAWA 260 3MM",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19003365": {
+    "name": "X-CORD 1 FLEX BOX - GREY",
+    "category": "From Catalogue"
+  },
+  "19003390": {
+    "name": "AYUSH - 4 BURNER",
+    "category": "From Catalogue"
+  },
+  "19003408": {
+    "name": "PG HA TIT FLAT KADHAI 250 IB WITH SS LID",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19003409": {
+    "name": "PG HA TIT FLAT KADHAI 350 IB WITH SS LID",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19003410": {
+    "name": "PG HA TITANIUM DEEP KADHAI 150 W SS LID",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19003411": {
+    "name": "PG HA TIT DEEP KADHAI 250 WITH SS LID",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19003412": {
+    "name": "STEEL Li d",
+    "category": "From Catalogue"
+  },
+  "19003416": {
+    "name": "HEALTHY FRESH GLASS LUNCH BOX PK 3",
+    "group": "LUNCH BOX"
+  },
+  "19003421": {
+    "name": "3 LITRE+5 LITRE COMBO",
+    "category": "From Catalogue"
+  },
+  "19003446": {
+    "name": "PRIME - 1800W",
+    "category": "From Catalogue"
+  },
+  "19003587": {
+    "name": "TITANIUM EASY COOK COMBI",
+    "category": "From Catalogue"
+  },
+  "19003595": {
+    "name": "COMFY 1000W DRY IRON - BLUE",
+    "group": "SMALL APPLIANCES"
+  },
+  "19003596": {
+    "name": "COMFY 1000W DRY IRON - PINK",
+    "group": "SMALL APPLIANCES"
+  },
+  "19003597": {
+    "name": "RED",
+    "category": "From Catalogue"
+  },
+  "19003615": {
+    "name": "PG -INOX SIGMA OUTER LID SS CKR 3L",
+    "group": "PRESSURE COOKER"
+  },
+  "19003619": {
+    "name": "HEALTHIFRY - MANUAL AIR FRYER",
+    "category": "From Catalogue"
+  },
+  "19003620": {
+    "name": "PIGEON 3 IN 1 SNACK MAKER BLACK",
+    "group": "SMALL APPLIANCES"
+  },
+  "19003621": {
+    "name": "PANINI SANDWICH GRILLER BLACK",
+    "category": "From Catalogue"
+  },
+  "19003623": {
+    "name": "5  Li tr e",
+    "category": "From Catalogue"
+  },
+  "19003629": {
+    "name": "MULTI-PURPOSE KESSEL 3 IN 1 VALUE PACK 1.5 LTR ",
+    "group": "KETTLE"
+  },
+  "19003634": {
+    "name": "PG STEAM IRON 1600W - BLUE",
+    "group": "SMALL APPLIANCES"
+  },
+  "19003635": {
+    "name": "STEAM IRON - PINK - 1600W",
+    "category": "From Catalogue"
+  },
+  "19003636": {
+    "name": "PG STEAM IRON 1600W - RED",
+    "group": "SMALL APPLIANCES"
+  },
+  "19003637": {
+    "name": "GREEN",
+    "category": "From Catalogue"
+  },
+  "19003638": {
+    "name": "PG STEAM IRON 2400W - BLACK",
+    "group": "SMALL APPLIANCES"
+  },
+  "19003639": {
+    "name": "PG STEAM IRON 2400W - PURPLE",
+    "group": "SMALL APPLIANCES"
+  },
+  "19003640": {
+    "name": "Blue",
+    "category": "From Catalogue"
+  },
+  "19003652": {
+    "name": "6 PCs Casserole set (200,220,240)",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19003653": {
+    "name": "PIGEON GLASSTOP JUMBO 2BR",
+    "group": "COOKTOP"
+  },
+  "19003654": {
+    "name": "PIGEON GLASSTOP JUMBO 3BR",
+    "group": "COOKTOP"
+  },
+  "19003655": {
+    "name": "PIGEON GLASSTOP JUMBO 4BR",
+    "group": "COOKTOP"
+  },
+  "19003793": {
+    "name": "ELECTRIC CHOPPER 350",
+    "group": "KITCHEN UTILITY"
+  },
+  "19003794": {
+    "name": "B+D BXIR2602IN -2600 watts steam iron with LED- cordless",
+    "group": "Black + Decker"
+  },
+  "19003795": {
+    "name": "B+D BXIR2603IN -2600 watts steam iron with LED- cordless",
+    "group": "Black + Decker"
+  },
+  "19003797": {
+    "name": "PG - 3.0 LTR ELECTRA SMART COOK EPC",
+    "group": "PRESSURE COOKER"
+  },
+  "19003798": {
+    "name": "PG - 6.0 LTR ELECTRA SMART COOK EPC",
+    "group": "PRESSURE COOKER"
+  },
+  "19003813": {
+    "name": "POP UP TOASTER - BLACK FP",
+    "group": "SMALL APPLIANCES"
+  },
+  "19003814": {
+    "name": "EGNITE POP UP TOASTER (WHITE-FP)",
+    "group": "SMALL APPLIANCES"
+  },
+  "19003815": {
+    "name": "PIGEON THERMINOX STARK 1000ML",
+    "group": "WATER BOTTLE"
+  },
+  "19003825": {
+    "name": "EXCELLA - 550 W",
+    "category": "From Catalogue"
+  },
+  "19003827": {
+    "name": "PIGEON HOB 3 BURNER - SLENDER",
+    "group": "HOB"
+  },
+  "19003828": {
+    "name": "PIGEON HOB 4 BURNER - SLENDER",
+    "group": "HOB"
+  },
+  "19003829": {
+    "name": "PIGEON HOB 4 BURNER XL - SLENDER",
+    "group": "HOB"
+  },
+  "19003833": {
+    "name": "B+D - BXIR1603IN - 1600 Watts Steam Iron",
+    "group": "Black + Decker"
+  },
+  "19003834": {
+    "name": "B+D - BXIR1604IN - 1600 Watts Steam Iron",
+    "group": "Black + Decker"
+  },
+  "19003835": {
+    "name": "B+D - BXIR1802IN - 1800W Steam Iron with Detachable Tank",
+    "group": "Black + Decker"
+  },
+  "19003836": {
+    "name": "B+D - BXIR1803IN - 1800W Steam Iron with Detachable Tank",
+    "group": "Black + Decker"
+  },
+  "19003837": {
+    "name": "B+D - BXIR2002IN - 2000W Steam Iron with Auto Shut Off",
+    "group": "Black + Decker"
+  },
+  "19003838": {
+    "name": "B+D - BXIR2003IN - 2000W Steam Iron with Auto Shut Off",
+    "group": "Black + Decker"
+  },
+  "19003839": {
+    "name": "B+D - BXIR2203IN - 2200W Steam Iron with Cordless",
+    "group": "Black + Decker"
+  },
+  "19003840": {
+    "name": "B+D - BXIR2204IN - 2200W Steam Iron with Cordless",
+    "group": "Black + Decker"
+  },
+  "19003841": {
+    "name": "B+D - BXIR2205IN - 2200W Steam Iron with Ceramic Sole Plate",
+    "group": "Black + Decker"
+  },
+  "19003842": {
+    "name": "B+D - BXIR2402IN - 2400W Steam Iron with Auto Shut Off",
+    "group": "Black + Decker"
+  },
+  "19003846": {
+    "name": "PIGEON OTG 20L - WITH ROTISSERIE (M)",
+    "group": "OTG"
+  },
+  "19003848": {
+    "name": "OTG 25 LTR WITH ROTISSERIE",
+    "group": "OTG"
+  },
+  "19003851": {
+    "name": "PG TREAT LUNCH WITH BOTTLE PK 4 - BLACK",
+    "group": "LUNCH BOX"
+  },
+  "19003853": {
+    "name": "PG - Inox 6L outer SS cooker",
+    "group": "PRESSURE COOKER"
+  },
+  "19003854": {
+    "name": "PG - Inox 7.5 L outer SS cooker",
+    "group": "PRESSURE COOKER"
+  },
+  "19003855": {
+    "name": "PG - Inox 10 L outer SS cooker",
+    "group": "PRESSURE COOKER"
+  },
+  "19003856": {
+    "name": "PG - Inox 12 L outer SS cooker",
+    "group": "PRESSURE COOKER"
+  },
+  "19003863": {
+    "name": "SW TOASTER EGNITE PLUS (BLACK)",
+    "group": "SMALL APPLIANCES"
+  },
+  "19003864": {
+    "name": "Sandwich Toaster White",
+    "group": "SMALL APPLIANCES"
+  },
+  "19003878": {
+    "name": "PG -ELITE SHINE OUTLID TRIPLY CKR 1.5L",
+    "group": "PRESSURE COOKER"
+  },
+  "19003882": {
+    "name": "ELEGANT BLDC HAIR DRYER 2 IN 1",
+    "category": "From Catalogue"
+  },
+  "19003883": {
+    "name": "PIGEON ELEGANT BLDC HAIR DRYER 5 IN 1",
+    "group": "PERSONAL CARE"
+  },
+  "19003884": {
+    "name": "PIGEON CHARM WOMEN TRIMMER 4 IN 1",
+    "group": "PERSONAL CARE"
+  },
+  "19003885": {
+    "name": "PIGEON FAIR BEARD TRIMMER",
+    "group": "PERSONAL CARE"
+  },
+  "19003886": {
+    "name": "PIGEON STRIKE BEARD TRIMMER",
+    "group": "PERSONAL CARE"
+  },
+  "19003892": {
+    "name": "FAVO+ 280 TAWA",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19003912": {
+    "name": "BLUE",
+    "category": "From Catalogue"
+  },
+  "19003913": {
+    "name": "GRACE HAIR DRYER PINK",
+    "category": "From Catalogue"
+  },
+  "19003914": {
+    "name": "PIGEON GLAM HAIR DRYER BLUE",
+    "group": "PERSONAL CARE"
+  },
+  "19003915": {
+    "name": "GLAM HAIR DRYER PINK",
+    "category": "From Catalogue"
+  },
+  "19003916": {
+    "name": "PIGEON GLAM HAIR DRYER PURPLE",
+    "group": "PERSONAL CARE"
+  },
+  "19003917": {
+    "name": "HANA Code: 19003918 | MRP: `2995",
+    "category": "From Catalogue"
+  },
+  "19003918": {
+    "name": "PIGEON MAGNI 2 IN 1 VOLUMIZER",
+    "group": "PERSONAL CARE"
+  },
+  "19003942": {
+    "name": "CELEBRATION 5 PCS GIFT SET (T280+F220+K240+3LTTR CKR)",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19003955": {
+    "name": "PG 1.8L CRYSTAL GLASS KETTLE",
+    "group": "KETTLE"
+  },
+  "19003956": {
+    "name": "PG 1.5L SWIFT MULTI-COOK KETTLE - BLACK",
+    "group": "KETTLE"
+  },
+  "19003957": {
+    "name": "PG 1.5L SWIFT PLUS MULTI-COOK KETTLE - PINK",
+    "group": "KETTLE"
+  },
+  "19003958": {
+    "name": "PG 1.5L SWIFT PLUS MULTI-COOK KETTLE - BLUE",
+    "group": "KETTLE"
+  },
+  "19003959": {
+    "name": "PG 0.5L PORTA TRAVEL SIZE KETTLE",
+    "group": "KETTLE"
+  },
+  "19003964": {
+    "name": "HEALTHIFRY + - DIGITAL AIR FRYER",
+    "category": "From Catalogue"
+  },
+  "19003969": {
+    "name": "OVEN TOASTER 9 LTR",
+    "group": "OTG"
+  },
+  "19003984": {
+    "name": "GREEN",
+    "category": "From Catalogue"
+  },
+  "19003985": {
+    "name": "1.5 LITRE HOT KETTLE PLUS - BLUE",
+    "category": "From Catalogue"
+  },
+  "19003987": {
+    "name": "IMPERI CAST IRON APPACHETTY DIA 220",
+    "group": "CAST IRON"
+  },
+  "19003988": {
+    "name": "IMPERI CAST IRON CURVED TAWA DIA 260",
+    "group": "CAST IRON"
+  },
+  "19003989": {
+    "name": "IMPERI CAST IRON CURVED TAWA DIA 280",
+    "group": "CAST IRON"
+  },
+  "19003992": {
+    "name": "LED EMERGENCY BULB 9W",
+    "group": "LED"
+  },
+  "19004008": {
+    "name": "PG-FLASH MOP DELUXE",
+    "group": "MOPS"
+  },
+  "19004009": {
+    "name": "JOY MOP",
+    "group": "MOPS"
+  },
+  "19004010": {
+    "name": "SHINE MOP DELUXE",
+    "category": "From Catalogue"
+  },
+  "19004011": {
+    "name": "SPARKLE MOP",
+    "category": "From Catalogue"
+  },
+  "19004012": {
+    "name": "PG-SPARKLE MOP DELUXE",
+    "group": "MOPS"
+  },
+  "19004013": {
+    "name": "FLAT MOP",
+    "category": "From Catalogue"
+  },
+  "19004014": {
+    "name": "PG-FLAT MOP- OCEAN BLUE",
+    "group": "MOPS"
+  },
+  "19004020": {
+    "name": "IMPERI CAST IRON KADAI WITH LID 200",
+    "group": "CAST IRON"
+  },
+  "19004021": {
+    "name": "IMPERI CAST IRON KADAI WITH LID 240",
+    "group": "CAST IRON"
+  },
+  "19004022": {
+    "name": "IMPERI CAST IRON KADAI WITH LID 260",
+    "group": "CAST IRON"
+  },
+  "19004023": {
+    "name": "IMPERI CAST IRON FRY PAN DIA 200",
+    "group": "CAST IRON"
+  },
+  "19004024": {
+    "name": "IMPERI CAST IRON FRY PAN DIA 220",
+    "group": "CAST IRON"
+  },
+  "19004025": {
+    "name": "IMPERI CAST IRON FRY PAN DIA 250",
+    "group": "CAST IRON"
+  },
+  "19004026": {
+    "name": "IMPERI CAST IRON GRILL PAN DIA 250",
+    "group": "CAST IRON"
+  },
+  "19004027": {
+    "name": "IMPERI CAST IRON PANIYARAKKAL 9 ROUND",
+    "group": "CAST IRON"
+  },
+  "19004028": {
+    "name": "IMPERI CAST IRON DOUBLE SIDE TAWA 310",
+    "group": "CAST IRON"
+  },
+  "19004029": {
+    "name": "BULLET- SDX 1000 ML",
+    "group": "WATER BOTTLE"
+  },
+  "19004033": {
+    "name": "CASSEROLE 220 WITH LID",
+    "category": "From Catalogue"
+  },
+  "19004034": {
+    "name": "240mm",
+    "category": "From Catalogue"
+  },
+  "19004035": {
+    "name": "IMPERI LUXE CAST IRON FRY PAN 200",
+    "category": "From Catalogue"
+  },
+  "19004036": {
+    "name": "220m m",
+    "category": "From Catalogue"
+  },
+  "19004037": {
+    "name": "250mm",
+    "category": "From Catalogue"
+  },
+  "19004038": {
+    "name": "IMPERI LUXE CAST IRON GRILL PAN 250",
+    "category": "From Catalogue"
+  },
+  "19004039": {
+    "name": "IMPERI LUXE CAST IRON KADAI 200 WITH LID",
+    "category": "From Catalogue"
+  },
+  "19004050": {
+    "name": "PIGEON GLASSTOP COSMIC (SABAF) 2BR",
+    "group": "COOKTOP"
+  },
+  "19004051": {
+    "name": "PIGEON GLASSTOP COSMIC (SABAF) 3BR",
+    "group": "COOKTOP"
+  },
+  "19004052": {
+    "name": "PIGEON GLASSTOP COSMIC (SABAF) 4BR",
+    "group": "COOKTOP"
+  },
+  "19004053": {
+    "name": "ELEGANCE - 3 BURNER",
+    "category": "From Catalogue"
+  },
+  "19004054": {
+    "name": "ELEGANCE - 4 BURNER",
+    "category": "From Catalogue"
+  },
+  "19004060": {
+    "name": "240mm",
+    "category": "From Catalogue"
+  },
+  "19004061": {
+    "name": "260mm",
+    "category": "From Catalogue"
+  },
+  "19004064": {
+    "name": "SS VACUUM BOTTLE AQUA - 1000ML  - SILVER",
+    "group": "WATER BOTTLE"
+  },
+  "19004089": {
+    "name": "PIGEON NEO PORTABLE BLENDER - BLUE",
+    "group": "MIXER GRINDER"
+  },
+  "19004180": {
+    "name": "PIGEON NEO PORTABLE BLENDER - GREEN",
+    "group": "MIXER GRINDER"
+  },
+  "19004181": {
+    "name": "PIGEON NEO PORTABLE BLENDER - ORANGE",
+    "group": "MIXER GRINDER"
+  },
+  "19004190": {
+    "name": "Sandwich Griller - Jumbo",
+    "group": "SMALL APPLIANCES"
+  },
+  "19004210": {
+    "name": "AYUSH BLK - 3 BURNER",
+    "category": "From Catalogue"
+  },
+  "19004211": {
+    "name": "AYUSH XL - 3 BURNER",
+    "category": "From Catalogue"
+  },
+  "19004214": {
+    "name": "Sandwich Toaster with Griller - Black",
+    "group": "SMALL APPLIANCES"
+  },
+  "19004215": {
+    "name": "Whit e",
+    "category": "From Catalogue"
+  },
+  "19004229": {
+    "name": "HEALTHIFRY+6.5L AIRFRYER",
+    "group": "SMALL APPLIANCES"
+  },
+  "19004230": {
+    "name": "PIGEON MIXER ORB - ALPINE GREEN 3 JAR 75",
+    "group": "MIXER GRINDER"
+  },
+  "19004231": {
+    "name": "PIGEON MIXER ORB-ROYAL PURPLE 4JAR 750W",
+    "group": "MIXER GRINDER"
+  },
+  "19004246": {
+    "name": "Radiance - Red",
+    "group": "EMERGENCY LAMPS"
+  },
+  "19004247": {
+    "name": "Radiance - Blue",
+    "group": "EMERGENCY LAMPS"
+  },
+  "19004248": {
+    "name": "Green-M",
+    "category": "From Catalogue"
+  },
+  "19004249": {
+    "name": "Blue-M",
+    "category": "From Catalogue"
+  },
+  "19004250": {
+    "name": "PIGEON HEAVY WEIGHT IRON 1100 W",
+    "group": "SMALL APPLIANCES"
+  },
+  "19004262": {
+    "name": "Astra Touch - 3 jar 750 W Mixer",
+    "group": "MIXER GRINDER"
+  },
+  "19004263": {
+    "name": "PIGEON MEGA MIXI - 3 JAR -750W",
+    "group": "MIXER GRINDER"
+  },
+  "19004264": {
+    "name": "PG AIRFUSION 12L AIR FRYER",
+    "group": "SMALL APPLIANCES"
+  },
+  "19004265": {
+    "name": "STELLA - 1800W",
+    "category": "From Catalogue"
+  },
+  "19004266": {
+    "name": "INOX HYDRA DUO - 900ML",
+    "category": "From Catalogue"
+  },
+  "19004267": {
+    "name": "PIGEON AIRTURBO VACCUM CLEANER 600W",
+    "group": "SMALL APPLIANCES"
+  },
+  "19004280": {
+    "name": "PIGEON MICROWAVE OVEN -M",
+    "group": "OTG"
+  },
+  "19004281": {
+    "name": "MICROWAVE OVEN 20 LITRE",
+    "category": "From Catalogue"
+  },
+  "19004290": {
+    "name": "PIGEON HEALTHIFRY+ STELLAR 5.5L AIRFRYER",
+    "group": "SMALL APPLIANCES"
+  },
+  "19004291": {
+    "name": "PG INOX PRO 2L INN LID SS CKR",
+    "group": "PRESSURE COOKER"
+  },
+  "19004292": {
+    "name": " INOX ERC 1L SDX - DOUBLE POT",
+    "group": "ERC"
+  },
+  "19004293": {
+    "name": " INOX ERC 1.8L SDX - DOUBLE POT",
+    "group": "ERC"
+  },
+  "19004302": {
+    "name": "Mabel Inner Lid Ceramic Cooker - 2 Ltr",
+    "group": "PRESSURE COOKER"
+  },
+  "19004303": {
+    "name": "Mabel Inner Lid Ceramic Cooker - 3 Ltr",
+    "group": "PRESSURE COOKER"
+  },
+  "19004304": {
+    "name": "Mabel Inner Lid Ceramic Cooker - 5 Ltr",
+    "group": "PRESSURE COOKER"
+  },
+  "19004309": {
+    "name": "TRIP MULTI-COOK  0.8 L ",
+    "group": "KETTLE"
+  },
+  "19004310": {
+    "name": "EVERYDAY PLUS MULTI-COOK BLACK  2.5L ",
+    "group": "KETTLE"
+  },
+  "19004316": {
+    "name": "PIGEON ALL IN 1 GROOMING KIT 3 IN 1",
+    "group": "PERSONAL CARE"
+  },
+  "19004317": {
+    "name": "PIGEON ALL IN 1 GROOMING KIT 5 IN 1",
+    "group": "PERSONAL CARE"
+  },
+  "19004318": {
+    "name": "PIGEON MULTI PURPOSE BODY TRIMMER",
+    "group": "PERSONAL CARE"
+  },
+  "19004319": {
+    "name": "PG ELITE SHINE 3PLY CKR 3.5 L OUTER JPP",
+    "group": "PRESSURE COOKER"
+  },
+  "19004320": {
+    "name": "PIGEON ELITE SHINE 3PLY CKR 6LTR OUTER",
+    "group": "PRESSURE COOKER"
+  },
+  "19004321": {
+    "name": "PG THERMINOX AQUA PLUS 1L",
+    "group": "WATER BOTTLE"
+  },
+  "19004325": {
+    "name": "Infinity Gold Glasstop Cooktp - 2 BR",
+    "group": "COOKTOP"
+  },
+  "19004326": {
+    "name": "Infinity Gold Glasstop Cooktp - 3 BR",
+    "group": "COOKTOP"
+  },
+  "19004327": {
+    "name": "Infinity Gold Glasstop Cooktp - 4 BR",
+    "group": "COOKTOP"
+  },
+  "19004337": {
+    "name": "GLO INDUCTION COOK TOP",
+    "group": "INDUCTION COOKTOP"
+  },
+  "19004339": {
+    "name": "AIRFRYER",
+    "category": "From Catalogue"
+  },
+  "19004340": {
+    "name": "ERC JOY UNLIMITED 0.6 L SDX - DOUBLE POT",
+    "group": "ERC"
+  },
+  "19004341": {
+    "name": "PG ERC JOY UNLIMITED 4.2 L DX",
+    "group": "ERC"
+  },
+  "19004362": {
+    "name": "AIRTURBO PRO VACCUM CLEANER 600W",
+    "group": "SMALL APPLIANCES"
+  },
+  "19004365": {
+    "name": "OTG 14L ",
+    "group": "OTG"
+  },
+  "19004367": {
+    "name": "1L DX",
+    "category": "From Catalogue"
+  },
+  "19004368": {
+    "name": "1. 8 L D X",
+    "category": "From Catalogue"
+  },
+  "19004374": {
+    "name": "LAZE 4 IN 1 ELECTRIC BODY MASSAGER",
+    "category": "From Catalogue"
+  },
+  "19004375": {
+    "name": "PIGEON ELECTRIC BODY MASSAGER 8 IN 1 EASE",
+    "group": "OTHER UTILITY"
+  },
+  "19004376": {
+    "name": "NEURA LEG & CALF MASSAGER",
+    "category": "From Catalogue"
+  },
+  "19004377": {
+    "name": "SYNA LEG MASSAGER",
+    "category": "From Catalogue"
+  },
+  "19004378": {
+    "name": "MASSAGER",
+    "category": "From Catalogue"
+  },
+  "19004379": {
+    "name": "NEXA GUN MASSAGER",
+    "category": "From Catalogue"
+  },
+  "19004380": {
+    "name": "PULSE MASSAGER",
+    "category": "From Catalogue"
+  },
+  "19004384": {
+    "name": "Therminox Rush Sports Flask 750ml - Pink",
+    "group": "WATER BOTTLE"
+  },
+  "19004385": {
+    "name": "Therminox Rush Sports Flask 1000ml - Pink",
+    "group": "WATER BOTTLE"
+  },
+  "19004386": {
+    "name": "Therminox Rush Sports Flask 750ml - Blue",
+    "group": "WATER BOTTLE"
+  },
+  "19004387": {
+    "name": "Therminox Rush Sports Flask 1000ml - Blue",
+    "group": "WATER BOTTLE"
+  },
+  "19004388": {
+    "name": "Therminox Rush Sports Flask 750ml - Green",
+    "group": "WATER BOTTLE"
+  },
+  "19004389": {
+    "name": "Therminox Rush Sports Flask 1000ml - Green",
+    "group": "WATER BOTTLE"
+  },
+  "19004390": {
+    "name": "PIGEON BUILT-IN HOB - KRAFT 3BR AUTO",
+    "group": "HOB"
+  },
+  "19004391": {
+    "name": "PIGEON BUILT-IN HOB - KRAFT 4BR AUTO",
+    "group": "HOB"
+  },
+  "19004404": {
+    "name": "ERC JOY UNLIMITED 0.6 L DX",
+    "group": "ERC"
+  },
+  "19004405": {
+    "name": "PG-1.7 LTR THEROS KETTLE",
+    "group": "KETTLE"
+  },
+  "19004406": {
+    "name": "KETTLE-WHITE",
+    "category": "From Catalogue"
+  },
+  "19004407": {
+    "name": "PG-1.8 LTR EVOKE KETTLE-BLUE",
+    "group": "KETTLE"
+  },
+  "19004408": {
+    "name": "PG-1.8 LTR EVOKE KETTLE-RED",
+    "group": "KETTLE"
+  },
+  "19004409": {
+    "name": "PG-1.8 LTR EVOKE KETTLE-YELLOW",
+    "group": "KETTLE"
+  },
+  "19004410": {
+    "name": "IMPERI CAST IRON LONG HANDLE TAWA 280 BB",
+    "group": "CAST IRON"
+  },
+  "19004423": {
+    "name": "OTG 30L With Rotisserie",
+    "group": "OTG"
+  },
+  "19004424": {
+    "name": "OTG 40L With Rotisserie",
+    "group": "OTG"
+  },
+  "19004449": {
+    "name": "NEBULA DX 60 CM",
+    "category": "From Catalogue"
+  },
+  "19004458": {
+    "name": "PG FAN-TASTIC 75W PEDESTAL FAN",
+    "group": "SMALL APPLIANCES"
+  },
+  "19004461": {
+    "name": "PIGEON AQUA - OLIVE - 1000ML - GREEN",
+    "group": "WATER BOTTLE"
+  },
+  "19004463": {
+    "name": "ELECTRA SMART COOK EPC - BLACK",
+    "group": "PRESSURE COOKER"
+  },
+  "19004464": {
+    "name": "ELECTRA SMART COOK EPC - BLACK",
+    "group": "PRESSURE COOKER"
+  },
+  "19004469": {
+    "name": "PIGEON CERAMIC FRY PAN 200",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19004480": {
+    "name": "PG BLITZ WATER BOTTLE 900ML - BLUE",
+    "group": "WATER BOTTLE"
+  },
+  "19004482": {
+    "name": "PG BLITZ WATER BOTTLE 900ML -BLACK",
+    "group": "WATER BOTTLE"
+  },
+  "19004489": {
+    "name": "PIGEON STARK PLUS OLIVE 1000ML(GREEN)",
+    "group": "WATER BOTTLE"
+  },
+  "19004490": {
+    "name": "PIGEON STARK PLUS NAVY 1000ML(BLUE)",
+    "group": "WATER BOTTLE"
+  },
+  "19004493": {
+    "name": "PG PURE SLOW JUICER",
+    "group": "MIXER GRINDER"
+  },
+  "19004499": {
+    "name": "BLOOM HAIR DRYER BLUE",
+    "category": "From Catalogue"
+  },
+  "19004500": {
+    "name": "PINK",
+    "category": "From Catalogue"
+  },
+  "19004503": {
+    "name": "RELAX SCALP MASSAGER",
+    "category": "From Catalogue"
+  },
+  "19004505": {
+    "name": "QUICK ELECTRIC CHOPPER",
+    "category": "From Catalogue"
+  },
+  "19004506": {
+    "name": "SHARP ELECTRIC CHOPPER",
+    "category": "From Catalogue"
+  },
+  "19004510": {
+    "name": "PIGEON CERAMIC FRY PAN 260",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19004511": {
+    "name": "PIGEON CERAMIC FRY PAN 300",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19004513": {
+    "name": "PG-OTG+AIRFRYER 25L- ROTISSERIE",
+    "group": "OTG"
+  },
+  "19004516": {
+    "name": "PIGEON INOX PRESSURE COOKER3.5 + 5 LTR OUTER LID IB - SS",
+    "group": "PRESSURE COOKER"
+  },
+  "19004521": {
+    "name": "Pigeon Healthifry+ air fryer 3.3L",
+    "group": "SMALL APPLIANCES"
+  },
+  "19004546": {
+    "name": "SHARP 5 INCH KNIFE",
+    "category": "From Catalogue"
+  },
+  "19004547": {
+    "name": "EDGE CUTESY 5 INCH",
+    "category": "From Catalogue"
+  },
+  "19004550": {
+    "name": "FLEXI 9 IN 1",
+    "category": "From Catalogue"
+  },
+  "19004557": {
+    "name": "PG SS CKR 3 ltr Outer LID Cast iron T280",
+    "group": "PRESSURE COOKER"
+  },
+  "19004560": {
+    "name": "PG ERC Inox Pro With Steamer 1LDX Yellow",
+    "group": "ERC"
+  },
+  "19004561": {
+    "name": "1 LDX PINK",
+    "category": "From Catalogue"
+  },
+  "19004562": {
+    "name": "1 LDX GREY",
+    "category": "From Catalogue"
+  },
+  "19004563": {
+    "name": "1.8  Lit re Double Pot",
+    "category": "From Catalogue"
+  },
+  "19004564": {
+    "name": "PG ERC Inox Pro With Steamer 1.8LDX Pink",
+    "group": "ERC"
+  },
+  "19004565": {
+    "name": "1.8  Lit re Double Pot",
+    "category": "From Catalogue"
+  },
+  "19004580": {
+    "name": "PG SS CKR 3 ltr Inner LID Cast iron T280",
+    "group": "PRESSURE COOKER"
+  },
+  "19004590": {
+    "name": "PG Triply 3 Ltr Cooker Inner Lid",
+    "group": "PRESSURE COOKER"
+  },
+  "19004591": {
+    "name": "PG Triply 5 Ltr Cooker Inner Lid",
+    "group": "PRESSURE COOKER"
+  },
+  "19004598": {
+    "name": "BLACK DIAMOND -60",
+    "group": "CHIMNEY"
+  },
+  "19004599": {
+    "name": "BLACK DIAMOND -90",
+    "group": "CHIMNEY"
+  },
+  "19004600": {
+    "name": "CHIMNEY ATMOS 60",
+    "group": "CHIMNEY"
+  },
+  "19004601": {
+    "name": "CHIMNEY ATMOS 75",
+    "group": "CHIMNEY"
+  },
+  "19004602": {
+    "name": "CHIMNEY ATMOS 90",
+    "group": "CHIMNEY"
+  },
+  "19004603": {
+    "name": "CHIMNEY - XTREME DLX- 60",
+    "group": "CHIMNEY"
+  },
+  "19004604": {
+    "name": "PIGEON CHIMNEY - XTREME DLX- 75",
+    "group": "CHIMNEY"
+  },
+  "19004605": {
+    "name": "PIGEON CHIMNEY - XTREME DLX- 90",
+    "group": "CHIMNEY"
+  },
+  "19004621": {
+    "name": "PG Nutri Blender 600W - 2 Jar",
+    "group": "MIXER GRINDER"
+  },
+  "19004625": {
+    "name": "PG ERC DELUX 3L SDX GREY",
+    "group": "ERC"
+  },
+  "19004626": {
+    "name": "PG CERRASTEEL SS CLAD CERAMIC TAWA 280",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19004645": {
+    "name": "ALL CLAD TRI-PLY 1 LITRE",
+    "category": "From Catalogue"
+  },
+  "19004646": {
+    "name": "1. 5   Li tr e",
+    "category": "From Catalogue"
+  },
+  "19004647": {
+    "name": "2.5 Li tr e",
+    "category": "From Catalogue"
+  },
+  "19004648": {
+    "name": "3  Li tr e",
+    "category": "From Catalogue"
+  },
+  "19004649": {
+    "name": "3.5 Li tr e",
+    "category": "From Catalogue"
+  },
+  "19004650": {
+    "name": "5 Li tr e",
+    "category": "From Catalogue"
+  },
+  "19004651": {
+    "name": "6 Li tr e",
+    "category": "From Catalogue"
+  },
+  "19004657": {
+    "name": "PG GLACIER VACUUMBOTTLE 1000ML-TEAL BLUE",
+    "group": "WATER BOTTLE"
+  },
+  "19004658": {
+    "name": "PG GLACIER VACUUMBOTTLE 750ML-TEAL BLUE",
+    "group": "WATER BOTTLE"
+  },
+  "19004730": {
+    "name": "PG HEAVY BOTTOM SS FRY PAN 200MM",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19004731": {
+    "name": "PG HEAVY BOTTOM SS BIRYANI POT 240MM",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19004732": {
+    "name": "PG HEAVY BOTTOM SS FRY PAN 240MM",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19004733": {
+    "name": "PG HEAVY BOTTOM SS SAUCE PAN 160MM",
+    "group": "NONSTICK COOKWARE"
+  },
+  "19004858": {
+    "name": "3GLACIER 750 ML",
+    "category": "From Catalogue"
+  },
+  "CMF": {
+    "name": "Color Me Flyer",
+    "group": "1Consumable"
+  },
+  "CT": {
+    "name": "Customer Testimonial card",
+    "group": "1Consumable"
+  },
+  "POS ROLL": {
+    "name": "PRINTED POS ROLL",
+    "group": "1Consumable"
+  },
+  "VM": {
+    "name": "VM KIT - New Store",
+    "group": "1Consumable"
+  }
+}
