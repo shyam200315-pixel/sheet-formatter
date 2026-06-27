@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { useReactToPrint } from "react-to-print";
-import { motion } from "framer-motion";
-import { Printer } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Printer, Pencil, X } from "lucide-react";
 import mrpData from "../../public/mrp_data.json";
 
 export default function QuotationGenerator() {
@@ -14,6 +14,27 @@ export default function QuotationGenerator() {
     quantity: "",
     gstPercent: 18,
   });
+
+  const [config, setConfig] = useState({
+    companyName: "STOVE KRAFT LIMITED",
+    buildingNo: "NO.81/1, MEDAMARANAHALLI VILLAGE, HAROHALLI",
+    roadStreet: "KANAKAPURA TALUK,",
+    cityTown: "RAMANAGARA DIST",
+    districtState: "District: Ramanagara, State: Karnataka, Pin code: - 562112",
+    companyGst: "29AADCS9958B1ZY",
+    beneficiary: "Stove Kraft Limited",
+    bankName: "ICICI Bank Limited",
+    branch: "Bangalore M G Road Branch",
+    branchAddress: "Shobha Pearl, Commissariat Road, off MG Road, Ground Floor, Bangalore - 560 025",
+    accountNo: "000251000253",
+    ifscCode: "ICIC0000002",
+  });
+
+  const [showModal, setShowModal] = useState(false);
+
+  const handleConfigChange = (e) => {
+    setConfig({ ...config, [e.target.name]: e.target.value });
+  };
 
   const printRef = useRef(null);
 
@@ -242,42 +263,52 @@ export default function QuotationGenerator() {
               <li>The above stated prices are non &ndash; negotiable &amp; non &ndash; commissionable.</li>
             </ol>
 
-            <p className="font-bold text-[#1a237e] mb-1">Company Address</p>
+            <div className="flex items-center gap-2 mb-1">
+              <p className="font-bold text-[#1a237e]">Company Address</p>
+              <button onClick={() => setShowModal(true)} className="text-gray-400 hover:text-blue-600 print:hidden" title="Edit Details">
+                <Pencil size={14} />
+              </button>
+            </div>
             <div className="text-[#1a237e] mb-4 space-y-0.5">
-              <p>STOVE KRAFT LIMITED</p>
-              <p><span className="font-bold">Building No./Flat No.:</span> NO.81/1, MEDAMARANAHALLI VILLAGE, HAROHALLI</p>
-              <p>HOBLI, <span className="font-bold">Road/Street:</span> KANAKAPURA TALUK,</p>
-              <p><span className="font-bold">City/Town/Village:</span> RAMANAGARA DIST</p>
-              <p>District: Ramanagara, State: Karnataka, Pin code: - 562112</p>
-              <p className="font-bold">GST: 29AADCS9958B1ZY</p>
+              <p>{config.companyName}</p>
+              <p><span className="font-bold">Building No./Flat No.:</span> {config.buildingNo}</p>
+              <p>HOBLI, <span className="font-bold">Road/Street:</span> {config.roadStreet}</p>
+              <p><span className="font-bold">City/Town/Village:</span> {config.cityTown}</p>
+              <p>{config.districtState}</p>
+              <p className="font-bold">GST: {config.companyGst}</p>
             </div>
 
-            <p className="font-bold text-[#1a237e] underline mb-1 text-[12pt]">Bank Details</p>
+            <div className="flex items-center gap-2 mb-1">
+              <p className="font-bold text-[#1a237e] underline text-[12pt]">Bank Details</p>
+              <button onClick={() => setShowModal(true)} className="text-gray-400 hover:text-blue-600 print:hidden" title="Edit Details">
+                <Pencil size={14} />
+              </button>
+            </div>
             <table className="mb-6 text-[10.5pt] border-collapse w-[70%]">
               <tbody>
                 <tr>
                   <td className="border border-black p-1 pl-2 w-1/3">Beneficiary</td>
-                  <td className="border border-black p-1 pl-2">Stove Kraft Limited</td>
+                  <td className="border border-black p-1 pl-2">{config.beneficiary}</td>
                 </tr>
                 <tr>
                   <td className="border border-black p-1 pl-2">Bank</td>
-                  <td className="border border-black p-1 pl-2">ICICI Bank Limited</td>
+                  <td className="border border-black p-1 pl-2">{config.bankName}</td>
                 </tr>
                 <tr>
                   <td className="border border-black p-1 pl-2">Branch</td>
-                  <td className="border border-black p-1 pl-2">Bangalore M G Road Branch</td>
+                  <td className="border border-black p-1 pl-2">{config.branch}</td>
                 </tr>
                 <tr>
                   <td className="border border-black p-1 pl-2 align-top">Branch Address</td>
-                  <td className="border border-black p-1 pl-2">Shobha Pearl, Commissariat Road, off MG Road, Ground Floor, Bangalore - 560 025</td>
+                  <td className="border border-black p-1 pl-2">{config.branchAddress}</td>
                 </tr>
                 <tr>
                   <td className="border border-black p-1 pl-2">Account No</td>
-                  <td className="border border-black p-1 pl-2">000251000253</td>
+                  <td className="border border-black p-1 pl-2">{config.accountNo}</td>
                 </tr>
                 <tr>
                   <td className="border border-black p-1 pl-2">IFSC Code</td>
-                  <td className="border border-black p-1 pl-2">ICIC0000002</td>
+                  <td className="border border-black p-1 pl-2">{config.ifscCode}</td>
                 </tr>
               </tbody>
             </table>
@@ -290,6 +321,100 @@ export default function QuotationGenerator() {
           </div>
         </div>
       </div>
+
+      {/* Edit Config Modal */}
+      <AnimatePresence>
+        {showModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 10 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 10 }}
+              className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col"
+            >
+              <div className="flex justify-between items-center p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+                <h2 className="text-lg font-bold text-gray-800">Edit Details</h2>
+                <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-800">
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="p-4 space-y-6">
+                <div>
+                  <h3 className="font-medium text-[#1a73e8] mb-3 border-b pb-1">Bank Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Beneficiary</label>
+                      <input type="text" name="beneficiary" value={config.beneficiary} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Bank Name</label>
+                      <input type="text" name="bankName" value={config.bankName} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Account No</label>
+                      <input type="text" name="accountNo" value={config.accountNo} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">IFSC Code</label>
+                      <input type="text" name="ifscCode" value={config.ifscCode} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Branch</label>
+                      <input type="text" name="branch" value={config.branch} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Branch Address</label>
+                      <input type="text" name="branchAddress" value={config.branchAddress} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-medium text-[#1a73e8] mb-3 border-b pb-1">Company Address</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Company Name</label>
+                      <input type="text" name="companyName" value={config.companyName} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">GST Number</label>
+                      <input type="text" name="companyGst" value={config.companyGst} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Building No./Flat No.</label>
+                      <input type="text" name="buildingNo" value={config.buildingNo} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Road/Street</label>
+                      <input type="text" name="roadStreet" value={config.roadStreet} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">City/Town/Village</label>
+                      <input type="text" name="cityTown" value={config.cityTown} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-medium text-gray-600 mb-1">District, State, Pin</label>
+                      <input type="text" name="districtState" value={config.districtState} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-4 border-t border-gray-200 bg-gray-50 flex justify-end">
+                <button onClick={() => setShowModal(false)} className="bg-[#1a73e8] hover:bg-[#1557b0] text-white px-5 py-2 rounded shadow transition-colors text-sm font-medium">
+                  Done
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <style jsx global>{`
         @media print {
