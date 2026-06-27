@@ -1,18 +1,17 @@
 import React, { useState, useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 import { motion, AnimatePresence } from "framer-motion";
-import { Printer, Pencil, X } from "lucide-react";
+import { Printer, Pencil, X, Plus, Trash2 } from "lucide-react";
 import mrpData from "../../public/mrp_data.json";
 
 export default function QuotationGenerator() {
   const [formData, setFormData] = useState({
     clientName: "",
     clientAddress: "",
-    productCode: "",
-    productName: "",
-    basePrice: "",
-    quantity: "",
-    gstPercent: 18,
+    subject: "",
+    items: [
+      { id: Date.now(), productCode: "", productName: "", basePrice: "", quantity: "", gstPercent: 18 }
+    ],
   });
 
   const [config, setConfig] = useState({
@@ -45,30 +44,67 @@ export default function QuotationGenerator() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleItemChange = (id, e) => {
+    const { name, value } = e.target;
     setFormData((prev) => {
-      const updated = {
-        ...prev,
-        [name]: name === "basePrice" || name === "quantity" || name === "gstPercent" 
-          ? (value === "" ? "" : Number(value)) 
-          : value,
-      };
-
-      // Auto-fill from dictionary if Item Code changes
-      if (name === "productCode" && mrpData[value]) {
-        updated.productName = mrpData[value].name;
-      }
-
-      return updated;
+      const newItems = prev.items.map(item => {
+        if (item.id === id) {
+          const updated = {
+            ...item,
+            [name]: name === "basePrice" || name === "quantity" || name === "gstPercent" 
+              ? (value === "" ? "" : Number(value)) 
+              : value,
+          };
+          if (name === "productCode" && mrpData[value]) {
+            updated.productName = mrpData[value].name;
+          }
+          return updated;
+        }
+        return item;
+      });
+      return { ...prev, items: newItems };
     });
   };
 
-  const basePriceNum = Number(formData.basePrice) || 0;
-  const quantityNum = Number(formData.quantity) || 0;
-  const gstPercentNum = Number(formData.gstPercent) || 0;
+  const addItem = () => {
+    setFormData(prev => ({
+      ...prev,
+      items: [...prev.items, { id: Date.now(), productCode: "", productName: "", basePrice: "", quantity: "", gstPercent: 18 }]
+    }));
+  };
 
-  const amount = basePriceNum * quantityNum;
-  const gstAmount = (amount * gstPercentNum) / 100;
-  const total = amount + gstAmount;
+  const removeItem = (id) => {
+    if (formData.items.length === 1) return;
+    setFormData(prev => ({
+      ...prev,
+      items: prev.items.filter(item => item.id !== id)
+    }));
+  };
+
+  const calculateItemTotals = (item) => {
+    const basePriceNum = Number(item.basePrice) || 0;
+    const quantityNum = Number(item.quantity) || 0;
+    const gstPercentNum = Number(item.gstPercent) || 0;
+    const amount = basePriceNum * quantityNum;
+    const gstAmount = (amount * gstPercentNum) / 100;
+    const total = amount + gstAmount;
+    return { amount, gstAmount, total };
+  };
+
+  const grandTotals = formData.items.reduce((acc, item) => {
+    const { amount, gstAmount, total } = calculateItemTotals(item);
+    return {
+      amount: acc.amount + amount,
+      gstAmount: acc.gstAmount + gstAmount,
+      total: acc.total + total
+    };
+  }, { amount: 0, gstAmount: 0, total: 0 });
 
   const formatDate = (date) => {
     const day = date.getDate();
@@ -87,6 +123,16 @@ export default function QuotationGenerator() {
     );
   };
 
+  // Determine Subject Line dynamically if not provided
+  let displaySubject = toTitleCase(formData.subject);
+  if (!displaySubject) {
+    if (formData.items.length === 1 && formData.items[0].productName) {
+      displaySubject = `Performa Invoice For ${toTitleCase(formData.items[0].productName)} (${formData.items[0].quantity} Qty)`;
+    } else if (formData.items.length > 1) {
+      displaySubject = "Performa Invoice For Assorted Items";
+    }
+  }
+
   return (
     <div className="flex flex-col lg:flex-row gap-8 items-start mt-6 w-full pb-10">
       
@@ -102,75 +148,59 @@ export default function QuotationGenerator() {
         <div className="bg-white border border-[#dadce0] rounded-xl shadow-sm p-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-[#5f6368] mb-1 uppercase tracking-wider">Client Name</label>
-            <input
-              type="text"
-              name="clientName"
-              value={formData.clientName}
-              onChange={handleChange}
-              className="google-input w-full p-2 text-sm"
-            />
+            <input type="text" name="clientName" value={formData.clientName} onChange={handleChange} className="google-input w-full p-2 text-sm" />
           </div>
           <div>
             <label className="block text-xs font-medium text-[#5f6368] mb-1 uppercase tracking-wider">Client Address</label>
-            <textarea
-              name="clientAddress"
-              value={formData.clientAddress}
-              onChange={handleChange}
-              rows={3}
-              className="google-input w-full p-2 text-sm resize-y"
-            />
+            <textarea name="clientAddress" value={formData.clientAddress} onChange={handleChange} rows={3} className="google-input w-full p-2 text-sm resize-y" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-[#5f6368] mb-1 uppercase tracking-wider">Item Name</label>
-            <input
-              type="text"
-              name="productName"
-              value={formData.productName}
-              onChange={handleChange}
-              className="google-input w-full p-2 text-sm"
-            />
+            <label className="block text-xs font-medium text-[#5f6368] mb-1 uppercase tracking-wider">Subject Line (Optional)</label>
+            <input type="text" name="subject" value={formData.subject} onChange={handleChange} placeholder="Leave blank to auto-generate" className="google-input w-full p-2 text-sm" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-[#5f6368] mb-1 uppercase tracking-wider">Item Code</label>
-              <input
-                type="text"
-                name="productCode"
-                value={formData.productCode}
-                onChange={handleChange}
-                className="google-input w-full p-2 text-sm"
-              />
+          
+          <div className="pt-2 border-t border-[#dadce0]">
+            <h2 className="text-sm font-semibold text-gray-800 mb-3">Items</h2>
+            <div className="space-y-4">
+              {formData.items.map((item, index) => (
+                <div key={item.id} className="relative bg-gray-50 border border-gray-200 p-3 rounded-lg">
+                  {formData.items.length > 1 && (
+                    <button onClick={() => removeItem(item.id)} className="absolute top-2 right-2 text-gray-400 hover:text-red-500">
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                  <p className="text-xs font-medium text-gray-500 mb-2">Item {index + 1}</p>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-[10px] font-medium text-[#5f6368] mb-1 uppercase">Item Name</label>
+                      <input type="text" name="productName" value={item.productName} onChange={(e) => handleItemChange(item.id, e)} className="google-input w-full p-2 text-xs" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[10px] font-medium text-[#5f6368] mb-1 uppercase">Item Code</label>
+                        <input type="text" name="productCode" value={item.productCode} onChange={(e) => handleItemChange(item.id, e)} className="google-input w-full p-2 text-xs" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-medium text-[#5f6368] mb-1 uppercase">Quantity</label>
+                        <input type="number" name="quantity" value={item.quantity} onChange={(e) => handleItemChange(item.id, e)} className="google-input w-full p-2 text-xs" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-medium text-[#5f6368] mb-1 uppercase">Base Price (₹)</label>
+                        <input type="number" name="basePrice" value={item.basePrice} onChange={(e) => handleItemChange(item.id, e)} className="google-input w-full p-2 text-xs" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-medium text-[#5f6368] mb-1 uppercase">GST (%)</label>
+                        <input type="number" name="gstPercent" value={item.gstPercent} onChange={(e) => handleItemChange(item.id, e)} className="google-input w-full p-2 text-xs" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div>
-              <label className="block text-xs font-medium text-[#5f6368] mb-1 uppercase tracking-wider">Quantity</label>
-              <input
-                type="number"
-                name="quantity"
-                value={formData.quantity}
-                onChange={handleChange}
-                className="google-input w-full p-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-[#5f6368] mb-1 uppercase tracking-wider">Base Price (₹)</label>
-              <input
-                type="number"
-                name="basePrice"
-                value={formData.basePrice}
-                onChange={handleChange}
-                className="google-input w-full p-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-[#5f6368] mb-1 uppercase tracking-wider">GST (%)</label>
-              <input
-                type="number"
-                name="gstPercent"
-                value={formData.gstPercent}
-                onChange={handleChange}
-                className="google-input w-full p-2 text-sm"
-              />
-            </div>
+            
+            <button onClick={addItem} className="mt-3 flex items-center justify-center gap-1 w-full text-sm font-medium text-[#1a73e8] hover:text-[#1557b0] py-2 bg-blue-50/50 hover:bg-blue-50 rounded transition-colors">
+              <Plus size={16} /> Add Another Item
+            </button>
           </div>
           
           <div className="pt-4 border-t border-[#dadce0]">
@@ -220,9 +250,11 @@ export default function QuotationGenerator() {
             <p className="font-bold underline mb-0.5">{toTitleCase(formData.clientName)}</p>
             <p className="mb-4 w-[70%]">{toTitleCase(formData.clientAddress)}</p>
 
-            <p className="font-bold underline mb-4">
-              Subject: &nbsp; Performa Invoice For {toTitleCase(formData.productName)} ({formData.quantity} Qty)
-            </p>
+            {displaySubject && (
+              <p className="font-bold underline mb-4">
+                Subject: &nbsp; {displaySubject}
+              </p>
+            )}
 
             <p className="font-bold underline mb-2">Dear Sir/Madam</p>
 
@@ -234,25 +266,39 @@ export default function QuotationGenerator() {
             <table className="w-full border-collapse mb-5 border border-black text-center text-[10pt]">
               <thead>
                 <tr>
-                  <th className="border border-black p-2 bg-gray-100 font-bold w-[12%]">Item Code</th>
-                  <th className="border border-black p-2 bg-gray-100 font-bold w-[28%]">Item Name</th>
-                  <th className="border border-black p-2 bg-gray-100 font-bold">Basic Price (₹)</th>
-                  <th className="border border-black p-2 bg-gray-100 font-bold">Quantity</th>
-                  <th className="border border-black p-2 bg-gray-100 font-bold">Amount (₹)</th>
-                  <th className="border border-black p-2 bg-gray-100 font-bold">GST @{formData.gstPercent}% (₹)</th>
-                  <th className="border border-black p-2 bg-gray-100 font-bold">Total with GST (₹)</th>
+                  <th className="border border-black p-1 bg-gray-100 font-bold w-[12%]">Item Code</th>
+                  <th className="border border-black p-1 bg-gray-100 font-bold w-[28%]">Item Name</th>
+                  <th className="border border-black p-1 bg-gray-100 font-bold">Basic Price (₹)</th>
+                  <th className="border border-black p-1 bg-gray-100 font-bold">Quantity</th>
+                  <th className="border border-black p-1 bg-gray-100 font-bold">Amount (₹)</th>
+                  <th className="border border-black p-1 bg-gray-100 font-bold">GST (₹)</th>
+                  <th className="border border-black p-1 bg-gray-100 font-bold">Total with GST (₹)</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="border border-black p-2 font-bold">{formData.productCode}</td>
-                  <td className="border border-black p-2 font-bold">{formData.productName.toUpperCase()}</td>
-                  <td className="border border-black p-2">{formData.basePrice !== "" ? Number(formData.basePrice).toLocaleString("en-IN") : ""}</td>
-                  <td className="border border-black p-2">{formData.quantity !== "" ? formData.quantity : ""}</td>
-                  <td className="border border-black p-2">{amount > 0 ? amount.toLocaleString("en-IN") : ""}</td>
-                  <td className="border border-black p-2">{gstAmount > 0 ? gstAmount.toLocaleString("en-IN") : ""}</td>
-                  <td className="border border-black p-2">{total > 0 ? total.toLocaleString("en-IN") : ""}</td>
-                </tr>
+                {formData.items.map((item, idx) => {
+                  const { amount, gstAmount, total } = calculateItemTotals(item);
+                  return (
+                    <tr key={item.id}>
+                      <td className="border border-black p-1 font-bold">{item.productCode}</td>
+                      <td className="border border-black p-1 font-bold text-sm leading-tight">{item.productName.toUpperCase()}</td>
+                      <td className="border border-black p-1">{item.basePrice !== "" ? Number(item.basePrice).toLocaleString("en-IN") : ""}</td>
+                      <td className="border border-black p-1">{item.quantity !== "" ? item.quantity : ""}</td>
+                      <td className="border border-black p-1">{amount > 0 ? amount.toLocaleString("en-IN") : ""}</td>
+                      <td className="border border-black p-1">{gstAmount > 0 ? gstAmount.toLocaleString("en-IN") : ""}</td>
+                      <td className="border border-black p-1">{total > 0 ? total.toLocaleString("en-IN") : ""}</td>
+                    </tr>
+                  )
+                })}
+                {/* Grand Total Row (Only show if multiple items) */}
+                {formData.items.length > 1 && (
+                  <tr className="bg-gray-50 font-bold">
+                    <td colSpan={4} className="border border-black p-1 text-right pr-4">Grand Total:</td>
+                    <td className="border border-black p-1">{grandTotals.amount > 0 ? grandTotals.amount.toLocaleString("en-IN") : ""}</td>
+                    <td className="border border-black p-1">{grandTotals.gstAmount > 0 ? grandTotals.gstAmount.toLocaleString("en-IN") : ""}</td>
+                    <td className="border border-black p-1">{grandTotals.total > 0 ? grandTotals.total.toLocaleString("en-IN") : ""}</td>
+                  </tr>
+                )}
               </tbody>
             </table>
 
