@@ -6,6 +6,7 @@ import DashboardView from "./components/DashboardView";
 import OrderProcessing from "./components/OrderProcessing";
 import RequirementGenerator from "./components/RequirementGenerator";
 import MRPChecker from "./components/MRPChecker";
+import QuotationGenerator from "./components/QuotationGenerator";
 import { motion, AnimatePresence } from "framer-motion";
 import { FileSpreadsheet } from "lucide-react";
 
@@ -175,6 +176,16 @@ export default function App() {
             >
               MRP Checker
             </button>
+            <button
+              onClick={() => setActiveTab("quotation")}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                activeTab === "quotation" 
+                  ? "bg-[#e8f0fe] text-[#1a73e8]" 
+                  : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
+              }`}
+            >
+              Quotation
+            </button>
           </div>
         </div>
         
@@ -250,6 +261,16 @@ export default function App() {
           }`}
         >
           MRP Check
+        </button>
+        <button
+          onClick={() => setActiveTab("quotation")}
+          className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === "quotation"
+              ? "border-[#1a73e8] text-[#1a73e8]"
+              : "border-transparent text-[#5f6368]"
+          }`}
+        >
+          Quotation
         </button>
       </div>
 
@@ -333,7 +354,7 @@ export default function App() {
             >
               <RequirementGenerator />
             </motion.div>
-          ) : (
+          ) : activeTab === "mrp" ? (
             <motion.div
               key="mrp-tab"
               initial={{ opacity: 0, x: 10 }}
@@ -342,6 +363,16 @@ export default function App() {
               transition={{ duration: 0.2 }}
             >
               <MRPChecker />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="quotation-tab"
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <QuotationGenerator />
             </motion.div>
           )}
         </AnimatePresence>
