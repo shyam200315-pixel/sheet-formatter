@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 import { findHeaderRowIndex, getTargetDate, parseBillDate } from "./helpers";
 import FileDropZone from "./components/FileDropZone";
@@ -12,7 +12,13 @@ import { FileSpreadsheet } from "lucide-react";
 import { Toaster } from 'react-hot-toast';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState("validator"); // 'validator' or 'orders'
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem("sheetFormatterActiveTab") || "validator";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("sheetFormatterActiveTab", activeTab);
+  }, [activeTab]);
 
   const [reportData, setReportData] = useState(null);
   const [error, setError] = useState("");
@@ -129,11 +135,9 @@ export default function App() {
       <header className="w-full bg-[var(--surface-color)] border-b border-[var(--border-color)] px-6 py-3 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded bg-[#e8f0fe] text-[#1a73e8] flex items-center justify-center">
-              <FileSpreadsheet size={24} />
-            </div>
+            <img src="/pigeon.png" alt="Pigeon Logo" className="h-10 object-contain rounded-md" />
             <span className="text-xl font-normal text-[#5f6368] tracking-tight">
-              Sheet <span className="text-[#202124] font-medium">Formatter</span>
+              Stovekraft <span className="text-[#202124] font-medium">Shyam</span>
             </span>
           </div>
 

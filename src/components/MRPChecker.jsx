@@ -96,13 +96,24 @@ export default function MRPChecker() {
             >
               <div className="mb-6 text-center">
                 <h3 className="text-xl font-bold text-gray-900 mb-1">{resultInfo.data.name}</h3>
-                <div className="flex items-center justify-center gap-2">
-                  <p className="text-sm text-gray-500 font-mono tracking-wider">HANA CODE: {resultInfo.hanaCode}</p>
-                  {resultInfo.isSapCode && (
-                    <span className="bg-[#e8f0fe] text-[#1a73e8] text-xs px-2 py-0.5 rounded font-medium">
-                      Matched via SAP: {resultInfo.originalQuery}
-                    </span>
-                  )}
+                <div className="flex flex-col items-center justify-center gap-3">
+                  <div className="flex items-center justify-center gap-2">
+                    <p className="text-sm text-gray-500 font-mono tracking-wider">HANA CODE: {resultInfo.hanaCode}</p>
+                    {resultInfo.isSapCode && (
+                      <span className="bg-[#e8f0fe] text-[#1a73e8] text-xs px-2 py-0.5 rounded font-medium">
+                        Matched via SAP: {resultInfo.originalQuery}
+                      </span>
+                    )}
+                  </div>
+                  <a 
+                    href={`https://www.google.com/search?q=${encodeURIComponent(resultInfo.data.name + " HSN Code and GST Slab")}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-[#1a73e8] bg-[#e8f0fe] px-3 py-1.5 rounded-full hover:bg-[#d2e3fc] transition-colors shadow-sm"
+                  >
+                    <Search size={14} />
+                    Search HSN & GST on Google
+                  </a>
                 </div>
               </div>
               
