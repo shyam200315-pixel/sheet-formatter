@@ -17,8 +17,8 @@ export default function App() {
   const [reportData, setReportData] = useState(null);
   const [error, setError] = useState("");
   const [validationSuccess, setValidationSuccess] = useState(false);
-  const [monthlyTarget, setMonthlyTarget] = useState(6300000);
-  const [monthlyCommitment, setMonthlyCommitment] = useState(6300000);
+  const [monthlyTarget, setMonthlyTarget] = useState(7800000);
+  const [monthlyCommitment, setMonthlyCommitment] = useState(7800000);
 
   const handleFileSelect = (file) => {
     setError("");

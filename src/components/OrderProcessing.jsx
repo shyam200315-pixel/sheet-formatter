@@ -89,8 +89,8 @@ export default function OrderProcessing() {
       const orderSheet = orderWb.Sheets[orderSheetName];
       const stockSheet = stockWb.Sheets[stockSheetName];
 
-      const orderHeaderRow = findHeaderIndex(orderSheet, [["ITEM CODE", "BARCODE"]]);
-      const stockHeaderRow = findHeaderIndex(stockSheet, [["ITEM CODE", "BARCODE"], ["QUANTITY REQ", "CLOSING STOCK", "REQ QTY"]]);
+      const orderHeaderRow = findHeaderIndex(orderSheet, [["ITEM CODE", "BARCODE"], ["STORE CODE"]]);
+      const stockHeaderRow = findHeaderIndex(stockSheet, [["ITEM CODE", "BARCODE"], ["QUANTITY REQ", "CLOSING STOCK", "REQ QTY"], ["BRANCH NAME"]]);
 
       const orderData = XLSX.utils.sheet_to_json(orderSheet, { defval: "", range: orderHeaderRow });
       const stockData = XLSX.utils.sheet_to_json(stockSheet, { defval: "", range: stockHeaderRow });
@@ -114,29 +114,50 @@ export default function OrderProcessing() {
       for (const row of stockData) {
         const itemCodeRaw = getValIgnoreCase(row, ["ITEM CODE", "BARCODE"]);
         const qtyRaw = getValIgnoreCase(row, ["QUANTITY REQ", "CLOSING STOCK", "REQ QTY"]);
-        if (itemCodeRaw) {
+        const branchNameRaw = getValIgnoreCase(row, ["BRANCH NAME"]);
+        
+        if (itemCodeRaw && branchNameRaw) {
           const itemCode = String(itemCodeRaw).trim().toUpperCase();
+          const branchNameStr = String(branchNameRaw).trim();
+          
+          let storeCode = "";
+          if (branchNameStr.includes("-")) {
+            storeCode = branchNameStr.split("-")[0].trim().toUpperCase();
+          } else {
+            storeCode = branchNameStr.split(" ")[0].trim().toUpperCase();
+          }
+
           // parse qty to number, default 0
           const qty = Number(qtyRaw) || 0;
-          stockMap.set(itemCode, qty);
+          stockMap.set(`${storeCode}_${itemCode}`, qty);
         }
       }
 
       // Process Order Requirement
       const processedOrderData = orderData.map((row) => {
         const itemCodeRaw = getValIgnoreCase(row, ["ITEM CODE", "BARCODE"]);
+        const storeCodeRaw = getValIgnoreCase(row, ["STORE CODE"]);
         let status = "processed"; // default if not found or <= 2
 
-        if (itemCodeRaw) {
+        if (itemCodeRaw && storeCodeRaw) {
           const itemCode = String(itemCodeRaw).trim().toUpperCase();
-          const stockQty = stockMap.get(itemCode);
+          const storeCode = String(storeCodeRaw).trim().toUpperCase();
+          const stockQty = stockMap.get(`${storeCode}_${itemCode}`);
+          
           if (stockQty !== undefined && stockQty > 2) {
             status = "not processed";
           }
         }
 
+        const cleanedRow = {};
+        for (const [key, value] of Object.entries(row)) {
+          if (!key.startsWith("__EMPTY")) {
+            cleanedRow[key] = value;
+          }
+        }
+
         return {
-          ...row,
+          ...cleanedRow,
           "Billing Status": status,
         };
       });
