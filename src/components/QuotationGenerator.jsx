@@ -1,13 +1,15 @@
 import React, { useState, useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 import { motion, AnimatePresence } from "framer-motion";
-import { Printer, Pencil, X, Plus, Trash2 } from "lucide-react";
+import { Printer, Pencil, X, Plus, Trash2, FileText } from "lucide-react";
+import toast from "react-hot-toast";
 import mrpData from "../../public/mrp_data.json";
 
 export default function QuotationGenerator() {
   const [formData, setFormData] = useState({
     clientName: "",
     clientAddress: "",
+    clientGst: "",
     subject: "",
     items: [
       { id: Date.now(), productCode: "", productName: "", basePrice: "", quantity: "", gstPercent: 18 }
@@ -40,7 +42,199 @@ export default function QuotationGenerator() {
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: `Quotation_${formData.clientName || "Draft"}`,
+    onBeforeGetContent: () => {
+      toast.loading("Preparing PDF...", { id: 'pdf-toast' });
+      return Promise.resolve();
+    },
+    onAfterPrint: () => {
+      toast.success("PDF action completed!", { id: 'pdf-toast' });
+    },
+    onPrintError: () => {
+      toast.error("Failed to generate PDF.", { id: 'pdf-toast' });
+    }
   });
+
+  const handleDownloadWord = async () => {
+    const toastId = toast.loading("Generating Word document...");
+    try {
+      const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle, ImageRun } = await import("docx");
+      const { saveAs } = await import("file-saver");
+      
+      let logoImageRun = null;
+      try {
+        const response = await fetch("/logo.jpeg");
+        if (response.ok) {
+          const blob = await response.blob();
+          const arrayBuffer = await blob.arrayBuffer();
+          logoImageRun = new ImageRun({
+            data: arrayBuffer,
+            transformation: {
+              width: 150, // Approximation to match 50px height
+              height: 50,
+            },
+          });
+        }
+      } catch (err) {
+        console.error("Failed to load logo image for Word doc", err);
+        toast.error("Failed to load company logo. Document will be generated without it.");
+      }
+
+      const createCell = (text, isHeader = false, colSpan = 1, alignment = AlignmentType.LEFT) => {
+        return new TableCell({
+          columnSpan: colSpan,
+          margins: { top: 100, bottom: 100, left: 100, right: 100 },
+          children: [new Paragraph({ children: [new TextRun({ text: text || "", bold: isHeader })], alignment })]
+        });
+      };
+
+      const tableBorders = {
+        top: { style: BorderStyle.SINGLE, size: 1 },
+        bottom: { style: BorderStyle.SINGLE, size: 1 },
+        left: { style: BorderStyle.SINGLE, size: 1 },
+        right: { style: BorderStyle.SINGLE, size: 1 },
+        insideHorizontal: { style: BorderStyle.SINGLE, size: 1 },
+        insideVertical: { style: BorderStyle.SINGLE, size: 1 },
+      };
+
+      const tableRows = [
+        new TableRow({
+          children: [
+            createCell("Item Code", true, 1, AlignmentType.CENTER),
+            createCell("Item Name", true, 1, AlignmentType.CENTER),
+            createCell("Basic Price (₹)", true, 1, AlignmentType.CENTER),
+            createCell("Quantity", true, 1, AlignmentType.CENTER),
+            createCell("Amount (₹)", true, 1, AlignmentType.CENTER),
+            createCell("GST (₹)", true, 1, AlignmentType.CENTER),
+            createCell("Total with GST (₹)", true, 1, AlignmentType.CENTER),
+          ]
+        }),
+        ...formData.items.map(item => {
+          const { amount, gstAmount, total } = calculateItemTotals(item);
+          return new TableRow({
+            children: [
+              createCell(item.productCode, false, 1, AlignmentType.CENTER),
+              createCell(item.productName ? item.productName.toUpperCase() : "", true, 1, AlignmentType.LEFT),
+              createCell(item.basePrice !== "" ? Number(item.basePrice).toLocaleString("en-IN") : "", false, 1, AlignmentType.CENTER),
+              createCell(item.quantity !== "" ? String(item.quantity) : "", false, 1, AlignmentType.CENTER),
+              createCell(amount > 0 ? amount.toLocaleString("en-IN") : "", false, 1, AlignmentType.CENTER),
+              createCell(gstAmount > 0 ? gstAmount.toLocaleString("en-IN") : "", false, 1, AlignmentType.CENTER),
+              createCell(total > 0 ? total.toLocaleString("en-IN") : "", false, 1, AlignmentType.CENTER),
+            ]
+          })
+        })
+      ];
+
+      if (formData.items.length > 1) {
+         tableRows.push(new TableRow({
+           children: [
+              createCell("Grand Total:", true, 4, AlignmentType.RIGHT),
+              createCell(grandTotals.amount > 0 ? grandTotals.amount.toLocaleString("en-IN") : "", true, 1, AlignmentType.CENTER),
+              createCell(grandTotals.gstAmount > 0 ? grandTotals.gstAmount.toLocaleString("en-IN") : "", true, 1, AlignmentType.CENTER),
+              createCell(grandTotals.total > 0 ? grandTotals.total.toLocaleString("en-IN") : "", true, 1, AlignmentType.CENTER),
+           ]
+         }));
+      }
+
+      const docChildren = [];
+      if (logoImageRun) {
+        docChildren.push(
+          new Paragraph({
+            children: [logoImageRun],
+            alignment: AlignmentType.RIGHT,
+            spacing: { after: 200 }
+          })
+        );
+      }
+
+      docChildren.push(
+        new Paragraph({ text: `Date: ${formatDate(new Date())}`, spacing: { after: 200 } }),
+        
+        new Paragraph({ children: [new TextRun({ text: "To,", bold: true, underline: {} })] }),
+        new Paragraph({ children: [new TextRun({ text: toTitleCase(formData.clientName), bold: true, underline: {} })] }),
+        new Paragraph({ text: toTitleCase(formData.clientAddress), spacing: { after: formData.clientGst ? 0 : 400 } })
+      );
+
+      if (formData.clientGst) {
+        docChildren.push(
+          new Paragraph({ children: [new TextRun({ text: `GST No.: ${formData.clientGst}`, bold: true })], spacing: { after: 400 } })
+        );
+      }
+
+      if (displaySubject) {
+        docChildren.push(
+          new Paragraph({ children: [new TextRun({ text: `Subject:  ${displaySubject}`, bold: true, underline: {} })], spacing: { after: 400 } })
+        );
+      }
+
+      docChildren.push(
+        new Paragraph({ children: [new TextRun({ text: "Dear Sir/Madam", bold: true, underline: {} })], spacing: { after: 200 } }),
+        new Paragraph({ text: "Further to the receipt of your requirement, details of the products along with price is given below. –", spacing: { after: 200 } }),
+        
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          borders: tableBorders,
+          rows: tableRows
+        }),
+
+        new Paragraph({ children: [new TextRun({ text: "Terms & Conditions: -", bold: true })], spacing: { before: 200 } }),
+        new Paragraph({ text: "1. Above prices are inclusive of GST." }),
+        new Paragraph({ children: [new TextRun({ text: "2. Payment Terms", underline: {} }), new TextRun({ text: " – 100% advance payment along with Purchase Order. Products will be supplied post receipt of Payment." })] }),
+        new Paragraph({ text: "3. The above stated prices are non – negotiable & non – commissionable.", spacing: { after: 400 } }),
+
+        new Paragraph({ children: [new TextRun({ text: "Company Address", bold: true })] }),
+        new Paragraph({ text: config.companyName }),
+        new Paragraph({ children: [new TextRun({ text: "Building No./Flat No.: ", bold: true }), new TextRun({ text: config.buildingNo })] }),
+        new Paragraph({ children: [new TextRun({ text: "Road/Street: ", bold: true }), new TextRun({ text: config.roadStreet })] }),
+        new Paragraph({ children: [new TextRun({ text: "City/Town/Village: ", bold: true }), new TextRun({ text: config.cityTown })] }),
+        new Paragraph({ text: config.districtState }),
+        new Paragraph({ children: [new TextRun({ text: `GST: ${config.companyGst}`, bold: true })], spacing: { after: 400 } }),
+
+        new Paragraph({ children: [new TextRun({ text: "Bank Details", bold: true, underline: {} })] }),
+        new Table({
+            width: { size: 70, type: WidthType.PERCENTAGE },
+            borders: tableBorders,
+            rows: [
+                new TableRow({ children: [createCell("Beneficiary"), createCell(config.beneficiary)] }),
+                new TableRow({ children: [createCell("Bank"), createCell(config.bankName)] }),
+                new TableRow({ children: [createCell("Branch"), createCell(config.branch)] }),
+                new TableRow({ children: [createCell("Branch Address"), createCell(config.branchAddress)] }),
+                new TableRow({ children: [createCell("Account No"), createCell(config.accountNo)] }),
+                new TableRow({ children: [createCell("IFSC Code"), createCell(config.ifscCode)] }),
+            ]
+        }),
+
+        new Paragraph({ text: "Yours Truly,", spacing: { before: 400 } }),
+        new Paragraph({ text: "Stove Kraft Team" })
+      );
+
+      const doc = new Document({
+        sections: [{
+          properties: {},
+          children: docChildren
+        }]
+      });
+
+      const blob = await Packer.toBlob(doc);
+      saveAs(blob, `Quotation_${formData.clientName || "Draft"}.docx`);
+      toast.success("Word document downloaded successfully!", { id: toastId });
+    } catch (error) {
+      console.error("Failed to generate word document", error);
+      toast.error("Failed to generate Word document. Please try again.", { id: toastId });
+    }
+  };
+
+  const isValidGst = (gst) => {
+    if (!gst) return true;
+    const regex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+    return regex.test(gst);
+  };
+
+  const handleGstChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      clientGst: e.target.value.toUpperCase(),
+    }));
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -155,6 +349,21 @@ export default function QuotationGenerator() {
             <textarea name="clientAddress" value={formData.clientAddress} onChange={handleChange} rows={3} className="google-input w-full p-2 text-sm resize-y" />
           </div>
           <div>
+            <label className="block text-xs font-medium text-[#5f6368] mb-1 uppercase tracking-wider">Client GST (Optional)</label>
+            <input 
+              type="text" 
+              name="clientGst" 
+              value={formData.clientGst} 
+              onChange={handleGstChange} 
+              maxLength={15}
+              placeholder="e.g. 27AAPFU0939F1ZV" 
+              className={`google-input w-full p-2 text-sm ${formData.clientGst && !isValidGst(formData.clientGst) ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-200 outline-none" : ""}`} 
+            />
+            {formData.clientGst && !isValidGst(formData.clientGst) && (
+              <p className="text-red-500 text-[10px] mt-1 font-medium">Invalid GST format. (e.g. 27AAPFU0939F1ZV)</p>
+            )}
+          </div>
+          <div>
             <label className="block text-xs font-medium text-[#5f6368] mb-1 uppercase tracking-wider">Subject Line (Optional)</label>
             <input type="text" name="subject" value={formData.subject} onChange={handleChange} placeholder="Leave blank to auto-generate" className="google-input w-full p-2 text-sm" />
           </div>
@@ -203,17 +412,29 @@ export default function QuotationGenerator() {
             </button>
           </div>
           
-          <div className="pt-4 border-t border-[#dadce0]">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handlePrint}
-              className="w-full flex justify-center items-center gap-2 bg-[#1a73e8] hover:bg-[#1557b0] text-white px-4 py-2.5 rounded font-medium transition-colors shadow-sm cursor-pointer"
-            >
-              <Printer size={18} />
-              Print / Save as PDF
-            </motion.button>
-            <p className="text-xs text-center text-[#5f6368] mt-2">
+          <div className="pt-4 border-t border-[#dadce0] flex flex-col gap-3">
+            <div className="flex gap-3">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handlePrint}
+                className="flex-1 flex justify-center items-center gap-2 bg-[#1a73e8] hover:bg-[#1557b0] text-white px-4 py-2.5 rounded font-medium transition-colors shadow-sm cursor-pointer"
+              >
+                <Printer size={18} />
+                PDF
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleDownloadWord}
+                className="flex-1 flex justify-center items-center gap-2 bg-[#0f9d58] hover:bg-[#0b8043] text-white px-4 py-2.5 rounded font-medium transition-colors shadow-sm cursor-pointer"
+              >
+                <FileText size={18} />
+                Word
+              </motion.button>
+            </div>
+            <p className="text-xs text-center text-[#5f6368]">
               Select "Save as PDF" in the print dialog for perfect margins.
             </p>
           </div>
@@ -248,7 +469,11 @@ export default function QuotationGenerator() {
 
             <p className="font-bold underline mb-0.5">To,</p>
             <p className="font-bold underline mb-0.5">{toTitleCase(formData.clientName)}</p>
-            <p className="mb-4 w-[70%]">{toTitleCase(formData.clientAddress)}</p>
+            <p className={formData.clientGst ? "mb-1 w-[70%]" : "mb-4 w-[70%]"}>{toTitleCase(formData.clientAddress)}</p>
+            
+            {formData.clientGst && (
+              <p className="mb-4 text-sm font-bold">GST No.: {formData.clientGst}</p>
+            )}
 
             {displaySubject && (
               <p className="font-bold underline mb-4">

@@ -9,6 +9,7 @@ import MRPChecker from "./components/MRPChecker";
 import QuotationGenerator from "./components/QuotationGenerator";
 import { motion, AnimatePresence } from "framer-motion";
 import { FileSpreadsheet } from "lucide-react";
+import { Toaster } from 'react-hot-toast';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("validator"); // 'validator' or 'orders'
@@ -122,6 +123,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-primary)] flex flex-col font-sans">
+      <Toaster position="bottom-center" />
       
       {/* Google-style Top App Bar */}
       <header className="w-full bg-[var(--surface-color)] border-b border-[var(--border-color)] px-6 py-3 flex items-center justify-between sticky top-0 z-50">

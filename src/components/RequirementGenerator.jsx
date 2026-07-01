@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { Download, AlertCircle, FileText, Table2, UploadCloud } from "lucide-react";
@@ -166,8 +167,10 @@ export default function RequirementGenerator() {
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       saveAs(blob, "Generated_Order_Requirement.xlsx");
+      toast.success("Excel file generated successfully!");
     } catch (err) {
       console.error(err);
+      toast.error("Failed to generate Excel file.");
       setError("Failed to generate Excel file.");
     }
   };

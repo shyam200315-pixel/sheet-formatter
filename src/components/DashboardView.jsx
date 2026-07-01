@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import toast from "react-hot-toast";
 import { 
   TrendingUp, 
   Calendar, 
@@ -199,6 +200,7 @@ export default function DashboardView({
   const copyToClipboard = () => {
     navigator.clipboard.writeText(formattedOutputText);
     setCopied(true);
+    toast.success("Report copied to clipboard!");
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -210,6 +212,7 @@ export default function DashboardView({
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
+    toast.success("Report downloaded successfully!");
   };
 
   // Filter stores based on search query

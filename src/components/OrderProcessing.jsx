@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 import * as XLSX from "xlsx";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
@@ -217,8 +218,10 @@ export default function OrderProcessing() {
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       saveAs(blob, `Processed_Order_Requirement_${filter.replace(" ", "_")}.xlsx`);
+      toast.success(`Processed orders downloaded for ${filter || "All"}!`);
     } catch (err) {
       console.error(err);
+      toast.error("Failed to generate Excel file.");
       setError("Failed to generate Excel file.");
     }
   };
