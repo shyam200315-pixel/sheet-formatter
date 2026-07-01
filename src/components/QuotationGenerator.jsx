@@ -1,8 +1,10 @@
 import React, { useState, useRef } from "react";
-import { useReactToPrint } from "react-to-print";
+// Removed useReactToPrint
 import { motion, AnimatePresence } from "framer-motion";
 import { Printer, Pencil, X, Plus, Trash2, FileText } from "lucide-react";
 import toast from "react-hot-toast";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import mrpData from "../../public/mrp_data.json";
 
 export default function QuotationGenerator() {
@@ -39,20 +41,264 @@ export default function QuotationGenerator() {
 
   const printRef = useRef(null);
 
-  const handlePrint = useReactToPrint({
-    contentRef: printRef,
-    documentTitle: `Quotation_${formData.clientName || "Draft"}`,
-    onBeforeGetContent: () => {
-      toast.loading("Preparing PDF...", { id: 'pdf-toast' });
-      return Promise.resolve();
-    },
-    onAfterPrint: () => {
-      toast.success("PDF action completed!", { id: 'pdf-toast' });
-    },
-    onPrintError: () => {
-      toast.error("Failed to generate PDF.", { id: 'pdf-toast' });
+  const handleDownloadPDF = async () => {
+    const toastId = toast.loading("Generating PDF...");
+    try {
+      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const marginX = 15;
+      let startY = 15;
+
+      let logoData = null;
+      try {
+        const res = await fetch("/logo.jpeg");
+        if (res.ok) {
+          const blob = await res.blob();
+          logoData = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+          });
+        }
+      } catch (e) {
+        console.error("Logo fetch failed", e);
+      }
+
+      if (logoData) {
+        doc.addImage(logoData, 'JPEG', 210 - marginX - 45, 8, 45, 15);
+      }
+
+      doc.setFont("times", "normal");
+      doc.setFontSize(10.5);
+
+      startY += 15;
+      doc.text(`Date: ${formatDate(new Date())}`, marginX, startY);
+      startY += 12;
+
+      doc.setFont("times", "bold");
+      doc.text("To,", marginX, startY);
+      doc.setLineWidth(0.3);
+      doc.line(marginX, startY + 1, marginX + doc.getTextWidth("To,"), startY + 1);
+      startY += 6;
+
+      const titleCaseName = toTitleCase(formData.clientName);
+      doc.text(titleCaseName, marginX, startY);
+      doc.line(marginX, startY + 1, marginX + doc.getTextWidth(titleCaseName), startY + 1);
+      startY += 6;
+
+      doc.setFont("times", "normal");
+      const splitAddress = doc.splitTextToSize(toTitleCase(formData.clientAddress), 140);
+      doc.text(splitAddress, marginX, startY);
+      startY += (splitAddress.length * 5) + 2;
+
+      if (formData.clientGst) {
+        doc.setFont("times", "bold");
+        doc.text(`GST No.: ${formData.clientGst}`, marginX, startY);
+        startY += 7;
+      } else {
+        startY += 2;
+      }
+
+      if (displaySubject) {
+        doc.setFont("times", "bold");
+        const subjText = `Subject:   ${displaySubject}`;
+        doc.text(subjText, marginX, startY);
+        doc.line(marginX + doc.getTextWidth("Subject:   "), startY + 1, marginX + doc.getTextWidth(subjText), startY + 1);
+        startY += 8;
+      }
+
+      doc.setFont("times", "bold");
+      doc.text("Dear Sir/Madam", marginX, startY);
+      doc.line(marginX, startY + 1, marginX + doc.getTextWidth("Dear Sir/Madam"), startY + 1);
+      startY += 6;
+
+      doc.setFont("times", "normal");
+      doc.text("Further to the receipt of your requirement, details of the products along with price is given below. –", marginX, startY);
+      startY += 5;
+
+      const tableColumn = [
+        "Item Code",
+        "Item Name",
+        "Basic Price\n(Rs.)",
+        "Quantity",
+        "Amount\n(Rs.)",
+        "GST\n(Rs.)",
+        "Total with\nGST (Rs.)"
+      ];
+      
+      const tableRows = formData.items.map(item => {
+        const { amount, gstAmount, total } = calculateItemTotals(item);
+        return [
+          item.productCode,
+          item.productName.toUpperCase(),
+          item.basePrice !== "" ? Number(item.basePrice).toLocaleString("en-IN") : "",
+          item.quantity !== "" ? String(item.quantity) : "",
+          amount > 0 ? amount.toLocaleString("en-IN") : "",
+          gstAmount > 0 ? gstAmount.toLocaleString("en-IN") : "",
+          total > 0 ? total.toLocaleString("en-IN") : ""
+        ];
+      });
+
+      if (formData.items.length > 1) {
+        tableRows.push([
+          { content: "Grand Total:", colSpan: 4, styles: { halign: 'right', fontStyle: 'bold' } },
+          { content: grandTotals.amount > 0 ? grandTotals.amount.toLocaleString("en-IN") : "", styles: { fontStyle: 'bold' } },
+          { content: grandTotals.gstAmount > 0 ? grandTotals.gstAmount.toLocaleString("en-IN") : "", styles: { fontStyle: 'bold' } },
+          { content: grandTotals.total > 0 ? grandTotals.total.toLocaleString("en-IN") : "", styles: { fontStyle: 'bold' } }
+        ]);
+      }
+
+      autoTable(doc, {
+        startY: startY,
+        head: [tableColumn],
+        body: tableRows,
+        theme: 'grid',
+        styles: { font: 'times', fontSize: 10, textColor: 0, lineColor: 0, lineWidth: 0.3, cellPadding: 1.5 },
+        headStyles: { fillColor: [243, 244, 246], textColor: 0, fontStyle: 'bold', halign: 'center', valign: 'middle' },
+        columnStyles: {
+          0: { halign: 'center', cellWidth: 22 },
+          1: { halign: 'left', cellWidth: 'auto' },
+          2: { halign: 'center', cellWidth: 20 },
+          3: { halign: 'center', cellWidth: 16 },
+          4: { halign: 'center', cellWidth: 20 },
+          5: { halign: 'center', cellWidth: 18 },
+          6: { halign: 'center', cellWidth: 22 },
+        },
+        bodyStyles: { halign: 'center', valign: 'middle' },
+        didParseCell: function (data) {
+           if (data.section === 'body' && data.column.index === 1 && (!data.cell.colSpan || data.cell.colSpan === 1)) {
+              data.cell.styles.fontStyle = 'bold';
+           }
+           if (data.section === 'body' && data.column.index === 0 && (!data.cell.colSpan || data.cell.colSpan === 1)) {
+              data.cell.styles.fontStyle = 'bold';
+           }
+        }
+      });
+
+      startY = doc.lastAutoTable.finalY + 8;
+
+      doc.setFont("times", "bold");
+      doc.text("Terms & Conditions: -", marginX, startY);
+      startY += 6;
+      
+      const listIndent = marginX + 8;
+      doc.setFont("times", "normal");
+      doc.text("1. Above prices are inclusive of GST.", listIndent, startY);
+      startY += 5;
+      
+      doc.text("2. Payment Terms", listIndent, startY);
+      doc.line(listIndent + doc.getTextWidth("2. "), startY + 1, listIndent + doc.getTextWidth("2. Payment Terms"), startY + 1);
+      doc.text(" – 100% advance payment along with Purchase Order.", listIndent + doc.getTextWidth("2. Payment Terms"), startY);
+      startY += 5;
+      doc.text("   Products will be supplied post receipt of Payment.", listIndent, startY);
+      startY += 5;
+      
+      doc.text("3. The above stated prices are non – negotiable & non – commissionable.", listIndent, startY);
+      startY += 10;
+
+      if (startY > 230) {
+        doc.addPage();
+        startY = 20;
+      }
+
+      // Blue section
+      const blueColor = [26, 35, 126];
+      doc.setTextColor(blueColor[0], blueColor[1], blueColor[2]);
+      
+      doc.setFont("times", "bold");
+      doc.text("Company Address", marginX, startY);
+      startY += 5;
+      
+      doc.setFont("times", "normal");
+      doc.text(config.companyName, marginX, startY);
+      startY += 5;
+      
+      doc.setFont("times", "bold");
+      const bnoLabel = "Building No./Flat No.: ";
+      doc.text(bnoLabel, marginX, startY);
+      const bnoLabelWidth = doc.getTextWidth(bnoLabel);
+      doc.setFont("times", "normal");
+      doc.text(config.buildingNo, marginX + bnoLabelWidth, startY);
+      startY += 5;
+      
+      doc.setFont("times", "normal");
+      const hobliLabel = "HOBLI, ";
+      doc.text(hobliLabel, marginX, startY);
+      const hobliWidth = doc.getTextWidth(hobliLabel);
+      
+      doc.setFont("times", "bold");
+      const rsLabel = "Road/Street: ";
+      doc.text(rsLabel, marginX + hobliWidth, startY);
+      const rsWidth = doc.getTextWidth(rsLabel);
+      
+      doc.setFont("times", "normal");
+      doc.text(config.roadStreet, marginX + hobliWidth + rsWidth, startY);
+      startY += 5;
+      
+      doc.setFont("times", "bold");
+      const cityLabel = "City/Town/Village: ";
+      doc.text(cityLabel, marginX, startY);
+      const cityWidth = doc.getTextWidth(cityLabel);
+      
+      doc.setFont("times", "normal");
+      doc.text(config.cityTown, marginX + cityWidth, startY);
+      startY += 5;
+      
+      doc.setFont("times", "normal");
+      doc.text(config.districtState, marginX, startY);
+      startY += 5;
+      
+      doc.setFont("times", "bold");
+      doc.text(`GST: ${config.companyGst}`, marginX, startY);
+      startY += 10;
+
+      doc.setFont("times", "bold");
+      doc.text("Bank Details", marginX, startY);
+      doc.setDrawColor(blueColor[0], blueColor[1], blueColor[2]);
+      doc.line(marginX, startY + 1, marginX + doc.getTextWidth("Bank Details"), startY + 1);
+      startY += 3;
+
+      doc.setTextColor(0, 0, 0); // reset to black for table
+      const bankData = [
+        ["Beneficiary", config.beneficiary],
+        ["Bank", config.bankName],
+        ["Branch", config.branch],
+        ["Branch Address", config.branchAddress],
+        ["Account No", config.accountNo],
+        ["IFSC Code", config.ifscCode]
+      ];
+
+      autoTable(doc, {
+        startY: startY,
+        body: bankData,
+        theme: 'grid',
+        styles: { font: 'times', fontSize: 10.5, textColor: 0, lineColor: 0, lineWidth: 0.3, cellPadding: 2 },
+        columnStyles: {
+          0: { cellWidth: 40 },
+          1: { cellWidth: 'auto' }
+        },
+        margin: { left: marginX, right: 60 }
+      });
+
+      startY = doc.lastAutoTable.finalY + 12;
+
+      if (startY > 270) {
+        doc.addPage();
+        startY = 20;
+      }
+
+      doc.setFont("times", "normal");
+      doc.text("Yours Truly,", marginX, startY);
+      startY += 8;
+      doc.text("Stove Kraft Team", marginX, startY);
+
+      doc.save(`Quotation_${formData.clientName || "Draft"}.pdf`);
+      
+      toast.success("PDF downloaded successfully!", { id: toastId });
+    } catch (error) {
+      console.error("Failed to generate PDF", error);
+      toast.error(`Error: ${error.message || "Unknown error"}`, { id: toastId, duration: 10000 });
     }
-  });
+  };
 
   const handleDownloadWord = async () => {
     const toastId = toast.loading("Generating Word document...");
@@ -417,7 +663,7 @@ export default function QuotationGenerator() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={handlePrint}
+                onClick={handleDownloadPDF}
                 className="flex-1 flex justify-center items-center gap-2 bg-[#1a73e8] hover:bg-[#1557b0] text-white px-4 py-2.5 rounded font-medium transition-colors shadow-sm cursor-pointer"
               >
                 <Printer size={18} />
