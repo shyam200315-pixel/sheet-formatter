@@ -326,6 +326,9 @@ export default function App() {
                       error={error} 
                       validationSuccess={validationSuccess} 
                     />
+                    <p className="text-center text-sm text-[#5f6368] mt-4">
+                      <em>Note: The option to upload your Closing Stock file (for Scrap calculations) will appear on the dashboard after you upload this sales report.</em>
+                    </p>
                   </div>
                 </div>
               ) : (

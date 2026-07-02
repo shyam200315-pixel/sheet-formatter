@@ -12,8 +12,11 @@ import {
   Search, 
   Percent, 
   Check, 
-  Settings 
+  Settings,
+  Trash2,
+  Upload
 } from "lucide-react";
+import * as XLSX from "xlsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   AreaChart, 
@@ -39,6 +42,73 @@ export default function DashboardView({
   const [storeSearch, setStoreSearch] = useState("");
   const [copied, setCopied] = useState(false);
   const [showTargetSettings, setShowTargetSettings] = useState(false);
+  const [scrapValue, setScrapValue] = useState(null);
+  const [isUploadingScrap, setIsUploadingScrap] = useState(false);
+
+  const handleScrapUpload = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    setIsUploadingScrap(true);
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const data = new Uint8Array(evt.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+        let closingStockColIdx = -1;
+        let mainProductColIdx = -1;
+        let dataStartIndex = 0;
+
+        for (let i = 0; i < Math.min(20, jsonData.length); i++) {
+          const row = jsonData[i];
+          if (!row) continue;
+          closingStockColIdx = row.findIndex(cell => String(cell).trim().toUpperCase() === "CLOSING STOCK");
+          mainProductColIdx = row.findIndex(cell => String(cell).trim().toUpperCase() === "MAIN PRODUCT");
+          
+          if (closingStockColIdx !== -1 && mainProductColIdx !== -1) {
+            dataStartIndex = i + 1;
+            break;
+          }
+        }
+
+        if (closingStockColIdx === -1 || mainProductColIdx === -1) {
+          throw new Error("Could not find required columns ('CLOSING STOCK' or 'MAIN PRODUCT').");
+        }
+
+        let totalScrap = 0;
+        for (let i = dataStartIndex; i < jsonData.length; i++) {
+          const row = jsonData[i];
+          if (!row) continue;
+          const mainProduct = String(row[mainProductColIdx] || "").trim().toUpperCase();
+          if (mainProduct === "SCRAP") {
+            const stock = Number(row[closingStockColIdx]);
+            if (!isNaN(stock)) {
+              totalScrap += stock;
+            }
+          }
+        }
+
+        setScrapValue(totalScrap);
+        toast.success("Closing stock parsed successfully!");
+      } catch (err) {
+        console.error(err);
+        toast.error(err.message || "Failed to parse closing stock file.");
+      } finally {
+        setIsUploadingScrap(false);
+      }
+    };
+    reader.onerror = () => {
+      toast.error("Error reading the file.");
+      setIsUploadingScrap(false);
+    };
+    reader.readAsArrayBuffer(file);
+    // Reset the input so the same file can be uploaded again if needed
+    e.target.value = null;
+  };
 
   const {
     todayStr,
@@ -190,12 +260,15 @@ export default function DashboardView({
     output += `AVG PER STORE TODAY\t::\t${Math.floor(computedMetrics.avgPerStoreToday).toLocaleString("en-IN")}\n`;
     output += `AVG PER STORE MTD \t::\t${Math.floor(computedMetrics.avgPerStoreMTD).toLocaleString("en-IN")}\n`;
     output += `TOTAL STORE COUNT \t::\t${allStores.size}\n`;
+    if (scrapValue !== null) {
+      output += `SCRAP ITEMS\t::\t${Math.floor(scrapValue)}\n`;
+    }
     output += `STORE BELOW 5K.\t::\t\n`;
     for (const store of computedMetrics.below5k) {
       output += `${store.name}\t\t${store.sales}\n`;
     }
     return output;
-  }, [todayStr, monthlyTarget, monthlyCommitment, totalDays, today, computedMetrics, allStores]);
+  }, [todayStr, monthlyTarget, monthlyCommitment, totalDays, today, computedMetrics, allStores, scrapValue]);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(formattedOutputText);
@@ -384,28 +457,60 @@ export default function DashboardView({
       </div>
 
       {/* Metrics Row 2 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="google-card p-5 flex items-center gap-4">
-          <div className="p-3 rounded-full bg-[#f3e8fd] text-[#9333ea]"><Store size={24} /></div>
-          <div>
-            <span className="text-sm text-[#5f6368] font-medium block">Total Store Count</span>
-            <span className="text-xl font-medium text-[#202124]">{allStores.size} Stores</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="google-card p-5 flex flex-col justify-center">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-full bg-[#f3e8fd] text-[#9333ea]"><Store size={24} /></div>
+            <div>
+              <span className="text-sm text-[#5f6368] font-medium block">Total Store Count</span>
+              <span className="text-xl font-medium text-[#202124]">{allStores.size} Stores</span>
+            </div>
           </div>
         </div>
 
-        <div className="google-card p-5 flex items-center gap-4">
-          <div className="p-3 rounded-full bg-[#e8f0fe] text-[#1a73e8]"><TrendingUp size={24} /></div>
-          <div>
-            <span className="text-sm text-[#5f6368] font-medium block">Avg Sales Per Store Today</span>
-            <span className="text-xl font-medium text-[#202124]">{formatCurrency(computedMetrics.avgPerStoreToday)}</span>
+        <div className="google-card p-5 flex flex-col justify-center">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-full bg-[#e8f0fe] text-[#1a73e8]"><TrendingUp size={24} /></div>
+            <div>
+              <span className="text-sm text-[#5f6368] font-medium block">Avg Sales Today</span>
+              <span className="text-xl font-medium text-[#202124]">{formatCurrency(computedMetrics.avgPerStoreToday)}</span>
+            </div>
           </div>
         </div>
 
-        <div className="google-card p-5 flex items-center gap-4">
-          <div className="p-3 rounded-full bg-[#e8f0fe] text-[#1a73e8]"><TrendingUp size={24} /></div>
-          <div>
-            <span className="text-sm text-[#5f6368] font-medium block">Avg Sales Per Store MTD</span>
-            <span className="text-xl font-medium text-[#202124]">{formatCurrency(computedMetrics.avgPerStoreMTD)}</span>
+        <div className="google-card p-5 flex flex-col justify-center">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-full bg-[#e8f0fe] text-[#1a73e8]"><TrendingUp size={24} /></div>
+            <div>
+              <span className="text-sm text-[#5f6368] font-medium block">Avg Sales MTD</span>
+              <span className="text-xl font-medium text-[#202124]">{formatCurrency(computedMetrics.avgPerStoreMTD)}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="google-card p-5 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-full bg-[#fce8e6] text-[#c5221f] shrink-0"><Trash2 size={24} /></div>
+            <div>
+              <span className="text-sm text-[#5f6368] font-medium block whitespace-nowrap">Total Scrap</span>
+              {scrapValue !== null ? (
+                <span className="text-xl font-medium text-[#202124]">{scrapValue} Units</span>
+              ) : (
+                <span className="text-sm text-[#5f6368] italic whitespace-nowrap">No data</span>
+              )}
+            </div>
+          </div>
+          <div className="shrink-0 flex items-center">
+            {isUploadingScrap ? (
+              <span className="text-xs text-[#5f6368]">Loading...</span>
+            ) : (
+              <>
+                <input type="file" accept=".xlsx, .xls" className="hidden" id="scrap-upload" onChange={handleScrapUpload} />
+                <label htmlFor="scrap-upload" className="p-2 rounded-full hover:bg-[#f1f3f4] text-[#1a73e8] cursor-pointer transition-colors" title="Upload Closing Stock">
+                  <Upload size={20} />
+                </label>
+              </>
+            )}
           </div>
         </div>
       </div>
