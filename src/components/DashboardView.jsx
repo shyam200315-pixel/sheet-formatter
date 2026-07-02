@@ -14,9 +14,12 @@ import {
   Check, 
   Settings,
   Trash2,
-  Upload
+  Upload,
+  Camera,
+  Image as ImageIcon
 } from "lucide-react";
 import * as XLSX from "xlsx";
+import { toBlob } from "html-to-image";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   AreaChart, 
@@ -31,6 +34,43 @@ import {
   Cell
 } from "recharts";
 
+const STORE_TARGETS = {
+  "WMH001 - NED - VAZIRABAD": 350000,
+  "WMH002 - NED - BHAGYA NAGAR": 450000,
+  "WMH003 - BDE - BEED": 1200000,
+  "WMH004 - PBN - PARBHANI": 350000,
+  "WMH005 - YTL - YAVATMAL": 1200000,
+  "WMH006 - BTW - BARSHI": 375000,
+  "WMP007 - PUN -RAVET PUNE": 550000,
+  "WMH007 - PUN - PIMPRI": 550000, // Alias for Pune
+  "WMH009 - KOP -  KOLHAPUR": 450000,
+  "WMP001 - BPL - SEHORE CITY": 600000,
+  "WMP002 - BPL - GULMOHAR COLONY": 500000,
+  "WMP003 - IND - MR 09 ROAD": 375000,
+  "WMP004 - IND - ANNAPURNA RD": 350000,
+  "WMP006 - BPL -  KOLAR ROAD": 450000,
+  "WMP007 - REW - REWA": 350000,
+  "WMP008 - SVP - SHIVPURI": 350000
+};
+
+const getStoreTarget = (storeName) => {
+  if (!storeName) return null;
+  const nameClean = storeName.replace(/\s+/g, '').toUpperCase();
+  for (const [key, value] of Object.entries(STORE_TARGETS)) {
+    const keyClean = key.replace(/\s+/g, '').toUpperCase();
+    if (keyClean === nameClean) return value;
+    
+    const keyParts = key.split('-');
+    const storeParts = storeName.split('-');
+    if (keyParts.length >= 2 && storeParts.length >= 2) {
+      const keySuffix = keyParts.slice(1).join('').replace(/\s+/g, '').toUpperCase();
+      const storeSuffix = storeParts.slice(1).join('').replace(/\s+/g, '').toUpperCase();
+      if (keySuffix === storeSuffix) return value;
+    }
+  }
+  return null;
+};
+
 export default function DashboardView({ 
   reportData, 
   monthlyTarget, 
@@ -44,6 +84,8 @@ export default function DashboardView({
   const [showTargetSettings, setShowTargetSettings] = useState(false);
   const [scrapValue, setScrapValue] = useState(null);
   const [isUploadingScrap, setIsUploadingScrap] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
+  const tableRef = React.useRef(null);
 
   const handleScrapUpload = (e) => {
     const file = e.target.files && e.target.files[0];
@@ -277,6 +319,40 @@ export default function DashboardView({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const copyTableAsImage = async () => {
+    if (!tableRef.current) {
+      toast.error("Table not found to capture.");
+      return;
+    }
+    try {
+      setIsCapturing(true);
+      
+      // We will capture the table element itself. Adding a white background ensures it doesn't have a transparent background when pasted.
+      const blob = await toBlob(tableRef.current, { 
+        backgroundColor: '#ffffff',
+        pixelRatio: 4, // <--- Ultra HD Upscale
+        style: {
+          margin: '0',
+          padding: '16px' // give it some padding so it looks good when pasted
+        }
+      });
+      
+      if (blob) {
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
+        toast.success("Image copied to clipboard! You can now paste it anywhere.");
+      } else {
+        toast.error("Failed to create image.");
+      }
+    } catch (err) {
+      console.error("Failed to capture image:", err);
+      toast.error("Failed to copy image.");
+    } finally {
+      setIsCapturing(false);
+    }
+  };
+
   const downloadReport = () => {
     const element = document.createElement("a");
     const file = new Blob([formattedOutputText], { type: "text/plain" });
@@ -290,14 +366,42 @@ export default function DashboardView({
 
   // Filter stores based on search query
   const filteredAllStores = useMemo(() => {
-    return Array.from(allStores)
-      .map(storeName => ({
-        name: storeName,
-        todaySales: computedMetrics.storeSalesToday[storeName] || 0,
-        mtdSales: computedMetrics.storeSalesMTD[storeName] || 0
-      }))
-      .filter(store => store.name.toLowerCase().includes(storeSearch.toLowerCase()))
-      .sort((a, b) => b.mtdSales - a.mtdSales);
+    const stores = Array.from(allStores)
+      .map(storeName => {
+        const mtdSales = computedMetrics.storeSalesMTD[storeName] || 0;
+        const target = getStoreTarget(storeName);
+        let achievedPercent = null;
+        if (target && target > 0) {
+          achievedPercent = (mtdSales / target) * 100;
+        }
+
+        return {
+          name: storeName,
+          todaySales: computedMetrics.storeSalesToday[storeName] || 0,
+          mtdSales,
+          target,
+          achievedPercent
+        };
+      })
+      .filter(store => store.name.toLowerCase().includes(storeSearch.toLowerCase()));
+
+    // Assign color tier based on rank of achieved percentage
+    const sortedByPercent = [...stores].sort((a, b) => (b.achievedPercent || 0) - (a.achievedPercent || 0));
+    
+    sortedByPercent.forEach((store, index) => {
+      if (store.achievedPercent === null) {
+        store.colorTier = "gray";
+      } else if (index < 5) {
+        store.colorTier = "green";
+      } else if (index < 10) {
+        store.colorTier = "yellow";
+      } else {
+        store.colorTier = "red";
+      }
+    });
+
+    // Finally sort by MTD sales for the table display order
+    return stores.sort((a, b) => b.mtdSales - a.mtdSales);
   }, [allStores, computedMetrics.storeSalesToday, computedMetrics.storeSalesMTD, storeSearch]);
 
   const filteredBelow5k = useMemo(() => {
@@ -641,26 +745,46 @@ export default function DashboardView({
               </button>
             </div>
 
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5f6368]" size={18} />
-              <input
-                type="text"
-                placeholder="Search store..."
-                value={storeSearch}
-                onChange={(e) => setStoreSearch(e.target.value)}
-                className="google-input w-full pl-10 pr-4 py-2 text-sm"
-              />
+            <div className="flex items-center gap-2">
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5f6368]" size={18} />
+                <input
+                  type="text"
+                  placeholder="Search store..."
+                  value={storeSearch}
+                  onChange={(e) => setStoreSearch(e.target.value)}
+                  className="google-input w-full pl-10 pr-4 py-2 text-sm"
+                />
+              </div>
+              <button
+                onClick={copyTableAsImage}
+                disabled={isCapturing || activeTab !== "all-stores"}
+                title={activeTab === "all-stores" ? "Copy table as Image" : "Switch to All Stores to copy image"}
+                className={`p-2.5 rounded-md flex items-center justify-center transition-colors ${
+                  activeTab === "all-stores" && !isCapturing 
+                    ? "bg-[#e8f0fe] text-[#1a73e8] hover:bg-[#d2e3fc]" 
+                    : "bg-[#f1f3f4] text-[#9aa0a6] cursor-not-allowed"
+                }`}
+              >
+                {isCapturing ? (
+                  <div className="w-5 h-5 border-2 border-[#1a73e8] border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <ImageIcon size={20} />
+                )}
+              </button>
             </div>
           </div>
 
           <div className="overflow-x-auto max-h-[400px]">
             {activeTab === "all-stores" ? (
-              <table className="google-table">
+              <div className="bg-white">
+                <table className="google-table">
                 <thead className="bg-white sticky top-0 shadow-sm">
                   <tr>
                     <th>Branch Name</th>
                     <th>Today Sales</th>
                     <th>MTD Sales</th>
+                    <th>Target Achieved</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -677,17 +801,31 @@ export default function DashboardView({
                         )}
                       </td>
                       <td className="text-[#5f6368]">{formatCurrency(store.mtdSales)}</td>
+                      <td>
+                        {store.achievedPercent !== null ? (
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${
+                            store.colorTier === "green" ? "bg-[#e6f4ea] text-[#137333]" :
+                            store.colorTier === "yellow" ? "bg-[#fef7e0] text-[#b06000]" :
+                            "bg-[#fce8e6] text-[#c5221f]"
+                          }`}>
+                            {store.achievedPercent.toFixed(1)}%
+                          </span>
+                        ) : (
+                          <span className="text-[#9aa0a6] text-xs">N/A</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                   {filteredAllStores.length === 0 && (
                     <tr>
-                      <td colSpan="3" className="text-center text-[#5f6368] py-12">
+                      <td colSpan="4" className="text-center text-[#5f6368] py-12">
                         No stores match your search
                       </td>
                     </tr>
                   )}
                 </tbody>
-              </table>
+                </table>
+              </div>
             ) : (
               <table className="google-table">
                 <thead className="bg-white sticky top-0 shadow-sm">
@@ -755,6 +893,72 @@ export default function DashboardView({
           </div>
         </div>
       </div>
+
+      {/* Hidden high-quality beautifully styled template specifically for image export */}
+      <div style={{ position: "absolute", left: "-9999px", top: 0 }}>
+        <div 
+          ref={tableRef} 
+          className="bg-white p-8"
+          style={{ width: "800px", fontFamily: "'Inter', sans-serif" }}
+        >
+          <div className="flex justify-between items-center mb-6 border-b border-[#dadce0] pb-4">
+            <div>
+              <h2 className="text-2xl font-bold text-[#1a73e8] m-0">Daily Store Performance</h2>
+              <p className="text-[#5f6368] mt-1 font-medium m-0">MH & MP Division • {todayStr}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-[#5f6368] font-medium m-0">Total MTD Sales</p>
+              <p className="text-xl font-bold text-[#202124] m-0">{formatCurrency(computedMetrics.mtdSales)}</p>
+            </div>
+          </div>
+          
+          <table className="w-full text-left border-collapse" style={{ borderCollapse: "collapse", width: "100%" }}>
+            <thead>
+              <tr className="bg-[#f8f9fa]">
+                <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>Branch Name</th>
+                <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>Today Sales</th>
+                <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>MTD Sales</th>
+                <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>Target Achieved</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#dadce0]">
+              {filteredAllStores.map((store, idx) => (
+                <tr key={store.name} className={idx % 2 === 0 ? "bg-white" : "bg-[#f8f9fa]"}>
+                  <td className="py-3 px-4 font-medium text-[#202124]" style={{ borderBottom: "1px solid #dadce0" }}>{store.name}</td>
+                  <td className="py-3 px-4" style={{ borderBottom: "1px solid #dadce0" }}>
+                    <span className={`font-semibold ${store.todaySales < 5000 ? "text-[#b06000]" : "text-[#137333]"}`}>
+                      {store.todaySales > 0 ? formatCurrency(store.todaySales) : "-"}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 font-medium text-[#5f6368]" style={{ borderBottom: "1px solid #dadce0" }}>{formatCurrency(store.mtdSales)}</td>
+                  <td className="py-3 px-4" style={{ borderBottom: "1px solid #dadce0" }}>
+                    {store.achievedPercent !== null ? (
+                      <span className={`px-2.5 py-1 rounded-md text-xs font-bold inline-block text-center min-w-[50px] ${
+                        store.colorTier === "green" ? "bg-[#e6f4ea] text-[#137333]" :
+                        store.colorTier === "yellow" ? "bg-[#fef7e0] text-[#b06000]" :
+                        "bg-[#fce8e6] text-[#c5221f]"
+                      }`}>
+                        {store.achievedPercent.toFixed(1)}%
+                      </span>
+                    ) : (
+                      <span className="text-[#9aa0a6] text-xs font-medium">N/A</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          
+          <div className="mt-6 pt-4 border-t border-[#dadce0] flex justify-between items-center">
+            <p className="text-xs text-[#9aa0a6] m-0">Generated automatically from Sales Data</p>
+            <p className="text-xs font-medium text-[#1a73e8] m-0 flex items-center gap-2">
+              <img src="/pigeon.png" alt="" className="h-4 object-contain" />
+              Stovekraft Shyam
+            </p>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }

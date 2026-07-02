@@ -89,8 +89,8 @@ export default function OrderProcessing() {
       const orderSheet = orderWb.Sheets[orderSheetName];
       const stockSheet = stockWb.Sheets[stockSheetName];
 
-      const orderHeaderRow = findHeaderIndex(orderSheet, [["ITEM CODE", "BARCODE"], ["STORE CODE"]]);
-      const stockHeaderRow = findHeaderIndex(stockSheet, [["ITEM CODE", "BARCODE"], ["QUANTITY REQ", "CLOSING STOCK", "REQ QTY"], ["BRANCH NAME"]]);
+      const orderHeaderRow = findHeaderIndex(orderSheet, [["ITEM CODE", "BARCODE", "POS ITEM CODE"], ["STORE CODE"]]);
+      const stockHeaderRow = findHeaderIndex(stockSheet, [["ITEM CODE", "BARCODE", "POS ITEM CODE"], ["QUANTITY REQ", "CLOSING STOCK", "REQ QTY"], ["BRANCH NAME", "STORE CODE"]]);
 
       const orderData = XLSX.utils.sheet_to_json(orderSheet, { defval: "", range: orderHeaderRow });
       const stockData = XLSX.utils.sheet_to_json(stockSheet, { defval: "", range: stockHeaderRow });
@@ -112,19 +112,24 @@ export default function OrderProcessing() {
       // Build mapping from Closing Stocks (case-insensitive for item code keys)
       const stockMap = new Map();
       for (const row of stockData) {
-        const itemCodeRaw = getValIgnoreCase(row, ["ITEM CODE", "BARCODE"]);
+        const itemCodeRaw = getValIgnoreCase(row, ["ITEM CODE", "BARCODE", "POS ITEM CODE"]);
         const qtyRaw = getValIgnoreCase(row, ["QUANTITY REQ", "CLOSING STOCK", "REQ QTY"]);
+        const storeCodeVal = getValIgnoreCase(row, ["STORE CODE"]);
         const branchNameRaw = getValIgnoreCase(row, ["BRANCH NAME"]);
         
-        if (itemCodeRaw && branchNameRaw) {
+        if (itemCodeRaw && (storeCodeVal || branchNameRaw)) {
           const itemCode = String(itemCodeRaw).trim().toUpperCase();
-          const branchNameStr = String(branchNameRaw).trim();
           
           let storeCode = "";
-          if (branchNameStr.includes("-")) {
-            storeCode = branchNameStr.split("-")[0].trim().toUpperCase();
-          } else {
-            storeCode = branchNameStr.split(" ")[0].trim().toUpperCase();
+          if (storeCodeVal) {
+            storeCode = String(storeCodeVal).trim().toUpperCase();
+          } else if (branchNameRaw) {
+            const branchNameStr = String(branchNameRaw).trim();
+            if (branchNameStr.includes("-")) {
+              storeCode = branchNameStr.split("-")[0].trim().toUpperCase();
+            } else {
+              storeCode = branchNameStr.split(" ")[0].trim().toUpperCase();
+            }
           }
 
           // parse qty to number, default 0
@@ -135,17 +140,21 @@ export default function OrderProcessing() {
 
       // Process Order Requirement
       const processedOrderData = orderData.map((row) => {
-        const itemCodeRaw = getValIgnoreCase(row, ["ITEM CODE", "BARCODE"]);
+        const itemCodeRaw = getValIgnoreCase(row, ["ITEM CODE", "BARCODE", "POS ITEM CODE"]);
         const storeCodeRaw = getValIgnoreCase(row, ["STORE CODE"]);
         let status = "processed"; // default if not found or <= 2
+        let currentStock = 0; // to track the available stock
 
         if (itemCodeRaw && storeCodeRaw) {
           const itemCode = String(itemCodeRaw).trim().toUpperCase();
           const storeCode = String(storeCodeRaw).trim().toUpperCase();
           const stockQty = stockMap.get(`${storeCode}_${itemCode}`);
           
-          if (stockQty !== undefined && stockQty > 2) {
-            status = "not processed";
+          if (stockQty !== undefined) {
+            currentStock = stockQty;
+            if (stockQty > 2) {
+              status = "not processed";
+            }
           }
         }
 
@@ -158,6 +167,7 @@ export default function OrderProcessing() {
 
         return {
           ...cleanedRow,
+          "Available Stock": currentStock,
           "Billing Status": status,
         };
       });
@@ -372,7 +382,7 @@ export default function OrderProcessing() {
                               {row[h]}
                             </span>
                           ) : (
-                            String(row[h] || "")
+                            String(row[h] ?? "")
                           )}
                         </td>
                       ))}
