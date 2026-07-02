@@ -116,7 +116,13 @@ export default function OrderProcessing() {
         const qtyRaw = getValIgnoreCase(row, ["QUANTITY REQ", "CLOSING STOCK", "REQ QTY"]);
         const storeCodeVal = getValIgnoreCase(row, ["STORE CODE"]);
         const branchNameRaw = getValIgnoreCase(row, ["BRANCH NAME"]);
+        const godownRaw = getValIgnoreCase(row, ["GODOWN"]);
         
+        // Skip damaged items
+        if (godownRaw && String(godownRaw).trim().toLowerCase().includes("damage")) {
+          continue;
+        }
+
         if (itemCodeRaw && (storeCodeVal || branchNameRaw)) {
           const itemCode = String(itemCodeRaw).trim().toUpperCase();
           
@@ -134,7 +140,9 @@ export default function OrderProcessing() {
 
           // parse qty to number, default 0
           const qty = Number(qtyRaw) || 0;
-          stockMap.set(`${storeCode}_${itemCode}`, qty);
+          const key = `${storeCode}_${itemCode}`;
+          const existingQty = stockMap.get(key) || 0;
+          stockMap.set(key, existingQty + qty);
         }
       }
 
