@@ -109,6 +109,16 @@ export default function OrderProcessing() {
         return undefined;
       };
 
+      const normalizeStoreCode = (code) => {
+        if (!code) return "";
+        let c = String(code).trim().toUpperCase();
+        // Fix common typo: replace letter 'O' with number '0' if the code looks like 3 letters followed by numbers/Os (e.g., WMHOO7 -> WMH007)
+        if (/^[A-Z]{3}[O0-9]{1,4}$/.test(c)) {
+          return c.substring(0, 3) + c.substring(3).replace(/O/g, "0");
+        }
+        return c;
+      };
+
       // Build mapping from Closing Stocks (case-insensitive for item code keys)
       const stockMap = new Map();
       for (const row of stockData) {
@@ -128,13 +138,13 @@ export default function OrderProcessing() {
           
           let storeCode = "";
           if (storeCodeVal) {
-            storeCode = String(storeCodeVal).trim().toUpperCase();
+            storeCode = normalizeStoreCode(storeCodeVal);
           } else if (branchNameRaw) {
             const branchNameStr = String(branchNameRaw).trim();
             if (branchNameStr.includes("-")) {
-              storeCode = branchNameStr.split("-")[0].trim().toUpperCase();
+              storeCode = normalizeStoreCode(branchNameStr.split("-")[0]);
             } else {
-              storeCode = branchNameStr.split(" ")[0].trim().toUpperCase();
+              storeCode = normalizeStoreCode(branchNameStr.split(" ")[0]);
             }
           }
 
@@ -155,7 +165,7 @@ export default function OrderProcessing() {
 
         if (itemCodeRaw && storeCodeRaw) {
           const itemCode = String(itemCodeRaw).trim().toUpperCase();
-          const storeCode = String(storeCodeRaw).trim().toUpperCase();
+          const storeCode = normalizeStoreCode(storeCodeRaw);
           const stockQty = stockMap.get(`${storeCode}_${itemCode}`);
           
           if (stockQty !== undefined) {
@@ -375,9 +385,7 @@ export default function OrderProcessing() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#dadce0]">
-                  {filteredData
-                    .slice(0, 50)
-                    .map((row, i) => (
+                  {filteredData.map((row, i) => (
                     <tr key={i} className="hover:bg-[#f1f3f4] transition-colors">
                       {previewHeaders.map((h, j) => (
                         <td key={j} className="px-6 py-3 text-[#202124]">
@@ -399,11 +407,7 @@ export default function OrderProcessing() {
                 </tbody>
               </table>
             </div>
-            {filteredData.length > 50 && (
-              <div className="px-6 py-3 text-center text-sm text-[#5f6368] border-t border-[#dadce0] bg-[#f8f9fa]">
-                Showing first 50 rows. Download to see all data.
-              </div>
-            )}
+
           </div>
 
           <div className="flex items-center justify-center gap-4 mt-2">
