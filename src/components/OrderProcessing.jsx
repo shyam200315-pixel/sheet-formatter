@@ -116,7 +116,7 @@ export default function OrderProcessing() {
         const qtyRaw = getValIgnoreCase(row, ["QUANTITY REQ", "CLOSING STOCK", "REQ QTY"]);
         const storeCodeVal = getValIgnoreCase(row, ["STORE CODE"]);
         const branchNameRaw = getValIgnoreCase(row, ["BRANCH NAME"]);
-        const godownRaw = getValIgnoreCase(row, ["GODOWN"]);
+        const godownRaw = getValIgnoreCase(row, ["GODOWN", "GODOWN NAME"]);
         
         // Skip damaged items
         if (godownRaw && String(godownRaw).trim().toLowerCase().includes("damage")) {

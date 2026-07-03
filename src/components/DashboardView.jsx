@@ -784,6 +784,7 @@ export default function DashboardView({
                     <th>Branch Name</th>
                     <th>Today Sales</th>
                     <th>MTD Sales</th>
+                    <th>Target</th>
                     <th>Target Achieved</th>
                   </tr>
                 </thead>
@@ -801,6 +802,7 @@ export default function DashboardView({
                         )}
                       </td>
                       <td className="text-[#5f6368]">{formatCurrency(store.mtdSales)}</td>
+                      <td className="text-[#5f6368] font-medium">{store.target ? formatCurrency(store.target) : "-"}</td>
                       <td>
                         {store.achievedPercent !== null ? (
                           <span className={`px-2 py-1 rounded text-xs font-medium ${
@@ -918,6 +920,7 @@ export default function DashboardView({
                 <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>Branch Name</th>
                 <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>Today Sales</th>
                 <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>MTD Sales</th>
+                <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>Target</th>
                 <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>Target Achieved</th>
               </tr>
             </thead>
@@ -931,6 +934,7 @@ export default function DashboardView({
                     </span>
                   </td>
                   <td className="py-3 px-4 font-medium text-[#5f6368]" style={{ borderBottom: "1px solid #dadce0" }}>{formatCurrency(store.mtdSales)}</td>
+                  <td className="py-3 px-4 font-medium text-[#5f6368]" style={{ borderBottom: "1px solid #dadce0" }}>{store.target ? formatCurrency(store.target) : "-"}</td>
                   <td className="py-3 px-4" style={{ borderBottom: "1px solid #dadce0" }}>
                     {store.achievedPercent !== null ? (
                       <span className={`px-2.5 py-1 rounded-md text-xs font-bold inline-block text-center min-w-[50px] ${
