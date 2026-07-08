@@ -89,8 +89,8 @@ export default function OrderProcessing() {
       const orderSheet = orderWb.Sheets[orderSheetName];
       const stockSheet = stockWb.Sheets[stockSheetName];
 
-      const orderHeaderRow = findHeaderIndex(orderSheet, [["ITEM CODE", "BARCODE", "POS ITEM CODE"], ["STORE CODE"]]);
-      const stockHeaderRow = findHeaderIndex(stockSheet, [["ITEM CODE", "BARCODE", "POS ITEM CODE"], ["QUANTITY REQ", "CLOSING STOCK", "REQ QTY"], ["BRANCH NAME", "STORE CODE"]]);
+      const orderHeaderRow = findHeaderIndex(orderSheet, [["ITEM CODE", "BARCODE", "POS ITEM CODE", "HANA CODE", "HANACODE"], ["STORE CODE"]]);
+      const stockHeaderRow = findHeaderIndex(stockSheet, [["ITEM CODE", "BARCODE", "POS ITEM CODE", "HANA CODE", "HANACODE"], ["QUANTITY REQ", "CLOSING STOCK", "REQ QTY"], ["BRANCH NAME", "STORE CODE"]]);
 
       const orderData = XLSX.utils.sheet_to_json(orderSheet, { defval: "", range: orderHeaderRow });
       const stockData = XLSX.utils.sheet_to_json(stockSheet, { defval: "", range: stockHeaderRow });
@@ -122,7 +122,7 @@ export default function OrderProcessing() {
       // Build mapping from Closing Stocks (case-insensitive for item code keys)
       const stockMap = new Map();
       for (const row of stockData) {
-        const itemCodeRaw = getValIgnoreCase(row, ["ITEM CODE", "BARCODE", "POS ITEM CODE"]);
+        const itemCodeRaw = getValIgnoreCase(row, ["ITEM CODE", "BARCODE", "POS ITEM CODE", "HANA CODE", "HANACODE"]);
         const qtyRaw = getValIgnoreCase(row, ["QUANTITY REQ", "CLOSING STOCK", "REQ QTY"]);
         const storeCodeVal = getValIgnoreCase(row, ["STORE CODE"]);
         const branchNameRaw = getValIgnoreCase(row, ["BRANCH NAME"]);
@@ -158,9 +158,9 @@ export default function OrderProcessing() {
 
       // Process Order Requirement
       const processedOrderData = orderData.map((row) => {
-        const itemCodeRaw = getValIgnoreCase(row, ["ITEM CODE", "BARCODE", "POS ITEM CODE"]);
+        const itemCodeRaw = getValIgnoreCase(row, ["ITEM CODE", "BARCODE", "POS ITEM CODE", "HANA CODE", "HANACODE"]);
         const storeCodeRaw = getValIgnoreCase(row, ["STORE CODE"]);
-        let status = "processed"; // default if not found or <= 2
+        let status = "processed"; // default if not found or <= 4
         let currentStock = 0; // to track the available stock
 
         if (itemCodeRaw && storeCodeRaw) {
@@ -170,7 +170,7 @@ export default function OrderProcessing() {
           
           if (stockQty !== undefined) {
             currentStock = stockQty;
-            if (stockQty > 2) {
+            if (stockQty > 4) {
               status = "not processed";
             }
           }
