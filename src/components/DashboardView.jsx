@@ -81,8 +81,11 @@ export default function DashboardView({
   const [activeTab, setActiveTab] = useState("all-stores");
   const [storeSearch, setStoreSearch] = useState("");
   const [copied, setCopied] = useState(false);
+  const [mpCopied, setMpCopied] = useState(false);
+  const [exportTab, setExportTab] = useState("main");
   const [showTargetSettings, setShowTargetSettings] = useState(false);
   const [scrapValue, setScrapValue] = useState(null);
+  const [mpScrapValue, setMpScrapValue] = useState(null);
   const [isUploadingScrap, setIsUploadingScrap] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const tableRef = React.useRef(null);
@@ -103,6 +106,7 @@ export default function DashboardView({
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
         let closingStockColIdx = -1;
         let mainProductColIdx = -1;
+        let branchNameColIdx = -1;
         let dataStartIndex = 0;
 
         for (let i = 0; i < Math.min(20, jsonData.length); i++) {
@@ -110,6 +114,7 @@ export default function DashboardView({
           if (!row) continue;
           closingStockColIdx = row.findIndex(cell => String(cell).trim().toUpperCase() === "CLOSING STOCK");
           mainProductColIdx = row.findIndex(cell => String(cell).trim().toUpperCase() === "MAIN PRODUCT");
+          branchNameColIdx = row.findIndex(cell => String(cell).trim().toUpperCase() === "BRANCH NAME");
           
           if (closingStockColIdx !== -1 && mainProductColIdx !== -1) {
             dataStartIndex = i + 1;
@@ -122,6 +127,7 @@ export default function DashboardView({
         }
 
         let totalScrap = 0;
+        let mpScrap = 0;
         for (let i = dataStartIndex; i < jsonData.length; i++) {
           const row = jsonData[i];
           if (!row) continue;
@@ -130,11 +136,18 @@ export default function DashboardView({
             const stock = Number(row[closingStockColIdx]);
             if (!isNaN(stock)) {
               totalScrap += stock;
+              if (branchNameColIdx !== -1) {
+                const branchName = String(row[branchNameColIdx] || "").trim().toUpperCase();
+                if (branchName.includes("WMP")) {
+                  mpScrap += stock;
+                }
+              }
             }
           }
         }
 
         setScrapValue(totalScrap);
+        setMpScrapValue(mpScrap);
         toast.success("Closing stock parsed successfully!");
       } catch (err) {
         console.error(err);
@@ -233,6 +246,67 @@ export default function DashboardView({
     };
   }, [jsonData, allStores, today, todayStr, totalDays, monthlyCommitment]);
 
+  // MP Specific Metrics
+  const mpMetrics = useMemo(() => {
+    const currentDay = today.getDate();
+    const remainingDays = totalDays - currentDay;
+    const mpCommitment = 3800000;
+    
+    let mtdSales = 0;
+    let todaySales = 0;
+    
+    // Filter MP Stores (starting with WMP)
+    const mpStores = Array.from(allStores).filter(name => name.toUpperCase().includes("WMP"));
+    
+    for (const row of jsonData) {
+      const billDate = parseBillDate(row["BILL DATE"]);
+      const saleAmount = Number(row["NET SALE AMOUNT"]);
+      const storeName = row["BRANCH NAME"];
+
+      if (billDate && !isNaN(saleAmount) && storeName && storeName.toUpperCase().includes("WMP")) {
+        if (
+          billDate.getMonth() === today.getMonth() &&
+          billDate.getFullYear() === today.getFullYear() &&
+          billDate <= today
+        ) {
+          mtdSales += saleAmount;
+          if (row["BILL DATE"] === todayStr) {
+            todaySales += saleAmount;
+          }
+        }
+      }
+    }
+
+    const currentDRR = Math.floor(mtdSales / currentDay);
+    const requiredDRR = remainingDays > 0
+      ? Math.floor((mpCommitment - mtdSales) / remainingDays)
+      : Math.floor(mpCommitment - mtdSales);
+
+    const avgPerStoreToday = mpStores.length > 0 ? Math.floor(todaySales / mpStores.length) : 0;
+    const avgPerStoreMTD = mpStores.length > 0 ? Math.floor(mtdSales / mpStores.length) : 0;
+
+    const below5k = [];
+    for (const storeName of mpStores) {
+      const salesToday = computedMetrics.storeSalesToday[storeName] || 0;
+      if (salesToday < 5000) {
+        below5k.push({ name: storeName, sales: salesToday });
+      }
+    }
+    below5k.sort((a, b) => a.sales - b.sales);
+
+    return {
+      mtdSales,
+      todaySales,
+      currentDRR,
+      requiredDRR,
+      avgPerStoreToday,
+      avgPerStoreMTD,
+      storeCount: mpStores.length,
+      below5k,
+      mpCommitment,
+    };
+  }, [jsonData, allStores, today, todayStr, totalDays, computedMetrics.storeSalesToday]);
+
   // Compute daily data for Area Chart (cumulative actual vs target trajectory)
   const chartData = useMemo(() => {
     const data = [];
@@ -312,11 +386,42 @@ export default function DashboardView({
     return output;
   }, [todayStr, monthlyTarget, monthlyCommitment, totalDays, today, computedMetrics, allStores, scrapValue]);
 
+  const mpFormattedOutputText = useMemo(() => {
+    let output = "";
+    output += `STATE NAME\t::\tMP\n`;
+    output += `DATE\t::\t${todayStr}\n`;
+    output += `MONTH TARGET\t::\t${Math.floor(mpMetrics.mpCommitment).toLocaleString("en-IN")}\n`;
+    output += `MONTH COMM\t::\t${Math.floor(mpMetrics.mpCommitment).toLocaleString("en-IN")}\n`;
+    output += `MTD TARGET\t::\t${Math.floor((mpMetrics.mpCommitment / totalDays) * today.getDate()).toLocaleString("en-IN")}\n`;
+    output += `MTD SALES\t::\t${Math.floor(mpMetrics.mtdSales)}\n`;
+    output += `TODAY SALES\t::\t${Math.floor(mpMetrics.todaySales)}\n`;
+    output += `CURRENT DRR\t::\t${Math.floor(mpMetrics.currentDRR)}\n`;
+    output += `REQUIRED DRR\t::\t${Math.floor(mpMetrics.requiredDRR).toLocaleString("en-IN")}\n`;
+    output += `AVG PER STORE TODAY\t::\t${Math.floor(mpMetrics.avgPerStoreToday).toLocaleString("en-IN")}\n`;
+    output += `AVG PER STORE MTD \t::\t${Math.floor(mpMetrics.avgPerStoreMTD).toLocaleString("en-IN")}\n`;
+    output += `TOTAL STORE COUNT \t::\t${mpMetrics.storeCount}\n`;
+    if (mpScrapValue !== null) {
+      output += `SCRAP ITEMS\t::\t${Math.floor(mpScrapValue)}\n`;
+    }
+    output += `STORE BELOW 5K.\t::\t\n`;
+    for (const store of mpMetrics.below5k) {
+      output += `${store.name}\t\t${store.sales}\n`;
+    }
+    return output;
+  }, [todayStr, mpMetrics, totalDays, today, mpScrapValue]);
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText(formattedOutputText);
     setCopied(true);
     toast.success("Report copied to clipboard!");
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const copyMPToClipboard = () => {
+    navigator.clipboard.writeText(mpFormattedOutputText);
+    setMpCopied(true);
+    toast.success("MP Report copied to clipboard!");
+    setTimeout(() => setMpCopied(false), 2000);
   };
 
   const copyTableAsImage = async () => {
@@ -454,6 +559,13 @@ export default function DashboardView({
           >
             {copied ? <Check size={18} /> : <Clipboard size={18} />}
             {copied ? "Copied!" : "Copy Report"}
+          </button>
+          <button
+            onClick={copyMPToClipboard}
+            className="flex items-center gap-2 px-5 py-2 text-sm shadow-sm rounded-lg bg-[#9333ea] hover:bg-[#7e22ce] text-white font-medium transition-all"
+          >
+            {mpCopied ? <Check size={18} /> : <Clipboard size={18} />}
+            {mpCopied ? "Copied!" : "Copy MP"}
           </button>
         </div>
       </div>
@@ -875,23 +987,45 @@ export default function DashboardView({
                 <Download size={20} />
               </button>
             </div>
-            <p className="text-sm text-[#5f6368] mb-6">
-              Text-formatted report ready for pasting.
-            </p>
+            
+            <div className="flex bg-[#e8eaed] p-1 rounded-lg mb-4 w-fit">
+              <button 
+                onClick={() => setExportTab("main")}
+                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${exportTab === "main" ? "bg-white text-[#202124] shadow-sm" : "text-[#5f6368] hover:text-[#202124]"}`}
+              >
+                Main
+              </button>
+              <button 
+                onClick={() => setExportTab("mp")}
+                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${exportTab === "mp" ? "bg-white text-[#202124] shadow-sm" : "text-[#5f6368] hover:text-[#202124]"}`}
+              >
+                MP Only
+              </button>
+            </div>
 
-            <pre className="output-code max-h-[300px]">
-              {formattedOutputText}
+            <pre className="output-code max-h-[250px]">
+              {exportTab === "main" ? formattedOutputText : mpFormattedOutputText}
             </pre>
           </div>
 
           <div className="mt-6">
-            <button
-              onClick={copyToClipboard}
-              className="w-full flex items-center justify-center gap-2 btn-primary py-3"
-            >
-              {copied ? <Check size={20} /> : <Clipboard size={20} />}
-              {copied ? "Copied to Clipboard" : "Copy to Clipboard"}
-            </button>
+            {exportTab === "main" ? (
+              <button
+                onClick={copyToClipboard}
+                className="w-full flex items-center justify-center gap-2 btn-primary py-3"
+              >
+                {copied ? <Check size={20} /> : <Clipboard size={20} />}
+                {copied ? "Copied Main" : "Copy Main Report"}
+              </button>
+            ) : (
+              <button
+                onClick={copyMPToClipboard}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-[#9333ea] hover:bg-[#7e22ce] text-white font-medium transition-all"
+              >
+                {mpCopied ? <Check size={20} /> : <Clipboard size={20} />}
+                {mpCopied ? "Copied MP" : "Copy MP Report"}
+              </button>
+            )}
           </div>
         </div>
       </div>
