@@ -250,7 +250,7 @@ export default function DashboardView({
   const mpMetrics = useMemo(() => {
     const currentDay = today.getDate();
     const remainingDays = totalDays - currentDay;
-    const mpCommitment = 3800000;
+    const mpCommitment = 3150000;
     
     let mtdSales = 0;
     let todaySales = 0;
