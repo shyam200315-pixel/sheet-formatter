@@ -50,7 +50,8 @@ const STORE_TARGETS = {
   "WMP004 - IND - ANNAPURNA RD": 350000,
   "WMP006 - BPL -  KOLAR ROAD": 450000,
   "WMP007 - REW - REWA": 350000,
-  "WMP008 - SVP - SHIVPURI": 350000
+  "WMP008 - SVP - SHIVPURI": 350000,
+  "WMP005 - STA - SATNA": 300000
 };
 
 const getStoreTarget = (storeName) => {
@@ -515,6 +516,10 @@ export default function DashboardView({
     );
   }, [computedMetrics.below5k, storeSearch]);
 
+  const filteredMpStores = useMemo(() => {
+    return filteredAllStores.filter(store => store.name.toUpperCase().includes("WMP"));
+  }, [filteredAllStores]);
+
   // Format currency
   const formatCurrency = (val) => {
     return `₹${Math.floor(val).toLocaleString("en-IN")}`;
@@ -850,6 +855,12 @@ export default function DashboardView({
                 All Stores ({filteredAllStores.length})
               </button>
               <button 
+                onClick={() => setActiveTab("mp-stores")}
+                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === "mp-stores" ? "bg-white text-[#202124] shadow-sm" : "text-[#5f6368] hover:text-[#202124]"}`}
+              >
+                MP Only ({filteredMpStores.length})
+              </button>
+              <button 
                 onClick={() => setActiveTab("below-5k")}
                 className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === "below-5k" ? "bg-white text-[#202124] shadow-sm" : "text-[#5f6368] hover:text-[#202124]"}`}
               >
@@ -870,10 +881,10 @@ export default function DashboardView({
               </div>
               <button
                 onClick={copyTableAsImage}
-                disabled={isCapturing || activeTab !== "all-stores"}
-                title={activeTab === "all-stores" ? "Copy table as Image" : "Switch to All Stores to copy image"}
+                disabled={isCapturing || (activeTab !== "all-stores" && activeTab !== "mp-stores")}
+                title={activeTab === "all-stores" || activeTab === "mp-stores" ? "Copy table as Image" : "Switch to All or MP Stores to copy image"}
                 className={`p-2.5 rounded-md flex items-center justify-center transition-colors ${
-                  activeTab === "all-stores" && !isCapturing 
+                  (activeTab === "all-stores" || activeTab === "mp-stores") && !isCapturing 
                     ? "bg-[#e8f0fe] text-[#1a73e8] hover:bg-[#d2e3fc]" 
                     : "bg-[#f1f3f4] text-[#9aa0a6] cursor-not-allowed"
                 }`}
@@ -888,7 +899,7 @@ export default function DashboardView({
           </div>
 
           <div className="overflow-x-auto max-h-[400px]">
-            {activeTab === "all-stores" ? (
+            {activeTab === "all-stores" || activeTab === "mp-stores" ? (
               <div className="bg-white">
                 <table className="google-table">
                 <thead className="bg-white sticky top-0 shadow-sm">
@@ -901,7 +912,7 @@ export default function DashboardView({
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredAllStores.map((store, idx) => (
+                  {(activeTab === "mp-stores" ? filteredMpStores : filteredAllStores).map((store, idx) => (
                     <tr key={store.name}>
                       <td className="font-medium">{store.name}</td>
                       <td>
@@ -930,7 +941,7 @@ export default function DashboardView({
                       </td>
                     </tr>
                   ))}
-                  {filteredAllStores.length === 0 && (
+                  {(activeTab === "mp-stores" ? filteredMpStores : filteredAllStores).length === 0 && (
                     <tr>
                       <td colSpan="4" className="text-center text-[#5f6368] py-12">
                         No stores match your search
@@ -1040,11 +1051,15 @@ export default function DashboardView({
           <div className="flex justify-between items-center mb-6 border-b border-[#dadce0] pb-4">
             <div>
               <h2 className="text-2xl font-bold text-[#1a73e8] m-0">Daily Store Performance</h2>
-              <p className="text-[#5f6368] mt-1 font-medium m-0">MH & MP Division • {todayStr}</p>
+              <p className="text-[#5f6368] mt-1 font-medium m-0">
+                {activeTab === "mp-stores" ? "MP Division" : "MH & MP Division"} • {todayStr}
+              </p>
             </div>
             <div className="text-right">
               <p className="text-sm text-[#5f6368] font-medium m-0">Total MTD Sales</p>
-              <p className="text-xl font-bold text-[#202124] m-0">{formatCurrency(computedMetrics.mtdSales)}</p>
+              <p className="text-xl font-bold text-[#202124] m-0">
+                {formatCurrency(activeTab === "mp-stores" ? mpMetrics.mtdSales : computedMetrics.mtdSales)}
+              </p>
             </div>
           </div>
           
@@ -1059,7 +1074,7 @@ export default function DashboardView({
               </tr>
             </thead>
             <tbody className="divide-y divide-[#dadce0]">
-              {filteredAllStores.map((store, idx) => (
+              {(activeTab === "mp-stores" ? filteredMpStores : filteredAllStores).map((store, idx) => (
                 <tr key={store.name} className={idx % 2 === 0 ? "bg-white" : "bg-[#f8f9fa]"}>
                   <td className="py-3 px-4 font-medium text-[#202124]" style={{ borderBottom: "1px solid #dadce0" }}>{store.name}</td>
                   <td className="py-3 px-4" style={{ borderBottom: "1px solid #dadce0" }}>
