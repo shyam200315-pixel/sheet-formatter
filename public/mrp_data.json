@@ -30,8 +30,8 @@
   "16000022": {
     "name": "SS KITCHEN KNIFE SET - 3 PCS - BL",
     "old_mrp": 545,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 395,
+    "difference": -150,
     "source": "file2"
   },
   "16000023": {
@@ -226,8 +226,8 @@
   "16000780": {
     "name": "KNIVES 6 PC SET (W/ WOODEN BLOCK)",
     "old_mrp": 700,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 769,
+    "difference": 69,
     "source": "file2"
   },
   "16000790": {
@@ -261,8 +261,8 @@
   "16000816": {
     "name": "PG SPL SS 3 PCS IB SET (K220F 220 SP160)",
     "old_mrp": 2795,
-    "new_mrp": 2855,
-    "difference": 60,
+    "new_mrp": 2877,
+    "difference": 82,
     "source": "file1"
   },
   "16000830": {
@@ -296,15 +296,15 @@
   "16000840": {
     "name": "SHEARS 4 PC KITCHEN TOOL SET",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 445,
     "difference": "N/A",
     "source": "pdf"
   },
   "16000841": {
     "name": "CUTTING BOARD",
     "old_mrp": 300,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 335,
+    "difference": 35,
     "source": "file2"
   },
   "16000935": {
@@ -520,15 +520,15 @@
   "16002016": {
     "name": "PIGEON IDLY MAKER (4 PLATES)",
     "old_mrp": 1595,
-    "new_mrp": 1595,
-    "difference": 0,
+    "new_mrp": 1545,
+    "difference": -50,
     "source": "file1"
   },
   "16002017": {
     "name": "PIGEON IDLY MAKER (6 PLATES)",
     "old_mrp": 1925,
-    "new_mrp": 1925,
-    "difference": 0,
+    "new_mrp": 1895,
+    "difference": -30,
     "source": "file1"
   },
   "16002018": {
@@ -667,15 +667,15 @@
   "16002088": {
     "name": "PIGEON MIXER GRINDER - ENORA 3 JAR",
     "old_mrp": 3295,
-    "new_mrp": 3398,
-    "difference": 103,
+    "new_mrp": 3799,
+    "difference": 504,
     "source": "file1"
   },
   "16002092": {
     "name": "PG SS STEELO MULTI KADAI 280 WITH SB",
     "old_mrp": 3075,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 3383,
+    "difference": 308,
     "source": "file2"
   },
   "16002094": {
@@ -702,78 +702,78 @@
   "16002097": {
     "name": "PG SS STEELO KADAI 12 INCH WITH SB 220MM",
     "old_mrp": 1205,
-    "new_mrp": 1205,
-    "difference": 0,
+    "new_mrp": 949,
+    "difference": -256,
     "source": "file1"
   },
   "16002098": {
     "name": "PG SS STEELO KADAI 13 INCH WITH SB 240MM",
     "old_mrp": 1265,
-    "new_mrp": 1265,
-    "difference": 0,
+    "new_mrp": 1049,
+    "difference": -216,
     "source": "file1"
   },
   "16002099": {
     "name": "PG SS STEELO KADAI 14 INCH WITH SB 260MM",
     "old_mrp": 1515,
-    "new_mrp": 1515,
-    "difference": 0,
+    "new_mrp": 1199,
+    "difference": -316,
     "source": "file1"
   },
   "16002100": {
     "name": "PG SS STEELO KADAI 15 INCH WITH SB 270MM",
     "old_mrp": 1685,
-    "new_mrp": 1685,
-    "difference": 0,
+    "new_mrp": 1349,
+    "difference": -336,
     "source": "file1"
   },
   "16002101": {
     "name": "PG SS STEELO KADAI 16 INCH WITH SB 290MM",
     "old_mrp": 1845,
-    "new_mrp": 1845,
-    "difference": 0,
+    "new_mrp": 1499,
+    "difference": -346,
     "source": "file1"
   },
   "16002102": {
     "name": "PG SS STEELO SAUCEPAN 10 INCH WITH SB",
     "old_mrp": 885,
-    "new_mrp": 885,
-    "difference": 0,
+    "new_mrp": 749,
+    "difference": -136,
     "source": "file1"
   },
   "16002103": {
     "name": "PG SS STEELO SAUCEPAN 11 INCH WITH SB",
     "old_mrp": 1035,
-    "new_mrp": 1035,
-    "difference": 0,
+    "new_mrp": 799,
+    "difference": -236,
     "source": "file1"
   },
   "16002104": {
     "name": "PG SS STEELO SAUCEPAN 12 INCH WITH SB",
     "old_mrp": 1115,
-    "new_mrp": 1699,
-    "difference": 584,
+    "new_mrp": 949,
+    "difference": -166,
     "source": "file1"
   },
   "16002105": {
     "name": "PG SS STEELO FRYPAN 10 INCH WITH SB",
     "old_mrp": 1085,
-    "new_mrp": 1085,
-    "difference": 0,
+    "new_mrp": 899,
+    "difference": -186,
     "source": "file1"
   },
   "16002106": {
     "name": "PG SS STEELO FRYPAN 12 INCH WITH SB",
     "old_mrp": 1165,
-    "new_mrp": 1165,
-    "difference": 0,
+    "new_mrp": 999,
+    "difference": -166,
     "source": "file1"
   },
   "16002107": {
     "name": "PG SS STEELO FRYPAN 13 INCH WITH SB",
     "old_mrp": 1285,
-    "new_mrp": 1285,
-    "difference": 0,
+    "new_mrp": 1299,
+    "difference": 14,
     "source": "file1"
   },
   "16002109": {
@@ -951,6 +951,13 @@
     "difference": 0,
     "source": "file1"
   },
+  "16002244": {
+    "name": "Item from PDF: 16002244",
+    "old_mrp": "Not Available",
+    "new_mrp": 572,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
   "16002249": {
     "name": "PG VACUUM THERMO CUP 350ML - BLACK",
     "old_mrp": 795,
@@ -982,22 +989,22 @@
   "16002259": {
     "name": "EDGE FLORA SS KNIFE 5 INCH",
     "old_mrp": 395,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 355,
+    "difference": -40,
     "source": "file2"
   },
   "16002260": {
     "name": "EDGE FLORA SS KNIFE 6 INCH",
     "old_mrp": 445,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 375,
+    "difference": -70,
     "source": "file2"
   },
   "16002261": {
     "name": "EDGE CARBON KNIFE SET 6 PCS",
     "old_mrp": 1995,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1585,
+    "difference": -410,
     "source": "file2"
   },
   "16002262": {
@@ -1052,29 +1059,29 @@
   "16002280": {
     "name": "EDGE CERAMIC KNIFE 4 INCH",
     "old_mrp": 795,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 505,
+    "difference": -290,
     "source": "file2"
   },
   "16002281": {
     "name": "EDGE CERAMIC KNIFE 5 INCH",
     "old_mrp": 895,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 615,
+    "difference": -280,
     "source": "file2"
   },
   "16002282": {
     "name": "EDGE CERAMIC KNIFE 6 INCH",
     "old_mrp": 995,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 885,
+    "difference": -110,
     "source": "file2"
   },
   "16002295": {
     "name": "EDGE FLORA SS KNIFE 3PC SET",
     "old_mrp": 1199,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 925,
+    "difference": -274,
     "source": "file2"
   },
   "16002300": {
@@ -1136,43 +1143,43 @@
   "16002368": {
     "name": "PIGEON SILICONE 12PCS KITCHEN TOOL SET",
     "old_mrp": 2795,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 2425,
+    "difference": -370,
     "source": "file2"
   },
   "16002369": {
     "name": "PIGEON EDGE CARBON KNIFE SET 3PCS",
     "old_mrp": 1395,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1215,
+    "difference": -180,
     "source": "file2"
   },
   "16002372": {
     "name": "PIGEON WOODEN CHOPPING BOARD S",
     "old_mrp": 495,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 365,
+    "difference": -130,
     "source": "file2"
   },
   "16002373": {
     "name": "PIGEON WOODEN CHOPPING BOARD L",
     "old_mrp": 595,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 445,
+    "difference": -150,
     "source": "file2"
   },
   "16002380": {
     "name": "PIGEON EDGE CARBON KNIFE SET 7PCS",
     "old_mrp": 2395,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 2095,
+    "difference": -300,
     "source": "file2"
   },
   "16002381": {
     "name": "PIGEON EDGE 4PCS KNIFE SET",
     "old_mrp": 245,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 265,
+    "difference": 20,
     "source": "file2"
   },
   "16002387": {
@@ -1234,64 +1241,64 @@
   "16002441": {
     "name": "MEDIUM",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 765,
     "difference": "N/A",
     "source": "pdf"
   },
   "16002442": {
     "name": "BOARD COMBO-LARGE",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 870,
     "difference": "N/A",
     "source": "pdf"
   },
   "16002443": {
     "name": "CHOPPING BOARD SMALL",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 245,
     "difference": "N/A",
     "source": "pdf"
   },
   "16002461": {
     "name": "PG CLEAR GLASS WATER BOTTLE 750ML - BLUE",
     "old_mrp": 749,
-    "new_mrp": 749,
-    "difference": 0,
+    "new_mrp": 995,
+    "difference": 246,
     "source": "file1"
   },
   "16002462": {
     "name": "PG CLEAR GLASS WATER BOTTLE 750ML - GREY",
     "old_mrp": 749,
-    "new_mrp": 749,
-    "difference": 0,
+    "new_mrp": 995,
+    "difference": 246,
     "source": "file1"
   },
   "16002463": {
     "name": "PG CLEAR GLASS WATER BOTTLE 750ML - YELL",
     "old_mrp": 749,
-    "new_mrp": 749,
-    "difference": 0,
+    "new_mrp": 995,
+    "difference": 246,
     "source": "file1"
   },
   "16002464": {
     "name": "PG CLEAR GLASS WATER BOTTLE 750ML - RED",
     "old_mrp": 749,
-    "new_mrp": 749,
-    "difference": 0,
+    "new_mrp": 995,
+    "difference": 246,
     "source": "file1"
   },
   "16002465": {
     "name": "PIGEON AURA RECHARGEABLE MINI FAN",
     "old_mrp": 1999,
-    "new_mrp": 1999,
-    "difference": 0,
+    "new_mrp": 1998,
+    "difference": -1,
     "source": "file1"
   },
   "16002466": {
     "name": "PIGEON WAVE RECHARGEABLE MINI FAN",
     "old_mrp": 1799,
-    "new_mrp": 1799,
-    "difference": 0,
+    "new_mrp": 1798,
+    "difference": -1,
     "source": "file1"
   },
   "16002469": {
@@ -1304,7 +1311,7 @@
   "16002480": {
     "name": "NYRO - 4 JAR - 550 W",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 4599,
     "difference": "N/A",
     "source": "pdf"
   },
@@ -1325,43 +1332,57 @@
   "16002520": {
     "name": "PG Elite - SS Triply Kadai 28Cm",
     "old_mrp": 2795,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 3075,
+    "difference": 280,
     "source": "file2"
   },
   "16002521": {
     "name": "PG Elite - SS Triply Frypan 26Cm",
     "old_mrp": 2235,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 2455,
+    "difference": 220,
     "source": "file2"
   },
   "16002522": {
     "name": "PG Elite- SS Triply Tadka Pan 13Cm",
     "old_mrp": 1025,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1125,
+    "difference": 100,
     "source": "file2"
+  },
+  "16002523": {
+    "name": "Item from PDF: 16002523",
+    "old_mrp": "Not Available",
+    "new_mrp": 4395,
+    "difference": "N/A",
+    "source": "pdf_update"
   },
   "16002524": {
     "name": "PG ELITE- SS TRIPLY 4PCS GIFT SET",
     "old_mrp": 5295,
-    "new_mrp": 5495,
-    "difference": 200,
+    "new_mrp": 6045,
+    "difference": 750,
     "source": "file1"
+  },
+  "16002527": {
+    "name": "Item from PDF: 16002527",
+    "old_mrp": "Not Available",
+    "new_mrp": 2875,
+    "difference": "N/A",
+    "source": "pdf_update"
   },
   "16002529": {
     "name": "PG ELITE- SS TRIPLY KADAI 24CM HEX",
     "old_mrp": 2795,
-    "new_mrp": 3075,
-    "difference": 280,
+    "new_mrp": 3385,
+    "difference": 590,
     "source": "file1"
   },
   "16002530": {
     "name": "PG ELITE- SS TRIPLY FRY PAN 24CM HEX",
     "old_mrp": 2295,
-    "new_mrp": 2615,
-    "difference": 320,
+    "new_mrp": 2875,
+    "difference": 580,
     "source": "file1"
   },
   "16002540": {
@@ -1378,6 +1399,27 @@
     "difference": "N/A",
     "source": "file2"
   },
+  "16002543": {
+    "name": "Item from PDF: 16002543",
+    "old_mrp": "Not Available",
+    "new_mrp": 18998,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "16002544": {
+    "name": "Item from PDF: 16002544",
+    "old_mrp": "Not Available",
+    "new_mrp": 22998,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "16002550": {
+    "name": "Item from PDF: 16002550",
+    "old_mrp": "Not Available",
+    "new_mrp": 1898,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
   "16002551": {
     "name": "PIGEON WET GRINDER 2 LTRS - NUTROVA",
     "old_mrp": 6195,
@@ -1385,11 +1427,18 @@
     "difference": 603,
     "source": "file1"
   },
+  "16002553": {
+    "name": "Item from PDF: 16002553",
+    "old_mrp": "Not Available",
+    "new_mrp": 3595,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
   "16002570": {
     "name": "PG SILK HANDHELD GARMENT STEAMER 1200W",
     "old_mrp": 2995,
-    "new_mrp": 3499,
-    "difference": 504,
+    "new_mrp": 3399,
+    "difference": 404,
     "source": "file1"
   },
   "16002571": {
@@ -1398,6 +1447,62 @@
     "new_mrp": 1695,
     "difference": 150,
     "source": "file1"
+  },
+  "16002574": {
+    "name": "Item from PDF: 16002574",
+    "old_mrp": "Not Available",
+    "new_mrp": 999,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "16002620": {
+    "name": "Item from PDF: 16002620",
+    "old_mrp": "Not Available",
+    "new_mrp": 2695,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "16002630": {
+    "name": "Item from PDF: 16002630",
+    "old_mrp": "Not Available",
+    "new_mrp": 3999,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "16002631": {
+    "name": "Item from PDF: 16002631",
+    "old_mrp": "Not Available",
+    "new_mrp": 5999,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "16002632": {
+    "name": "Item from PDF: 16002632",
+    "old_mrp": "Not Available",
+    "new_mrp": 7999,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "16002652": {
+    "name": "Item from PDF: 16002652",
+    "old_mrp": "Not Available",
+    "new_mrp": 15499,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "16002653": {
+    "name": "Item from PDF: 16002653",
+    "old_mrp": "Not Available",
+    "new_mrp": 19499,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "16002654": {
+    "name": "Item from PDF: 16002654",
+    "old_mrp": "Not Available",
+    "new_mrp": 23999,
+    "difference": "N/A",
+    "source": "pdf_update"
   },
   "18008480": {
     "name": "SILICON SS 3LTR COOKER GASKET - IH",
@@ -1416,15 +1521,15 @@
   "19000002": {
     "name": "STAINLESS STEEL LPG STOVES 2 BR DUO",
     "old_mrp": 3999,
-    "new_mrp": 3999,
-    "difference": 0,
+    "new_mrp": 4499,
+    "difference": 500,
     "source": "file1"
   },
   "19000003": {
     "name": "STAINLESS STEEL LPG STOVES 2 BR JUMBO",
     "old_mrp": 3749,
-    "new_mrp": 3899,
-    "difference": 150,
+    "new_mrp": 4499,
+    "difference": 750,
     "source": "file1"
   },
   "19000004": {
@@ -1437,8 +1542,8 @@
   "19000005": {
     "name": "STAINLESS STEEL LPG STOVES- 3 BR 123",
     "old_mrp": 5999,
-    "new_mrp": 6249,
-    "difference": 250,
+    "new_mrp": 6499,
+    "difference": 500,
     "source": "file1"
   },
   "19000006": {
@@ -1479,197 +1584,197 @@
   "19000017": {
     "name": "PG - DELUXE  CKR 2 LTR OUT LID",
     "old_mrp": 1345,
-    "new_mrp": 1445,
-    "difference": 100,
+    "new_mrp": 1595,
+    "difference": 250,
     "source": "file1"
   },
   "19000018": {
     "name": "PG - DELUXE  CKR 3 LTR OUT LID",
     "old_mrp": 1545,
-    "new_mrp": 1645,
-    "difference": 100,
+    "new_mrp": 1795,
+    "difference": 250,
     "source": "file1"
   },
   "19000019": {
     "name": "PG - DELUXE  CKR 5 LTR OUT LID",
     "old_mrp": 2295,
-    "new_mrp": 2395,
-    "difference": 100,
+    "new_mrp": 2695,
+    "difference": 400,
     "source": "file1"
   },
   "19000020": {
     "name": "PG - DELUXE  CKR 7.5 LTR OUT LID",
     "old_mrp": 2945,
-    "new_mrp": 3145,
-    "difference": 200,
+    "new_mrp": 3545,
+    "difference": 600,
     "source": "file1"
   },
   "19000021": {
     "name": "PG - DELUXE  CKR 10 LTR OUT LID",
     "old_mrp": 3295,
-    "new_mrp": 3495,
-    "difference": 200,
+    "new_mrp": 4195,
+    "difference": 900,
     "source": "file1"
   },
   "19000022": {
     "name": "PG - DELUXE  CKR 12 LTR OUT LID",
     "old_mrp": 3695,
-    "new_mrp": 3945,
-    "difference": 250,
+    "new_mrp": 4795,
+    "difference": 1100,
     "source": "file1"
   },
   "19000023": {
     "name": "PIGEON DELUXE  PAN  3.5 LTR OUT LID",
     "old_mrp": 2195,
-    "new_mrp": 2345,
-    "difference": 150,
+    "new_mrp": 2695,
+    "difference": 500,
     "source": "file1"
   },
   "19000024": {
     "name": "PG - DELUXE  PAN  6 LTR OUT LID",
     "old_mrp": 2745,
-    "new_mrp": 2895,
-    "difference": 150,
+    "new_mrp": 3395,
+    "difference": 650,
     "source": "file1"
   },
   "19000025": {
     "name": "PG - DELUXE CALIDA  CKR 3 LTR OUT  IB",
     "old_mrp": 1645,
-    "new_mrp": 1745,
-    "difference": 100,
+    "new_mrp": 1895,
+    "difference": 250,
     "source": "file1"
   },
   "19000026": {
     "name": "PG - DELUXE CALIDA  CKR 5 LTR OUT  IB",
     "old_mrp": 2395,
-    "new_mrp": 2545,
-    "difference": 150,
+    "new_mrp": 2795,
+    "difference": 400,
     "source": "file1"
   },
   "19000029": {
     "name": "PIGEON CLASSIC CALIDA PRESSURE COOKER 3",
     "old_mrp": 1645,
-    "new_mrp": 1745,
-    "difference": 100,
+    "new_mrp": 1895,
+    "difference": 250,
     "source": "file1"
   },
   "19000030": {
     "name": "PIGEON NONSTICK FLAT TAWA250",
     "old_mrp": 1145,
-    "new_mrp": 1175,
-    "difference": 30,
+    "new_mrp": 1269,
+    "difference": 124,
     "source": "file1"
   },
   "19000031": {
     "name": "PIGEON NONSTICK FLAT TAWA280",
     "old_mrp": 1295,
-    "new_mrp": 1325,
-    "difference": 30,
+    "new_mrp": 1429,
+    "difference": 134,
     "source": "file1"
   },
   "19000032": {
     "name": "PIGEON NONSTICK FLAT TAWA310",
     "old_mrp": 1595,
-    "new_mrp": 1645,
-    "difference": 50,
+    "new_mrp": 1779,
+    "difference": 184,
     "source": "file1"
   },
   "19000033": {
     "name": "PIGEON NONSTICK CONCAVE TAWA260",
     "old_mrp": 1145,
-    "new_mrp": 1175,
-    "difference": 30,
+    "new_mrp": 1269,
+    "difference": 124,
     "source": "file1"
   },
   "19000034": {
     "name": "PIGEON NONSTICK CONCAVE TAWA280",
     "old_mrp": 1245,
-    "new_mrp": 1285,
-    "difference": 40,
+    "new_mrp": 1389,
+    "difference": 144,
     "source": "file1"
   },
   "19000035": {
     "name": "PIGEON NONSTICK KADAI150",
     "old_mrp": 1395,
-    "new_mrp": 1435,
-    "difference": 40,
+    "new_mrp": 1549,
+    "difference": 154,
     "source": "file1"
   },
   "19000036": {
     "name": "PIGEON NONSTICK KADAI200",
     "old_mrp": 1595,
-    "new_mrp": 1645,
-    "difference": 50,
+    "new_mrp": 1779,
+    "difference": 184,
     "source": "file1"
   },
   "19000037": {
     "name": "PIGEON NONSTICK KADAI300",
     "old_mrp": 1995,
-    "new_mrp": 2055,
-    "difference": 60,
+    "new_mrp": 2219,
+    "difference": 224,
     "source": "file1"
   },
   "19000039": {
     "name": "PIGEON NONSTICK FRY PAN200",
     "old_mrp": 999,
-    "new_mrp": 1025,
-    "difference": 26,
+    "new_mrp": 1109,
+    "difference": 110,
     "source": "file1"
   },
   "19000040": {
     "name": "PIGEON NONSTICK FRY PAN220",
     "old_mrp": 1095,
-    "new_mrp": 1125,
-    "difference": 30,
+    "new_mrp": 1219,
+    "difference": 124,
     "source": "file1"
   },
   "19000041": {
     "name": "PIGEON NONSTICK FRY PAN240",
     "old_mrp": 1245,
-    "new_mrp": 1285,
-    "difference": 40,
+    "new_mrp": 1389,
+    "difference": 144,
     "source": "file1"
   },
   "19000042": {
     "name": "PIGEON NONSTICK FRY PAN260",
     "old_mrp": 1395,
-    "new_mrp": 1435,
-    "difference": 40,
+    "new_mrp": 1549,
+    "difference": 154,
     "source": "file1"
   },
   "19000043": {
     "name": "PIGEON NONSTICK FRY PAN280",
     "old_mrp": 1645,
-    "new_mrp": 1685,
-    "difference": 40,
+    "new_mrp": 1819,
+    "difference": 174,
     "source": "file1"
   },
   "19000047": {
     "name": "PIGEON NONSTICK DELUXE FRY PAN 235",
     "old_mrp": 1795,
-    "new_mrp": 1845,
-    "difference": 50,
+    "new_mrp": 1999,
+    "difference": 204,
     "source": "file1"
   },
   "19000048": {
     "name": "PIGEON NONSTICK DELUXE FRY PAN 255",
     "old_mrp": 1895,
-    "new_mrp": 1955,
-    "difference": 60,
+    "new_mrp": 2109,
+    "difference": 214,
     "source": "file1"
   },
   "19000049": {
     "name": "PIGEON NONSTICK DELUXE FRY PAN 275",
     "old_mrp": 2095,
-    "new_mrp": 2155,
-    "difference": 60,
+    "new_mrp": 2319,
+    "difference": 224,
     "source": "file1"
   },
   "19000051": {
     "name": "PIGEON NONSTICK APPACHETTY  WITH LID",
     "old_mrp": 1095,
-    "new_mrp": 1125,
-    "difference": 30,
+    "new_mrp": 1219,
+    "difference": 124,
     "source": "file1"
   },
   "19000052": {
@@ -1689,106 +1794,106 @@
   "19000054": {
     "name": "PIGEON NONSTICK PATHRI TAWA320",
     "old_mrp": 1945,
-    "new_mrp": 1997,
-    "difference": 52,
+    "new_mrp": 2159,
+    "difference": 214,
     "source": "file1"
   },
   "19000058": {
     "name": "PIGEON NONSTICK MULTI TAWA 310",
     "old_mrp": 1545,
-    "new_mrp": 1590,
-    "difference": 45,
+    "new_mrp": 1719,
+    "difference": 174,
     "source": "file1"
   },
   "19000059": {
     "name": "PIGEON NONSTICK BIRIYANI POT 350",
     "old_mrp": 1945,
-    "new_mrp": 1995,
-    "difference": 50,
+    "new_mrp": 2149,
+    "difference": 204,
     "source": "file1"
   },
   "19000060": {
     "name": "PIGEON NONSTICK BIRIYANI POT 400",
     "old_mrp": 2045,
-    "new_mrp": 2105,
-    "difference": 60,
+    "new_mrp": 2269,
+    "difference": 224,
     "source": "file1"
   },
   "19000061": {
     "name": "PIGEON NONSTICK BIRIYANI POT 500",
     "old_mrp": 2095,
-    "new_mrp": 2155,
-    "difference": 60,
+    "new_mrp": 2329,
+    "difference": 234,
     "source": "file1"
   },
   "19000062": {
     "name": "PIGEON NONSTICK BIRIYANI POT 850",
     "old_mrp": 3245,
-    "new_mrp": 3335,
-    "difference": 90,
+    "new_mrp": 3599,
+    "difference": 354,
     "source": "file1"
   },
   "19000064": {
     "name": "PIGEON NONSTICK BIRIYANI POT 1100",
     "old_mrp": 3595,
-    "new_mrp": 3695,
-    "difference": 100,
+    "new_mrp": 3999,
+    "difference": 404,
     "source": "file1"
   },
   "19000065": {
     "name": "PIGEON NONSTICK - GRAVY POT - 3 LTR",
     "old_mrp": 1945,
-    "new_mrp": 1995,
-    "difference": 50,
+    "new_mrp": 2159,
+    "difference": 214,
     "source": "file1"
   },
   "19000066": {
     "name": "PIGEON NONSTICK - GRAVY POT - 6 LTR",
     "old_mrp": 2545,
-    "new_mrp": 2615,
-    "difference": 70,
+    "new_mrp": 2829,
+    "difference": 284,
     "source": "file1"
   },
   "19000067": {
     "name": "PIGEON NONSTICK - GRAVY POT - 9 LTR",
     "old_mrp": 3195,
-    "new_mrp": 3295,
-    "difference": 100,
+    "new_mrp": 3559,
+    "difference": 364,
     "source": "file1"
   },
   "19000068": {
     "name": "PIGEON NONSTICK - GRAVY POT - 12 LTR",
     "old_mrp": 3695,
-    "new_mrp": 3805,
-    "difference": 110,
+    "new_mrp": 4109,
+    "difference": 414,
     "source": "file1"
   },
   "19000081": {
     "name": "PIGEON WONDER CAST  FLAT TAWA  280",
     "old_mrp": 1345,
-    "new_mrp": 1395,
-    "difference": 50,
+    "new_mrp": 1509,
+    "difference": 164,
     "source": "file1"
   },
   "19000082": {
     "name": "PIGEON WONDER CAST  PANNIYARKAL ( 7 ROUN",
     "old_mrp": 1345,
-    "new_mrp": 1385,
-    "difference": 40,
+    "new_mrp": 1499,
+    "difference": 154,
     "source": "file1"
   },
   "19000083": {
     "name": "PIGEON WONDER CAST  PANNIYARKAL ( 11  RO",
     "old_mrp": 1645,
-    "new_mrp": 1685,
-    "difference": 40,
+    "new_mrp": 1819,
+    "difference": 174,
     "source": "file1"
   },
   "19000084": {
     "name": "PIGEON WONDER CAST FLAT TAWA -280 IB",
     "old_mrp": 1395,
-    "new_mrp": 1435,
-    "difference": 40,
+    "new_mrp": 1549,
+    "difference": 154,
     "source": "file1"
   },
   "19000092": {
@@ -1864,15 +1969,15 @@
   "19000173": {
     "name": "PG - TIT  CKR 3 LTR OUT  IB - HA",
     "old_mrp": 2195,
-    "new_mrp": 2345,
-    "difference": 150,
+    "new_mrp": 2595,
+    "difference": 400,
     "source": "file1"
   },
   "19000174": {
     "name": "PG - TIT  CKR 5 LTR OUT  IB - HA",
     "old_mrp": 2995,
-    "new_mrp": 3195,
-    "difference": 200,
+    "new_mrp": 3495,
+    "difference": 500,
     "source": "file1"
   },
   "19000175": {
@@ -1892,22 +1997,22 @@
   "19000181": {
     "name": "STAINLESS STEEL LPG STOVES - 2BR-COMPACT",
     "old_mrp": 2799,
-    "new_mrp": 2899,
-    "difference": 100,
+    "new_mrp": 2999,
+    "difference": 200,
     "source": "file1"
   },
   "19000182": {
     "name": "STAINLESS STEEL LPG STOVES - 2BR-MAXIMA",
     "old_mrp": 3499,
-    "new_mrp": 3699,
-    "difference": 200,
+    "new_mrp": 3999,
+    "difference": 500,
     "source": "file1"
   },
   "19000183": {
     "name": "PIGEON GLASSTOP CARBON 2 BR",
     "old_mrp": 4999,
-    "new_mrp": 5249,
-    "difference": 250,
+    "new_mrp": 5499,
+    "difference": 500,
     "source": "file1"
   },
   "19000184": {
@@ -1920,15 +2025,15 @@
   "19000203": {
     "name": "PIGEON AMELIA 3 LTR CKR INN LID - HA",
     "old_mrp": 2795,
-    "new_mrp": 2945,
-    "difference": 150,
+    "new_mrp": 3045,
+    "difference": 250,
     "source": "file1"
   },
   "19000204": {
     "name": "PIGEON AMELIA 5 LTR CKR INN LID - HA",
     "old_mrp": 3445,
-    "new_mrp": 3645,
-    "difference": 200,
+    "new_mrp": 3795,
+    "difference": 350,
     "source": "file1"
   },
   "19000209": {
@@ -1962,8 +2067,8 @@
   "19000244": {
     "name": "PG - MINI COMBI OUT LID IB (2+3)",
     "old_mrp": 1995,
-    "new_mrp": 1995,
-    "difference": 0,
+    "new_mrp": 2395,
+    "difference": 400,
     "source": "file1"
   },
   "19000245": {
@@ -1990,50 +2095,50 @@
   "19000250": {
     "name": "PG - TIT HANDI  CKR 2 LTR OUT  IB - HA",
     "old_mrp": 2295,
-    "new_mrp": 2445,
-    "difference": 150,
+    "new_mrp": 2695,
+    "difference": 400,
     "source": "file1"
   },
   "19000251": {
     "name": "PG - TIT HANDI  CKR 3 LTR OUT  IB - HA",
     "old_mrp": 2595,
-    "new_mrp": 2745,
-    "difference": 150,
+    "new_mrp": 3095,
+    "difference": 500,
     "source": "file1"
   },
   "19000252": {
     "name": "PG - TIT HANDI  CKR 5 LTR OUT  IB - HA",
     "old_mrp": 3395,
-    "new_mrp": 3595,
-    "difference": 200,
+    "new_mrp": 3995,
+    "difference": 600,
     "source": "file1"
   },
   "19000253": {
     "name": "PIGEON STORM CKR 3 LTR INN LID",
     "old_mrp": 825,
-    "new_mrp": 1595,
-    "difference": 770,
+    "new_mrp": 1795,
+    "difference": 970,
     "source": "file1"
   },
   "19000254": {
     "name": "PG - ALUMINIUM PRESSURE COOKER STORM 3",
     "old_mrp": 1545,
-    "new_mrp": 1645,
-    "difference": 100,
+    "new_mrp": 1885,
+    "difference": 340,
     "source": "file1"
   },
   "19000255": {
     "name": "PIGEON - ALUMINIUM PRESSURE COOKER STORM",
     "old_mrp": 1075,
-    "new_mrp": 2045,
-    "difference": 970,
+    "new_mrp": 2345,
+    "difference": 1270,
     "source": "file1"
   },
   "19000256": {
     "name": "PG - ALUMINIUM PRESSURE COOKER STORM  5",
     "old_mrp": 1995,
-    "new_mrp": 2145,
-    "difference": 150,
+    "new_mrp": 2395,
+    "difference": 400,
     "source": "file1"
   },
   "19000257": {
@@ -2046,8 +2151,8 @@
   "19000276": {
     "name": "PIGEON MINI COMBI OUT LID IB - SS (2+3)",
     "old_mrp": 3295,
-    "new_mrp": 3495,
-    "difference": 200,
+    "new_mrp": 3695,
+    "difference": 400,
     "source": "file1"
   },
   "19000282": {
@@ -2088,8 +2193,8 @@
   "19000312": {
     "name": "PIGEON GLASSTOP - 4BR FAVOURITE",
     "old_mrp": 7299,
-    "new_mrp": 7749,
-    "difference": 450,
+    "new_mrp": 7999,
+    "difference": 700,
     "source": "file1"
   },
   "19000315": {
@@ -2102,50 +2207,50 @@
   "19000321": {
     "name": "PIGEON STORM SERIES TAWA 250",
     "old_mrp": 895,
-    "new_mrp": 974,
-    "difference": 79,
+    "new_mrp": 1049,
+    "difference": 154,
     "source": "file1"
   },
   "19000322": {
     "name": "PIGEON STORM SERIES TAWA 280",
     "old_mrp": 1095,
-    "new_mrp": 1128,
-    "difference": 33,
+    "new_mrp": 1219,
+    "difference": 124,
     "source": "file1"
   },
   "19000323": {
     "name": "PIGEON STORM SERIES FRY PAN 175",
     "old_mrp": 645,
-    "new_mrp": 666,
-    "difference": 21,
+    "new_mrp": 719,
+    "difference": 74,
     "source": "file1"
   },
   "19000324": {
     "name": "PIGEON STORM SERIES FRY PAN 200",
     "old_mrp": 845,
-    "new_mrp": 875,
-    "difference": 30,
+    "new_mrp": 949,
+    "difference": 104,
     "source": "file1"
   },
   "19000325": {
     "name": "PIGEON STORM SERIES FRY PAN 220",
     "old_mrp": 945,
-    "new_mrp": 974,
-    "difference": 29,
+    "new_mrp": 1049,
+    "difference": 104,
     "source": "file1"
   },
   "19000326": {
     "name": "PIGEON STORM SERIES FRY PAN 240",
     "old_mrp": 1045,
-    "new_mrp": 1073,
-    "difference": 28,
+    "new_mrp": 1159,
+    "difference": 114,
     "source": "file1"
   },
   "19000327": {
     "name": "PIGEON STORM SERIES FRY PAN 260",
     "old_mrp": 1095,
-    "new_mrp": 1128,
-    "difference": 33,
+    "new_mrp": 1219,
+    "difference": 124,
     "source": "file1"
   },
   "19000328": {
@@ -2158,57 +2263,57 @@
   "19000329": {
     "name": "PIGEON STORM SERIES TAWA 250 IB",
     "old_mrp": 995,
-    "new_mrp": 1029,
-    "difference": 34,
+    "new_mrp": 1109,
+    "difference": 114,
     "source": "file1"
   },
   "19000330": {
     "name": "PIGEON STORM SERIES TAWA 280 IB",
     "old_mrp": 1195,
-    "new_mrp": 1227,
-    "difference": 32,
+    "new_mrp": 1329,
+    "difference": 134,
     "source": "file1"
   },
   "19000331": {
     "name": "PIGEON STORM SERIES FRY PAN 240 IB",
     "old_mrp": 1145,
-    "new_mrp": 1183,
-    "difference": 38,
+    "new_mrp": 1279,
+    "difference": 134,
     "source": "file1"
   },
   "19000332": {
     "name": "PIGEON STORM SERIES FRY PAN 260 IB",
     "old_mrp": 1195,
-    "new_mrp": 1227,
-    "difference": 32,
+    "new_mrp": 1329,
+    "difference": 134,
     "source": "file1"
   },
   "19000333": {
     "name": "PIGEON STORM SERIES KADAI 200 IB",
     "old_mrp": 1445,
-    "new_mrp": 1491,
-    "difference": 46,
+    "new_mrp": 1609,
+    "difference": 164,
     "source": "file1"
   },
   "19000334": {
     "name": "PIGEON STORM SERIES KADAI 300 IB",
     "old_mrp": 1595,
-    "new_mrp": 1645,
-    "difference": 50,
+    "new_mrp": 1779,
+    "difference": 184,
     "source": "file1"
   },
   "19000336": {
     "name": "PIGEON INOX  CKR 3 LTR OUT LID IB - SS",
     "old_mrp": 2295,
-    "new_mrp": 2395,
-    "difference": 100,
+    "new_mrp": 2595,
+    "difference": 300,
     "source": "file1"
   },
   "19000338": {
     "name": "PIGEON INOX  CKR 5 LTR OUT LID IB - SS",
     "old_mrp": 2995,
-    "new_mrp": 3145,
-    "difference": 150,
+    "new_mrp": 3245,
+    "difference": 250,
     "source": "file1"
   },
   "19000345": {
@@ -2263,8 +2368,8 @@
   "19000400": {
     "name": "PG - IND COOKTOP - BRIO PLUS",
     "old_mrp": 2995,
-    "new_mrp": 4095,
-    "difference": 1100,
+    "new_mrp": 4295,
+    "difference": 1300,
     "source": "file1"
   },
   "19000406": {
@@ -2284,8 +2389,8 @@
   "19000425": {
     "name": "PIGEON GLASSTOP AYUSH 3 BR",
     "old_mrp": 5999,
-    "new_mrp": 6249,
-    "difference": 250,
+    "new_mrp": 6499,
+    "difference": 500,
     "source": "file1"
   },
   "19000450": {
@@ -2326,8 +2431,8 @@
   "19000457": {
     "name": "PIGEON GLASSTOP AYUSH 2 BR",
     "old_mrp": 4499,
-    "new_mrp": 4749,
-    "difference": 250,
+    "new_mrp": 4999,
+    "difference": 500,
     "source": "file1"
   },
   "19000459": {
@@ -2375,15 +2480,15 @@
   "19000645": {
     "name": "HANDY CHOPPER 3 - BLADE (M)",
     "old_mrp": 545,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 374,
+    "difference": -171,
     "source": "file2"
   },
   "19000650": {
     "name": "PG - IND COOKTOP - RAPIDO SLEEK (M)",
     "old_mrp": 3955,
-    "new_mrp": 4895,
-    "difference": 940,
+    "new_mrp": 5145,
+    "difference": 1190,
     "source": "file1"
   },
   "19000660": {
@@ -2410,92 +2515,92 @@
   "19000687": {
     "name": "PG - SUPER  CKR 3 LTR OUT LID IB- HA",
     "old_mrp": 3445,
-    "new_mrp": 3645,
-    "difference": 200,
+    "new_mrp": 3995,
+    "difference": 550,
     "source": "file1"
   },
   "19000689": {
     "name": "PG - SUPER  CKR 5 LTR OUT LID IB- HA",
     "old_mrp": 3995,
-    "new_mrp": 4234.7,
-    "difference": 239.7,
+    "new_mrp": 4645,
+    "difference": 650,
     "source": "file1"
   },
   "19000691": {
     "name": "PG - SUPER  CKR VP OUT  IB- HA (3+5)",
     "old_mrp": 4995,
-    "new_mrp": 5295,
-    "difference": 300,
+    "new_mrp": 6195,
+    "difference": 1200,
     "source": "file1"
   },
   "19000694": {
     "name": "PG - IND COOKTOP - RAPIDO TOUCH DX (M)",
     "old_mrp": 3855,
-    "new_mrp": 4495,
-    "difference": 640,
+    "new_mrp": 4695,
+    "difference": 840,
     "source": "file1"
   },
   "19000697": {
     "name": "PG - IND COOKTOP - RAPIDO ANTI SKID (M)",
     "old_mrp": 3995,
-    "new_mrp": 4695,
-    "difference": 700,
+    "new_mrp": 4895,
+    "difference": 900,
     "source": "file1"
   },
   "19000700": {
     "name": "PIGEON BLACKLINE -2 BR  SMART",
     "old_mrp": 4999,
-    "new_mrp": 5249,
-    "difference": 250,
+    "new_mrp": 5499,
+    "difference": 500,
     "source": "file1"
   },
   "19000745": {
     "name": "PIGEON NONSTICK 4 PC- CARLO",
     "old_mrp": 3095,
-    "new_mrp": 3185,
-    "difference": 90,
+    "new_mrp": 3439,
+    "difference": 344,
     "source": "file1"
   },
   "19000809": {
     "name": "PIGEON DUO PACK - FT 250 + FP 220",
     "old_mrp": 1295,
-    "new_mrp": 1335,
-    "difference": 40,
+    "new_mrp": 1439,
+    "difference": 144,
     "source": "file1"
   },
   "19000818": {
     "name": "PIGEON NON STICK DUO PACK - (FT 250, FP",
     "old_mrp": 1195,
-    "new_mrp": 1225,
-    "difference": 30,
+    "new_mrp": 1319,
+    "difference": 124,
     "source": "file1"
   },
   "19000841": {
     "name": "PIGEON CHEF DELIGHT GIFT SET 7 PCS - NON",
     "old_mrp": 2895,
-    "new_mrp": 3075,
-    "difference": 180,
+    "new_mrp": 3329,
+    "difference": 434,
     "source": "file1"
   },
   "19000870": {
     "name": "PIGEON RC FAVORITE DUO PACK  - 1.7",
     "old_mrp": 1895,
-    "new_mrp": 1953,
-    "difference": 58,
+    "new_mrp": 1499,
+    "difference": -396,
     "source": "file1"
   },
   "19000885": {
     "name": "PIGEON CLASSIC CALIDA PRESSURE COOKER 5",
     "old_mrp": 2295,
-    "new_mrp": 2395,
-    "difference": 100,
+    "new_mrp": 2545,
+    "difference": 250,
     "source": "file1"
   },
   "19000909": {
     "name": "PG - TIT CKR 3 LTR INN IB - HA",
     "old_mrp": 2195,
-    "new_mrp": 2345,
-    "difference": 150,
+    "new_mrp": 2545,
+    "difference": 350,
     "source": "file1"
   },
   "19000936": {
@@ -2515,15 +2620,15 @@
   "19000978": {
     "name": "PG - TIT CKR 5 LTR INN IB - HA",
     "old_mrp": 2995,
-    "new_mrp": 3195,
-    "difference": 200,
+    "new_mrp": 3495,
+    "difference": 500,
     "source": "file1"
   },
   "19001022": {
     "name": "PIGEON - VITA GIFT SET -  (TAWA 250, KAD",
     "old_mrp": 2195,
-    "new_mrp": 2265,
-    "difference": 70,
+    "new_mrp": 2449,
+    "difference": 254,
     "source": "file1"
   },
   "19001023": {
@@ -2550,57 +2655,57 @@
   "19001080": {
     "name": "2 LITRE MILA INNER LID COOKER",
     "old_mrp": 1695,
-    "new_mrp": 1795,
-    "difference": 100,
+    "new_mrp": 1945,
+    "difference": 250,
     "source": "file1"
   },
   "19001081": {
     "name": "PIGEON MILA 3 LTR CKR INN LID IB",
     "old_mrp": 1895,
-    "new_mrp": 1995,
-    "difference": 100,
+    "new_mrp": 2145,
+    "difference": 250,
     "source": "file1"
   },
   "19001082": {
     "name": "PIGEON MILA 5 LTR CKR INN LID IB",
     "old_mrp": 2345,
-    "new_mrp": 2495,
-    "difference": 150,
+    "new_mrp": 2795,
+    "difference": 450,
     "source": "file1"
   },
   "19001093": {
     "name": "PIGEON INOX PLUS  CKR 3 LTR OUT  IB - SS",
     "old_mrp": 2395,
-    "new_mrp": 2545,
-    "difference": 150,
+    "new_mrp": 2695,
+    "difference": 300,
     "source": "file1"
   },
   "19001094": {
     "name": "PIGEON INOX PLUS  CKR 5 LTR OUT  IB - SS",
     "old_mrp": 3149,
-    "new_mrp": 3345,
-    "difference": 196,
+    "new_mrp": 3445,
+    "difference": 296,
     "source": "file1"
   },
   "19001100": {
     "name": "PG - INOX  PLUS CKR 3 LTR INN LID -",
     "old_mrp": 2435,
-    "new_mrp": 2595,
-    "difference": 160,
+    "new_mrp": 2695,
+    "difference": 260,
     "source": "file1"
   },
   "19001101": {
     "name": "PG - INOX  PLUS CKR 5 LTR INN LID",
     "old_mrp": 3445,
-    "new_mrp": 3445,
-    "difference": 0,
+    "new_mrp": 3545,
+    "difference": 100,
     "source": "file1"
   },
   "19001102": {
     "name": "PIGEON AMELIA 2 LTR CKR INN LID - HA",
     "old_mrp": 2495,
-    "new_mrp": 2645,
-    "difference": 150,
+    "new_mrp": 2845,
+    "difference": 350,
     "source": "file1"
   },
   "19001175": {
@@ -2620,21 +2725,21 @@
   "19001178": {
     "name": "PG HOT KETTLE 1.5 LTRS",
     "old_mrp": 1045,
-    "new_mrp": 1045,
-    "difference": 0,
+    "new_mrp": 1095,
+    "difference": 50,
     "source": "file1"
   },
   "19001180": {
     "name": "XL - 900 ML",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 528,
     "difference": "N/A",
     "source": "pdf"
   },
   "19001181": {
     "name": "LITRE - 650 ML",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 418,
     "difference": "N/A",
     "source": "pdf"
   },
@@ -2683,22 +2788,22 @@
   "19001285": {
     "name": "HANDY CHOPPER PRO - M - 400ML (M)",
     "old_mrp": 695,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 374,
+    "difference": -321,
     "source": "file2"
   },
   "19001286": {
     "name": "PRO LITRE - 650 ML",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 396,
     "difference": "N/A",
     "source": "pdf"
   },
   "19001287": {
     "name": "HANDY CHOPPER PRO - XL- 900ML (M)",
     "old_mrp": 945,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 484,
+    "difference": -461,
     "source": "file2"
   },
   "19001293": {
@@ -2711,57 +2816,57 @@
   "19001296": {
     "name": "PACK (MINI+XL)",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 660,
     "difference": "N/A",
     "source": "pdf"
   },
   "19001302": {
     "name": "PG MODERN CUCINA COFFEE MAKER 1.0- M",
     "old_mrp": 2195,
-    "new_mrp": 2398,
-    "difference": 203,
+    "new_mrp": 2399,
+    "difference": 204,
     "source": "file1"
   },
   "19001327": {
     "name": "PIGEON INOX  SS OUTER LID CKR - 2 LTR",
     "old_mrp": 2045,
-    "new_mrp": 2145,
-    "difference": 100,
+    "new_mrp": 2295,
+    "difference": 250,
     "source": "file1"
   },
   "19001336": {
     "name": "PG-RC CASSEROLE NON IB W/GL - 6PCS",
     "old_mrp": 2695,
-    "new_mrp": 2765,
-    "difference": 70,
+    "new_mrp": 2989,
+    "difference": 294,
     "source": "file1"
   },
   "19001337": {
     "name": "PG-RC CASSEROLE NON IB W/GL -180 MM",
     "old_mrp": 895,
-    "new_mrp": 915,
-    "difference": 20,
+    "new_mrp": 989,
+    "difference": 94,
     "source": "file1"
   },
   "19001338": {
     "name": "PG-RC CASSEROLE NON IB W/GL -200 MM",
     "old_mrp": 1295,
-    "new_mrp": 1335,
-    "difference": 40,
+    "new_mrp": 1439,
+    "difference": 144,
     "source": "file1"
   },
   "19001339": {
     "name": "PG-RC CASSEROLE NON IB W/GL -220 MM",
     "old_mrp": 1345,
-    "new_mrp": 1385,
-    "difference": 40,
+    "new_mrp": 1499,
+    "difference": 154,
     "source": "file1"
   },
   "19001341": {
     "name": "PG - IND COOKTOP - RADIANT INFRA",
     "old_mrp": 4390,
-    "new_mrp": 5195,
-    "difference": 805,
+    "new_mrp": 5455,
+    "difference": 1065,
     "source": "file1"
   },
   "19001345": {
@@ -2774,22 +2879,22 @@
   "19001350": {
     "name": "PG-RC CASSEROLE NON IB W/GL -240 MM",
     "old_mrp": 1495,
-    "new_mrp": 1535,
-    "difference": 40,
+    "new_mrp": 1659,
+    "difference": 164,
     "source": "file1"
   },
   "19001352": {
     "name": "TORNADO TURBO FOOD PROCESSOR",
     "old_mrp": 1295,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1320,
+    "difference": 25,
     "source": "file2"
   },
   "19001355": {
     "name": "PG HOT ELECTRIC KETTLE 1.8 LTR (M)",
     "old_mrp": 0,
-    "new_mrp": 1145,
-    "difference": 1145,
+    "new_mrp": 1195,
+    "difference": 1195,
     "source": "file1"
   },
   "19001357": {
@@ -2816,15 +2921,15 @@
   "19001392": {
     "name": "PIGEON VENUS 3BR LPG GLASSTOP",
     "old_mrp": 7499,
-    "new_mrp": 7499,
-    "difference": 0,
+    "new_mrp": 8499,
+    "difference": 1000,
     "source": "file1"
   },
   "19001418": {
     "name": "PIGEON INOX SS INNER LID CKR 2 LTR",
     "old_mrp": 2245,
-    "new_mrp": 2245,
-    "difference": 0,
+    "new_mrp": 2295,
+    "difference": 50,
     "source": "file1"
   },
   "19001423": {
@@ -2865,8 +2970,8 @@
   "19001487": {
     "name": "PG WC  PANNIYARKAL(12 ROUNDS) W/L",
     "old_mrp": 1995,
-    "new_mrp": 2055,
-    "difference": 60,
+    "new_mrp": 2219,
+    "difference": 224,
     "source": "file1"
   },
   "19001488": {
@@ -2886,36 +2991,36 @@
   "19001507": {
     "name": "PG ERC JOY UNLIMITED 1.8 L DX",
     "old_mrp": 3095,
-    "new_mrp": 3395,
-    "difference": 300,
+    "new_mrp": 3695,
+    "difference": 600,
     "source": "file1"
   },
   "19001508": {
     "name": "PG ERC JOY UNLIMITED 1 LTR DX",
     "old_mrp": 2595,
-    "new_mrp": 2795,
-    "difference": 200,
+    "new_mrp": 2995,
+    "difference": 400,
     "source": "file1"
   },
   "19001509": {
     "name": "PG ERC JOY UNLIMITED 1 L SDX",
     "old_mrp": 3145,
-    "new_mrp": 3465,
-    "difference": 320,
+    "new_mrp": 3695,
+    "difference": 550,
     "source": "file1"
   },
   "19001510": {
     "name": "PG ERC JOY UNLIMITED 2.8 L SDX",
     "old_mrp": 5145,
-    "new_mrp": 5445,
-    "difference": 300,
+    "new_mrp": 5795,
+    "difference": 650,
     "source": "file1"
   },
   "19001511": {
     "name": "PG BLOSSOM ERC 1.8 SDX",
     "old_mrp": 3695,
-    "new_mrp": 3995,
-    "difference": 300,
+    "new_mrp": 4395,
+    "difference": 700,
     "source": "file1"
   },
   "19001517": {
@@ -2935,15 +3040,15 @@
   "19001659": {
     "name": "PIGEON GLASSTOP - 2BR AYUSH BLK",
     "old_mrp": 3999,
-    "new_mrp": 4249,
-    "difference": 250,
+    "new_mrp": 4499,
+    "difference": 500,
     "source": "file1"
   },
   "19001663": {
     "name": "PG - 1.2 LTR MULTIPURPOSE KESSEL",
     "old_mrp": 1775,
-    "new_mrp": 1845,
-    "difference": 70,
+    "new_mrp": 1945,
+    "difference": 170,
     "source": "file1"
   },
   "19001665": {
@@ -2977,15 +3082,15 @@
   "19001766": {
     "name": "PG ERC RUBY 1.8 LTR DX",
     "old_mrp": 3095,
-    "new_mrp": 3395,
-    "difference": 300,
+    "new_mrp": 3695,
+    "difference": 600,
     "source": "file1"
   },
   "19001767": {
     "name": "PG ERC RUBY 1.8 LTR SDX",
     "old_mrp": 3695,
-    "new_mrp": 3995,
-    "difference": 300,
+    "new_mrp": 4395,
+    "difference": 700,
     "source": "file1"
   },
   "19001874": {
@@ -3005,15 +3110,15 @@
   "19001889": {
     "name": "PIGEON RIO INNER LID  3 LTR",
     "old_mrp": 1395,
-    "new_mrp": 1495,
-    "difference": 100,
+    "new_mrp": 1645,
+    "difference": 250,
     "source": "file1"
   },
   "19001899": {
     "name": "PIGEON INOX PRO SS CKR 3 LTR OUTER",
     "old_mrp": 2495,
-    "new_mrp": 2645,
-    "difference": 150,
+    "new_mrp": 2795,
+    "difference": 300,
     "source": "file1"
   },
   "19001901": {
@@ -3026,22 +3131,22 @@
   "19001902": {
     "name": "PIGEON ELITE SHINE 3PLY CKR 2LTR OUTER",
     "old_mrp": 2395,
-    "new_mrp": 2545,
-    "difference": 150,
+    "new_mrp": 2745,
+    "difference": 350,
     "source": "file1"
   },
   "19001903": {
     "name": "PIGEON ELITE SHINE 3PLY CKR 3LTR OUTER",
     "old_mrp": 2695,
-    "new_mrp": 2845,
-    "difference": 150,
+    "new_mrp": 3059,
+    "difference": 364,
     "source": "file1"
   },
   "19001905": {
     "name": "PG ELITE SHINE 3PLY CKR 5LTR OUTER",
     "old_mrp": 3195,
-    "new_mrp": 3395,
-    "difference": 200,
+    "new_mrp": 3695,
+    "difference": 500,
     "source": "file1"
   },
   "19001907": {
@@ -3054,8 +3159,8 @@
   "19001910": {
     "name": "PIGEON INOX PRO SS CKR 5 LTR OUTER",
     "old_mrp": 3249,
-    "new_mrp": 3445,
-    "difference": 196,
+    "new_mrp": 3645,
+    "difference": 396,
     "source": "file1"
   },
   "19001920": {
@@ -3075,71 +3180,78 @@
   "19001932": {
     "name": "+FRY PAN 200-MINT GREEN",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 1329,
     "difference": "N/A",
     "source": "pdf"
   },
   "19001933": {
     "name": "Yellow",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 1329,
     "difference": "N/A",
     "source": "pdf"
   },
   "19001934": {
     "name": "Pi n k",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 1329,
     "difference": "N/A",
     "source": "pdf"
   },
   "19001935": {
     "name": "Blue",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 1329,
     "difference": "N/A",
     "source": "pdf"
   },
   "19001936": {
     "name": "PG - CLASSIC AL CKR 8 LTR INNER LID.",
     "old_mrp": 3195,
-    "new_mrp": 3495,
-    "difference": 300,
+    "new_mrp": 4195,
+    "difference": 1000,
     "source": "file1"
   },
   "19001937": {
     "name": "PG - CLASSIC AL CKR 10 LTR INNER LID",
     "old_mrp": 3545,
-    "new_mrp": 3945,
-    "difference": 400,
+    "new_mrp": 4745,
+    "difference": 1200,
     "source": "file1"
   },
   "19001951": {
     "name": "PG - CLASSIC AL CKR 12 LTR INNER LID",
     "old_mrp": 3845,
-    "new_mrp": 4245,
-    "difference": 400,
+    "new_mrp": 5245,
+    "difference": 1400,
     "source": "file1"
   },
   "19002174": {
     "name": "IMPERI CAST IRON DOSA TAWA 300",
     "old_mrp": 2055,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1699,
+    "difference": -356,
     "source": "file2"
+  },
+  "19002175": {
+    "name": "Item from PDF: 19002175",
+    "old_mrp": "Not Available",
+    "new_mrp": 1349,
+    "difference": "N/A",
+    "source": "pdf_update"
   },
   "19002176": {
     "name": "IMPERI CAST IRON LONG HANDLE TAWA 250",
     "old_mrp": 1675,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1199,
+    "difference": -476,
     "source": "file2"
   },
   "19002210": {
     "name": "PG ESSENTIALS  SS 7 PCS COOKWARE SET ",
     "old_mrp": 2895,
-    "new_mrp": 2975,
-    "difference": 80,
+    "new_mrp": 3209,
+    "difference": 314,
     "source": "file1"
   },
   "19002212": {
@@ -3180,99 +3292,106 @@
   "19002688": {
     "name": "PIGEON INOX 900 ML",
     "old_mrp": 495,
-    "new_mrp": 495,
-    "difference": 0,
+    "new_mrp": 325,
+    "difference": -170,
     "source": "file1"
   },
   "19002689": {
     "name": "PIGEON INOX PLUS 900 ML",
     "old_mrp": 495,
-    "new_mrp": 495,
-    "difference": 0,
+    "new_mrp": 325,
+    "difference": -170,
     "source": "file1"
   },
   "19002698": {
     "name": "PG ELITE - SS TRIPLY CASSEROLE 24CM",
     "old_mrp": 3395,
-    "new_mrp": 3545,
-    "difference": 150,
+    "new_mrp": 3895,
+    "difference": 500,
     "source": "file1"
   },
   "19002699": {
     "name": "PG ELITE - SS TRIPLY FRYPAN 20cm",
     "old_mrp": 1675,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1845,
+    "difference": 170,
     "source": "file2"
   },
   "19002700": {
     "name": "PG ELITE - SS TRIPLY FRYPAN 22CM",
     "old_mrp": 1805,
-    "new_mrp": 1865,
-    "difference": 60,
+    "new_mrp": 2055,
+    "difference": 250,
     "source": "file1"
   },
   "19002701": {
     "name": "PG ELITE - SS TRIPLY FRYPAN 24CM",
     "old_mrp": 1995,
-    "new_mrp": 2055,
-    "difference": 60,
+    "new_mrp": 2265,
+    "difference": 270,
     "source": "file1"
   },
   "19002702": {
     "name": "PG ELITE - SS TRIPLY KADAI 20cm",
     "old_mrp": 1865,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 2055,
+    "difference": 190,
     "source": "file2"
   },
   "19002703": {
     "name": "PG ELITE - SS TRIPLY KADAI 22CM",
     "old_mrp": 2095,
-    "new_mrp": 2145,
-    "difference": 50,
+    "new_mrp": 2355,
+    "difference": 260,
     "source": "file1"
   },
   "19002704": {
     "name": "PG ELITE - SS TRIPLY KADAI 24CM",
     "old_mrp": 2495,
-    "new_mrp": 2515,
-    "difference": 20,
+    "new_mrp": 2765,
+    "difference": 270,
     "source": "file1"
   },
   "19002705": {
     "name": "PG ELITE - SS TRIPLY KADAI 26cm",
     "old_mrp": 2705,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 2975,
+    "difference": 270,
     "source": "file2"
+  },
+  "19002706": {
+    "name": "Item from PDF: 19002706",
+    "old_mrp": "Not Available",
+    "new_mrp": 1845,
+    "difference": "N/A",
+    "source": "pdf_update"
   },
   "19002707": {
     "name": "PG ELITE - SS TRIPLY SAUCEPAN 16cm",
     "old_mrp": 1865,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 2055,
+    "difference": 190,
     "source": "file2"
   },
   "19002708": {
     "name": "PG ELITE - SS TRIPLY SAUCEPAN 18cm",
     "old_mrp": 2145,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 2354,
+    "difference": 209,
     "source": "file2"
   },
   "19002716": {
     "name": "PIGEON AMELIA  CKR 7 LTR INNER LID HA ",
     "old_mrp": 3965,
-    "new_mrp": 4195,
-    "difference": 230,
+    "new_mrp": 4345,
+    "difference": 380,
     "source": "file1"
   },
   "19002717": {
     "name": "PIGEON MILA ALUMINIUM CKR 7 LTR INNER LI",
     "old_mrp": 2795,
-    "new_mrp": 2845,
-    "difference": 50,
+    "new_mrp": 3145,
+    "difference": 350,
     "source": "file1"
   },
   "19002861": {
@@ -3285,8 +3404,8 @@
   "19002863": {
     "name": "PIGEON ELITE SHINE 3PLY CKR COMBI 2+3LTR",
     "old_mrp": 4495,
-    "new_mrp": 4495,
-    "difference": 0,
+    "new_mrp": 4595,
+    "difference": 100,
     "source": "file1"
   },
   "19003040": {
@@ -3306,22 +3425,22 @@
   "19003043": {
     "name": "PIGEON WONDER CAST  FLAT TAWA 310",
     "old_mrp": 1445,
-    "new_mrp": 1495,
-    "difference": 50,
+    "new_mrp": 1619,
+    "difference": 174,
     "source": "file1"
   },
   "19003050": {
     "name": "PIGEON GLASSTOP AYUSH  2BR -  AUTO",
     "old_mrp": 5499,
-    "new_mrp": 5749,
-    "difference": 250,
+    "new_mrp": 5999,
+    "difference": 500,
     "source": "file1"
   },
   "19003051": {
     "name": "PIGEON GLASSTOP AYUSH  3BR - AUTO",
     "old_mrp": 6999,
-    "new_mrp": 7249,
-    "difference": 250,
+    "new_mrp": 7499,
+    "difference": 500,
     "source": "file1"
   },
   "19003052": {
@@ -3334,15 +3453,15 @@
   "19003055": {
     "name": "PG-MIXER GRINDER ORB 750 W 3 JAR",
     "old_mrp": 4495,
-    "new_mrp": 5198,
-    "difference": 703,
+    "new_mrp": 5599,
+    "difference": 1104,
     "source": "file1"
   },
   "19003057": {
     "name": "PG 1.2 LTR SPARK DOUBLE-WALLED KETTLE",
     "old_mrp": 1845,
-    "new_mrp": 1845,
-    "difference": 0,
+    "new_mrp": 1695,
+    "difference": -150,
     "source": "file1"
   },
   "19003061": {
@@ -3355,29 +3474,29 @@
   "19003233": {
     "name": "PG COMFY 1000W DRY IRON",
     "old_mrp": 895,
-    "new_mrp": 998,
-    "difference": 103,
+    "new_mrp": 1059,
+    "difference": 164,
     "source": "file1"
   },
   "19003238": {
     "name": "PG GALE 1000W HEAVY WEIGHT DRY IRON",
     "old_mrp": 1595,
-    "new_mrp": 1998,
-    "difference": 403,
+    "new_mrp": 1999,
+    "difference": 404,
     "source": "file1"
   },
   "19003244": {
     "name": "PG X-CORD1 FLEX BOX 2PIN 4 MTR-RED",
     "old_mrp": 500,
-    "new_mrp": 598,
-    "difference": 98,
+    "new_mrp": 599,
+    "difference": 99,
     "source": "file1"
   },
   "19003278": {
     "name": "PIGEON EVA INFRARED COOKTOP",
     "old_mrp": 3990,
-    "new_mrp": 4995,
-    "difference": 1005,
+    "new_mrp": 5245,
+    "difference": 1255,
     "source": "file1"
   },
   "19003279": {
@@ -3404,8 +3523,8 @@
   "19003319": {
     "name": "ZOOM CHOPPER 350 ML",
     "old_mrp": 1495,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1144,
+    "difference": -351,
     "source": "file2"
   },
   "19003327": {
@@ -3432,8 +3551,8 @@
   "19003330": {
     "name": "ZOOM CHOPPER 250 ML",
     "old_mrp": 1295,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1056,
+    "difference": -239,
     "source": "file2"
   },
   "19003340": {
@@ -3446,15 +3565,15 @@
   "19003365": {
     "name": "PG X-CORD1 FLEX BOX 2PIN 4 MTR-GREY",
     "old_mrp": 500,
-    "new_mrp": 598,
-    "difference": 98,
+    "new_mrp": 599,
+    "difference": 99,
     "source": "file1"
   },
   "19003390": {
     "name": "PIGEON GLASSTOP AYUSH  4BR",
     "old_mrp": 7499,
-    "new_mrp": 7999,
-    "difference": 500,
+    "new_mrp": 8499,
+    "difference": 1000,
     "source": "file1"
   },
   "19003408": {
@@ -3502,15 +3621,15 @@
   "19003421": {
     "name": "3 LITRE+5 LITRE COMBO",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 7995,
     "difference": "N/A",
     "source": "pdf"
   },
   "19003446": {
     "name": "PG ICT PRIME 1800W",
     "old_mrp": 2195,
-    "new_mrp": 2895,
-    "difference": 700,
+    "new_mrp": 2990,
+    "difference": 795,
     "source": "file1"
   },
   "19003587": {
@@ -3523,22 +3642,22 @@
   "19003595": {
     "name": "PG COMFY 1000W DRY IRON-BLUE",
     "old_mrp": 895,
-    "new_mrp": 998,
-    "difference": 103,
+    "new_mrp": 1059,
+    "difference": 164,
     "source": "file1"
   },
   "19003596": {
     "name": "PG COMFY 1000W DRY IRON-PINK",
     "old_mrp": 895,
-    "new_mrp": 998,
-    "difference": 103,
+    "new_mrp": 1059,
+    "difference": 164,
     "source": "file1"
   },
   "19003597": {
     "name": "PG COMFY 1000W DRY IRON-RED",
     "old_mrp": 895,
-    "new_mrp": 998,
-    "difference": 103,
+    "new_mrp": 1059,
+    "difference": 164,
     "source": "file1"
   },
   "19003611": {
@@ -3551,14 +3670,14 @@
   "19003615": {
     "name": "PG -INOX SIGMA OUTER LID SS CKR 3L",
     "old_mrp": 2295,
-    "new_mrp": 2445,
-    "difference": 150,
+    "new_mrp": 2695,
+    "difference": 400,
     "source": "file1"
   },
   "19003619": {
     "name": "HEALTHIFRY - MANUAL AIR FRYER",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 5599,
     "difference": "N/A",
     "source": "pdf"
   },
@@ -3579,8 +3698,8 @@
   "19003623": {
     "name": "PG -INOX SIGMA OUTER LID SS CKR 5L ",
     "old_mrp": 2995,
-    "new_mrp": 3175,
-    "difference": 180,
+    "new_mrp": 3445,
+    "difference": 450,
     "source": "file1"
   },
   "19003624": {
@@ -3593,8 +3712,8 @@
   "19003629": {
     "name": "PG 1.5 LTR MULTI-PURPOSE KESSEL 3 IN 1 V",
     "old_mrp": 2475,
-    "new_mrp": 2595,
-    "difference": 120,
+    "new_mrp": 2695,
+    "difference": 220,
     "source": "file1"
   },
   "19003634": {
@@ -3649,29 +3768,29 @@
   "19003652": {
     "name": "PG 6 PCS CASSEROLE SET  ",
     "old_mrp": 3995,
-    "new_mrp": 4115,
-    "difference": 120,
+    "new_mrp": 4439,
+    "difference": 444,
     "source": "file1"
   },
   "19003653": {
     "name": "PIGEON GLASSTOP JUMBO 2BR",
     "old_mrp": 5999,
-    "new_mrp": 6499,
-    "difference": 500,
+    "new_mrp": 6999,
+    "difference": 1000,
     "source": "file1"
   },
   "19003654": {
     "name": "PIGEON GLASSTOP JUMBO 3BR",
     "old_mrp": 7749,
-    "new_mrp": 8499,
-    "difference": 750,
+    "new_mrp": 8999,
+    "difference": 1250,
     "source": "file1"
   },
   "19003655": {
     "name": "PIGEON GLASSTOP JUMBO 4BR",
     "old_mrp": 9499,
-    "new_mrp": 9999,
-    "difference": 500,
+    "new_mrp": 10999,
+    "difference": 1500,
     "source": "file1"
   },
   "19003779": {
@@ -3691,8 +3810,8 @@
   "19003793": {
     "name": "ELECTRIC CHOPPER 350",
     "old_mrp": 2300,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 2530,
+    "difference": 230,
     "source": "file2"
   },
   "19003794": {
@@ -3726,22 +3845,22 @@
   "19003803": {
     "name": "PG 1.5 LTR MULTI-PURPOSE KESSEL - BLUE",
     "old_mrp": 1895,
-    "new_mrp": 1945,
-    "difference": 50,
+    "new_mrp": 2095,
+    "difference": 200,
     "source": "file1"
   },
   "19003813": {
     "name": "PG POP-UP TOASTER -BLACK.",
     "old_mrp": 1895,
-    "new_mrp": 1998,
-    "difference": 103,
+    "new_mrp": 1999,
+    "difference": 104,
     "source": "file1"
   },
   "19003814": {
     "name": "PG POP-UP TOASTER - WHITE",
     "old_mrp": 1895,
-    "new_mrp": 1998,
-    "difference": 103,
+    "new_mrp": 1999,
+    "difference": 104,
     "source": "file1"
   },
   "19003815": {
@@ -3754,8 +3873,8 @@
   "19003825": {
     "name": "PG EXCELLA 3 JAR MIXER - 550W",
     "old_mrp": 3495,
-    "new_mrp": 3798,
-    "difference": 303,
+    "new_mrp": 4399,
+    "difference": 904,
     "source": "file1"
   },
   "19003827": {
@@ -3859,8 +3978,8 @@
   "19003848": {
     "name": "PIGEON OTG 25L - WITH ROTISSERIE (M)",
     "old_mrp": 7495,
-    "new_mrp": 7598,
-    "difference": 103,
+    "new_mrp": 7599,
+    "difference": 104,
     "source": "file1"
   },
   "19003851": {
@@ -3873,43 +3992,43 @@
   "19003853": {
     "name": "PG - INOX 6L OUTER SS COOKER",
     "old_mrp": 4295,
-    "new_mrp": 4595,
-    "difference": 300,
+    "new_mrp": 4995,
+    "difference": 700,
     "source": "file1"
   },
   "19003854": {
     "name": "PG - INOX 7.5 L OUTER SS COOKER",
     "old_mrp": 4695,
-    "new_mrp": 5095,
-    "difference": 400,
+    "new_mrp": 5495,
+    "difference": 800,
     "source": "file1"
   },
   "19003855": {
     "name": "PG - INOX 10 L OUTER SS COOKER",
     "old_mrp": 5295,
-    "new_mrp": 5695,
-    "difference": 400,
+    "new_mrp": 6145,
+    "difference": 850,
     "source": "file1"
   },
   "19003856": {
     "name": "PG - INOX 12 L OUTER SS  COOKER",
     "old_mrp": 5495,
-    "new_mrp": 5945,
-    "difference": 450,
+    "new_mrp": 6395,
+    "difference": 900,
     "source": "file1"
   },
   "19003863": {
     "name": "PIGEON SANDWICH TOASTER BLACK",
     "old_mrp": 1695,
-    "new_mrp": 1998,
-    "difference": 303,
+    "new_mrp": 1999,
+    "difference": 304,
     "source": "file1"
   },
   "19003864": {
     "name": "PIGEON SANDWICH TOASTER WHITE",
     "old_mrp": 1695,
-    "new_mrp": 1998,
-    "difference": 303,
+    "new_mrp": 1999,
+    "difference": 304,
     "source": "file1"
   },
   "19003878": {
@@ -4013,15 +4132,15 @@
   "19003942": {
     "name": "PG CELEBRATION 5 PCS GIFT SET ",
     "old_mrp": 3995,
-    "new_mrp": 4105,
-    "difference": 110,
+    "new_mrp": 4429,
+    "difference": 434,
     "source": "file1"
   },
   "19003955": {
     "name": "PG 1.8L  CRYSTAL GLASS KETTLE",
     "old_mrp": 1795,
-    "new_mrp": 2095,
-    "difference": 300,
+    "new_mrp": 2195,
+    "difference": 400,
     "source": "file1"
   },
   "19003956": {
@@ -4034,15 +4153,15 @@
   "19003957": {
     "name": "PG1.5L SWIFT PLUS MULTI-COOK KETTLE-PINK",
     "old_mrp": 2495,
-    "new_mrp": 2495,
-    "difference": 0,
+    "new_mrp": 2395,
+    "difference": -100,
     "source": "file1"
   },
   "19003958": {
     "name": "PG1.5L SWIFT PLUS MULTI-COOK KETTLE-BLUE",
     "old_mrp": 2495,
-    "new_mrp": 2495,
-    "difference": 0,
+    "new_mrp": 2395,
+    "difference": -100,
     "source": "file1"
   },
   "19003959": {
@@ -4055,50 +4174,50 @@
   "19003964": {
     "name": "HEALTHIFRY + - DIGITAL AIR FRYER",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 5999,
     "difference": "N/A",
     "source": "pdf"
   },
   "19003969": {
     "name": "PIGEON OTG 9L (M)",
     "old_mrp": 2995,
-    "new_mrp": 3198,
-    "difference": 203,
+    "new_mrp": 3199,
+    "difference": 204,
     "source": "file1"
   },
   "19003984": {
     "name": "GREEN",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 1195,
     "difference": "N/A",
     "source": "pdf"
   },
   "19003985": {
     "name": "1.5 LITRE HOT KETTLE PLUS - BLUE",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 1195,
     "difference": "N/A",
     "source": "pdf"
   },
   "19003987": {
     "name": "IMPERI CAST IRON APPACHETTY DIA 220",
     "old_mrp": 1675,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1349,
+    "difference": -326,
     "source": "file2"
   },
   "19003988": {
     "name": "IMPERI CAST IRON CURVED TAWA DIA 260",
     "old_mrp": 2055,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1149,
+    "difference": -906,
     "source": "file2"
   },
   "19003989": {
     "name": "IMPERI CAST IRON CURVED TAWA DIA 280",
     "old_mrp": 2335,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1249,
+    "difference": -1086,
     "source": "file2"
   },
   "19003992": {
@@ -4160,64 +4279,64 @@
   "19004020": {
     "name": "IMPERI CAST IRON KADAI WITH LID 200",
     "old_mrp": 2145,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1349,
+    "difference": -796,
     "source": "file2"
   },
   "19004021": {
     "name": "IMPERI CAST IRON KADAI WITH LID 240",
     "old_mrp": 2615,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1749,
+    "difference": -866,
     "source": "file2"
   },
   "19004022": {
     "name": "IMPERI CAST IRON KADAI WITH LID 260",
     "old_mrp": 3075,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1999,
+    "difference": -1076,
     "source": "file2"
   },
   "19004023": {
     "name": "IMPERI CAST IRON FRY PAN DIA 200",
     "old_mrp": 1865,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1099,
+    "difference": -766,
     "source": "file2"
   },
   "19004024": {
     "name": "IMPERI CAST IRON FRY PAN DIA 220",
     "old_mrp": 2145,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1299,
+    "difference": -846,
     "source": "file2"
   },
   "19004025": {
     "name": "IMPERI CAST IRON FRY PAN DIA 250",
     "old_mrp": 2425,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1499,
+    "difference": -926,
     "source": "file2"
   },
   "19004026": {
     "name": "IMPERI CAST IRON GRILL PAN DIA 250",
     "old_mrp": 2705,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1549,
+    "difference": -1156,
     "source": "file2"
   },
   "19004027": {
     "name": "IMPERI CAST IRON PANIYARAKKAL 9 ROUND",
     "old_mrp": 1865,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1199,
+    "difference": -666,
     "source": "file2"
   },
   "19004028": {
     "name": "IMPERI CAST IRON DOUBLE SIDE TAWA 310",
     "old_mrp": 3175,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 2199,
+    "difference": -976,
     "source": "file2"
   },
   "19004029": {
@@ -4230,49 +4349,49 @@
   "19004033": {
     "name": "CASSEROLE 220 WITH LID",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 3825,
     "difference": "N/A",
     "source": "pdf"
   },
   "19004034": {
     "name": "240mm",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 4385,
     "difference": "N/A",
     "source": "pdf"
   },
   "19004035": {
     "name": "IMPERI LUXE CAST IRON FRY PAN 200",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 1999,
     "difference": "N/A",
     "source": "pdf"
   },
   "19004036": {
     "name": "220m m",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 2099,
     "difference": "N/A",
     "source": "pdf"
   },
   "19004037": {
     "name": "250mm",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 2699,
     "difference": "N/A",
     "source": "pdf"
   },
   "19004038": {
     "name": "IMPERI LUXE CAST IRON GRILL PAN 250",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 2699,
     "difference": "N/A",
     "source": "pdf"
   },
   "19004039": {
     "name": "IMPERI LUXE CAST IRON KADAI 200 WITH LID",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 2999,
     "difference": "N/A",
     "source": "pdf"
   },
@@ -4314,14 +4433,14 @@
   "19004060": {
     "name": "240mm",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 3999,
     "difference": "N/A",
     "source": "pdf"
   },
   "19004061": {
     "name": "260mm",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 4699,
     "difference": "N/A",
     "source": "pdf"
   },
@@ -4363,29 +4482,29 @@
   "19004210": {
     "name": "PIGEON GLASSTOP - 3BR AYUSH BLK",
     "old_mrp": 5499,
-    "new_mrp": 5749,
-    "difference": 250,
+    "new_mrp": 5999,
+    "difference": 500,
     "source": "file1"
   },
   "19004211": {
     "name": "PIGEON GLASSTOP - 3BR AYUSH XL",
     "old_mrp": 6499,
-    "new_mrp": 6749,
-    "difference": 250,
+    "new_mrp": 6999,
+    "difference": 500,
     "source": "file1"
   },
   "19004214": {
     "name": "PIGEON SANDWICH GRILLER BLACK",
     "old_mrp": 1695,
-    "new_mrp": 1998,
-    "difference": 303,
+    "new_mrp": 1999,
+    "difference": 304,
     "source": "file1"
   },
   "19004215": {
     "name": "PIGEON SANDWICH GRILLER WHITE",
     "old_mrp": 1695,
-    "new_mrp": 1998,
-    "difference": 303,
+    "new_mrp": 1999,
+    "difference": 304,
     "source": "file1"
   },
   "19004229": {
@@ -4398,16 +4517,23 @@
   "19004230": {
     "name": "PIGEON MIXER ORB - ALPINE GREEN 3 JAR 75",
     "old_mrp": 4495,
-    "new_mrp": 5398,
-    "difference": 903,
+    "new_mrp": 5799,
+    "difference": 1304,
     "source": "file1"
   },
   "19004231": {
     "name": "PIGEON MIXER ORB-ROYAL PURPLE 4JAR 750W",
     "old_mrp": 5595,
-    "new_mrp": 6198,
-    "difference": 603,
+    "new_mrp": 6599,
+    "difference": 1004,
     "source": "file1"
+  },
+  "19004241": {
+    "name": "Item from PDF: 19004241",
+    "old_mrp": "Not Available",
+    "new_mrp": 998,
+    "difference": "N/A",
+    "source": "pdf_update"
   },
   "19004246": {
     "name": "Radiance - Red",
@@ -4419,29 +4545,29 @@
   "19004247": {
     "name": "PG-EMERGENCY LAMP- RADIANCE - ORANGE-M",
     "old_mrp": 745,
-    "new_mrp": 798,
-    "difference": 53,
+    "new_mrp": 799,
+    "difference": 54,
     "source": "file1"
   },
   "19004248": {
     "name": "PG-EMERGENCY LAMP- RADIANCE - GREEN-M",
     "old_mrp": 745,
-    "new_mrp": 798,
-    "difference": 53,
+    "new_mrp": 799,
+    "difference": 54,
     "source": "file1"
   },
   "19004249": {
     "name": "PG-EMERGENCY LAMP- RADIANCE - BLUE-M",
     "old_mrp": 745,
-    "new_mrp": 798,
-    "difference": 53,
+    "new_mrp": 799,
+    "difference": 54,
     "source": "file1"
   },
   "19004250": {
     "name": "PIGEON TITAN HEAVY WEIGHT IRON 1100 W",
     "old_mrp": 1795,
-    "new_mrp": 1998,
-    "difference": 203,
+    "new_mrp": 2199,
+    "difference": 404,
     "source": "file1"
   },
   "19004262": {
@@ -4461,29 +4587,29 @@
   "19004264": {
     "name": "PG AIRFUSION 12L AIR FRYER",
     "old_mrp": 15995,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 13390,
+    "difference": -2605,
     "source": "file2"
   },
   "19004265": {
     "name": "STELLA - 1800W",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 4095,
     "difference": "N/A",
     "source": "pdf"
   },
   "19004266": {
     "name": "PG INOX HYD DUO CAP 900ML BLK",
     "old_mrp": 545,
-    "new_mrp": 545,
-    "difference": 0,
+    "new_mrp": 355,
+    "difference": -190,
     "source": "file1"
   },
   "19004267": {
     "name": "PIGEON AIRTURBO VACUUM CLEANER 600W",
     "old_mrp": 2995,
-    "new_mrp": 3198,
-    "difference": 203,
+    "new_mrp": 3199,
+    "difference": 204,
     "source": "file1"
   },
   "19004280": {
@@ -4496,8 +4622,8 @@
   "19004281": {
     "name": "PIGEON MICROWAVE OVEN -M ",
     "old_mrp": 10995,
-    "new_mrp": 11598,
-    "difference": 603,
+    "new_mrp": 11999,
+    "difference": 1004,
     "source": "file1"
   },
   "19004290": {
@@ -4517,15 +4643,15 @@
   "19004292": {
     "name": "PG INOX ERC 1L SDX",
     "old_mrp": 4495,
-    "new_mrp": 4795,
-    "difference": 300,
+    "new_mrp": 5095,
+    "difference": 600,
     "source": "file1"
   },
   "19004293": {
     "name": "PG INOX ERC 1.8L SDX",
     "old_mrp": 5495,
-    "new_mrp": 5845,
-    "difference": 350,
+    "new_mrp": 6195,
+    "difference": 700,
     "source": "file1"
   },
   "19004302": {
@@ -4559,8 +4685,8 @@
   "19004310": {
     "name": "PG 2.5L  EVERYDAY PLUS MULTI-COOK BLACK",
     "old_mrp": 2995,
-    "new_mrp": 2995,
-    "difference": 0,
+    "new_mrp": 3245,
+    "difference": 250,
     "source": "file1"
   },
   "19004316": {
@@ -4587,15 +4713,15 @@
   "19004319": {
     "name": "PG ELITE SHINE 3PLY CKR 3.5 L OUTER JPP",
     "old_mrp": 2895,
-    "new_mrp": 3295,
-    "difference": 400,
+    "new_mrp": 3595,
+    "difference": 700,
     "source": "file1"
   },
   "19004320": {
     "name": "PG ELITE SHINE 3PLY CKR 6 L OUTER SPP",
     "old_mrp": 3395,
-    "new_mrp": 3895,
-    "difference": 500,
+    "new_mrp": 4195,
+    "difference": 800,
     "source": "file1"
   },
   "19004321": {
@@ -4608,8 +4734,8 @@
   "19004325": {
     "name": "PIGEON GLASSTOP - INFINITY GOLD 2BR",
     "old_mrp": 9999,
-    "new_mrp": 9999,
-    "difference": 0,
+    "new_mrp": 10999,
+    "difference": 1000,
     "source": "file1"
   },
   "19004326": {
@@ -4650,8 +4776,8 @@
   "19004337": {
     "name": "PIGEON GLO INDUCTION COOKTOP",
     "old_mrp": 2795,
-    "new_mrp": 3295,
-    "difference": 500,
+    "new_mrp": 3445,
+    "difference": 650,
     "source": "file1"
   },
   "19004339": {
@@ -4664,42 +4790,42 @@
   "19004340": {
     "name": "PG ERC JOY UNLIMITED 0.6 L SDX",
     "old_mrp": 2745,
-    "new_mrp": 2895,
-    "difference": 150,
+    "new_mrp": 3045,
+    "difference": 300,
     "source": "file1"
   },
   "19004341": {
     "name": "PG ERC JOY UNLIMITED 4.2 L DX",
     "old_mrp": 6995,
-    "new_mrp": 8595,
-    "difference": 1600,
+    "new_mrp": 9195,
+    "difference": 2200,
     "source": "file1"
   },
   "19004362": {
     "name": "AIRTURBO PRO VACCUM CLEANER 600W",
     "old_mrp": 4499,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 4398,
+    "difference": -101,
     "source": "file2"
   },
   "19004365": {
     "name": "PIGEON OTG 14L (M)",
     "old_mrp": 3995,
-    "new_mrp": 4398,
-    "difference": 403,
+    "new_mrp": 4399,
+    "difference": 404,
     "source": "file1"
   },
   "19004367": {
     "name": "1L DX",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 3895,
     "difference": "N/A",
     "source": "pdf"
   },
   "19004368": {
     "name": "1. 8 L D X",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 5049,
     "difference": "N/A",
     "source": "pdf"
   },
@@ -4818,8 +4944,8 @@
   "19004404": {
     "name": "PG ERC JOY UNLIMITED 0.6 L DX",
     "old_mrp": 2545,
-    "new_mrp": 2695,
-    "difference": 150,
+    "new_mrp": 2845,
+    "difference": 300,
     "source": "file1"
   },
   "19004405": {
@@ -4860,8 +4986,8 @@
   "19004410": {
     "name": "IMPERI CAST IRON LONG HANDLE TAWA 280 BB",
     "old_mrp": 1955,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1349,
+    "difference": -606,
     "source": "file2"
   },
   "19004421": {
@@ -4892,11 +5018,32 @@
     "difference": "N/A",
     "source": "pdf"
   },
+  "19004455": {
+    "name": "Item from PDF: 19004455",
+    "old_mrp": "Not Available",
+    "new_mrp": 4998,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004456": {
+    "name": "Item from PDF: 19004456",
+    "old_mrp": "Not Available",
+    "new_mrp": 4998,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004457": {
+    "name": "Item from PDF: 19004457",
+    "old_mrp": "Not Available",
+    "new_mrp": 4998,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
   "19004458": {
     "name": "PG FAN-TASTIC 75W PEDESTAL FAN",
     "old_mrp": 4995,
-    "new_mrp": 4995,
-    "difference": 0,
+    "new_mrp": 4398,
+    "difference": -597,
     "source": "file1"
   },
   "19004461": {
@@ -4923,22 +5070,22 @@
   "19004469": {
     "name": "PIGEON CERAMIC FRY PAN 200",
     "old_mrp": 1995,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1665,
+    "difference": -330,
     "source": "file2"
   },
   "19004480": {
     "name": "PG BLITZ WATER BOTTLE 975ML - BLUE",
     "old_mrp": 495,
-    "new_mrp": 495,
-    "difference": 0,
+    "new_mrp": 375,
+    "difference": -120,
     "source": "file1"
   },
   "19004482": {
     "name": "PG BLITZ WATER BOTTLE 975ML - BLACK",
     "old_mrp": 495,
-    "new_mrp": 495,
-    "difference": 0,
+    "new_mrp": 375,
+    "difference": -120,
     "source": "file1"
   },
   "19004489": {
@@ -4958,8 +5105,8 @@
   "19004493": {
     "name": "PG PURE SLOW JUICER",
     "old_mrp": 9995,
-    "new_mrp": 11198,
-    "difference": 1203,
+    "new_mrp": 11999,
+    "difference": 2004,
     "source": "file1"
   },
   "19004499": {
@@ -4983,32 +5130,39 @@
     "difference": "N/A",
     "source": "pdf"
   },
+  "19004504": {
+    "name": "Item from PDF: 19004504",
+    "old_mrp": "Not Available",
+    "new_mrp": 2195,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
   "19004505": {
     "name": "QUICK ELECTRIC CHOPPER",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 3495,
     "difference": "N/A",
     "source": "pdf"
   },
   "19004506": {
     "name": "SHARP ELECTRIC CHOPPER",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 4994,
     "difference": "N/A",
     "source": "pdf"
   },
   "19004510": {
     "name": "Marvel Ceramic Fry Pan 260 IB",
     "old_mrp": 2495,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 2175,
+    "difference": -320,
     "source": "file2"
   },
   "19004511": {
     "name": "PIGEON CERAMIC FRY PAN 300",
     "old_mrp": 2995,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 2745,
+    "difference": -250,
     "source": "file2"
   },
   "19004513": {
@@ -5021,8 +5175,8 @@
   "19004516": {
     "name": "PIGEON SS COOKER INOX-5L+PAN 3.5L COMBO",
     "old_mrp": 3995,
-    "new_mrp": 3995,
-    "difference": 0,
+    "new_mrp": 4395,
+    "difference": 400,
     "source": "file1"
   },
   "19004521": {
@@ -5035,9 +5189,37 @@
   "19004531": {
     "name": "PG-ELECTRIC WATER HEATER 3L",
     "old_mrp": 5995,
-    "new_mrp": 5995,
-    "difference": 0,
+    "new_mrp": 6395,
+    "difference": 400,
     "source": "file1"
+  },
+  "19004535": {
+    "name": "Item from PDF: 19004535",
+    "old_mrp": "Not Available",
+    "new_mrp": 1785,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004536": {
+    "name": "Item from PDF: 19004536",
+    "old_mrp": "Not Available",
+    "new_mrp": 2175,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004539": {
+    "name": "Item from PDF: 19004539",
+    "old_mrp": "Not Available",
+    "new_mrp": 2735,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004540": {
+    "name": "Item from PDF: 19004540",
+    "old_mrp": "Not Available",
+    "new_mrp": 1845,
+    "difference": "N/A",
+    "source": "pdf_update"
   },
   "19004546": {
     "name": "SHARP 5 INCH KNIFE",
@@ -5056,7 +5238,7 @@
   "19004550": {
     "name": "FLEXI 9 IN 1",
     "old_mrp": "Not Available",
-    "new_mrp": "Not Available",
+    "new_mrp": 3495,
     "difference": "N/A",
     "source": "pdf"
   },
@@ -5070,43 +5252,43 @@
   "19004560": {
     "name": "PG ERC INOX PRO WITH STEAMER 1LDX YELLOW",
     "old_mrp": 3645,
-    "new_mrp": 3845,
-    "difference": 200,
+    "new_mrp": 4049,
+    "difference": 404,
     "source": "file1"
   },
   "19004561": {
     "name": "PG ERC INOX PRO WITH STEAMER 1L DX PINK",
     "old_mrp": 3645,
-    "new_mrp": 3845,
-    "difference": 200,
+    "new_mrp": 4049,
+    "difference": 404,
     "source": "file1"
   },
   "19004562": {
     "name": "PG ERC INOX PRO WITH STEAMER 1L DX GREY",
     "old_mrp": 3645,
-    "new_mrp": 3845,
-    "difference": 200,
+    "new_mrp": 4049,
+    "difference": 404,
     "source": "file1"
   },
   "19004563": {
     "name": "PG ERC INOX PRO WITH STEAMER 1.8LDX YELL",
     "old_mrp": 4695,
-    "new_mrp": 4995,
-    "difference": 300,
+    "new_mrp": 5295,
+    "difference": 600,
     "source": "file1"
   },
   "19004564": {
     "name": "PG ERC INOX PRO WITH STEAMER 1.8LDX PINK",
     "old_mrp": 4695,
-    "new_mrp": 4995,
-    "difference": 300,
+    "new_mrp": 5295,
+    "difference": 600,
     "source": "file1"
   },
   "19004565": {
     "name": "PG ERC INOX PRO WITH STEAMER 1.8LDX GREY",
     "old_mrp": 4695,
-    "new_mrp": 4995,
-    "difference": 300,
+    "new_mrp": 5295,
+    "difference": 600,
     "source": "file1"
   },
   "19004580": {
@@ -5119,16 +5301,30 @@
   "19004590": {
     "name": "PG TRIPLY 3 LTR COOKER INNER LID",
     "old_mrp": 2495,
-    "new_mrp": 2995,
-    "difference": 500,
+    "new_mrp": 3295,
+    "difference": 800,
     "source": "file1"
   },
   "19004591": {
     "name": "PG TRIPLY 5 LTR COOKER INNER LID",
     "old_mrp": 3295,
-    "new_mrp": 3995,
-    "difference": 700,
+    "new_mrp": 4345,
+    "difference": 1050,
     "source": "file1"
+  },
+  "19004596": {
+    "name": "Item from PDF: 19004596",
+    "old_mrp": "Not Available",
+    "new_mrp": 1399,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004597": {
+    "name": "Item from PDF: 19004597",
+    "old_mrp": "Not Available",
+    "new_mrp": 1299,
+    "difference": "N/A",
+    "source": "pdf_update"
   },
   "19004598": {
     "name": "PIGEON CHIMNEY  - BLACK DIAMOND -60",
@@ -5189,16 +5385,37 @@
   "19004606": {
     "name": "PG TRIPLY 2 LTR COOKER INNER LID",
     "old_mrp": 2475,
-    "new_mrp": 2745,
-    "difference": 270,
+    "new_mrp": 2945,
+    "difference": 470,
     "source": "file1"
+  },
+  "19004609": {
+    "name": "Item from PDF: 19004609",
+    "old_mrp": "Not Available",
+    "new_mrp": 2999,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004620": {
+    "name": "Item from PDF: 19004620",
+    "old_mrp": "Not Available",
+    "new_mrp": 3399,
+    "difference": "N/A",
+    "source": "pdf_update"
   },
   "19004621": {
     "name": "PG NUTRI BLENDER 600W - 2 JAR",
     "old_mrp": 4495,
-    "new_mrp": 5198,
-    "difference": 703,
+    "new_mrp": 5199,
+    "difference": 704,
     "source": "file1"
+  },
+  "19004624": {
+    "name": "Item from PDF: 19004624",
+    "old_mrp": "Not Available",
+    "new_mrp": 1399,
+    "difference": "N/A",
+    "source": "pdf_update"
   },
   "19004625": {
     "name": "PG ERC DELUX 3L SDX GREY",
@@ -5210,8 +5427,8 @@
   "19004626": {
     "name": "PG CERRASTEEL SS CLAD CERAMIC TAWA 280",
     "old_mrp": 1495,
-    "new_mrp": "Not Available",
-    "difference": "N/A",
+    "new_mrp": 1779,
+    "difference": 284,
     "source": "file2"
   },
   "19004645": {
@@ -5284,11 +5501,18 @@
     "difference": 0,
     "source": "file1"
   },
+  "19004663": {
+    "name": "Item from PDF: 19004663",
+    "old_mrp": "Not Available",
+    "new_mrp": 1459,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
   "19004664": {
     "name": "PG ALL IN ONE SUPER COOKER 3 LTR -SS",
     "old_mrp": 4295,
-    "new_mrp": 4295,
-    "difference": 0,
+    "new_mrp": 3595,
+    "difference": -700,
     "source": "file1"
   },
   "19004730": {
@@ -5319,40 +5543,82 @@
     "difference": "N/A",
     "source": "file2"
   },
+  "19004736": {
+    "name": "Item from PDF: 19004736",
+    "old_mrp": "Not Available",
+    "new_mrp": 1245,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
   "19004750": {
     "name": "PG CORDLESS DRY IRON 1300W - BLUE",
     "old_mrp": 1695,
-    "new_mrp": 1695,
-    "difference": 0,
+    "new_mrp": 1459,
+    "difference": -236,
     "source": "file1"
   },
   "19004762": {
     "name": "PG UN CORD CORDLESS STEAM IRON - 2200W",
     "old_mrp": 3995,
-    "new_mrp": 3995,
-    "difference": 0,
+    "new_mrp": 4199,
+    "difference": 204,
     "source": "file1"
+  },
+  "19004766": {
+    "name": "Item from PDF: 19004766",
+    "old_mrp": "Not Available",
+    "new_mrp": 3595,
+    "difference": "N/A",
+    "source": "pdf_update"
   },
   "19004790": {
     "name": "CERRASTEEL SS CLAD CERAMIC FRY PAN 240",
     "old_mrp": 1495,
-    "new_mrp": 1645,
-    "difference": 150,
+    "new_mrp": 1779,
+    "difference": 284,
     "source": "file1"
+  },
+  "19004791": {
+    "name": "Item from PDF: 19004791",
+    "old_mrp": "Not Available",
+    "new_mrp": 1999,
+    "difference": "N/A",
+    "source": "pdf_update"
   },
   "19004798": {
     "name": "PG MIXER GRINDER - SWIFTY 550",
     "old_mrp": 3595,
-    "new_mrp": 3798,
-    "difference": 203,
+    "new_mrp": 4199,
+    "difference": 604,
     "source": "file1"
+  },
+  "19004799": {
+    "name": "Item from PDF: 19004799",
+    "old_mrp": "Not Available",
+    "new_mrp": 1779,
+    "difference": "N/A",
+    "source": "pdf_update"
   },
   "19004810": {
     "name": "PG FAN-TASTIC 30W BLDC PEDESTAL FAN",
     "old_mrp": 6995,
-    "new_mrp": 6995,
-    "difference": 0,
+    "new_mrp": 6398,
+    "difference": -597,
     "source": "file1"
+  },
+  "19004811": {
+    "name": "Item from PDF: 19004811",
+    "old_mrp": "Not Available",
+    "new_mrp": 4590,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004812": {
+    "name": "Item from PDF: 19004812",
+    "old_mrp": "Not Available",
+    "new_mrp": 5990,
+    "difference": "N/A",
+    "source": "pdf_update"
   },
   "19004815": {
     "name": "GILMA CHIMNEY GRETA 60",
@@ -5361,40 +5627,82 @@
     "difference": 0,
     "source": "file1"
   },
+  "19004816": {
+    "name": "Item from PDF: 19004816",
+    "old_mrp": "Not Available",
+    "new_mrp": 3595,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
   "19004826": {
     "name": "PIGEON CHIMNEY ATMOS 60 (BLDC)",
     "old_mrp": 24990,
-    "new_mrp": 26990,
-    "difference": 2000,
+    "new_mrp": 24790,
+    "difference": -200,
     "source": "file1"
   },
   "19004827": {
     "name": "PIGEON CHIMNEY ATMOS 75 (BLDC)",
     "old_mrp": 26990,
-    "new_mrp": 28990,
-    "difference": 2000,
+    "new_mrp": 26590,
+    "difference": -400,
     "source": "file1"
   },
   "19004828": {
     "name": "PIGEON CHIMNEY - XTREME DLX 60 (BLDC)",
     "old_mrp": 27990,
-    "new_mrp": 31490,
-    "difference": 3500,
+    "new_mrp": 28890,
+    "difference": 900,
     "source": "file1"
   },
   "19004829": {
     "name": "PIGEON CHIMNEY - XTREME DLX 75 (BLDC)",
     "old_mrp": 29990,
-    "new_mrp": 34490,
-    "difference": 4500,
+    "new_mrp": 31690,
+    "difference": 1700,
     "source": "file1"
   },
   "19004830": {
     "name": "PIGEON CHIMNEY - XTREME DLX 90 (BLDC)",
     "old_mrp": 31990,
-    "new_mrp": 35990,
-    "difference": 4000,
+    "new_mrp": 33090,
+    "difference": 1100,
     "source": "file1"
+  },
+  "19004831": {
+    "name": "Item from PDF: 19004831",
+    "old_mrp": "Not Available",
+    "new_mrp": 20990,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004832": {
+    "name": "Item from PDF: 19004832",
+    "old_mrp": "Not Available",
+    "new_mrp": 22990,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004838": {
+    "name": "Item from PDF: 19004838",
+    "old_mrp": "Not Available",
+    "new_mrp": 1595,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004839": {
+    "name": "Item from PDF: 19004839",
+    "old_mrp": "Not Available",
+    "new_mrp": 1098,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004841": {
+    "name": "Item from PDF: 19004841",
+    "old_mrp": "Not Available",
+    "new_mrp": 1779,
+    "difference": "N/A",
+    "source": "pdf_update"
   },
   "19004842": {
     "name": "PIGEON TOWER FAN MANUAL",
@@ -5410,12 +5718,159 @@
     "difference": 0,
     "source": "file1"
   },
+  "19004848": {
+    "name": "Item from PDF: 19004848",
+    "old_mrp": "Not Available",
+    "new_mrp": 1999,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
   "19004858": {
     "name": "3GLACIER 750 ML",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
     "source": "pdf"
+  },
+  "19004871": {
+    "name": "Item from PDF: 19004871",
+    "old_mrp": "Not Available",
+    "new_mrp": 1899,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004872": {
+    "name": "Item from PDF: 19004872",
+    "old_mrp": "Not Available",
+    "new_mrp": 1899,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004885": {
+    "name": "Item from PDF: 19004885",
+    "old_mrp": "Not Available",
+    "new_mrp": 1495,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004906": {
+    "name": "Item from PDF: 19004906",
+    "old_mrp": "Not Available",
+    "new_mrp": 28490,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004923": {
+    "name": "Item from PDF: 19004923",
+    "old_mrp": "Not Available",
+    "new_mrp": 8990,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004931": {
+    "name": "Item from PDF: 19004931",
+    "old_mrp": "Not Available",
+    "new_mrp": 10999,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004932": {
+    "name": "Item from PDF: 19004932",
+    "old_mrp": "Not Available",
+    "new_mrp": 2595,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004980": {
+    "name": "Item from PDF: 19004980",
+    "old_mrp": "Not Available",
+    "new_mrp": 13990,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004981": {
+    "name": "Item from PDF: 19004981",
+    "old_mrp": "Not Available",
+    "new_mrp": 13990,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004987": {
+    "name": "Item from PDF: 19004987",
+    "old_mrp": "Not Available",
+    "new_mrp": 2495,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004990": {
+    "name": "Item from PDF: 19004990",
+    "old_mrp": "Not Available",
+    "new_mrp": 1199,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004991": {
+    "name": "Item from PDF: 19004991",
+    "old_mrp": "Not Available",
+    "new_mrp": 1499,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004992": {
+    "name": "Item from PDF: 19004992",
+    "old_mrp": "Not Available",
+    "new_mrp": 1899,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004993": {
+    "name": "Item from PDF: 19004993",
+    "old_mrp": "Not Available",
+    "new_mrp": 1999,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004994": {
+    "name": "Item from PDF: 19004994",
+    "old_mrp": "Not Available",
+    "new_mrp": 1299,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004995": {
+    "name": "Item from PDF: 19004995",
+    "old_mrp": "Not Available",
+    "new_mrp": 849,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004996": {
+    "name": "Item from PDF: 19004996",
+    "old_mrp": "Not Available",
+    "new_mrp": 949,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19004997": {
+    "name": "Item from PDF: 19004997",
+    "old_mrp": "Not Available",
+    "new_mrp": 1099,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19005021": {
+    "name": "Item from PDF: 19005021",
+    "old_mrp": "Not Available",
+    "new_mrp": 11495,
+    "difference": "N/A",
+    "source": "pdf_update"
+  },
+  "19005022": {
+    "name": "Item from PDF: 19005022",
+    "old_mrp": "Not Available",
+    "new_mrp": 13495,
+    "difference": "N/A",
+    "source": "pdf_update"
   },
   "CMF": {
     "name": "Color Me Flyer",
