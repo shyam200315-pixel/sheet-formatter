@@ -37,21 +37,23 @@ import {
 const STORE_TARGETS = {
   "WMH001 - NED - VAZIRABAD": 350000,
   "WMH002 - NED - BHAGYA NAGAR": 450000,
-  "WMH003 - BDE - BEED": 1200000,
-  "WMH004 - PBN - PARBHANI": 350000,
-  "WMH005 - YTL - YAVATMAL": 1200000,
-  "WMH006 - BTW - BARSHI": 375000,
-  "WMP007 - PUN -RAVET PUNE": 550000,
-  "WMH007 - PUN - PIMPRI": 550000, // Alias for Pune
-  "WMH009 - KOP -  KOLHAPUR": 450000,
-  "WMP001 - BPL - SEHORE CITY": 600000,
-  "WMP002 - BPL - GULMOHAR COLONY": 500000,
+  "WMH003 - BDE - BEED": 1150000,
+  "WMH004 - PBN - PARBHANI": 500000,
+  "WMH005 - YTL - YAVATMAL": 1150000,
+  "WMH006 - BTW - BARSHI": 360000,
+  "WMP007 - PUN -RAVET PUNE": 500000,
+  "WMH007 - PUN - PIMPRI": 500000, // Alias for Pune
+  "WMH008 - STR - SATARA": 350000,
+  "WMH009 - KOP -  KOLHAPUR": 400000,
+  "WMH011 - BDL - BADLAPUR": 350000,
+  "WMP001 - BPL - SEHORE CITY": 450000,
+  "WMP002 - BPL - GULMOHAR COLONY": 450000,
   "WMP003 - IND - MR 09 ROAD": 375000,
   "WMP004 - IND - ANNAPURNA RD": 350000,
-  "WMP006 - BPL -  KOLAR ROAD": 450000,
+  "WMP005 - STN - SATNA": 350000,
+  "WMP006 - BPL -  KOLAR ROAD": 440000,
   "WMP007 - REW - REWA": 350000,
-  "WMP008 - SVP - SHIVPURI": 350000,
-  "WMP005 - STA - SATNA": 300000
+  "WMP008 - SVP - SHIVPURI": 350000
 };
 
 const getStoreTarget = (storeName) => {
@@ -251,7 +253,7 @@ export default function DashboardView({
   const mpMetrics = useMemo(() => {
     const currentDay = today.getDate();
     const remainingDays = totalDays - currentDay;
-    const mpCommitment = 3150000;
+    const mpCommitment = 3115000;
     
     let mtdSales = 0;
     let todaySales = 0;

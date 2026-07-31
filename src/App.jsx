@@ -7,8 +7,8 @@ import OrderProcessing from "./components/OrderProcessing";
 import RequirementGenerator from "./components/RequirementGenerator";
 import MRPChecker from "./components/MRPChecker";
 import QuotationGenerator from "./components/QuotationGenerator";
+import StockAnalyzer from "./components/StockAnalyzer";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileSpreadsheet } from "lucide-react";
 import { Toaster } from 'react-hot-toast';
 
 export default function App() {
@@ -16,15 +16,24 @@ export default function App() {
     return localStorage.getItem("sheetFormatterActiveTab") || "validator";
   });
 
+  const [showSplash, setShowSplash] = useState(true);
+
   useEffect(() => {
     localStorage.setItem("sheetFormatterActiveTab", activeTab);
   }, [activeTab]);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2500); // 2.5 seconds splash
+    return () => clearTimeout(timer);
+  }, []);
+
   const [reportData, setReportData] = useState(null);
   const [error, setError] = useState("");
   const [validationSuccess, setValidationSuccess] = useState(false);
-  const [monthlyTarget, setMonthlyTarget] = useState(7800000);
-  const [monthlyCommitment, setMonthlyCommitment] = useState(7800000);
+  const [monthlyTarget, setMonthlyTarget] = useState(8675000);
+  const [monthlyCommitment, setMonthlyCommitment] = useState(8675000);
 
   const handleFileSelect = (file) => {
     setError("");
@@ -128,268 +137,343 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-color)] text-[var(--text-primary)] flex flex-col font-sans">
-      <Toaster position="bottom-center" />
-      
-      {/* Google-style Top App Bar */}
-      <header className="w-full bg-[var(--surface-color)] border-b border-[var(--border-color)] px-6 py-3 flex items-center justify-between sticky top-0 z-50">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3">
-            <img src="/pigeon.png" alt="Pigeon Logo" className="h-10 object-contain rounded-md" />
-            <span className="text-xl font-normal text-[#5f6368] tracking-tight">
-              Stovekraft <span className="text-[#202124] font-medium">Shyam</span>
-            </span>
-          </div>
-
-          <div className="hidden sm:flex items-center gap-1 border-l border-[#dadce0] pl-6">
-            <button
-              onClick={() => setActiveTab("validator")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                activeTab === "validator" 
-                  ? "bg-[#e8f0fe] text-[#1a73e8]" 
-                  : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
-              }`}
-            >
-              Daily Sales Validator
-            </button>
-            <button
-              onClick={() => setActiveTab("orders")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                activeTab === "orders" 
-                  ? "bg-[#e8f0fe] text-[#1a73e8]" 
-                  : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
-              }`}
-            >
-              Order Processing
-            </button>
-            <button
-              onClick={() => setActiveTab("generator")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                activeTab === "generator" 
-                  ? "bg-[#e8f0fe] text-[#1a73e8]" 
-                  : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
-              }`}
-            >
-              Requirement Generator
-            </button>
-            <button
-              onClick={() => setActiveTab("mrp")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                activeTab === "mrp" 
-                  ? "bg-[#e8f0fe] text-[#1a73e8]" 
-                  : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
-              }`}
-            >
-              MRP Checker
-            </button>
-            <button
-              onClick={() => setActiveTab("quotation")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                activeTab === "quotation" 
-                  ? "bg-[#e8f0fe] text-[#1a73e8]" 
-                  : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
-              }`}
-            >
-              Quotation
-            </button>
-          </div>
-        </div>
-        
-        {activeTab === "validator" && !reportData && (
-          <div className="hidden md:flex items-center gap-6">
-            <div className="flex flex-col">
-              <label className="text-[11px] font-medium text-[#5f6368] uppercase tracking-wider mb-0.5">Target</label>
-              <div className="flex items-center gap-1 text-[#1a73e8] font-medium text-sm">
-                <span>₹</span>
-                <input
-                  type="number"
-                  value={monthlyTarget}
-                  onChange={(e) => setMonthlyTarget(Number(e.target.value))}
-                  className="bg-transparent w-24 focus:outline-none focus:border-b focus:border-[#1a73e8]"
-                />
-              </div>
-            </div>
-            <div className="w-px h-8 bg-[#dadce0]"></div>
-            <div className="flex flex-col">
-              <label className="text-[11px] font-medium text-[#5f6368] uppercase tracking-wider mb-0.5">Commitment</label>
-              <div className="flex items-center gap-1 text-[#1a73e8] font-medium text-sm">
-                <span>₹</span>
-                <input
-                  type="number"
-                  value={monthlyCommitment}
-                  onChange={(e) => setMonthlyCommitment(Number(e.target.value))}
-                  className="bg-transparent w-24 focus:outline-none focus:border-b focus:border-[#1a73e8]"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-      </header>
-
-      {/* Mobile Tabs */}
-      <div className="sm:hidden flex border-b border-[#dadce0] bg-white">
-        <button
-          onClick={() => setActiveTab("validator")}
-          className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === "validator"
-              ? "border-[#1a73e8] text-[#1a73e8]"
-              : "border-transparent text-[#5f6368]"
-          }`}
-        >
-          Daily Sales
-        </button>
-        <button
-          onClick={() => setActiveTab("orders")}
-          className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === "orders"
-              ? "border-[#1a73e8] text-[#1a73e8]"
-              : "border-transparent text-[#5f6368]"
-          }`}
-        >
-          Orders
-        </button>
-        <button
-          onClick={() => setActiveTab("generator")}
-          className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === "generator"
-              ? "border-[#1a73e8] text-[#1a73e8]"
-              : "border-transparent text-[#5f6368]"
-          }`}
-        >
-          Generator
-        </button>
-        <button
-          onClick={() => setActiveTab("mrp")}
-          className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === "mrp"
-              ? "border-[#1a73e8] text-[#1a73e8]"
-              : "border-transparent text-[#5f6368]"
-          }`}
-        >
-          MRP Check
-        </button>
-        <button
-          onClick={() => setActiveTab("quotation")}
-          className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === "quotation"
-              ? "border-[#1a73e8] text-[#1a73e8]"
-              : "border-transparent text-[#5f6368]"
-          }`}
-        >
-          Quotation
-        </button>
-      </div>
-
-      <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-8">
-        <AnimatePresence mode="wait">
-          {activeTab === "validator" ? (
+    <>
+      <AnimatePresence>
+        {showSplash && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 1.05, filter: "blur(5px)" }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#f8f9fa]"
+            style={{
+              backgroundImage: `
+                radial-gradient(at 0% 0%, hsla(217,100%,94%,1) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(209,100%,95%,1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, hsla(217,100%,95%,1) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, hsla(208,100%,96%,1) 0px, transparent 50%),
+                radial-gradient(#dadce0 1px, transparent 1px)
+              `,
+              backgroundSize: '100% 100%, 100% 100%, 100% 100%, 100% 100%, 32px 32px',
+              backgroundPosition: 'center, center, center, center, 0 0',
+            }}
+          >
             <motion.div
-              key="validator-tab"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+              className="flex flex-col items-center relative"
             >
-              {!reportData ? (
-                <div className="flex flex-col items-center mt-6">
-                  <h1 className="text-3xl font-normal text-[#202124] mb-2 text-center">
-                    Upload a spreadsheet to begin
-                  </h1>
-                  <p className="text-[#5f6368] mb-10 text-center max-w-lg">
-                    Drag and drop your daily sales Excel report to instantly calculate DRR, view store metrics, and generate text reports.
-                  </p>
+              {/* Premium Glow Effect */}
+              <div className="absolute inset-0 bg-blue-100 blur-[80px] rounded-full opacity-50 -z-10" />
+              <img src="/pigeon.png" alt="Pigeon Logo" className="h-28 object-contain mb-8 drop-shadow-xl" />
+              <h1 className="text-4xl md:text-5xl font-light text-[#202124] tracking-tight mb-3">
+                Welcome <span className="font-semibold text-[#1a73e8]">Shyam</span>
+              </h1>
+              <div className="flex items-center gap-3">
+                <div className="h-[1px] w-8 bg-[#dadce0]"></div>
+                <p className="text-[#5f6368] text-sm font-medium tracking-[0.2em] uppercase">
+                  by Stovekraft
+                </p>
+                <div className="h-[1px] w-8 bg-[#dadce0]"></div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-                  <div className="md:hidden w-full max-w-md bg-white border border-[#dadce0] rounded-lg p-4 mb-6 shadow-sm flex flex-col gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-[#5f6368] mb-1">Monthly Target (₹)</label>
-                      <input
-                        type="number"
-                        value={monthlyTarget}
-                        onChange={(e) => setMonthlyTarget(Number(e.target.value))}
-                        className="google-input w-full p-2 text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-[#5f6368] mb-1">Monthly Commitment (₹)</label>
-                      <input
-                        type="number"
-                        value={monthlyCommitment}
-                        onChange={(e) => setMonthlyCommitment(Number(e.target.value))}
-                        className="google-input w-full p-2 text-sm"
-                      />
-                    </div>
-                  </div>
+      <div className="min-h-screen bg-transparent text-[var(--text-primary)] flex flex-col font-sans">
+        <Toaster position="bottom-center" />
+      
+        {/* Google-style Top App Bar */}
+        <header className="w-full bg-[var(--surface-color)] border-b border-[var(--border-color)] px-6 py-3 flex items-center justify-between sticky top-0 z-50">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <img src="/pigeon.png" alt="Pigeon Logo" className="h-10 object-contain rounded-md" />
+              <span className="text-xl font-normal text-[#5f6368] tracking-tight">
+                Stovekraft <span className="text-[#202124] font-medium">Shyam</span>
+              </span>
+            </div>
 
-                  <div className="w-full max-w-2xl">
-                    <FileDropZone 
-                      onFileSelect={handleFileSelect} 
-                      error={error} 
-                      validationSuccess={validationSuccess} 
-                    />
-                    <p className="text-center text-sm text-[#5f6368] mt-4">
-                      <em>Note: The option to upload your Closing Stock file (for Scrap calculations) will appear on the dashboard after you upload this sales report.</em>
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="w-full">
-                  <DashboardView 
-                    reportData={reportData} 
-                    monthlyTarget={monthlyTarget}
-                    monthlyCommitment={monthlyCommitment}
-                    onTargetChange={handleTargetChange}
-                    onReset={handleReset} 
+            <div className="hidden sm:flex items-center gap-1 border-l border-[#dadce0] pl-6">
+              <button
+                onClick={() => setActiveTab("validator")}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  activeTab === "validator" 
+                    ? "bg-[#e8f0fe] text-[#1a73e8]" 
+                    : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
+                }`}
+              >
+                Daily Sales Validator
+              </button>
+              <button
+                onClick={() => setActiveTab("orders")}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  activeTab === "orders" 
+                    ? "bg-[#e8f0fe] text-[#1a73e8]" 
+                    : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
+                }`}
+              >
+                Order Processing
+              </button>
+              <button
+                onClick={() => setActiveTab("generator")}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  activeTab === "generator" 
+                    ? "bg-[#e8f0fe] text-[#1a73e8]" 
+                    : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
+                }`}
+              >
+                Requirement Generator
+              </button>
+              <button
+                onClick={() => setActiveTab("mrp")}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  activeTab === "mrp" 
+                    ? "bg-[#e8f0fe] text-[#1a73e8]" 
+                    : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
+                }`}
+              >
+                MRP Checker
+              </button>
+              <button
+                onClick={() => setActiveTab("quotation")}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  activeTab === "quotation" 
+                    ? "bg-[#e8f0fe] text-[#1a73e8]" 
+                    : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
+                }`}
+              >
+                Quotation
+              </button>
+              <button
+                onClick={() => setActiveTab("stock")}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  activeTab === "stock" 
+                    ? "bg-[#e8f0fe] text-[#1a73e8]" 
+                    : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
+                }`}
+              >
+                Stock Analyzer
+              </button>
+            </div>
+          </div>
+        
+          {activeTab === "validator" && !reportData && (
+            <div className="hidden md:flex items-center gap-6">
+              <div className="flex flex-col">
+                <label className="text-[11px] font-medium text-[#5f6368] uppercase tracking-wider mb-0.5">Target</label>
+                <div className="flex items-center gap-1 text-[#1a73e8] font-medium text-sm">
+                  <span>₹</span>
+                  <input
+                    type="number"
+                    value={monthlyTarget}
+                    onChange={(e) => setMonthlyTarget(Number(e.target.value))}
+                    className="bg-transparent w-24 focus:outline-none focus:border-b focus:border-[#1a73e8]"
                   />
                 </div>
-              )}
-            </motion.div>
-          ) : activeTab === "orders" ? (
-            <motion.div
-              key="orders-tab"
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <OrderProcessing />
-            </motion.div>
-          ) : activeTab === "generator" ? (
-            <motion.div
-              key="generator-tab"
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <RequirementGenerator />
-            </motion.div>
-          ) : activeTab === "mrp" ? (
-            <motion.div
-              key="mrp-tab"
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <MRPChecker />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="quotation-tab"
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <QuotationGenerator />
-            </motion.div>
+              </div>
+              <div className="w-px h-8 bg-[#dadce0]"></div>
+              <div className="flex flex-col">
+                <label className="text-[11px] font-medium text-[#5f6368] uppercase tracking-wider mb-0.5">Commitment</label>
+                <div className="flex items-center gap-1 text-[#1a73e8] font-medium text-sm">
+                  <span>₹</span>
+                  <input
+                    type="number"
+                    value={monthlyCommitment}
+                    onChange={(e) => setMonthlyCommitment(Number(e.target.value))}
+                    className="bg-transparent w-24 focus:outline-none focus:border-b focus:border-[#1a73e8]"
+                  />
+                </div>
+              </div>
+            </div>
           )}
-        </AnimatePresence>
-      </main>
+        </header>
 
-      <footer className="w-full text-center py-6 text-sm text-[#5f6368] bg-[#f8f9fa] border-t border-[#dadce0]">
-        <p>Processed locally in your browser. No files are uploaded to any server.</p>
-      </footer>
-    </div>
+        {/* Mobile Tabs */}
+        <div className="sm:hidden flex border-b border-[#dadce0] bg-white">
+          <button
+            onClick={() => setActiveTab("validator")}
+            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === "validator"
+                ? "border-[#1a73e8] text-[#1a73e8]"
+                : "border-transparent text-[#5f6368]"
+            }`}
+          >
+            Daily Sales
+          </button>
+          <button
+            onClick={() => setActiveTab("orders")}
+            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === "orders"
+                ? "border-[#1a73e8] text-[#1a73e8]"
+                : "border-transparent text-[#5f6368]"
+            }`}
+          >
+            Orders
+          </button>
+          <button
+            onClick={() => setActiveTab("generator")}
+            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === "generator"
+                ? "border-[#1a73e8] text-[#1a73e8]"
+                : "border-transparent text-[#5f6368]"
+            }`}
+          >
+            Generator
+          </button>
+          <button
+            onClick={() => setActiveTab("mrp")}
+            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === "mrp"
+                ? "border-[#1a73e8] text-[#1a73e8]"
+                : "border-transparent text-[#5f6368]"
+            }`}
+          >
+            MRP Check
+          </button>
+          <button
+            onClick={() => setActiveTab("quotation")}
+            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === "quotation"
+                ? "border-[#1a73e8] text-[#1a73e8]"
+                : "border-transparent text-[#5f6368]"
+            }`}
+          >
+            Quotation
+          </button>
+          <button
+            onClick={() => setActiveTab("stock")}
+            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === "stock"
+                ? "border-[#1a73e8] text-[#1a73e8]"
+                : "border-transparent text-[#5f6368]"
+            }`}
+          >
+            Stock Analyzer
+          </button>
+        </div>
+
+        <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-8">
+          <AnimatePresence mode="wait">
+            {activeTab === "validator" ? (
+              <motion.div
+                key="validator-tab"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {!reportData ? (
+                  <div className="flex flex-col items-center mt-6">
+                    <h1 className="text-3xl font-normal text-[#202124] mb-2 text-center">
+                      Upload a spreadsheet to begin
+                    </h1>
+                    <p className="text-[#5f6368] mb-10 text-center max-w-lg">
+                      Drag and drop your daily sales Excel report to instantly calculate DRR, view store metrics, and generate text reports.
+                    </p>
+
+                    <div className="md:hidden w-full max-w-md bg-white border border-[#dadce0] rounded-lg p-4 mb-6 shadow-sm flex flex-col gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-[#5f6368] mb-1">Monthly Target (₹)</label>
+                        <input
+                          type="number"
+                          value={monthlyTarget}
+                          onChange={(e) => setMonthlyTarget(Number(e.target.value))}
+                          className="google-input w-full p-2 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-[#5f6368] mb-1">Monthly Commitment (₹)</label>
+                        <input
+                          type="number"
+                          value={monthlyCommitment}
+                          onChange={(e) => setMonthlyCommitment(Number(e.target.value))}
+                          className="google-input w-full p-2 text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="w-full max-w-2xl">
+                      <FileDropZone 
+                        onFileSelect={handleFileSelect} 
+                        error={error} 
+                        validationSuccess={validationSuccess} 
+                      />
+                      <p className="text-center text-sm text-[#5f6368] mt-4">
+                        <em>Note: The option to upload your Closing Stock file (for Scrap calculations) will appear on the dashboard after you upload this sales report.</em>
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-full">
+                    <DashboardView 
+                      reportData={reportData} 
+                      monthlyTarget={monthlyTarget}
+                      monthlyCommitment={monthlyCommitment}
+                      onTargetChange={handleTargetChange}
+                      onReset={handleReset} 
+                    />
+                  </div>
+                )}
+              </motion.div>
+            ) : activeTab === "orders" ? (
+              <motion.div
+                key="orders-tab"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <OrderProcessing />
+              </motion.div>
+            ) : activeTab === "generator" ? (
+              <motion.div
+                key="generator-tab"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <RequirementGenerator />
+              </motion.div>
+            ) : activeTab === "mrp" ? (
+              <motion.div
+                key="mrp-tab"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <MRPChecker />
+              </motion.div>
+            ) : activeTab === "quotation" ? (
+              <motion.div
+                key="quotation-tab"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <QuotationGenerator />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="stock-tab"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <StockAnalyzer />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </main>
+
+        <footer className="w-full text-center py-6 text-sm text-[#5f6368] bg-[#f8f9fa] border-t border-[#dadce0]">
+          <p>Processed locally in your browser. No files are uploaded to any server.</p>
+        </footer>
+      </div>
+    </>
   );
 }
