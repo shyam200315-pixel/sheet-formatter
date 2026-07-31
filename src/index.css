@@ -173,3 +173,13 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #bdc1c6;
 }
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

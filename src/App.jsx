@@ -290,10 +290,10 @@ export default function App() {
         </header>
 
         {/* Mobile Tabs */}
-        <div className="sm:hidden flex border-b border-[#dadce0] bg-white">
+        <div className="sm:hidden flex overflow-x-auto border-b border-[#dadce0] bg-white scrollbar-hide">
           <button
             onClick={() => setActiveTab("validator")}
-            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
+            className={`flex-shrink-0 whitespace-nowrap px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === "validator"
                 ? "border-[#1a73e8] text-[#1a73e8]"
                 : "border-transparent text-[#5f6368]"
@@ -303,7 +303,7 @@ export default function App() {
           </button>
           <button
             onClick={() => setActiveTab("orders")}
-            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
+            className={`flex-shrink-0 whitespace-nowrap px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === "orders"
                 ? "border-[#1a73e8] text-[#1a73e8]"
                 : "border-transparent text-[#5f6368]"
@@ -313,7 +313,7 @@ export default function App() {
           </button>
           <button
             onClick={() => setActiveTab("generator")}
-            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
+            className={`flex-shrink-0 whitespace-nowrap px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === "generator"
                 ? "border-[#1a73e8] text-[#1a73e8]"
                 : "border-transparent text-[#5f6368]"
@@ -323,7 +323,7 @@ export default function App() {
           </button>
           <button
             onClick={() => setActiveTab("mrp")}
-            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
+            className={`flex-shrink-0 whitespace-nowrap px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === "mrp"
                 ? "border-[#1a73e8] text-[#1a73e8]"
                 : "border-transparent text-[#5f6368]"
@@ -333,7 +333,7 @@ export default function App() {
           </button>
           <button
             onClick={() => setActiveTab("quotation")}
-            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
+            className={`flex-shrink-0 whitespace-nowrap px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === "quotation"
                 ? "border-[#1a73e8] text-[#1a73e8]"
                 : "border-transparent text-[#5f6368]"
@@ -343,7 +343,7 @@ export default function App() {
           </button>
           <button
             onClick={() => setActiveTab("stock")}
-            className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
+            className={`flex-shrink-0 whitespace-nowrap px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === "stock"
                 ? "border-[#1a73e8] text-[#1a73e8]"
                 : "border-transparent text-[#5f6368]"

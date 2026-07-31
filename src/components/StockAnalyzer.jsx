@@ -515,9 +515,9 @@ export default function StockAnalyzer() {
                     {selectedStore === "All Stores" && (
                       <th className="px-6 py-4 font-medium">Branch</th>
                     )}
-                    <th className="px-6 py-4 font-medium">Godown</th>
+                    <th className="px-6 py-4 font-medium hidden md:table-cell">Godown</th>
                     <th className="px-6 py-4 font-medium text-right">Quantity</th>
-                    <th className="px-6 py-4 font-medium text-right">Value</th>
+                    <th className="px-6 py-4 font-medium text-right hidden sm:table-cell">Value</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#f1f3f4]">
@@ -551,6 +551,13 @@ export default function StockAnalyzer() {
                                   {row.gender}
                                 </span>
                               )}
+                              <span className={`md:hidden px-1.5 py-0.5 rounded text-[11px] font-medium ${
+                                row.godown.toUpperCase().includes('EXCHANGE') 
+                                  ? 'bg-[#fce8e6] text-[#c5221f]' 
+                                  : 'bg-[#f1f3f4] text-[#5f6368]'
+                              }`}>
+                                {row.godown}
+                              </span>
                             </div>
                           </div>
                         </td>
@@ -566,7 +573,7 @@ export default function StockAnalyzer() {
                             </div>
                           </td>
                         )}
-                        <td className="px-6 py-3 text-[#5f6368]">
+                        <td className="px-6 py-3 text-[#5f6368] hidden md:table-cell">
                           <span className={`px-2 py-1 rounded text-xs font-medium ${
                             row.godown.toUpperCase().includes('EXCHANGE') 
                               ? 'bg-[#fce8e6] text-[#c5221f]' 
@@ -576,9 +583,12 @@ export default function StockAnalyzer() {
                           </span>
                         </td>
                         <td className="px-6 py-3 text-right">
-                          <span className="font-medium text-[#202124] text-base">{row.stock}</span>
+                          <div className="flex flex-col items-end">
+                            <span className="font-medium text-[#202124] text-base">{row.stock}</span>
+                            <span className="sm:hidden text-[10px] text-[#5f6368]">{formatCurrency(row.value)}</span>
+                          </div>
                         </td>
-                        <td className="px-6 py-3 text-right text-[#5f6368]">
+                        <td className="px-6 py-3 text-[#5f6368] text-right hidden sm:table-cell">
                           {formatCurrency(row.value)}
                         </td>
                       </tr>
