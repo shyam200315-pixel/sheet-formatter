@@ -50,7 +50,7 @@ const STORE_TARGETS = {
   "WMP002 - BPL - GULMOHAR COLONY": 450000,
   "WMP003 - IND - MR 09 ROAD": 375000,
   "WMP004 - IND - ANNAPURNA RD": 350000,
-  "WMP005 - STN - SATNA": 350000,
+  "WMP005 - STA - SATNA": 350000,
   "WMP006 - BPL -  KOLAR ROAD": 440000,
   "WMP007 - REW - REWA": 350000,
   "WMP008 - SVP - SHIVPURI": 350000
@@ -69,6 +69,10 @@ const getStoreTarget = (storeName) => {
       const keySuffix = keyParts.slice(1).join('').replace(/\s+/g, '').toUpperCase();
       const storeSuffix = storeParts.slice(1).join('').replace(/\s+/g, '').toUpperCase();
       if (keySuffix === storeSuffix) return value;
+      
+      const keyCity = keyParts[keyParts.length - 1].replace(/\s+/g, '').toUpperCase();
+      const storeCity = storeParts[storeParts.length - 1].replace(/\s+/g, '').toUpperCase();
+      if (keyCity === storeCity) return value;
     }
   }
   return null;
