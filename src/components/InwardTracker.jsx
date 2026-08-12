@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Truck, AlertTriangle, CheckCircle, Search, Download, Filter } from 'lucide-react';
 import FileDropZone from './FileDropZone';
@@ -136,44 +138,92 @@ export default function InwardTracker() {
     });
   }, [data, searchQuery, selectedBranch]);
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
     if (filteredData.length === 0) {
       toast.error("No data to export");
       return;
     }
 
-    const exportData = filteredData.map((inv, index) => ({
-      "SNO.": index + 1,
-      "BRANCH NAME": inv.branch,
-      "SUPPLIER NAME": inv.supplier,
-      "BILL NO.": inv.billNo,
-      "BILL DATE": inv.billDate,
-      "TOTAL QTY": inv.totalQty,
-      "DAYS OLD": inv.daysOld,
-      "STATUS": inv.daysOld <= 8 ? "Safe Zone" : (inv.daysOld > 30 ? "Critical Alert" : "Red Alert"),
-      "REMARKS": "" // Blank space for user to type in
-    }));
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Pending Inwards");
 
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Pending Inwards");
+      // Define Columns
+      worksheet.columns = [
+        { header: 'SNO.', key: 'sno', width: 8 },
+        { header: 'BRANCH NAME', key: 'branch', width: 35 },
+        { header: 'SUPPLIER NAME', key: 'supplier', width: 45 },
+        { header: 'BILL NO.', key: 'billNo', width: 18 },
+        { header: 'BILL DATE', key: 'billDate', width: 15 },
+        { header: 'TOTAL QTY', key: 'totalQty', width: 12 },
+        { header: 'DAYS OLD', key: 'daysOld', width: 12 },
+        { header: 'STATUS', key: 'status', width: 20 },
+        { header: 'REMARKS', key: 'remarks', width: 35 },
+      ];
 
-    // Adjust column widths for better formatting
-    const wscols = [
-      {wch: 6},  // SNO
-      {wch: 35}, // BRANCH
-      {wch: 45}, // SUPPLIER
-      {wch: 15}, // BILL NO
-      {wch: 15}, // BILL DATE
-      {wch: 12}, // TOTAL QTY
-      {wch: 10}, // DAYS OLD
-      {wch: 15}, // STATUS
-      {wch: 30}, // REMARKS
-    ];
-    ws['!cols'] = wscols;
+      // Style Header Row
+      const headerRow = worksheet.getRow(1);
+      headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+      headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1A73E8' } };
+      headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+      headerRow.height = 25;
 
-    XLSX.writeFile(wb, "Pending_Inwards_Report.xlsx");
-    toast.success("Excel report downloaded successfully!");
+      // Add Data Rows with Styling
+      filteredData.forEach((inv, idx) => {
+        const status = inv.daysOld <= 8 ? "Safe Zone" : (inv.daysOld > 30 ? "Critical Alert" : "Red Alert");
+        
+        const row = worksheet.addRow({
+          sno: idx + 1,
+          branch: inv.branch,
+          supplier: inv.supplier,
+          billNo: inv.billNo,
+          billDate: inv.billDate,
+          totalQty: inv.totalQty,
+          daysOld: inv.daysOld,
+          status: status,
+          remarks: '' // Blank space for user
+        });
+
+        // Style each cell in the row
+        row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+          // Borders for all cells
+          cell.border = {
+            top: { style: 'thin', color: { argb: 'FFDADCE0' } },
+            left: { style: 'thin', color: { argb: 'FFDADCE0' } },
+            bottom: { style: 'thin', color: { argb: 'FFDADCE0' } },
+            right: { style: 'thin', color: { argb: 'FFDADCE0' } }
+          };
+
+          // Alignment
+          // Branch (2), Supplier (3), and Remarks (9) left aligned, others centered
+          const isLeftAligned = [2, 3, 9].includes(colNumber);
+          cell.alignment = { vertical: 'middle', horizontal: isLeftAligned ? 'left' : 'center', wrapText: true };
+
+          // Status colors
+          if (colNumber === 8) {
+            cell.font = { bold: true };
+            if (status === "Safe Zone") {
+              cell.font.color = { argb: 'FF137333' };
+              cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE6F4EA' } };
+            } else if (status === "Critical Alert") {
+              cell.font.color = { argb: 'FFC5221F' };
+              cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFCE8E6' } };
+            } else {
+              cell.font.color = { argb: 'FFB06000' };
+              cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF7E0' } };
+            }
+          }
+        });
+      });
+
+      // Write buffer and save file
+      const buffer = await workbook.xlsx.writeBuffer();
+      saveAs(new Blob([buffer]), "Pending_Inwards_Report.xlsx");
+      toast.success("Formatted Excel report downloaded successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to generate Excel file.");
+    }
   };
 
   return (
