@@ -15,7 +15,7 @@ export default function InwardTracker() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBranch, setSelectedBranch] = useState("ALL");
 
-  const requiredHeaders = ["BRANCH NAME", "BILL NO.", "BILL DATE", "GOODS IN TRANSIT", "PUR QTY"];
+  const displayHeaders = ["BRANCH/STORE", "BILL NO.", "BILL DATE", "GOODS IN TRANSIT", "PUR QTY"];
 
   const handleFileSelect = (file) => {
     setError("");
@@ -46,7 +46,16 @@ export default function InwardTracker() {
         }
 
         const sampleRow = jsonData[0];
-        const missingHeaders = requiredHeaders.filter(h => !(h in sampleRow));
+        
+        const possibleBranchHeaders = ["BRANCH NAME", "TO STORE", "FROM STORE"];
+        const branchHeader = possibleBranchHeaders.find(h => h in sampleRow);
+        
+        const strictRequiredHeaders = ["BILL NO.", "BILL DATE", "GOODS IN TRANSIT", "PUR QTY"];
+        const missingHeaders = strictRequiredHeaders.filter(h => !(h in sampleRow));
+        
+        if (!branchHeader) {
+          missingHeaders.push("BRANCH NAME (or FROM STORE / TO STORE)");
+        }
 
         if (missingHeaders.length > 0) {
           throw new Error(
@@ -75,8 +84,8 @@ export default function InwardTracker() {
               }
 
               invoicesMap[billNo] = {
-                branch: row["BRANCH NAME"] || "N/A",
-                supplier: row["SUPPLIER NAME"] || "N/A",
+                branch: branchHeader ? row[branchHeader] || "N/A" : "N/A",
+                supplier: row["FROM STORE"] || row["SUPPLIER NAME"] || row["COMPANY NAME"] || "N/A",
                 billNo: billNo,
                 billDate: billDateStr || "N/A",
                 daysOld: daysOld,
@@ -252,7 +261,7 @@ export default function InwardTracker() {
                 onFileSelect={handleFileSelect} 
                 error={error} 
                 validationSuccess={validationSuccess} 
-                requiredHeaders={requiredHeaders}
+                requiredHeaders={displayHeaders}
               />
             </div>
           </motion.div>
@@ -333,6 +342,7 @@ export default function InwardTracker() {
                   <thead>
                     <tr className="bg-[#f8f9fa] border-b border-[#dadce0]">
                       <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider">Branch</th>
+                      <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider">Supplier</th>
                       <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider">Bill No.</th>
                       <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider">Bill Date</th>
                       <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider text-right">Qty</th>
@@ -345,6 +355,7 @@ export default function InwardTracker() {
                       filteredData.map((inv, idx) => (
                         <tr key={idx} className="hover:bg-[#f8f9fa] transition-colors">
                           <td className="py-3 px-4 text-sm font-medium text-[#202124]">{inv.branch}</td>
+                          <td className="py-3 px-4 text-sm text-[#5f6368] truncate max-w-[150px]" title={inv.supplier}>{inv.supplier}</td>
                           <td className="py-3 px-4 text-sm text-[#5f6368] font-mono">{inv.billNo}</td>
                           <td className="py-3 px-4 text-sm text-[#5f6368]">{inv.billDate}</td>
                           <td className="py-3 px-4 text-sm text-[#202124] font-medium text-right">{inv.totalQty}</td>
@@ -371,7 +382,7 @@ export default function InwardTracker() {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="6" className="py-8 text-center text-[#5f6368] text-sm">
+                        <td colSpan="7" className="py-8 text-center text-[#5f6368] text-sm">
                           No pending inwardings found matching your search.
                         </td>
                       </tr>

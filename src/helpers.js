@@ -27,7 +27,7 @@ export function findHeaderRowIndex(worksheet) {
       const cell = worksheet[XLSX.utils.encode_cell({ r, c })];
       if (cell && cell.v) {
         const val = String(cell.v).trim().toUpperCase();
-        if (val === "BRANCH NAME") foundBranchName = true;
+        if (val === "BRANCH NAME" || val === "FROM STORE" || val === "TO STORE") foundBranchName = true;
         if (val === "BILL DATE") foundBillDate = true;
       }
     }
