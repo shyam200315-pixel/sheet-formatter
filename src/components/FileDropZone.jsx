@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { Upload, FileSpreadsheet, AlertCircle, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function FileDropZone({ onFileSelect, error, validationSuccess }) {
+export default function FileDropZone({ onFileSelect, error, validationSuccess, requiredHeaders = ["BRANCH NAME", "BILL DATE", "NET SALE AMOUNT"] }) {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -102,18 +102,12 @@ export default function FileDropZone({ onFileSelect, error, validationSuccess })
 
       {/* Requirement Badges */}
       <div className="mt-6 flex flex-wrap justify-center gap-4">
-        <div className="flex items-center gap-1.5 text-xs text-[#5f6368]">
-          <CheckCircle size={16} className="text-[#34a853]" />
-          <span>"BRANCH NAME"</span>
-        </div>
-        <div className="flex items-center gap-1.5 text-xs text-[#5f6368]">
-          <CheckCircle size={16} className="text-[#34a853]" />
-          <span>"BILL DATE"</span>
-        </div>
-        <div className="flex items-center gap-1.5 text-xs text-[#5f6368]">
-          <CheckCircle size={16} className="text-[#34a853]" />
-          <span>"NET SALE AMOUNT"</span>
-        </div>
+        {requiredHeaders.map((header, idx) => (
+          <div key={idx} className="flex items-center gap-1.5 text-xs text-[#5f6368]">
+            <CheckCircle size={16} className="text-[#34a853]" />
+            <span>"{header}"</span>
+          </div>
+        ))}
       </div>
     </div>
   );

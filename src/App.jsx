@@ -8,6 +8,7 @@ import RequirementGenerator from "./components/RequirementGenerator";
 import MRPChecker from "./components/MRPChecker";
 import QuotationGenerator from "./components/QuotationGenerator";
 import StockAnalyzer from "./components/StockAnalyzer";
+import InwardTracker from "./components/InwardTracker";
 import { motion, AnimatePresence } from "framer-motion";
 import { Toaster } from 'react-hot-toast';
 
@@ -255,6 +256,16 @@ export default function App() {
               >
                 Stock Analyzer
               </button>
+              <button
+                onClick={() => setActiveTab("inward-tracker")}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  activeTab === "inward-tracker" 
+                    ? "bg-[#e8f0fe] text-[#1a73e8]" 
+                    : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
+                }`}
+              >
+                Inward Tracker
+              </button>
             </div>
           </div>
         
@@ -350,6 +361,16 @@ export default function App() {
             }`}
           >
             Stock Analyzer
+          </button>
+          <button
+            onClick={() => setActiveTab("inward-tracker")}
+            className={`flex-shrink-0 whitespace-nowrap px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === "inward-tracker"
+                ? "border-[#1a73e8] text-[#1a73e8]"
+                : "border-transparent text-[#5f6368]"
+            }`}
+          >
+            Inward Tracker
           </button>
         </div>
 
@@ -456,7 +477,7 @@ export default function App() {
               >
                 <QuotationGenerator />
               </motion.div>
-            ) : (
+            ) : activeTab === "stock" ? (
               <motion.div
                 key="stock-tab"
                 initial={{ opacity: 0, x: 10 }}
@@ -465,6 +486,16 @@ export default function App() {
                 transition={{ duration: 0.2 }}
               >
                 <StockAnalyzer />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="inward-tracker-tab"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <InwardTracker />
               </motion.div>
             )}
           </AnimatePresence>
