@@ -1,13 +1,28 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 // Removed useReactToPrint
 import { motion, AnimatePresence } from "framer-motion";
-import { Printer, Pencil, X, Plus, Trash2, FileText } from "lucide-react";
+import { Printer, Pencil, X, Plus, Trash2, FileText, Settings } from "lucide-react";
 import toast from "react-hot-toast";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import mrpData from "../../public/mrp_data.json";
 
 export default function QuotationGenerator() {
+
+  const [logoDataUri, setLogoDataUri] = useState(null);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState(null);
+
+  useEffect(() => {
+    fetch("/logo.jpeg")
+      .then(res => res.blob())
+      .then(blob => {
+        const reader = new FileReader();
+        reader.onloadend = () => setLogoDataUri(reader.result);
+        reader.readAsDataURL(blob);
+      })
+      .catch(console.error);
+  }, []);
+
   const [formData, setFormData] = useState({
     clientName: "",
     clientAddress: "",
@@ -41,31 +56,15 @@ export default function QuotationGenerator() {
 
   const printRef = useRef(null);
 
-  const handleDownloadPDF = async () => {
-    const toastId = toast.loading("Generating PDF...");
-    try {
-      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  
+  const generatePDFDocument = () => {
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const marginX = 15;
       let startY = 15;
 
-      let logoData = null;
-      try {
-        const res = await fetch("/logo.jpeg");
-        if (res.ok) {
-          const blob = await res.blob();
-          logoData = await new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.readAsDataURL(blob);
-          });
-        }
-      } catch (e) {
-        console.error("Logo fetch failed", e);
-      }
-
-      if (logoData) {
-        doc.addImage(logoData, 'JPEG', 210 - marginX - 45, 8, 45, 15);
-      }
+      if (logoDataUri) {
+      doc.addImage(logoDataUri, "JPEG", 210 - marginX - 45, 8, 45, 15);
+    }
 
       doc.setFont("times", "normal");
       doc.setFontSize(10.5);
@@ -147,12 +146,25 @@ export default function QuotationGenerator() {
         ]);
       }
 
+      // Dynamic sizing to try to keep it on a single page
+      let tableFontSize = 10;
+      let tableCellPadding = 1.5;
+      const numItems = formData.items.length;
+      
+      if (numItems > 25) {
+        tableFontSize = 8;
+        tableCellPadding = 0.5;
+      } else if (numItems > 15) {
+        tableFontSize = 9;
+        tableCellPadding = 1.0;
+      }
+
       autoTable(doc, {
         startY: startY,
         head: [tableColumn],
         body: tableRows,
         theme: 'grid',
-        styles: { font: 'times', fontSize: 10, textColor: 0, lineColor: 0, lineWidth: 0.3, cellPadding: 1.5 },
+        styles: { font: 'times', fontSize: tableFontSize, textColor: 0, lineColor: 0, lineWidth: 0.3, cellPadding: tableCellPadding },
         headStyles: { fillColor: [243, 244, 246], textColor: 0, fontStyle: 'bold', halign: 'center', valign: 'middle' },
         columnStyles: {
           0: { halign: 'center', cellWidth: 22 },
@@ -291,8 +303,25 @@ export default function QuotationGenerator() {
       startY += 8;
       doc.text("Stove Kraft Team", marginX, startY);
 
-      doc.save(`Quotation_${formData.clientName || "Draft"}.pdf`);
       
+    return doc;
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        const doc = generatePDFDocument();
+        setPdfPreviewUrl(doc.output('bloburl'));
+      } catch(e) { console.error("PDF Preview Error", e); }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [formData, config, logoDataUri]);
+
+  const handleDownloadPDF = async () => {
+    const toastId = toast.loading("Generating PDF...");
+    try {
+      const doc = generatePDFDocument();
+      doc.save(`Quotation_${formData.clientName || "Draft"}.pdf`);
       toast.success("PDF downloaded successfully!", { id: toastId });
     } catch (error) {
       console.error("Failed to generate PDF", error);
@@ -574,28 +603,28 @@ export default function QuotationGenerator() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 items-start mt-6 w-full pb-10">
+    <div className="flex flex-col lg:flex-row gap-4 sm:gap-8 items-start mt-4 sm:mt-6 w-full pb-10">
       
       {/* LEFT SIDE: Form */}
       <div className="w-full lg:w-1/3 flex flex-col gap-6">
         <div>
-          <h1 className="text-2xl font-normal text-[#202124] mb-2">Quotation Details</h1>
-          <p className="text-[#5f6368] text-sm">
+          <h1 className="text-2xl font-normal text-[#202124] dark:text-white mb-2">Quotation Details</h1>
+          <p className="text-[#5f6368] dark:text-gray-300 text-sm">
             Fill in the details below. The preview on the right will update in real-time.
           </p>
         </div>
 
-        <div className="bg-white border border-[#dadce0] rounded-xl shadow-sm p-5 space-y-4">
+        <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-[#dadce0] rounded-xl shadow-sm p-5 space-y-4">
           <div>
-            <label className="block text-xs font-medium text-[#5f6368] mb-1 uppercase tracking-wider">Client Name</label>
+            <label className="block text-xs font-medium text-[#5f6368] dark:text-gray-300 mb-1 uppercase tracking-wider">Client Name</label>
             <input type="text" name="clientName" value={formData.clientName} onChange={handleChange} className="google-input w-full p-2 text-sm" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-[#5f6368] mb-1 uppercase tracking-wider">Client Address</label>
+            <label className="block text-xs font-medium text-[#5f6368] dark:text-gray-300 mb-1 uppercase tracking-wider">Client Address</label>
             <textarea name="clientAddress" value={formData.clientAddress} onChange={handleChange} rows={3} className="google-input w-full p-2 text-sm resize-y" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-[#5f6368] mb-1 uppercase tracking-wider">Client GST (Optional)</label>
+            <label className="block text-xs font-medium text-[#5f6368] dark:text-gray-300 mb-1 uppercase tracking-wider">Client GST (Optional)</label>
             <input 
               type="text" 
               name="clientGst" 
@@ -610,41 +639,41 @@ export default function QuotationGenerator() {
             )}
           </div>
           <div>
-            <label className="block text-xs font-medium text-[#5f6368] mb-1 uppercase tracking-wider">Subject Line (Optional)</label>
+            <label className="block text-xs font-medium text-[#5f6368] dark:text-gray-300 mb-1 uppercase tracking-wider">Subject Line (Optional)</label>
             <input type="text" name="subject" value={formData.subject} onChange={handleChange} placeholder="Leave blank to auto-generate" className="google-input w-full p-2 text-sm" />
           </div>
           
           <div className="pt-2 border-t border-[#dadce0]">
-            <h2 className="text-sm font-semibold text-gray-800 mb-3">Items</h2>
+            <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">Items</h2>
             <div className="space-y-4">
               {formData.items.map((item, index) => (
-                <div key={item.id} className="relative bg-gray-50 border border-gray-200 p-3 rounded-lg">
+                <div key={item.id} className="relative bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 p-3 rounded-lg">
                   {formData.items.length > 1 && (
-                    <button onClick={() => removeItem(item.id)} className="absolute top-2 right-2 text-gray-400 hover:text-red-500">
+                    <button onClick={() => removeItem(item.id)} className="absolute top-2 right-2 text-gray-400 dark:text-gray-400 hover:text-red-500">
                       <Trash2 size={16} />
                     </button>
                   )}
-                  <p className="text-xs font-medium text-gray-500 mb-2">Item {index + 1}</p>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Item {index + 1}</p>
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-[10px] font-medium text-[#5f6368] mb-1 uppercase">Item Name</label>
+                      <label className="block text-[10px] font-medium text-[#5f6368] dark:text-gray-300 mb-1 uppercase">Item Name</label>
                       <input type="text" name="productName" value={item.productName} onChange={(e) => handleItemChange(item.id, e)} className="google-input w-full p-2 text-xs" />
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="block text-[10px] font-medium text-[#5f6368] mb-1 uppercase">Item Code</label>
+                        <label className="block text-[10px] font-medium text-[#5f6368] dark:text-gray-300 mb-1 uppercase">Item Code</label>
                         <input type="text" name="productCode" value={item.productCode} onChange={(e) => handleItemChange(item.id, e)} className="google-input w-full p-2 text-xs" />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-medium text-[#5f6368] mb-1 uppercase">Quantity</label>
+                        <label className="block text-[10px] font-medium text-[#5f6368] dark:text-gray-300 mb-1 uppercase">Quantity</label>
                         <input type="number" name="quantity" value={item.quantity} onChange={(e) => handleItemChange(item.id, e)} className="google-input w-full p-2 text-xs" />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-medium text-[#5f6368] mb-1 uppercase">Base Price (₹)</label>
+                        <label className="block text-[10px] font-medium text-[#5f6368] dark:text-gray-300 mb-1 uppercase">Base Price (₹)</label>
                         <input type="number" name="basePrice" value={item.basePrice} onChange={(e) => handleItemChange(item.id, e)} className="google-input w-full p-2 text-xs" />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-medium text-[#5f6368] mb-1 uppercase">GST (%)</label>
+                        <label className="block text-[10px] font-medium text-[#5f6368] dark:text-gray-300 mb-1 uppercase">GST (%)</label>
                         <input type="number" name="gstPercent" value={item.gstPercent} onChange={(e) => handleItemChange(item.id, e)} className="google-input w-full p-2 text-xs" />
                       </div>
                     </div>
@@ -653,11 +682,15 @@ export default function QuotationGenerator() {
               ))}
             </div>
             
-            <button onClick={addItem} className="mt-3 flex items-center justify-center gap-1 w-full text-sm font-medium text-[#1a73e8] hover:text-[#1557b0] py-2 bg-blue-50/50 hover:bg-blue-50 rounded transition-colors">
+            <button onClick={addItem} className="mt-3 flex items-center justify-center gap-1 w-full text-sm font-medium text-[#1a73e8] hover:text-[#1557b0] py-2 bg-blue-50 dark:bg-blue-900/30/50 hover:bg-blue-50 dark:bg-blue-900/30 rounded transition-colors">
               <Plus size={16} /> Add Another Item
             </button>
           </div>
           
+          
+          <button onClick={() => setShowModal(true)} className="mt-2 mb-4 flex items-center justify-center gap-2 w-full text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white py-2.5 bg-white/60 dark:bg-slate-800/60 hover:bg-white/80 backdrop-blur-md rounded transition-colors border border-gray-300 dark:border-slate-600">
+            <Settings size={16} /> Configure Company & Bank Details
+          </button>
           <div className="pt-4 border-t border-[#dadce0] flex flex-col gap-3">
             <div className="flex gap-3">
               <motion.button
@@ -680,15 +713,15 @@ export default function QuotationGenerator() {
                 Word
               </motion.button>
             </div>
-            <p className="text-xs text-center text-[#5f6368]">
+            <p className="text-xs text-center text-[#5f6368] dark:text-gray-300">
               Select "Save as PDF" in the print dialog for perfect margins.
             </p>
           </div>
         </div>
       </div>
 
-      {/* RIGHT SIDE: Live A4 Preview */}
-      <div className="w-full lg:w-2/3 flex justify-center overflow-x-auto bg-[#f1f3f4] p-4 rounded-xl border border-[#dadce0]">
+      {/* RIGHT SIDE: Live A4 Preview - scrollable on mobile */}
+      <div className="w-full lg:w-2/3 overflow-x-auto bg-gray-100 dark:bg-slate-900/80 backdrop-blur-[28px] backdrop-saturate-[120%] p-2 sm:p-4 rounded-xl border border-[#dadce0] dark:border-slate-700">
         
         {/* A4 Page Container */}
         <div 
@@ -763,7 +796,7 @@ export default function QuotationGenerator() {
                 })}
                 {/* Grand Total Row (Only show if multiple items) */}
                 {formData.items.length > 1 && (
-                  <tr className="bg-gray-50 font-bold">
+                  <tr className="bg-gray-50 dark:bg-slate-800/50 font-bold">
                     <td colSpan={4} className="border border-black p-1 text-right pr-4">Grand Total:</td>
                     <td className="border border-black p-1">{grandTotals.amount > 0 ? grandTotals.amount.toLocaleString("en-IN") : ""}</td>
                     <td className="border border-black p-1">{grandTotals.gstAmount > 0 ? grandTotals.gstAmount.toLocaleString("en-IN") : ""}</td>
@@ -782,7 +815,7 @@ export default function QuotationGenerator() {
 
             <div className="flex items-center gap-2 mb-1">
               <p className="font-bold text-[#1a237e]">Company Address</p>
-              <button onClick={() => setShowModal(true)} className="text-gray-400 hover:text-blue-600 print:hidden" title="Edit Details">
+              <button onClick={() => setShowModal(true)} className="text-gray-400 dark:text-gray-400 hover:text-blue-600 print:hidden" title="Edit Details">
                 <Pencil size={14} />
               </button>
             </div>
@@ -797,7 +830,7 @@ export default function QuotationGenerator() {
 
             <div className="flex items-center gap-2 mb-1">
               <p className="font-bold text-[#1a237e] underline text-[12pt]">Bank Details</p>
-              <button onClick={() => setShowModal(true)} className="text-gray-400 hover:text-blue-600 print:hidden" title="Edit Details">
+              <button onClick={() => setShowModal(true)} className="text-gray-400 dark:text-gray-400 hover:text-blue-600 print:hidden" title="Edit Details">
                 <Pencil size={14} />
               </button>
             </div>
@@ -852,11 +885,11 @@ export default function QuotationGenerator() {
               initial={{ scale: 0.95, y: 10 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 10 }}
-              className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col"
+              className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col"
             >
-              <div className="flex justify-between items-center p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
-                <h2 className="text-lg font-bold text-gray-800">Edit Details</h2>
-                <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-800">
+              <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-slate-700 sticky top-0 bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] z-10">
+                <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200">Edit Details</h2>
+                <button onClick={() => setShowModal(false)} className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200">
                   <X size={20} />
                 </button>
               </div>
@@ -866,27 +899,27 @@ export default function QuotationGenerator() {
                   <h3 className="font-medium text-[#1a73e8] mb-3 border-b pb-1">Bank Details</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Beneficiary</label>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Beneficiary</label>
                       <input type="text" name="beneficiary" value={config.beneficiary} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Bank Name</label>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Bank Name</label>
                       <input type="text" name="bankName" value={config.bankName} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Account No</label>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Account No</label>
                       <input type="text" name="accountNo" value={config.accountNo} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">IFSC Code</label>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">IFSC Code</label>
                       <input type="text" name="ifscCode" value={config.ifscCode} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Branch</label>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Branch</label>
                       <input type="text" name="branch" value={config.branch} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Branch Address</label>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Branch Address</label>
                       <input type="text" name="branchAddress" value={config.branchAddress} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
                     </div>
                   </div>
@@ -896,34 +929,34 @@ export default function QuotationGenerator() {
                   <h3 className="font-medium text-[#1a73e8] mb-3 border-b pb-1">Company Address</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Company Name</label>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Company Name</label>
                       <input type="text" name="companyName" value={config.companyName} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">GST Number</label>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">GST Number</label>
                       <input type="text" name="companyGst" value={config.companyGst} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Building No./Flat No.</label>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Building No./Flat No.</label>
                       <input type="text" name="buildingNo" value={config.buildingNo} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Road/Street</label>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Road/Street</label>
                       <input type="text" name="roadStreet" value={config.roadStreet} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">City/Town/Village</label>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">City/Town/Village</label>
                       <input type="text" name="cityTown" value={config.cityTown} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-medium text-gray-600 mb-1">District, State, Pin</label>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">District, State, Pin</label>
                       <input type="text" name="districtState" value={config.districtState} onChange={handleConfigChange} className="google-input w-full p-2 text-sm" />
                     </div>
                   </div>
                 </div>
               </div>
               
-              <div className="p-4 border-t border-gray-200 bg-gray-50 flex justify-end">
+              <div className="p-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 flex justify-end">
                 <button onClick={() => setShowModal(false)} className="bg-[#1a73e8] hover:bg-[#1557b0] text-white px-5 py-2 rounded shadow transition-colors text-sm font-medium">
                   Done
                 </button>

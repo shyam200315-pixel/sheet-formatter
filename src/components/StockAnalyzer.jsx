@@ -231,14 +231,14 @@ export default function StockAnalyzer() {
   // Render initial upload screen
   if (!stockData) {
     return (
-      <div className="flex flex-col items-center mt-12 w-full max-w-3xl mx-auto">
-        <div className="mb-6 bg-[#e8f0fe] p-4 rounded-full text-[#1a73e8]">
+      <div className="flex flex-col items-center mt-6">
+        <div className="p-4 rounded-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#1a73e8] mb-6 shadow-sm icon-database inline-block">
           <Database size={48} />
         </div>
-        <h1 className="text-3xl font-normal text-[#202124] mb-3 text-center tracking-tight">
+        <h1 className="text-3xl font-normal text-[#202124] dark:text-white mb-3 text-center tracking-tight">
           Stock Analyzer
         </h1>
-        <p className="text-[#5f6368] mb-10 text-center max-w-lg text-lg">
+        <p className="text-[#5f6368] dark:text-gray-300 mb-10 text-center max-w-lg text-lg">
           Upload your Closing Stock Excel file to instantly analyze inventory, find scrap, and track category distribution across all branches.
         </p>
 
@@ -254,7 +254,7 @@ export default function StockAnalyzer() {
           <label 
             htmlFor="stock-upload" 
             className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${
-              isParsing ? 'bg-[#f1f3f4] border-[#dadce0]' : 'bg-[#f8fafd] border-[#8ab4f8] hover:bg-[#e8f0fe]'
+              isParsing ? 'bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border-[#dadce0]' : 'bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border-[#8ab4f8] hover:bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)]'
             }`}
           >
             {isParsing ? (
@@ -263,10 +263,12 @@ export default function StockAnalyzer() {
                 <p className="text-sm text-[#1a73e8] font-medium">Analyzing Stock Data...</p>
               </div>
             ) : (
-              <div className="flex flex-col items-center">
-                <UploadCloud size={48} className="text-[#1a73e8] mb-4 opacity-80" />
+              <div className="text-center py-12 px-4 rounded-xl border-2 border-dashed border-gray-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] shadow-sm flex flex-col items-center justify-center">
+                <div className="icon-upload inline-block">
+                  <UploadCloud size={48} className="text-[#1a73e8] mb-4 opacity-80" />
+                </div>
                 <p className="text-lg font-medium text-[#1a73e8] mb-1">Click to Upload Stock File</p>
-                <p className="text-sm text-[#5f6368]">Supports .xlsx and .xls formats</p>
+                <p className="text-sm text-[#5f6368] dark:text-gray-300">Supports .xlsx and .xls formats</p>
               </div>
             )}
           </label>
@@ -286,18 +288,18 @@ export default function StockAnalyzer() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleReset}
-            className="p-2 rounded-full hover:bg-[rgba(60,64,67,0.08)] text-[#5f6368] transition-colors"
+            className="p-2 rounded-full hover:bg-[rgba(60,64,67,0.08)] text-[#5f6368] dark:text-gray-300 transition-colors"
           >
             <ArrowLeft size={24} />
           </button>
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="badge badge-primary bg-[#e8f0fe] text-[#1a73e8]">Analysis Active</span>
-              <span className="text-[#5f6368] text-sm flex items-center gap-1 font-medium">
+              <span className="badge badge-primary bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#1a73e8]">Analysis Active</span>
+              <span className="text-[#5f6368] dark:text-gray-300 text-sm flex items-center gap-1 font-medium">
                 <Database size={14} /> {stockData.length.toLocaleString()} Records Loaded
               </span>
             </div>
-            <h1 className="text-3xl font-normal tracking-tight text-[#202124]">
+            <h1 className="text-3xl font-normal tracking-tight text-[#202124] dark:text-white">
               Inventory Insights
             </h1>
           </div>
@@ -305,16 +307,16 @@ export default function StockAnalyzer() {
       </div>
 
       {/* Filters */}
-      <div className="google-card p-4 mb-8 bg-white shadow-sm flex flex-col md:flex-row gap-4 items-end">
+      <div className="google-card p-4 mb-8 bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] shadow-sm flex flex-col md:flex-row gap-4 items-end">
         <div className="flex-1 w-full">
-          <label className="flex items-center gap-2 text-sm font-medium text-[#5f6368] mb-2">
+          <label className="flex items-center gap-2 text-sm font-medium text-[#5f6368] dark:text-gray-300 mb-2">
             <Store size={16} /> Select Branch
           </label>
           <div className="relative">
             <select
               value={selectedStore}
               onChange={(e) => setSelectedStore(e.target.value)}
-              className="w-full appearance-none bg-[#f1f3f4] border-none rounded-lg px-4 py-3 text-[#202124] focus:ring-2 focus:ring-[#1a73e8] outline-none font-medium transition-shadow cursor-pointer"
+              className="w-full appearance-none bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border-none rounded-lg px-4 py-3 text-[#202124] dark:text-white focus:ring-2 focus:ring-[#1a73e8] outline-none font-medium transition-shadow cursor-pointer"
             >
               <option value="All Stores">All Stores</option>
               {stores.map(s => (
@@ -322,20 +324,20 @@ export default function StockAnalyzer() {
               ))}
             </select>
             <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-              <svg className="w-4 h-4 text-[#5f6368]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+              <svg className="w-4 h-4 text-[#5f6368] dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
             </div>
           </div>
         </div>
 
         <div className="flex-1 w-full">
-          <label className="flex items-center gap-2 text-sm font-medium text-[#5f6368] mb-2">
+          <label className="flex items-center gap-2 text-sm font-medium text-[#5f6368] dark:text-gray-300 mb-2">
             <Layers size={16} /> Category (Gender)
           </label>
           <div className="relative">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full appearance-none bg-[#f1f3f4] border-none rounded-lg px-4 py-3 text-[#202124] focus:ring-2 focus:ring-[#1a73e8] outline-none font-medium transition-shadow cursor-pointer"
+              className="w-full appearance-none bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border-none rounded-lg px-4 py-3 text-[#202124] dark:text-white focus:ring-2 focus:ring-[#1a73e8] outline-none font-medium transition-shadow cursor-pointer"
             >
               <option value="All Categories">All Categories</option>
               {categories.map(c => (
@@ -343,13 +345,13 @@ export default function StockAnalyzer() {
               ))}
             </select>
             <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-              <svg className="w-4 h-4 text-[#5f6368]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+              <svg className="w-4 h-4 text-[#5f6368] dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
             </div>
           </div>
         </div>
 
         <div className="flex-1 w-full relative">
-          <label className="flex items-center gap-2 text-sm font-medium text-[#5f6368] mb-2">
+          <label className="flex items-center gap-2 text-sm font-medium text-[#5f6368] dark:text-gray-300 mb-2">
             <Search size={16} /> Search Items
           </label>
           <input
@@ -357,9 +359,9 @@ export default function StockAnalyzer() {
             placeholder="Search by name or barcode..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-[#f1f3f4] border-none rounded-lg pl-10 pr-4 py-3 text-[#202124] focus:ring-2 focus:ring-[#1a73e8] outline-none transition-shadow"
+            className="w-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border-none rounded-lg pl-10 pr-4 py-3 text-[#202124] dark:text-white focus:ring-2 focus:ring-[#1a73e8] outline-none transition-shadow"
           />
-          <Search size={18} className="absolute left-3 bottom-3.5 text-[#5f6368]" />
+          <Search size={18} className="absolute left-3 bottom-3.5 text-[#5f6368] dark:text-gray-300" />
         </div>
       </div>
 
@@ -370,13 +372,13 @@ export default function StockAnalyzer() {
             <Package size={120} />
           </div>
           <div className="relative z-10">
-            <span className="text-[#5f6368] text-sm font-medium tracking-wide flex items-center gap-2 mb-4">
+            <span className="text-[#5f6368] dark:text-gray-300 text-sm font-medium tracking-wide flex items-center gap-2 mb-4">
               <span className="w-2 h-2 rounded-full bg-[#1a73e8]"></span> Total Quantity
             </span>
             <h2 className="text-4xl font-normal tracking-tight text-[#1a73e8]">
               {metrics.qty.toLocaleString()}
             </h2>
-            <p className="text-xs text-[#5f6368] mt-2 font-medium">Units in stock</p>
+            <p className="text-xs text-[#5f6368] dark:text-gray-300 mt-2 font-medium">Units in stock</p>
           </div>
         </div>
 
@@ -385,13 +387,13 @@ export default function StockAnalyzer() {
             <DollarSign size={120} />
           </div>
           <div className="relative z-10">
-            <span className="text-[#5f6368] text-sm font-medium tracking-wide flex items-center gap-2 mb-4">
+            <span className="text-[#5f6368] dark:text-gray-300 text-sm font-medium tracking-wide flex items-center gap-2 mb-4">
               <span className="w-2 h-2 rounded-full bg-[#137333]"></span> Total Value
             </span>
             <h2 className="text-4xl font-normal tracking-tight text-[#137333]">
               {formatCurrency(metrics.val)}
             </h2>
-            <p className="text-xs text-[#5f6368] mt-2 font-medium">Landed cost valuation</p>
+            <p className="text-xs text-[#5f6368] dark:text-gray-300 mt-2 font-medium">Landed cost valuation</p>
           </div>
         </div>
 
@@ -400,13 +402,13 @@ export default function StockAnalyzer() {
             <Layers size={120} />
           </div>
           <div className="relative z-10">
-            <span className="text-[#5f6368] text-sm font-medium tracking-wide flex items-center gap-2 mb-4">
+            <span className="text-[#5f6368] dark:text-gray-300 text-sm font-medium tracking-wide flex items-center gap-2 mb-4">
               <span className="w-2 h-2 rounded-full bg-[#f29900]"></span> Unique Items
             </span>
             <h2 className="text-4xl font-normal tracking-tight text-[#e65100]">
               {metrics.unique.toLocaleString()}
             </h2>
-            <p className="text-xs text-[#5f6368] mt-2 font-medium">Distinct models/SKUs</p>
+            <p className="text-xs text-[#5f6368] dark:text-gray-300 mt-2 font-medium">Distinct models/SKUs</p>
           </div>
         </div>
       </div>
@@ -417,7 +419,7 @@ export default function StockAnalyzer() {
         {/* Chart Area */}
         <div className="lg:col-span-1">
           <div className="google-card p-6 h-full min-h-[400px]">
-            <h3 className="text-lg font-medium text-[#202124] mb-1">
+            <h3 className="text-lg font-medium text-[#202124] dark:text-white mb-1">
               {searchTerm !== "" && selectedStore === "All Stores"
                 ? "Search Results by Branch"
                 : selectedStore !== "All Stores" && selectedCategory !== "All Categories" 
@@ -426,7 +428,7 @@ export default function StockAnalyzer() {
                   ? "Distribution by Branch" 
                   : "Distribution by Category"}
             </h3>
-            <p className="text-xs text-[#5f6368] mb-6">Top items sorted by stock volume</p>
+            <p className="text-xs text-[#5f6368] dark:text-gray-300 mb-6">Top items sorted by stock volume</p>
             
             <div className="w-full h-[300px]">
               {chartData.length > 0 ? (
@@ -477,7 +479,7 @@ export default function StockAnalyzer() {
                   )}
                 </ResponsiveContainer>
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-[#5f6368] text-sm">
+                <div className="w-full h-full flex items-center justify-center text-[#5f6368] dark:text-gray-300 text-sm">
                   No data to display
                 </div>
               )}
@@ -487,7 +489,7 @@ export default function StockAnalyzer() {
             {searchTerm === "" && selectedStore === "All Stores" && selectedCategory === "All Categories" && chartData.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-2 justify-center">
                 {chartData.slice(0, 8).map((entry, index) => (
-                  <div key={entry.name} className="flex items-center gap-1.5 text-xs text-[#5f6368]">
+                  <div key={entry.name} className="flex items-center gap-1.5 text-xs text-[#5f6368] dark:text-gray-300">
                     <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
                     <span className="truncate max-w-[80px]" title={entry.name}>{entry.name}</span>
                   </div>
@@ -500,17 +502,17 @@ export default function StockAnalyzer() {
         {/* Detailed Table Area */}
         <div className="lg:col-span-2">
           <div className="google-card p-0 overflow-hidden flex flex-col h-full max-h-[600px]">
-            <div className="p-5 border-b border-[#dadce0] bg-[#f8f9fa] flex justify-between items-center">
+            <div className="p-5 border-b border-[#dadce0] bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] flex justify-between items-center">
               <div>
-                <h3 className="text-lg font-medium text-[#202124]">Detailed Stock Breakdown</h3>
-                <p className="text-xs text-[#5f6368] mt-0.5">Showing {filteredData.length} records</p>
+                <h3 className="text-lg font-medium text-[#202124] dark:text-white">Detailed Stock Breakdown</h3>
+                <p className="text-xs text-[#5f6368] dark:text-gray-300 mt-0.5">Showing {filteredData.length} records</p>
               </div>
             </div>
             
-            <div className="flex-1 overflow-auto bg-white">
+            <div className="flex-1 overflow-auto bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)]">
               <table className="w-full text-left text-sm whitespace-nowrap">
-                <thead className="sticky top-0 bg-white border-b border-[#dadce0] shadow-sm z-10">
-                  <tr className="text-[#5f6368] font-medium text-xs uppercase tracking-wider">
+                <thead className="sticky top-0 bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border-b border-[#dadce0] shadow-sm z-10">
+                  <tr className="text-[#5f6368] dark:text-gray-300 font-medium text-xs uppercase tracking-wider">
                     <th className="px-6 py-4 font-medium">Item Details</th>
                     {selectedStore === "All Stores" && (
                       <th className="px-6 py-4 font-medium">Branch</th>
@@ -523,38 +525,38 @@ export default function StockAnalyzer() {
                 <tbody className="divide-y divide-[#f1f3f4]">
                   {filteredData.length === 0 ? (
                     <tr>
-                      <td colSpan={selectedStore === "All Stores" ? "5" : "4"} className="px-6 py-12 text-center text-[#5f6368]">
+                      <td colSpan={selectedStore === "All Stores" ? "5" : "4"} className="px-6 py-12 text-center text-[#5f6368] dark:text-gray-300">
                         <Package size={32} className="mx-auto mb-3 opacity-20" />
                         <p>No items found matching the selected filters.</p>
                       </td>
                     </tr>
                   ) : (
                     filteredData.slice(0, 100).map((row, idx) => (
-                      <tr key={row.id} className="hover:bg-[#f8f9fa] transition-colors group">
+                      <tr key={row.id} className="hover:bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] transition-colors group">
                         <td className="px-6 py-3">
                           <div className="flex flex-col">
-                            <span className="font-medium text-[#202124] text-wrap line-clamp-2 leading-tight max-w-sm whitespace-normal">
+                            <span className="font-medium text-[#202124] dark:text-white text-wrap line-clamp-2 leading-tight max-w-sm whitespace-normal">
                               {row.description}
                             </span>
                             <div className="flex items-center gap-2 mt-1 flex-wrap">
-                              <span className="text-[11px] text-[#5f6368] font-mono bg-[#f1f3f4] px-1.5 py-0.5 rounded" title="Item Name">
+                              <span className="text-[11px] text-[#5f6368] dark:text-gray-300 font-mono bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] px-1.5 py-0.5 rounded" title="Item Name">
                                 {row.item}
                               </span>
-                              <span className="text-[11px] text-[#5f6368] font-mono bg-[#f1f3f4] px-1.5 py-0.5 rounded" title="Barcode">
+                              <span className="text-[11px] text-[#5f6368] dark:text-gray-300 font-mono bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] px-1.5 py-0.5 rounded" title="Barcode">
                                 {row.barcode}
                               </span>
                               <span className="text-[11px] text-[#0f9d58] bg-[#e6f4ea] px-1.5 py-0.5 rounded font-medium">
                                 {row.mainProduct}
                               </span>
                               {selectedCategory === "All Categories" && (
-                                <span className="text-[11px] text-[#1a73e8] bg-[#e8f0fe] px-1.5 py-0.5 rounded font-medium">
+                                <span className="text-[11px] text-[#1a73e8] bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] px-1.5 py-0.5 rounded font-medium">
                                   {row.gender}
                                 </span>
                               )}
                               <span className={`md:hidden px-1.5 py-0.5 rounded text-[11px] font-medium ${
                                 row.godown.toUpperCase().includes('EXCHANGE') 
                                   ? 'bg-[#fce8e6] text-[#c5221f]' 
-                                  : 'bg-[#f1f3f4] text-[#5f6368]'
+                                  : 'bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#5f6368] dark:text-gray-300'
                               }`}>
                                 {row.godown}
                               </span>
@@ -564,31 +566,31 @@ export default function StockAnalyzer() {
                         {selectedStore === "All Stores" && (
                           <td className="px-6 py-3">
                             <div className="flex flex-col">
-                              <span className="font-medium text-[#202124] text-xs">
+                              <span className="font-medium text-[#202124] dark:text-white text-xs">
                                 {row.branch.split('-')[0].trim()}
                               </span>
-                              <span className="text-[10px] text-[#5f6368] truncate max-w-[140px]" title={row.branch}>
+                              <span className="text-[10px] text-[#5f6368] dark:text-gray-300 truncate max-w-[140px]" title={row.branch}>
                                 {row.branch.split('-').slice(1).join('-').trim()}
                               </span>
                             </div>
                           </td>
                         )}
-                        <td className="px-6 py-3 text-[#5f6368] hidden md:table-cell">
+                        <td className="px-6 py-3 text-[#5f6368] dark:text-gray-300 hidden md:table-cell">
                           <span className={`px-2 py-1 rounded text-xs font-medium ${
                             row.godown.toUpperCase().includes('EXCHANGE') 
                               ? 'bg-[#fce8e6] text-[#c5221f]' 
-                              : 'bg-[#f1f3f4] text-[#5f6368]'
+                              : 'bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#5f6368] dark:text-gray-300'
                           }`}>
                             {row.godown}
                           </span>
                         </td>
                         <td className="px-6 py-3 text-right">
                           <div className="flex flex-col items-end">
-                            <span className="font-medium text-[#202124] text-base">{row.stock}</span>
-                            <span className="sm:hidden text-[10px] text-[#5f6368]">{formatCurrency(row.value)}</span>
+                            <span className="font-medium text-[#202124] dark:text-white text-base">{row.stock}</span>
+                            <span className="sm:hidden text-[10px] text-[#5f6368] dark:text-gray-300">{formatCurrency(row.value)}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-3 text-[#5f6368] text-right hidden sm:table-cell">
+                        <td className="px-6 py-3 text-[#5f6368] dark:text-gray-300 text-right hidden sm:table-cell">
                           {formatCurrency(row.value)}
                         </td>
                       </tr>
@@ -597,7 +599,7 @@ export default function StockAnalyzer() {
                 </tbody>
               </table>
               {filteredData.length > 100 && (
-                <div className="p-4 text-center text-xs text-[#5f6368] bg-[#f8f9fa] border-t border-[#f1f3f4]">
+                <div className="p-4 text-center text-xs text-[#5f6368] dark:text-gray-300 bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border-t border-[#f1f3f4]">
                   Showing top 100 results. Please use search or filters to narrow down.
                 </div>
               )}

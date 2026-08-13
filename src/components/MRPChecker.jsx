@@ -53,18 +53,18 @@ export default function MRPChecker() {
   return (
     <div className="w-full max-w-3xl mx-auto mt-4">
       <div className="google-card p-8">
-        <h2 className="text-2xl font-semibold mb-6 flex items-center justify-center gap-2 text-gray-800">
+        <h2 className="text-2xl font-semibold mb-6 flex items-center justify-center gap-2 text-gray-800 dark:text-gray-200">
           <Tag className="text-[#1a73e8]" size={28} />
           MRP Checker
         </h2>
         
         <div className="relative mb-8 max-w-lg mx-auto">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
+            <Search className="h-5 w-5 text-gray-400 dark:text-gray-400" />
           </div>
           <input
             type="text"
-            className="block w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-full leading-5 bg-white placeholder-gray-400 focus:outline-none focus:border-[#1a73e8] focus:ring-0 transition-colors sm:text-lg font-mono shadow-sm"
+            className="block w-full pl-12 pr-4 py-4 border-2 border-gray-200 dark:border-slate-700 rounded-full leading-5 bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] placeholder-gray-400 focus:outline-none focus:border-[#1a73e8] focus:ring-0 transition-colors sm:text-lg font-mono shadow-sm"
             placeholder="Enter Item Code (e.g. 19000002)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -79,7 +79,7 @@ export default function MRPChecker() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="text-center text-gray-500 py-10"
+              className="text-center text-gray-500 dark:text-gray-400 py-10"
             >
               <div className="w-8 h-8 border-4 border-[#1a73e8] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
               Loading database...
@@ -92,15 +92,15 @@ export default function MRPChecker() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="bg-[#f8f9fa] rounded-xl p-6 border border-[#dadce0]"
+              className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] rounded-xl p-6 border border-[#dadce0]"
             >
               <div className="mb-6 text-center">
-                <h3 className="text-xl font-bold text-gray-900 mb-1">{resultInfo.data.name}</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">{resultInfo.data.name}</h3>
                 <div className="flex flex-col items-center justify-center gap-3">
                   <div className="flex items-center justify-center gap-2">
-                    <p className="text-sm text-gray-500 font-mono tracking-wider">HANA CODE: {resultInfo.hanaCode}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 font-mono tracking-wider">HANA CODE: {resultInfo.hanaCode}</p>
                     {resultInfo.isSapCode && (
-                      <span className="bg-[#e8f0fe] text-[#1a73e8] text-xs px-2 py-0.5 rounded font-medium">
+                      <span className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#1a73e8] text-xs px-2 py-0.5 rounded font-medium">
                         Matched via SAP: {resultInfo.originalQuery}
                       </span>
                     )}
@@ -109,7 +109,7 @@ export default function MRPChecker() {
                     href={`https://www.google.com/search?q=${encodeURIComponent(resultInfo.data.name + " HSN Code and GST Slab")}`} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-medium text-[#1a73e8] bg-[#e8f0fe] px-3 py-1.5 rounded-full hover:bg-[#d2e3fc] transition-colors shadow-sm"
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-[#1a73e8] bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] px-3 py-1.5 rounded-full hover:bg-[#d2e3fc] transition-colors shadow-sm"
                   >
                     <Search size={14} />
                     Search HSN & GST on Google
@@ -118,27 +118,27 @@ export default function MRPChecker() {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200 flex flex-col items-center justify-center">
-                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Old MRP (25-26)</span>
-                  <span className="text-2xl font-bold text-gray-800">₹{resultInfo.data.old_mrp}</span>
+                <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] p-5 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 flex flex-col items-center justify-center">
+                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Old MRP (25-26)</span>
+                  <span className="text-2xl font-bold text-gray-800 dark:text-gray-200">₹{resultInfo.data.old_mrp}</span>
                 </div>
                 
-                <div className="bg-white p-5 rounded-lg shadow-sm border-2 border-[#1a73e8] border-opacity-20 flex flex-col items-center justify-center relative">
+                <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] p-5 rounded-lg shadow-sm border-2 border-[#1a73e8] border-opacity-20 flex flex-col items-center justify-center relative">
                   <span className="text-xs font-semibold text-[#1a73e8] uppercase tracking-wider mb-2">New MRP (26-27)</span>
-                  <span className="text-2xl font-bold text-gray-800">
+                  <span className="text-2xl font-bold text-gray-800 dark:text-gray-200">
                     {resultInfo.data.new_mrp === "Not Available" ? (
-                      <span className="text-sm font-normal text-gray-500">Not Available</span>
+                      <span className="text-sm font-normal text-gray-500 dark:text-gray-400">Not Available</span>
                     ) : (
                       `₹${resultInfo.data.new_mrp}`
                     )}
                   </span>
                 </div>
 
-                <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200 flex flex-col items-center justify-center">
-                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Difference</span>
+                <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] p-5 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 flex flex-col items-center justify-center">
+                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Difference</span>
                   <div className="flex items-center gap-1">
                     {resultInfo.data.difference === "N/A" ? (
-                      <span className="text-sm font-normal text-gray-500">N/A</span>
+                      <span className="text-sm font-normal text-gray-500 dark:text-gray-400">N/A</span>
                     ) : (
                       <>
                         {Number(resultInfo.data.difference) > 0 ? (
@@ -146,9 +146,9 @@ export default function MRPChecker() {
                         ) : Number(resultInfo.data.difference) < 0 ? (
                           <TrendingDown size={24} className="text-red-500" />
                         ) : (
-                          <Minus size={24} className="text-gray-400" />
+                          <Minus size={24} className="text-gray-400 dark:text-gray-400" />
                         )}
-                        <span className={`text-2xl font-bold ${Number(resultInfo.data.difference) > 0 ? 'text-green-600' : Number(resultInfo.data.difference) < 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                        <span className={`text-2xl font-bold ${Number(resultInfo.data.difference) > 0 ? 'text-green-600' : Number(resultInfo.data.difference) < 0 ? 'text-red-600' : 'text-gray-600 dark:text-gray-300'}`}>
                           {Number(resultInfo.data.difference) > 0 ? '+' : ''}{resultInfo.data.difference}
                         </span>
                       </>
@@ -167,7 +167,7 @@ export default function MRPChecker() {
               )}
 
               {resultInfo.data.source === "pdf" && (
-                <div className="mt-6 flex items-start gap-3 text-purple-700 bg-purple-50 p-4 rounded-lg text-sm border border-purple-200">
+                <div className="mt-6 flex items-start gap-3 text-purple-700 bg-purple-50 dark:bg-purple-900/30 p-4 rounded-lg text-sm border border-purple-200">
                   <Info size={18} className="mt-0.5 flex-shrink-0" />
                   <div>
                     <strong>Note:</strong> This item was entirely missing from the Excel sheets and was found in the 2025-26 PDF Catalogue instead. Pricing has been omitted as the catalogue MRPs are outdated.
@@ -183,10 +183,10 @@ export default function MRPChecker() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="text-center p-12 text-gray-500 bg-gray-50 rounded-xl border border-gray-100"
+              className="text-center p-12 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-slate-800/50 rounded-xl border border-gray-100"
             >
               <Search className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-              <p className="text-lg font-medium text-gray-900">Code Not Found</p>
+              <p className="text-lg font-medium text-gray-900 dark:text-white">Code Not Found</p>
               <p className="text-sm mt-2 max-w-sm mx-auto">We couldn't find '{searchQuery}' in either the Updated MRP or Master files.</p>
             </motion.div>
           )}

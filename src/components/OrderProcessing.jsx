@@ -286,8 +286,8 @@ export default function OrderProcessing() {
   return (
     <div className="w-full flex flex-col items-center animate-in fade-in zoom-in-95 duration-200">
       <div className="text-center mb-10 mt-6">
-        <h1 className="text-3xl font-normal text-[#202124] mb-3">Order Processing</h1>
-        <p className="text-[#5f6368] max-w-xl mx-auto">
+        <h1 className="text-3xl font-normal text-[#202124] dark:text-white mb-3">Order Processing</h1>
+        <p className="text-[#5f6368] dark:text-gray-300 max-w-xl mx-auto">
           Upload your Order Requirement and Closing Stocks sheets. The system will match items by code and update the billing status based on stock availability.
         </p>
       </div>
@@ -345,28 +345,28 @@ export default function OrderProcessing() {
         </div>
       ) : (
         <div className="w-full max-w-6xl flex flex-col gap-6">
-          <div className="bg-white border border-[#dadce0] rounded-xl shadow-sm overflow-hidden flex flex-col">
-            <div className="px-6 py-4 border-b border-[#dadce0] flex items-center justify-between bg-[#f8f9fa] flex-wrap gap-4">
+          <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-[#dadce0] rounded-xl shadow-sm overflow-hidden flex flex-col">
+            <div className="px-6 py-4 border-b border-[#dadce0] flex items-center justify-between bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] flex-wrap gap-4">
               <div className="flex items-center gap-3">
                 <Table2 className="text-[#1a73e8]" size={24} />
-                <h2 className="text-lg font-medium text-[#202124]">Data Preview</h2>
+                <h2 className="text-lg font-medium text-[#202124] dark:text-white">Data Preview</h2>
               </div>
-              <div className="flex bg-white rounded-lg border border-[#dadce0] p-1">
+              <div className="flex bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] rounded-lg border border-[#dadce0] p-1">
                 <button
                   onClick={() => setFilter("all")}
-                  className={`px-3 py-1 text-sm font-medium rounded-md ${filter === "all" ? "bg-[#e8f0fe] text-[#1a73e8]" : "text-[#5f6368] hover:bg-[#f1f3f4]"}`}
+                  className={`px-3 py-1 text-sm font-medium rounded-md ${filter === "all" ? "bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#1a73e8]" : "text-[#5f6368] dark:text-gray-300 hover:bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)]"}`}
                 >
                   All ({previewData.length})
                 </button>
                 <button
                   onClick={() => setFilter("processed")}
-                  className={`px-3 py-1 text-sm font-medium rounded-md ${filter === "processed" ? "bg-[#e6f4ea] text-[#137333]" : "text-[#5f6368] hover:bg-[#f1f3f4]"}`}
+                  className={`px-3 py-1 text-sm font-medium rounded-md ${filter === "processed" ? "bg-[#e6f4ea] text-[#137333]" : "text-[#5f6368] dark:text-gray-300 hover:bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)]"}`}
                 >
                   Processed ({previewData.filter(r => r["Billing Status"] === "processed").length})
                 </button>
                 <button
                   onClick={() => setFilter("not processed")}
-                  className={`px-3 py-1 text-sm font-medium rounded-md ${filter === "not processed" ? "bg-[#fce8e6] text-[#c5221f]" : "text-[#5f6368] hover:bg-[#f1f3f4]"}`}
+                  className={`px-3 py-1 text-sm font-medium rounded-md ${filter === "not processed" ? "bg-[#fce8e6] text-[#c5221f]" : "text-[#5f6368] dark:text-gray-300 hover:bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)]"}`}
                 >
                   Not Processed ({previewData.filter(r => r["Billing Status"] === "not processed").length})
                 </button>
@@ -375,7 +375,7 @@ export default function OrderProcessing() {
             
             <div className="overflow-x-auto max-h-[500px]">
               <table className="w-full text-sm text-left whitespace-nowrap">
-                <thead className="text-xs text-[#5f6368] uppercase bg-[#f8f9fa] sticky top-0 z-10 shadow-sm">
+                <thead className="text-xs text-[#5f6368] dark:text-gray-300 uppercase bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] sticky top-0 z-10 shadow-sm">
                   <tr>
                     {previewHeaders.map((h, i) => (
                       <th key={i} className="px-6 py-4 font-medium border-b border-[#dadce0]">
@@ -386,9 +386,9 @@ export default function OrderProcessing() {
                 </thead>
                 <tbody className="divide-y divide-[#dadce0]">
                   {filteredData.map((row, i) => (
-                    <tr key={i} className="hover:bg-[#f1f3f4] transition-colors">
+                    <tr key={i} className="hover:bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] transition-colors">
                       {previewHeaders.map((h, j) => (
-                        <td key={j} className="px-6 py-3 text-[#202124]">
+                        <td key={j} className="px-6 py-3 text-[#202124] dark:text-white">
                           {h === "Billing Status" ? (
                             <span className={`px-2 py-1 rounded text-xs font-medium ${
                               row[h] === "processed" 
@@ -413,7 +413,7 @@ export default function OrderProcessing() {
           <div className="flex items-center justify-center gap-4 mt-2">
             <button
               onClick={handleReset}
-              className="px-6 py-2.5 rounded-lg border border-[#dadce0] text-[#5f6368] font-medium hover:bg-[#f8f9fa] transition-colors flex items-center gap-2"
+              className="px-6 py-2.5 rounded-lg border border-[#dadce0] text-[#5f6368] dark:text-gray-300 font-medium hover:bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] transition-colors flex items-center gap-2"
             >
               <RefreshCcw size={18} />
               Start Over

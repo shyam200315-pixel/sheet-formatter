@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import * as XLSX from "xlsx";
 import { findHeaderRowIndex, getTargetDate, parseBillDate } from "./helpers";
 import FileDropZone from "./components/FileDropZone";
@@ -10,7 +10,10 @@ import QuotationGenerator from "./components/QuotationGenerator";
 import StockAnalyzer from "./components/StockAnalyzer";
 import InwardTracker from "./components/InwardTracker";
 import BestSellers from "./components/BestSellers";
+import MacDock from "./components/MacDock";
 import { motion, AnimatePresence } from "framer-motion";
+import SpaceBackground from "./components/SpaceBackground";
+import { Sun, Moon, Settings } from "lucide-react";
 import { Toaster } from 'react-hot-toast';
 import { 
   Calculator, 
@@ -99,16 +102,84 @@ const TOOLS = [
   }
 ];
 
+const ToolCard = ({ tool, onClick }) => {
+  return (
+    <motion.div
+      variants={{
+        hidden: { opacity: 0, y: 30 },
+        show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+      }}
+      whileHover={{ 
+        y: -8, 
+        scale: 1.02,
+        transition: { type: "spring", stiffness: 300, damping: 20 }
+      }}
+      whileTap={{ scale: 0.98 }}
+      onClick={onClick}
+      className={`glass-card bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl p-6 border border-white/80 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-300 cursor-pointer group relative overflow-hidden flex flex-col h-full`}
+    >
+      {/* Spotlight Effect (Windows 11 Fluent) */}
+      <div 
+        className="pointer-events-none absolute -inset-px rounded-2xl z-10 transition-opacity duration-300"
+        style={{
+          background: `radial-gradient(800px circle at var(--mouse-x, -1000px) var(--mouse-y, -1000px), rgba(255,255,255,0.7), transparent 40%)`
+        }}
+      />
+      
+      {/* Background color blob for the card */}
+      <div className={`absolute -top-10 -right-10 w-40 h-40 rounded-full ${tool.color} opacity-40 blur-2xl transition-transform duration-700 group-hover:scale-150 group-hover:opacity-60 z-0`} />
+      
+      <div className={`w-14 h-14 rounded-2xl ${tool.color} flex items-center justify-center mb-6 relative z-10 shadow-sm border border-white/50 transition-transform duration-500 group-hover:rotate-[5deg] group-hover:scale-110`}>
+        {tool.icon}
+      </div>
+      
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 relative z-10 group-hover:text-black dark:group-hover:text-white transition-colors">{tool.title}</h3>
+      <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed relative z-10 flex-grow">{tool.description}</p>
+      
+      <div className="mt-6 flex items-center text-sm font-semibold text-gray-400 dark:text-gray-400 group-hover:text-blue-600 transition-colors relative z-10">
+        Launch Tool <span className="ml-2 group-hover:translate-x-1 transition-transform">&rarr;</span>
+      </div>
+    </motion.div>
+  );
+};
+
 export default function App() {
-  const [activeTab, setActiveTab] = useState(() => {
-    return localStorage.getItem("sheetFormatterActiveTab") || "home";
-  });
+  const [activeTab, setActiveTab] = useState("home");
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   const [showSplash, setShowSplash] = useState(true);
 
+  // Ensure we always start on the home dashboard on fresh load or reload
   useEffect(() => {
-    localStorage.setItem("sheetFormatterActiveTab", activeTab);
-  }, [activeTab]);
+    setActiveTab("home");
+  }, []);
+
+  const handleGridMouseMove = (e) => {
+    const cards = document.getElementsByClassName("glass-card");
+    for (const card of cards) {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      card.style.setProperty("--mouse-x", `${x}px`);
+      card.style.setProperty("--mouse-y", `${y}px`);
+    }
+  };
+
+  const handleGridMouseLeave = () => {
+    const cards = document.getElementsByClassName("glass-card");
+    for (const card of cards) {
+      card.style.setProperty("--mouse-x", `-1000px`);
+      card.style.setProperty("--mouse-y", `-1000px`);
+    }
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -122,6 +193,15 @@ export default function App() {
   const [validationSuccess, setValidationSuccess] = useState(false);
   const [monthlyTarget, setMonthlyTarget] = useState(8675000);
   const [monthlyCommitment, setMonthlyCommitment] = useState(8675000);
+
+  // Reset validator state when tab changes to open afresh
+  useEffect(() => {
+    if (activeTab !== "validator") {
+      setReportData(null);
+      setError("");
+      setValidationSuccess(false);
+    }
+  }, [activeTab]);
 
   const handleFileSelect = (file) => {
     setError("");
@@ -235,9 +315,9 @@ export default function App() {
         {showSplash && (
           <motion.div
             initial={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 1.05, filter: "blur(5px)" }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
-            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#f8f9fa]"
+            exit={{ opacity: 0, scale: 2.5, filter: "blur(10px)" }}
+            transition={{ duration: 0.8, ease: "easeIn" }}
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#f8f9fa] dark:bg-transparent"
             style={{
               backgroundImage: `
                 radial-gradient(at 0% 0%, hsla(217,100%,94%,1) 0px, transparent 50%),
@@ -258,46 +338,89 @@ export default function App() {
             >
               {/* Premium Glow Effect */}
               <div className="absolute inset-0 bg-blue-100 blur-[80px] rounded-full opacity-50 -z-10" />
+              
+              {/* Restored Pigeon Logo */}
               <img src="/pigeon.png" alt="Pigeon Logo" className="h-28 object-contain mb-8 drop-shadow-xl" />
-              <h1 className="text-4xl md:text-5xl font-light text-[#202124] tracking-tight mb-3">
+              
+              <h1 className="text-4xl md:text-5xl font-light text-[#202124] dark:text-white tracking-tight mb-3">
                 Welcome <span className="font-semibold text-[#1a73e8]">Shyam</span>
               </h1>
+              
               <div className="flex items-center gap-3">
                 <div className="h-[1px] w-8 bg-[#dadce0]"></div>
-                <p className="text-[#5f6368] text-sm font-medium tracking-[0.2em] uppercase">
+                <p className="text-[#5f6368] dark:text-gray-300 text-sm font-medium tracking-[0.2em] uppercase">
                   by Stovekraft
                 </p>
                 <div className="h-[1px] w-8 bg-[#dadce0]"></div>
+              </div>
+              
+              {/* Loading Progress Bar */}
+              <div className="mt-10 w-64 h-1 bg-slate-200 rounded-full overflow-hidden shadow-inner">
+                <motion.div 
+                  initial={{ width: "0%" }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 2.3, ease: "easeInOut" }}
+                  className="h-full bg-blue-600 rounded-full"
+                />
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="min-h-screen bg-transparent text-[var(--text-primary)] flex flex-col font-sans">
-        <Toaster position="bottom-center" />
+      <div className={`min-h-screen ${!isDarkMode ? "abstract-gradient-bg" : ""} text-[#202124] dark:text-white flex flex-col font-sans overflow-x-hidden relative`}>
+      <Toaster position="bottom-center" />
+      {/* Dark Mode Toggle Drawer */}
+      <div 
+        className="fixed bottom-20 sm:bottom-6 right-0 z-50 flex items-center bg-white/90 dark:bg-slate-800/90 backdrop-blur-md shadow-lg border border-r-0 border-gray-200 dark:border-slate-700 rounded-l-full cursor-pointer transition-transform duration-300 ease-in-out translate-x-[calc(100%-48px)] hover:translate-x-0 group"
+        onClick={() => setIsDarkMode(!isDarkMode)}
+      >
+        <div className="w-12 h-12 flex items-center justify-center shrink-0">
+          <Settings size={20} className="text-gray-500 dark:text-gray-400 group-hover:rotate-90 transition-transform duration-500" />
+        </div>
+        <div className="flex items-center gap-3 pr-5 py-2">
+          <Sun size={16} className={`${!isDarkMode ? 'text-amber-500' : 'text-slate-400'}`} />
+          <div className={`w-12 h-6 rounded-full p-1 transition-colors ${isDarkMode ? 'bg-indigo-500' : 'bg-slate-300'} flex items-center`}>
+            <motion.div 
+              className="w-4 h-4 bg-white rounded-full shadow-sm"
+              animate={{ x: isDarkMode ? 24 : 0 }}
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            />
+          </div>
+          <Moon size={16} className={`${isDarkMode ? 'text-indigo-300' : 'text-slate-400'}`} />
+        </div>
+      </div>
+
+      {/* Conditionally render space background */}
+      {isDarkMode && <SpaceBackground />}
+
       
-        {/* Google-style Top App Bar */}
-        <header className="w-full bg-[var(--surface-color)] border-b border-[var(--border-color)] px-6 py-3 flex items-center justify-between sticky top-0 z-50">
-          <div className="flex items-center gap-6">
+      {/* Background Decor */}
+      <div className="fixed bottom-0 left-0 w-full h-32 pointer-events-none z-0 opacity-40">
+      </div>
+    
+      {/* macOS Tahoe Top Nav Bar */}
+      <header className="w-full macos-glass px-3 sm:px-6 py-2 sm:py-3 flex items-center justify-between sticky top-0 z-50">
+          <div className="flex items-center gap-4">
             <div 
               className="flex items-center gap-3 cursor-pointer group"
               onClick={() => setActiveTab("home")}
             >
-              <img src="/pigeon.png" alt="Pigeon Logo" className="h-10 object-contain rounded-md transition-transform group-hover:scale-105" />
-              <span className="text-xl font-normal text-[#5f6368] tracking-tight hidden sm:block">
-                Stovekraft <span className="text-[#202124] font-medium">Shyam</span>
+              <img src="/pigeon.png" alt="Pigeon Logo" className="h-8 sm:h-10 object-contain rounded-md transition-transform group-hover:scale-105" />
+              <span className="text-xl font-normal text-[#5f6368] dark:text-gray-300 tracking-tight hidden sm:block">
+                Stovekraft <span className="text-[#202124] dark:text-white font-medium">Shyam</span>
               </span>
             </div>
-
+            
             {activeTab !== "home" && (
-              <div className="flex items-center border-l border-[#dadce0] pl-6">
+              <div className="flex items-center border-l border-[#dadce0] dark:border-slate-600 pl-3 sm:pl-6">
                 <button
                   onClick={() => setActiveTab("home")}
-                  className="flex items-center gap-2 text-sm font-medium text-[#5f6368] hover:text-[#1a73e8] hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors"
+                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium text-[#5f6368] dark:text-gray-300 hover:text-[#1a73e8] hover:bg-blue-50 dark:hover:bg-slate-700 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-colors cursor-pointer"
                 >
-                  <ArrowLeft size={16} />
-                  Back to Dashboard
+                  <ArrowLeft size={14} className="sm:w-4 sm:h-4" />
+                  <span className="hidden xs:inline">Back to Dashboard</span>
+                  <span className="xs:hidden">Back</span>
                 </button>
               </div>
             )}
@@ -306,7 +429,7 @@ export default function App() {
           {activeTab === "validator" && !reportData && (
             <div className="hidden md:flex items-center gap-6">
               <div className="flex flex-col">
-                <label className="text-[11px] font-medium text-[#5f6368] uppercase tracking-wider mb-0.5">Target</label>
+                <label className="text-[11px] font-medium text-[#5f6368] dark:text-gray-300 uppercase tracking-wider mb-0.5">Target</label>
                 <div className="flex items-center gap-1 text-[#1a73e8] font-medium text-sm">
                   <span>₹</span>
                   <input
@@ -319,7 +442,7 @@ export default function App() {
               </div>
               <div className="w-px h-8 bg-[#dadce0]"></div>
               <div className="flex flex-col">
-                <label className="text-[11px] font-medium text-[#5f6368] uppercase tracking-wider mb-0.5">Commitment</label>
+                <label className="text-[11px] font-medium text-[#5f6368] dark:text-gray-300 uppercase tracking-wider mb-0.5">Commitment</label>
                 <div className="flex items-center gap-1 text-[#1a73e8] font-medium text-sm">
                   <span>₹</span>
                   <input
@@ -334,183 +457,205 @@ export default function App() {
           )}
         </header>
 
-        <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-8">
+
+        <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-8 relative z-10">
           <AnimatePresence mode="wait">
             {activeTab === "home" ? (
-              <motion.div
-                key="home-dashboard"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-                className="w-full"
-              >
-                <div className="text-center mb-12">
-                  <h1 className="text-4xl font-medium text-[#202124] tracking-tight mb-3">Welcome to your Workspace</h1>
-                  <p className="text-lg text-[#5f6368]">Select a tool below to begin your work today.</p>
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {TOOLS.map((tool) => (
-                    <div
-                      key={tool.id}
-                      onClick={() => setActiveTab(tool.id)}
-                      className={`bg-white rounded-2xl p-6 border ${tool.borderColor} ${tool.hoverBorder} shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group relative overflow-hidden flex flex-col h-full`}
-                    >
-                      <div className={`absolute top-0 right-0 w-32 h-32 rounded-bl-full ${tool.color} opacity-30 transition-transform duration-500 group-hover:scale-110`} />
-                      
-                      <div className={`w-14 h-14 rounded-2xl ${tool.color} flex items-center justify-center mb-6 relative z-10 transition-transform duration-300 group-hover:-translate-y-1`}>
-                        {tool.icon}
+                  <motion.div
+                    key="home-dashboard"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="w-full"
+                  >
+                    <div className="relative w-full">
+                      <div className="text-center mb-12 relative z-10">
+                        <motion.h1 
+                          initial={{ opacity: 0, y: -20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-4xl font-medium text-[#202124] dark:text-white tracking-tight mb-3"
+                        >
+                          Welcome to your Workspace
+                        </motion.h1>
+                        <motion.p 
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.2 }}
+                          className="text-lg text-[#5f6368] dark:text-gray-300"
+                        >
+                          Select a tool below to begin your work today.
+                        </motion.p>
                       </div>
                       
-                      <h3 className="text-xl font-semibold text-gray-900 mb-3 relative z-10">{tool.title}</h3>
-                      <p className="text-sm text-gray-500 leading-relaxed relative z-10 flex-grow">{tool.description}</p>
-                      
-                      <div className="mt-6 flex items-center text-sm font-medium text-gray-400 group-hover:text-blue-600 transition-colors">
-                        Launch Tool &rarr;
-                      </div>
+                      <motion.div 
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative z-10"
+                        onMouseMove={handleGridMouseMove}
+                        onMouseLeave={handleGridMouseLeave}
+                        initial="hidden"
+                        animate="show"
+                        variants={{
+                          hidden: { opacity: 0 },
+                          show: {
+                            opacity: 1,
+                            transition: {
+                              staggerChildren: 0.1
+                            }
+                          }
+                        }}
+                      >
+                        {TOOLS.map((tool) => (
+                          <ToolCard 
+                            key={tool.id} 
+                            tool={tool} 
+                            onClick={() => setActiveTab(tool.id)} 
+                          />
+                        ))}
+                      </motion.div>
                     </div>
-                  ))}
-                </div>
-              </motion.div>
-            ) : activeTab === "validator" ? (
-              <motion.div
-                key="validator-tab"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
-                transition={{ duration: 0.2 }}
-              >
-                {!reportData ? (
-                  <div className="flex flex-col items-center mt-6">
-                    <h1 className="text-3xl font-normal text-[#202124] mb-2 text-center">
-                      Upload a spreadsheet to begin
-                    </h1>
-                    <p className="text-[#5f6368] mb-10 text-center max-w-lg">
-                      Drag and drop your daily sales Excel report to instantly calculate DRR, view store metrics, and generate text reports.
-                    </p>
+                  </motion.div>
+                ) : activeTab === "validator" ? (
+                  <motion.div
+                    key="validator-tab"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {!reportData ? (
+                      <div className="flex flex-col items-center mt-6">
+                        <h1 className="text-3xl font-normal text-[#202124] dark:text-white mb-2 text-center">
+                          Upload a spreadsheet to begin
+                        </h1>
+                        <p className="text-[#5f6368] dark:text-gray-300 mb-10 text-center max-w-lg">
+                          Drag and drop your daily sales Excel report to instantly calculate DRR, view store metrics, and generate text reports.
+                        </p>
 
-                    <div className="md:hidden w-full max-w-md bg-white border border-[#dadce0] rounded-lg p-4 mb-6 shadow-sm flex flex-col gap-4">
-                      <div>
-                        <label className="block text-xs font-medium text-[#5f6368] mb-1">Monthly Target (₹)</label>
-                        <input
-                          type="number"
-                          value={monthlyTarget}
-                          onChange={(e) => setMonthlyTarget(Number(e.target.value))}
-                          className="google-input w-full p-2 text-sm"
+                        <div className="md:hidden w-full max-w-md bg-white dark:bg-slate-800/60 border border-[#dadce0] dark:border-slate-700 rounded-lg p-4 mb-6 shadow-sm flex flex-col gap-4">
+                          <div>
+                            <label className="block text-xs font-medium text-[#5f6368] dark:text-gray-300 mb-1">Monthly Target (₹)</label>
+                            <input
+                              type="number"
+                              value={monthlyTarget}
+                              onChange={(e) => setMonthlyTarget(Number(e.target.value))}
+                              className="google-input w-full p-2 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-[#5f6368] dark:text-gray-300 mb-1">Monthly Commitment (₹)</label>
+                            <input
+                              type="number"
+                              value={monthlyCommitment}
+                              onChange={(e) => setMonthlyCommitment(Number(e.target.value))}
+                              className="google-input w-full p-2 text-sm"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="w-full max-w-2xl">
+                          <FileDropZone 
+                            onFileSelect={handleFileSelect} 
+                            error={error} 
+                            validationSuccess={validationSuccess} 
+                          />
+                          <p className="text-center text-sm text-[#5f6368] dark:text-gray-300 mt-4">
+                            <em>Note: The option to upload your Closing Stock file (for Scrap calculations) will appear on the dashboard after you upload this sales report.</em>
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="w-full">
+                        <DashboardView 
+                          reportData={reportData} 
+                          monthlyTarget={monthlyTarget}
+                          monthlyCommitment={monthlyCommitment}
+                          onTargetChange={handleTargetChange}
+                          onReset={handleReset} 
                         />
                       </div>
-                      <div>
-                        <label className="block text-xs font-medium text-[#5f6368] mb-1">Monthly Commitment (₹)</label>
-                        <input
-                          type="number"
-                          value={monthlyCommitment}
-                          onChange={(e) => setMonthlyCommitment(Number(e.target.value))}
-                          className="google-input w-full p-2 text-sm"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="w-full max-w-2xl">
-                      <FileDropZone 
-                        onFileSelect={handleFileSelect} 
-                        error={error} 
-                        validationSuccess={validationSuccess} 
-                      />
-                      <p className="text-center text-sm text-[#5f6368] mt-4">
-                        <em>Note: The option to upload your Closing Stock file (for Scrap calculations) will appear on the dashboard after you upload this sales report.</em>
-                      </p>
-                    </div>
-                  </div>
+                    )}
+                  </motion.div>
+                ) : activeTab === "orders" ? (
+                  <motion.div
+                    key="orders-tab"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <OrderProcessing />
+                  </motion.div>
+                ) : activeTab === "generator" ? (
+                  <motion.div
+                    key="generator-tab"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <RequirementGenerator />
+                  </motion.div>
+                ) : activeTab === "mrp" ? (
+                  <motion.div
+                    key="mrp-tab"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <MRPChecker />
+                  </motion.div>
+                ) : activeTab === "quotation" ? (
+                  <motion.div
+                    key="quotation-tab"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <QuotationGenerator />
+                  </motion.div>
+                ) : activeTab === "stock" ? (
+                  <motion.div
+                    key="stock-tab"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <StockAnalyzer />
+                  </motion.div>
+                ) : activeTab === "inward-tracker" ? (
+                  <motion.div
+                    key="inward-tracker-tab"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <InwardTracker />
+                  </motion.div>
                 ) : (
-                  <div className="w-full">
-                    <DashboardView 
-                      reportData={reportData} 
-                      monthlyTarget={monthlyTarget}
-                      monthlyCommitment={monthlyCommitment}
-                      onTargetChange={handleTargetChange}
-                      onReset={handleReset} 
-                    />
-                  </div>
+                  <motion.div
+                    key="best-sellers-tab"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <BestSellers />
+                  </motion.div>
                 )}
-              </motion.div>
-            ) : activeTab === "orders" ? (
-              <motion.div
-                key="orders-tab"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.2 }}
-              >
-                <OrderProcessing />
-              </motion.div>
-            ) : activeTab === "generator" ? (
-              <motion.div
-                key="generator-tab"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.2 }}
-              >
-                <RequirementGenerator />
-              </motion.div>
-            ) : activeTab === "mrp" ? (
-              <motion.div
-                key="mrp-tab"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.2 }}
-              >
-                <MRPChecker />
-              </motion.div>
-            ) : activeTab === "quotation" ? (
-              <motion.div
-                key="quotation-tab"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.2 }}
-              >
-                <QuotationGenerator />
-              </motion.div>
-            ) : activeTab === "stock" ? (
-              <motion.div
-                key="stock-tab"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.2 }}
-              >
-                <StockAnalyzer />
-              </motion.div>
-            ) : activeTab === "inward-tracker" ? (
-              <motion.div
-                key="inward-tracker-tab"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.2 }}
-              >
-                <InwardTracker />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="best-sellers-tab"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.2 }}
-              >
-                <BestSellers />
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </AnimatePresence>
         </main>
 
-        <footer className="w-full text-center py-6 text-sm text-[#5f6368] bg-[#f8f9fa] border-t border-[#dadce0] mt-auto">
-          <p>Processed locally in your browser. No files are uploaded to any server.</p>
-        </footer>
+        {/* macOS Dock */}
+        {activeTab !== "home" && (
+          <MacDock activeTab={activeTab} setActiveTab={setActiveTab} />
+        )}
+        
+        {/* Spacing for Dock */}
+        <div className="h-20 sm:h-24"></div>
       </div>
     </>
   );

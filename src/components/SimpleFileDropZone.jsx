@@ -44,12 +44,12 @@ export default function SimpleFileDropZone({ onFileSelect, error, validationSucc
       />
       
       <div
-        className={`w-full flex-1 border-2 border-dashed rounded-lg cursor-pointer flex flex-col items-center justify-center p-8 text-center transition-colors bg-white
+        className={`w-full flex-1 border-2 border-dashed rounded-lg cursor-pointer flex flex-col items-center justify-center p-8 text-center transition-colors bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)]
           ${isDragging 
-            ? "border-[#1a73e8] bg-[#e8f0fe]" 
+            ? "border-[#1a73e8] bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)]" 
             : file 
-              ? "border-[#34a853] bg-[#f8f9fa]"
-              : "border-[#dadce0] hover:border-[#1a73e8] hover:bg-[#f8f9fa]"
+              ? "border-[#34a853] bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)]"
+              : "border-[#dadce0] hover:border-[#1a73e8] hover:bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)]"
           }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -57,21 +57,21 @@ export default function SimpleFileDropZone({ onFileSelect, error, validationSucc
         onClick={triggerFileInput}
       >
         <div className="mb-4">
-          <Upload size={36} className={isDragging ? "text-[#1a73e8]" : file ? "text-[#34a853]" : "text-[#5f6368]"} strokeWidth={1.5} />
+          <Upload size={36} className={isDragging ? "text-[#1a73e8]" : file ? "text-[#34a853]" : "text-[#5f6368] dark:text-gray-300"} strokeWidth={1.5} />
         </div>
 
-        <h3 className="text-lg font-medium mb-1 text-[#202124]">
+        <h3 className="text-lg font-medium mb-1 text-[#202124] dark:text-white">
           {file ? file.name : title}
         </h3>
         
-        <p className="text-sm text-[#5f6368] mb-4">
+        <p className="text-sm text-[#5f6368] dark:text-gray-300 mb-4">
           {file ? "Click or drag to replace" : (description || "Select a file from your device or drag and drop it here")}
         </p>
 
         {!file && (
           <div className="flex items-center justify-center gap-4">
-            <span className="text-xs font-medium text-[#5f6368] bg-[#f1f3f4] px-2 py-1 rounded">.XLSX</span>
-            <span className="text-xs font-medium text-[#5f6368] bg-[#f1f3f4] px-2 py-1 rounded">.XLS</span>
+            <span className="text-xs font-medium text-[#5f6368] dark:text-gray-300 bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] px-2 py-1 rounded">.XLSX</span>
+            <span className="text-xs font-medium text-[#5f6368] dark:text-gray-300 bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] px-2 py-1 rounded">.XLS</span>
           </div>
         )}
 

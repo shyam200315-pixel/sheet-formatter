@@ -246,13 +246,13 @@ export default function InwardTracker() {
             exit={{ opacity: 0, x: 10 }}
             className="flex flex-col items-center mt-6"
           >
-            <div className="p-4 rounded-full bg-[#e8f0fe] text-[#1a73e8] mb-6 shadow-sm">
+            <div className="p-4 rounded-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#1a73e8] mb-6 shadow-sm icon-truck cursor-pointer">
               <Truck size={48} strokeWidth={1.5} />
             </div>
-            <h1 className="text-3xl font-normal text-[#202124] mb-2 text-center">
+            <h1 className="text-3xl font-normal text-[#202124] dark:text-white mb-2 text-center">
               Upload Stock Transfer Report
             </h1>
-            <p className="text-[#5f6368] mb-10 text-center max-w-lg">
+            <p className="text-[#5f6368] dark:text-gray-300 mb-10 text-center max-w-lg">
               Track pending inwardings and see how many days old each invoice is.
             </p>
 
@@ -275,10 +275,10 @@ export default function InwardTracker() {
           >
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
               <div>
-                <h1 className="text-3xl font-normal tracking-tight text-[#202124] flex items-center gap-3">
+                <h1 className="text-3xl font-normal tracking-tight text-[#202124] dark:text-white flex items-center gap-3">
                   Pending Inwardings
                 </h1>
-                <p className="text-sm text-[#5f6368] mt-1">
+                <p className="text-sm text-[#5f6368] dark:text-gray-300 mt-1">
                   Showing {filteredData.length} invoices that are currently in transit.
                 </p>
               </div>
@@ -292,7 +292,7 @@ export default function InwardTracker() {
                 </button>
                 <button
                   onClick={handleReset}
-                  className="px-4 py-2 rounded-full border border-[#dadce0] text-[#5f6368] font-medium hover:bg-[#f8f9fa] transition-colors text-sm"
+                  className="px-4 py-2 rounded-full border border-[#dadce0] text-[#5f6368] dark:text-gray-300 font-medium hover:bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] transition-colors text-sm"
                 >
                   Upload New
                 </button>
@@ -300,28 +300,28 @@ export default function InwardTracker() {
             </div>
 
             {/* Filters Row */}
-            <div className="flex flex-col md:flex-row gap-4 mb-6 p-4 bg-white rounded-xl shadow-sm border border-[#dadce0]">
+            <div className="flex flex-col md:flex-row gap-4 mb-6 p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] rounded-xl shadow-sm border border-[#dadce0]">
               <div className="relative flex-1 md:w-64">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-4 w-4 text-gray-400" />
+                  <Search className="h-4 w-4 text-gray-400 dark:text-gray-400" />
                 </div>
                 <input
                   type="text"
                   placeholder="Search branch or bill no..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:border-[#1a73e8] focus:ring-1 focus:ring-[#1a73e8] sm:text-sm transition-colors shadow-sm"
+                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg leading-5 bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:border-[#1a73e8] focus:ring-1 focus:ring-[#1a73e8] sm:text-sm transition-colors shadow-sm"
                 />
               </div>
 
               <div className="relative flex-1 md:w-64">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Filter className="h-4 w-4 text-gray-400" />
+                  <Filter className="h-4 w-4 text-gray-400 dark:text-gray-400" />
                 </div>
                 <select
                   value={selectedBranch}
                   onChange={(e) => setSelectedBranch(e.target.value)}
-                  className="block w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-[#1a73e8] focus:ring-1 focus:ring-[#1a73e8] sm:text-sm appearance-none shadow-sm text-gray-700"
+                  className="block w-full pl-10 pr-10 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] focus:outline-none focus:border-[#1a73e8] focus:ring-1 focus:ring-[#1a73e8] sm:text-sm appearance-none shadow-sm text-gray-700 dark:text-gray-300"
                 >
                   <option value="ALL">All Stores</option>
                   {storeStats.map((store, idx) => (
@@ -330,35 +330,35 @@ export default function InwardTracker() {
                     </option>
                   ))}
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500 dark:text-gray-400">
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-[#dadce0] overflow-hidden">
+            <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] rounded-xl shadow-sm border border-[#dadce0] overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-[#f8f9fa] border-b border-[#dadce0]">
-                      <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider">Branch</th>
-                      <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider">Supplier</th>
-                      <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider">Bill No.</th>
-                      <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider">Bill Date</th>
-                      <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider text-right">Qty</th>
-                      <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider text-right">Age (Days)</th>
-                      <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider text-center">Status</th>
+                    <tr className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border-b border-[#dadce0]">
+                      <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] dark:text-gray-300 uppercase tracking-wider">Branch</th>
+                      <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] dark:text-gray-300 uppercase tracking-wider">Supplier</th>
+                      <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] dark:text-gray-300 uppercase tracking-wider">Bill No.</th>
+                      <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] dark:text-gray-300 uppercase tracking-wider">Bill Date</th>
+                      <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] dark:text-gray-300 uppercase tracking-wider text-right">Qty</th>
+                      <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] dark:text-gray-300 uppercase tracking-wider text-right">Age (Days)</th>
+                      <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] dark:text-gray-300 uppercase tracking-wider text-center">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#f1f3f4]">
                     {filteredData.length > 0 ? (
                       filteredData.map((inv, idx) => (
-                        <tr key={idx} className="hover:bg-[#f8f9fa] transition-colors">
-                          <td className="py-3 px-4 text-sm font-medium text-[#202124]">{inv.branch}</td>
-                          <td className="py-3 px-4 text-sm text-[#5f6368] truncate max-w-[150px]" title={inv.supplier}>{inv.supplier}</td>
-                          <td className="py-3 px-4 text-sm text-[#5f6368] font-mono">{inv.billNo}</td>
-                          <td className="py-3 px-4 text-sm text-[#5f6368]">{inv.billDate}</td>
-                          <td className="py-3 px-4 text-sm text-[#202124] font-medium text-right">{inv.totalQty}</td>
+                        <tr key={idx} className="hover:bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] transition-colors">
+                          <td className="py-3 px-4 text-sm font-medium text-[#202124] dark:text-white">{inv.branch}</td>
+                          <td className="py-3 px-4 text-sm text-[#5f6368] dark:text-gray-300 truncate max-w-[150px]" title={inv.supplier}>{inv.supplier}</td>
+                          <td className="py-3 px-4 text-sm text-[#5f6368] dark:text-gray-300 font-mono">{inv.billNo}</td>
+                          <td className="py-3 px-4 text-sm text-[#5f6368] dark:text-gray-300">{inv.billDate}</td>
+                          <td className="py-3 px-4 text-sm text-[#202124] dark:text-white font-medium text-right">{inv.totalQty}</td>
                           <td className="py-3 px-4 text-sm font-bold text-right">
                             <span className={inv.daysOld > 8 ? "text-[#d93025]" : "text-[#137333]"}>
                               {inv.daysOld}
@@ -382,7 +382,7 @@ export default function InwardTracker() {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="7" className="py-8 text-center text-[#5f6368] text-sm">
+                        <td colSpan="7" className="py-8 text-center text-[#5f6368] dark:text-gray-300 text-sm">
                           No pending inwardings found matching your search.
                         </td>
                       </tr>

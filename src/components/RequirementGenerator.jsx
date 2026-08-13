@@ -185,7 +185,7 @@ export default function RequirementGenerator() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
           <div>
-            <label className="block text-sm font-medium text-[#5f6368] mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-[#5f6368] dark:text-gray-300 mb-2 flex items-center gap-2">
               <UploadCloud size={16} />
               Option 1: Upload Excel File
             </label>
@@ -195,7 +195,7 @@ export default function RequirementGenerator() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#5f6368] mb-2 flex items-center gap-2">
+            <label className="block text-sm font-medium text-[#5f6368] dark:text-gray-300 mb-2 flex items-center gap-2">
               <FileText size={16} />
               Option 2: Paste Raw Text
             </label>
@@ -238,7 +238,7 @@ export default function RequirementGenerator() {
           animate={{ opacity: 1, y: 0 }}
           className="google-card overflow-hidden"
         >
-          <div className="p-6 border-b border-[#dadce0] flex justify-between items-center bg-[#f8f9fa]">
+          <div className="p-6 border-b border-[#dadce0] flex justify-between items-center bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)]">
             <h2 className="text-xl font-semibold flex items-center gap-2">
               <Table2 className="text-[#1a73e8]" />
               Parsed Data Preview
@@ -253,7 +253,7 @@ export default function RequirementGenerator() {
           </div>
           <div className="overflow-x-auto max-h-[500px]">
             <table className="google-table">
-              <thead className="bg-[#f1f3f4] sticky top-0 shadow-sm z-10">
+              <thead className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] sticky top-0 shadow-sm z-10">
                 <tr>
                   <th>ITEM CODE</th>
                   <th>ITEM DESCRIPTION</th>
@@ -263,7 +263,7 @@ export default function RequirementGenerator() {
               </thead>
               <tbody className="divide-y divide-[#dadce0]">
                 {parsedData.map((row, i) => (
-                  <tr key={i} className="hover:bg-[#f1f3f4] transition-colors">
+                  <tr key={i} className="hover:bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] transition-colors">
                     <td>{row.code}</td>
                     <td>{row.name}</td>
                     <td>{row.category}</td>

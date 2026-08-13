@@ -538,18 +538,18 @@ export default function DashboardView({
         <div className="flex items-center gap-3">
           <button
             onClick={onReset}
-            className="p-2 rounded-full hover:bg-[rgba(60,64,67,0.08)] text-[#5f6368] transition-colors"
+            className="p-2 rounded-full hover:bg-[rgba(60,64,67,0.08)] text-[#5f6368] dark:text-gray-300 transition-colors"
           >
             <ArrowLeft size={24} />
           </button>
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="badge badge-success">Live Report</span>
-              <span className="text-[#5f6368] text-sm flex items-center gap-1 font-medium">
+              <span className="text-[#5f6368] dark:text-gray-300 text-sm flex items-center gap-1 font-medium">
                 <Calendar size={14} />MH & MP Division
               </span>
             </div>
-            <h1 className="text-3xl font-normal tracking-tight text-[#202124]">
+            <h1 className="text-3xl font-normal tracking-tight text-[#202124] dark:text-white">
               Sales Analytics
             </h1>
           </div>
@@ -590,13 +590,13 @@ export default function DashboardView({
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden mb-6"
           >
-            <div className="google-card p-6 border-[#1a73e8] border-opacity-30 bg-[#e8f0fe] bg-opacity-30 mb-2">
+            <div className="google-card p-6 border-[#1a73e8] border-opacity-30 bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] bg-opacity-30 mb-2">
               <h3 className="text-sm font-medium mb-4 text-[#1a73e8] flex items-center gap-2">
                 Configure Targets & Commitments
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm text-[#5f6368] mb-1.5 font-medium">Monthly Target Amount (₹)</label>
+                  <label className="block text-sm text-[#5f6368] dark:text-gray-300 mb-1.5 font-medium">Monthly Target Amount (₹)</label>
                   <input
                     type="number"
                     value={monthlyTarget}
@@ -605,7 +605,7 @@ export default function DashboardView({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-[#5f6368] mb-1.5 font-medium">Monthly Commitment Amount (₹)</label>
+                  <label className="block text-sm text-[#5f6368] dark:text-gray-300 mb-1.5 font-medium">Monthly Commitment Amount (₹)</label>
                   <input
                     type="number"
                     value={monthlyCommitment}
@@ -623,32 +623,32 @@ export default function DashboardView({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="google-card p-6">
           <div className="flex justify-between items-start mb-4">
-            <span className="text-[#5f6368] text-sm font-medium tracking-wide">Today's Sales</span>
+            <span className="text-[#5f6368] dark:text-gray-300 text-sm font-medium tracking-wide">Today's Sales</span>
             <div className="p-2 rounded-full bg-[#e6f4ea] text-[#137333]"><DollarSign size={20} /></div>
           </div>
-          <h2 className="text-3xl font-normal tracking-tight text-[#202124]">
+          <h2 className="text-3xl font-normal tracking-tight text-[#202124] dark:text-white">
             {formatCurrency(computedMetrics.todaySales)}
           </h2>
-          <p className="text-xs text-[#5f6368] mt-2 font-medium">
+          <p className="text-xs text-[#5f6368] dark:text-gray-300 mt-2 font-medium">
             Report date: {todayStr}
           </p>
         </div>
 
         <div className="google-card p-6">
           <div className="flex justify-between items-start mb-4">
-            <span className="text-[#5f6368] text-sm font-medium tracking-wide">MTD Sales Actual</span>
-            <div className="p-2 rounded-full bg-[#e8f0fe] text-[#1a73e8]"><TrendingUp size={20} /></div>
+            <span className="text-[#5f6368] dark:text-gray-300 text-sm font-medium tracking-wide">MTD Sales Actual</span>
+            <div className="p-2 rounded-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#1a73e8]"><TrendingUp size={20} /></div>
           </div>
-          <h2 className="text-3xl font-normal tracking-tight text-[#202124]">
+          <h2 className="text-3xl font-normal tracking-tight text-[#202124] dark:text-white">
             {formatCurrency(computedMetrics.mtdSales)}
           </h2>
-          <div className="w-full bg-[#f1f3f4] rounded-full h-1.5 mt-4 overflow-hidden">
+          <div className="w-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] rounded-full h-1.5 mt-4 overflow-hidden">
             <div 
               className="bg-[#1a73e8] h-1.5 rounded-full" 
               style={{ width: `${Math.min(100, (computedMetrics.mtdSales / monthlyCommitment) * 100)}%` }}
             ></div>
           </div>
-          <div className="flex justify-between items-center text-xs text-[#5f6368] mt-2 font-medium">
+          <div className="flex justify-between items-center text-xs text-[#5f6368] dark:text-gray-300 mt-2 font-medium">
             <span>Commitment progress</span>
             <span>{((computedMetrics.mtdSales / monthlyCommitment) * 100).toFixed(1)}%</span>
           </div>
@@ -656,28 +656,28 @@ export default function DashboardView({
 
         <div className="google-card p-6">
           <div className="flex justify-between items-start mb-4">
-            <span className="text-[#5f6368] text-sm font-medium tracking-wide">Current DRR</span>
-            <div className="p-2 rounded-full bg-[#e8f0fe] text-[#1a73e8]"><Percent size={20} /></div>
+            <span className="text-[#5f6368] dark:text-gray-300 text-sm font-medium tracking-wide">Current DRR</span>
+            <div className="p-2 rounded-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#1a73e8]"><Percent size={20} /></div>
           </div>
-          <h2 className="text-3xl font-normal tracking-tight text-[#202124]">
+          <h2 className="text-3xl font-normal tracking-tight text-[#202124] dark:text-white">
             {formatCurrency(computedMetrics.currentDRR)}
           </h2>
-          <p className="text-xs text-[#5f6368] mt-2 font-medium">
+          <p className="text-xs text-[#5f6368] dark:text-gray-300 mt-2 font-medium">
             Daily Run Rate on active days
           </p>
         </div>
 
         <div className="google-card p-6">
           <div className="flex justify-between items-start mb-4">
-            <span className="text-[#5f6368] text-sm font-medium tracking-wide">Required DRR</span>
+            <span className="text-[#5f6368] dark:text-gray-300 text-sm font-medium tracking-wide">Required DRR</span>
             <div className={`p-2 rounded-full ${computedMetrics.requiredDRR > computedMetrics.currentDRR ? 'bg-[#fce8e6] text-[#c5221f]' : 'bg-[#e6f4ea] text-[#137333]'}`}>
               <AlertTriangle size={20} />
             </div>
           </div>
-          <h2 className={`text-3xl font-normal tracking-tight ${computedMetrics.requiredDRR > computedMetrics.currentDRR ? 'text-[#c5221f]' : 'text-[#202124]'}`}>
+          <h2 className={`text-3xl font-normal tracking-tight ${computedMetrics.requiredDRR > computedMetrics.currentDRR ? 'text-[#c5221f]' : 'text-[#202124] dark:text-white'}`}>
             {formatCurrency(computedMetrics.requiredDRR)}
           </h2>
-          <p className="text-xs text-[#5f6368] mt-2 font-medium">
+          <p className="text-xs text-[#5f6368] dark:text-gray-300 mt-2 font-medium">
             Needed for {formatCurrency(monthlyCommitment)} target
           </p>
         </div>
@@ -689,28 +689,28 @@ export default function DashboardView({
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-full bg-[#f3e8fd] text-[#9333ea]"><Store size={24} /></div>
             <div>
-              <span className="text-sm text-[#5f6368] font-medium block">Total Store Count</span>
-              <span className="text-xl font-medium text-[#202124]">{allStores.size} Stores</span>
+              <span className="text-sm text-[#5f6368] dark:text-gray-300 font-medium block">Total Store Count</span>
+              <span className="text-xl font-medium text-[#202124] dark:text-white">{allStores.size} Stores</span>
             </div>
           </div>
         </div>
 
         <div className="google-card p-5 flex flex-col justify-center">
           <div className="flex items-center gap-4">
-            <div className="p-3 rounded-full bg-[#e8f0fe] text-[#1a73e8]"><TrendingUp size={24} /></div>
+            <div className="p-3 rounded-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#1a73e8]"><TrendingUp size={24} /></div>
             <div>
-              <span className="text-sm text-[#5f6368] font-medium block">Avg Sales Today</span>
-              <span className="text-xl font-medium text-[#202124]">{formatCurrency(computedMetrics.avgPerStoreToday)}</span>
+              <span className="text-sm text-[#5f6368] dark:text-gray-300 font-medium block">Avg Sales Today</span>
+              <span className="text-xl font-medium text-[#202124] dark:text-white">{formatCurrency(computedMetrics.avgPerStoreToday)}</span>
             </div>
           </div>
         </div>
 
         <div className="google-card p-5 flex flex-col justify-center">
           <div className="flex items-center gap-4">
-            <div className="p-3 rounded-full bg-[#e8f0fe] text-[#1a73e8]"><TrendingUp size={24} /></div>
+            <div className="p-3 rounded-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#1a73e8]"><TrendingUp size={24} /></div>
             <div>
-              <span className="text-sm text-[#5f6368] font-medium block">Avg Sales MTD</span>
-              <span className="text-xl font-medium text-[#202124]">{formatCurrency(computedMetrics.avgPerStoreMTD)}</span>
+              <span className="text-sm text-[#5f6368] dark:text-gray-300 font-medium block">Avg Sales MTD</span>
+              <span className="text-xl font-medium text-[#202124] dark:text-white">{formatCurrency(computedMetrics.avgPerStoreMTD)}</span>
             </div>
           </div>
         </div>
@@ -719,21 +719,21 @@ export default function DashboardView({
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-full bg-[#fce8e6] text-[#c5221f] shrink-0"><Trash2 size={24} /></div>
             <div>
-              <span className="text-sm text-[#5f6368] font-medium block whitespace-nowrap">Total Scrap</span>
+              <span className="text-sm text-[#5f6368] dark:text-gray-300 font-medium block whitespace-nowrap">Total Scrap</span>
               {scrapValue !== null ? (
-                <span className="text-xl font-medium text-[#202124]">{scrapValue} Units</span>
+                <span className="text-xl font-medium text-[#202124] dark:text-white">{scrapValue} Units</span>
               ) : (
-                <span className="text-sm text-[#5f6368] italic whitespace-nowrap">No data</span>
+                <span className="text-sm text-[#5f6368] dark:text-gray-300 italic whitespace-nowrap">No data</span>
               )}
             </div>
           </div>
           <div className="shrink-0 flex items-center">
             {isUploadingScrap ? (
-              <span className="text-xs text-[#5f6368]">Loading...</span>
+              <span className="text-xs text-[#5f6368] dark:text-gray-300">Loading...</span>
             ) : (
               <>
                 <input type="file" accept=".xlsx, .xls" className="hidden" id="scrap-upload" onChange={handleScrapUpload} />
-                <label htmlFor="scrap-upload" className="p-2 rounded-full hover:bg-[#f1f3f4] text-[#1a73e8] cursor-pointer transition-colors" title="Upload Closing Stock">
+                <label htmlFor="scrap-upload" className="p-2 rounded-full hover:bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#1a73e8] cursor-pointer transition-colors" title="Upload Closing Stock">
                   <Upload size={20} />
                 </label>
               </>
@@ -748,15 +748,15 @@ export default function DashboardView({
         <div className="google-card p-6 lg:col-span-2 flex flex-col min-h-[400px]">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h3 className="text-lg font-medium text-[#202124]">MTD Cumulative Trajectory</h3>
-              <p className="text-sm text-[#5f6368]">Actual cumulative sales vs target trajectory</p>
+              <h3 className="text-lg font-medium text-[#202124] dark:text-white">MTD Cumulative Trajectory</h3>
+              <p className="text-sm text-[#5f6368] dark:text-gray-300">Actual cumulative sales vs target trajectory</p>
             </div>
             <div className="flex gap-4 text-sm font-medium">
-              <span className="flex items-center gap-1.5 text-[#5f6368]">
+              <span className="flex items-center gap-1.5 text-[#5f6368] dark:text-gray-300">
                 <span className="w-3 h-3 rounded-full bg-[#1a73e8] inline-block"></span>
                 Actual
               </span>
-              <span className="flex items-center gap-1.5 text-[#5f6368]">
+              <span className="flex items-center gap-1.5 text-[#5f6368] dark:text-gray-300">
                 <span className="w-3 h-3 rounded-full bg-[#dadce0] inline-block"></span>
                 Target
               </span>
@@ -810,8 +810,8 @@ export default function DashboardView({
         {/* Top stores today bar chart */}
         <div className="google-card p-6 flex flex-col min-h-[400px]">
           <div className="mb-6">
-            <h3 className="text-lg font-medium text-[#202124]">Top 10 Stores Today</h3>
-            <p className="text-sm text-[#5f6368]">Highest contributors for {todayStr}</p>
+            <h3 className="text-lg font-medium text-[#202124] dark:text-white">Top 10 Stores Today</h3>
+            <p className="text-sm text-[#5f6368] dark:text-gray-300">Highest contributors for {todayStr}</p>
           </div>
 
           <div className="flex-1 w-full min-h-[280px]">
@@ -840,7 +840,7 @@ export default function DashboardView({
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex items-center justify-center h-full text-[#5f6368] text-sm">
+              <div className="flex items-center justify-center h-full text-[#5f6368] dark:text-gray-300 text-sm">
                 No store sales recorded for today
               </div>
             )}
@@ -852,23 +852,23 @@ export default function DashboardView({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Side: Store Breakdown */}
         <div className="google-card p-0 flex flex-col lg:col-span-2 overflow-hidden">
-          <div className="p-6 border-b border-[#dadce0] bg-[#f8f9fa] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="p-6 border-b border-[#dadce0] bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex bg-[#e8eaed] p-1 rounded-lg">
               <button 
                 onClick={() => setActiveTab("all-stores")}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === "all-stores" ? "bg-white text-[#202124] shadow-sm" : "text-[#5f6368] hover:text-[#202124]"}`}
+                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === "all-stores" ? "bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#202124] dark:text-white shadow-sm" : "text-[#5f6368] dark:text-gray-300 hover:text-[#202124] dark:text-white"}`}
               >
                 All Stores ({filteredAllStores.length})
               </button>
               <button 
                 onClick={() => setActiveTab("mp-stores")}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === "mp-stores" ? "bg-white text-[#202124] shadow-sm" : "text-[#5f6368] hover:text-[#202124]"}`}
+                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === "mp-stores" ? "bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#202124] dark:text-white shadow-sm" : "text-[#5f6368] dark:text-gray-300 hover:text-[#202124] dark:text-white"}`}
               >
                 MP Only ({filteredMpStores.length})
               </button>
               <button 
                 onClick={() => setActiveTab("below-5k")}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === "below-5k" ? "bg-white text-[#202124] shadow-sm" : "text-[#5f6368] hover:text-[#202124]"}`}
+                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === "below-5k" ? "bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#202124] dark:text-white shadow-sm" : "text-[#5f6368] dark:text-gray-300 hover:text-[#202124] dark:text-white"}`}
               >
                 Below 5K today ({filteredBelow5k.length})
               </button>
@@ -876,7 +876,7 @@ export default function DashboardView({
 
             <div className="flex items-center gap-2">
               <div className="relative w-full sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5f6368]" size={18} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5f6368] dark:text-gray-300" size={18} />
                 <input
                   type="text"
                   placeholder="Search store..."
@@ -891,8 +891,8 @@ export default function DashboardView({
                 title={activeTab === "all-stores" || activeTab === "mp-stores" ? "Copy table as Image" : "Switch to All or MP Stores to copy image"}
                 className={`p-2.5 rounded-md flex items-center justify-center transition-colors ${
                   (activeTab === "all-stores" || activeTab === "mp-stores") && !isCapturing 
-                    ? "bg-[#e8f0fe] text-[#1a73e8] hover:bg-[#d2e3fc]" 
-                    : "bg-[#f1f3f4] text-[#9aa0a6] cursor-not-allowed"
+                    ? "bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#1a73e8] hover:bg-[#d2e3fc]" 
+                    : "bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#9aa0a6] cursor-not-allowed"
                 }`}
               >
                 {isCapturing ? (
@@ -906,9 +906,9 @@ export default function DashboardView({
 
           <div className="overflow-x-auto max-h-[400px]">
             {activeTab === "all-stores" || activeTab === "mp-stores" ? (
-              <div className="bg-white">
+              <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)]">
                 <table className="google-table">
-                <thead className="bg-white sticky top-0 shadow-sm">
+                <thead className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] sticky top-0 shadow-sm">
                   <tr>
                     <th>Branch Name</th>
                     <th>Today Sales</th>
@@ -930,8 +930,8 @@ export default function DashboardView({
                           <span className="text-[#9aa0a6]">-</span>
                         )}
                       </td>
-                      <td className="text-[#5f6368]">{formatCurrency(store.mtdSales)}</td>
-                      <td className="text-[#5f6368] font-medium">{store.target ? formatCurrency(store.target) : "-"}</td>
+                      <td className="text-[#5f6368] dark:text-gray-300">{formatCurrency(store.mtdSales)}</td>
+                      <td className="text-[#5f6368] dark:text-gray-300 font-medium">{store.target ? formatCurrency(store.target) : "-"}</td>
                       <td>
                         {store.achievedPercent !== null ? (
                           <span className={`px-2 py-1 rounded text-xs font-medium ${
@@ -949,7 +949,7 @@ export default function DashboardView({
                   ))}
                   {(activeTab === "mp-stores" ? filteredMpStores : filteredAllStores).length === 0 && (
                     <tr>
-                      <td colSpan="4" className="text-center text-[#5f6368] py-12">
+                      <td colSpan="4" className="text-center text-[#5f6368] dark:text-gray-300 py-12">
                         No stores match your search
                       </td>
                     </tr>
@@ -959,7 +959,7 @@ export default function DashboardView({
               </div>
             ) : (
               <table className="google-table">
-                <thead className="bg-white sticky top-0 shadow-sm">
+                <thead className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] sticky top-0 shadow-sm">
                   <tr>
                     <th>Branch Name</th>
                     <th>Today Sales</th>
@@ -995,10 +995,10 @@ export default function DashboardView({
         <div className="google-card p-6 flex flex-col justify-between">
           <div>
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-[#202124]">Export Report</h3>
+              <h3 className="text-lg font-medium text-[#202124] dark:text-white">Export Report</h3>
               <button 
                 onClick={downloadReport}
-                className="p-2 rounded-full hover:bg-[rgba(60,64,67,0.08)] text-[#5f6368] transition-colors"
+                className="p-2 rounded-full hover:bg-[rgba(60,64,67,0.08)] text-[#5f6368] dark:text-gray-300 transition-colors"
                 title="Download txt file"
               >
                 <Download size={20} />
@@ -1008,13 +1008,13 @@ export default function DashboardView({
             <div className="flex bg-[#e8eaed] p-1 rounded-lg mb-4 w-fit">
               <button 
                 onClick={() => setExportTab("main")}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${exportTab === "main" ? "bg-white text-[#202124] shadow-sm" : "text-[#5f6368] hover:text-[#202124]"}`}
+                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${exportTab === "main" ? "bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#202124] dark:text-white shadow-sm" : "text-[#5f6368] dark:text-gray-300 hover:text-[#202124] dark:text-white"}`}
               >
                 Main
               </button>
               <button 
                 onClick={() => setExportTab("mp")}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${exportTab === "mp" ? "bg-white text-[#202124] shadow-sm" : "text-[#5f6368] hover:text-[#202124]"}`}
+                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${exportTab === "mp" ? "bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#202124] dark:text-white shadow-sm" : "text-[#5f6368] dark:text-gray-300 hover:text-[#202124] dark:text-white"}`}
               >
                 MP Only
               </button>
@@ -1051,19 +1051,19 @@ export default function DashboardView({
       <div style={{ position: "absolute", left: "-9999px", top: 0 }}>
         <div 
           ref={tableRef} 
-          className="bg-white p-8"
+          className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] p-8"
           style={{ width: "800px", fontFamily: "'Inter', sans-serif" }}
         >
           <div className="flex justify-between items-center mb-6 border-b border-[#dadce0] pb-4">
             <div>
               <h2 className="text-2xl font-bold text-[#1a73e8] m-0">Daily Store Performance</h2>
-              <p className="text-[#5f6368] mt-1 font-medium m-0">
+              <p className="text-[#5f6368] dark:text-gray-300 mt-1 font-medium m-0">
                 {activeTab === "mp-stores" ? "MP Division" : "MH & MP Division"} • {todayStr}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-[#5f6368] font-medium m-0">Total MTD Sales</p>
-              <p className="text-xl font-bold text-[#202124] m-0">
+              <p className="text-sm text-[#5f6368] dark:text-gray-300 font-medium m-0">Total MTD Sales</p>
+              <p className="text-xl font-bold text-[#202124] dark:text-white m-0">
                 {formatCurrency(activeTab === "mp-stores" ? mpMetrics.mtdSales : computedMetrics.mtdSales)}
               </p>
             </div>
@@ -1071,25 +1071,25 @@ export default function DashboardView({
           
           <table className="w-full text-left border-collapse" style={{ borderCollapse: "collapse", width: "100%" }}>
             <thead>
-              <tr className="bg-[#f8f9fa]">
-                <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>Branch Name</th>
-                <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>Today Sales</th>
-                <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>MTD Sales</th>
-                <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>Target</th>
-                <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>Target Achieved</th>
+              <tr className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)]">
+                <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] dark:text-gray-300 uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>Branch Name</th>
+                <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] dark:text-gray-300 uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>Today Sales</th>
+                <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] dark:text-gray-300 uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>MTD Sales</th>
+                <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] dark:text-gray-300 uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>Target</th>
+                <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] dark:text-gray-300 uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>Target Achieved</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#dadce0]">
               {(activeTab === "mp-stores" ? filteredMpStores : filteredAllStores).map((store, idx) => (
-                <tr key={store.name} className={idx % 2 === 0 ? "bg-white" : "bg-[#f8f9fa]"}>
-                  <td className="py-3 px-4 font-medium text-[#202124]" style={{ borderBottom: "1px solid #dadce0" }}>{store.name}</td>
+                <tr key={store.name} className={idx % 2 === 0 ? "bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)]" : "bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)]"}>
+                  <td className="py-3 px-4 font-medium text-[#202124] dark:text-white" style={{ borderBottom: "1px solid #dadce0" }}>{store.name}</td>
                   <td className="py-3 px-4" style={{ borderBottom: "1px solid #dadce0" }}>
                     <span className={`font-semibold ${store.todaySales < 5000 ? "text-[#b06000]" : "text-[#137333]"}`}>
                       {store.todaySales > 0 ? formatCurrency(store.todaySales) : "-"}
                     </span>
                   </td>
-                  <td className="py-3 px-4 font-medium text-[#5f6368]" style={{ borderBottom: "1px solid #dadce0" }}>{formatCurrency(store.mtdSales)}</td>
-                  <td className="py-3 px-4 font-medium text-[#5f6368]" style={{ borderBottom: "1px solid #dadce0" }}>{store.target ? formatCurrency(store.target) : "-"}</td>
+                  <td className="py-3 px-4 font-medium text-[#5f6368] dark:text-gray-300" style={{ borderBottom: "1px solid #dadce0" }}>{formatCurrency(store.mtdSales)}</td>
+                  <td className="py-3 px-4 font-medium text-[#5f6368] dark:text-gray-300" style={{ borderBottom: "1px solid #dadce0" }}>{store.target ? formatCurrency(store.target) : "-"}</td>
                   <td className="py-3 px-4" style={{ borderBottom: "1px solid #dadce0" }}>
                     {store.achievedPercent !== null ? (
                       <span className={`px-2.5 py-1 rounded-md text-xs font-bold inline-block text-center min-w-[50px] ${
