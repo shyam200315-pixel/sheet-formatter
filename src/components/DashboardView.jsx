@@ -1051,7 +1051,7 @@ export default function DashboardView({
       <div style={{ position: "absolute", left: "-9999px", top: 0 }}>
         <div 
           ref={tableRef} 
-          className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] p-8"
+          className="bg-white p-8"
           style={{ width: "800px", fontFamily: "'Inter', sans-serif" }}
         >
           <div className="flex justify-between items-center mb-6 border-b border-[#dadce0] pb-4">
@@ -1071,7 +1071,7 @@ export default function DashboardView({
           
           <table className="w-full text-left border-collapse" style={{ borderCollapse: "collapse", width: "100%" }}>
             <thead>
-              <tr className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)]">
+              <tr className="bg-white">
                 <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] dark:text-gray-300 uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>Branch Name</th>
                 <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] dark:text-gray-300 uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>Today Sales</th>
                 <th className="py-3 px-4 text-xs font-semibold text-[#5f6368] dark:text-gray-300 uppercase tracking-wider border-b border-[#dadce0]" style={{ textAlign: "left" }}>MTD Sales</th>
@@ -1081,7 +1081,7 @@ export default function DashboardView({
             </thead>
             <tbody className="divide-y divide-[#dadce0]">
               {(activeTab === "mp-stores" ? filteredMpStores : filteredAllStores).map((store, idx) => (
-                <tr key={store.name} className={idx % 2 === 0 ? "bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)]" : "bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)]"}>
+                <tr key={store.name} className={idx % 2 === 0 ? "bg-[#f8f9fa]" : "bg-white"}>
                   <td className="py-3 px-4 font-medium text-[#202124] dark:text-white" style={{ borderBottom: "1px solid #dadce0" }}>{store.name}</td>
                   <td className="py-3 px-4" style={{ borderBottom: "1px solid #dadce0" }}>
                     <span className={`font-semibold ${store.todaySales < 5000 ? "text-[#b06000]" : "text-[#137333]"}`}>
