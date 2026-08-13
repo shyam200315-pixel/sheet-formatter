@@ -9,12 +9,99 @@ import MRPChecker from "./components/MRPChecker";
 import QuotationGenerator from "./components/QuotationGenerator";
 import StockAnalyzer from "./components/StockAnalyzer";
 import InwardTracker from "./components/InwardTracker";
+import BestSellers from "./components/BestSellers";
 import { motion, AnimatePresence } from "framer-motion";
 import { Toaster } from 'react-hot-toast';
+import { 
+  Calculator, 
+  ShoppingCart, 
+  ListChecks, 
+  Tags, 
+  FileText, 
+  BarChart2, 
+  PackageCheck, 
+  TrendingUp,
+  ArrowLeft 
+} from 'lucide-react';
+
+const TOOLS = [
+  {
+    id: "validator",
+    title: "Daily Sales Validator",
+    description: "Calculate DRR, view store metrics, and generate text reports.",
+    icon: <Calculator className="w-8 h-8 text-blue-600" />,
+    color: "bg-blue-100",
+    borderColor: "border-blue-200",
+    hoverBorder: "hover:border-blue-400"
+  },
+  {
+    id: "best-sellers",
+    title: "Best Sellers",
+    description: "Item-wise store collection and product analytics.",
+    icon: <TrendingUp className="w-8 h-8 text-fuchsia-600" />,
+    color: "bg-fuchsia-100",
+    borderColor: "border-fuchsia-200",
+    hoverBorder: "hover:border-fuchsia-400"
+  },
+  {
+    id: "orders",
+    title: "Order Processing",
+    description: "Process purchase orders and streamline dispatch operations.",
+    icon: <ShoppingCart className="w-8 h-8 text-indigo-600" />,
+    color: "bg-indigo-100",
+    borderColor: "border-indigo-200",
+    hoverBorder: "hover:border-indigo-400"
+  },
+  {
+    id: "generator",
+    title: "Requirement Generator",
+    description: "Generate branch requirements dynamically based on sales.",
+    icon: <ListChecks className="w-8 h-8 text-emerald-600" />,
+    color: "bg-emerald-100",
+    borderColor: "border-emerald-200",
+    hoverBorder: "hover:border-emerald-400"
+  },
+  {
+    id: "stock",
+    title: "Stock Analyzer",
+    description: "Analyze stock levels, closing stock and inventory health.",
+    icon: <BarChart2 className="w-8 h-8 text-violet-600" />,
+    color: "bg-violet-100",
+    borderColor: "border-violet-200",
+    hoverBorder: "hover:border-violet-400"
+  },
+  {
+    id: "inward-tracker",
+    title: "Inward Tracker",
+    description: "Track inward shipments and pending deliveries efficiently.",
+    icon: <PackageCheck className="w-8 h-8 text-cyan-600" />,
+    color: "bg-cyan-100",
+    borderColor: "border-cyan-200",
+    hoverBorder: "hover:border-cyan-400"
+  },
+  {
+    id: "mrp",
+    title: "MRP Checker",
+    description: "Validate product pricing against official master records.",
+    icon: <Tags className="w-8 h-8 text-amber-600" />,
+    color: "bg-amber-100",
+    borderColor: "border-amber-200",
+    hoverBorder: "hover:border-amber-400"
+  },
+  {
+    id: "quotation",
+    title: "Quotation Generator",
+    description: "Quickly generate professional PDF quotations for customers.",
+    icon: <FileText className="w-8 h-8 text-rose-600" />,
+    color: "bg-rose-100",
+    borderColor: "border-rose-200",
+    hoverBorder: "hover:border-rose-400"
+  }
+];
 
 export default function App() {
   const [activeTab, setActiveTab] = useState(() => {
-    return localStorage.getItem("sheetFormatterActiveTab") || "validator";
+    return localStorage.getItem("sheetFormatterActiveTab") || "home";
   });
 
   const [showSplash, setShowSplash] = useState(true);
@@ -50,17 +137,14 @@ export default function App() {
           throw new Error("The Excel file doesn't contain any sheets.");
         }
 
-        // Get the target sheet (Report or the first sheet)
         const sheetName = workbook.SheetNames.includes("Report") 
           ? "Report" 
           : workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
 
-        // 1. Dynamically find the header row index
         const headerRowIndex = findHeaderRowIndex(worksheet);
 
-        // 2. Parse the sheet to JSON
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+        let jsonData = XLSX.utils.sheet_to_json(worksheet, {
           defval: "",
           range: headerRowIndex,
         });
@@ -69,7 +153,19 @@ export default function App() {
           throw new Error(`The sheet "${sheetName}" does not contain any rows after headers.`);
         }
 
-        // Validate that critical headers are present in the parsed rows
+        jsonData = jsonData.map(row => {
+          const newRow = { ...row };
+          if (newRow[" FROM BRANCH NAME "]) {
+            newRow["BRANCH NAME"] = newRow[" FROM BRANCH NAME "];
+          } else if (newRow["FROM BRANCH NAME"]) {
+            newRow["BRANCH NAME"] = newRow["FROM BRANCH NAME"];
+          }
+          if (newRow["NET AMOUNT"]) {
+            newRow["NET SALE AMOUNT"] = newRow["NET AMOUNT"];
+          }
+          return newRow;
+        });
+
         const sampleRow = jsonData[0];
         const requiredHeaders = ["BRANCH NAME", "BILL DATE", "NET SALE AMOUNT"];
         const missingHeaders = requiredHeaders.filter(h => !(h in sampleRow));
@@ -81,15 +177,12 @@ export default function App() {
           );
         }
 
-        // 3. Resolve the target report date
         const { today, todayStr } = getTargetDate(worksheet, jsonData);
 
-        // Validate that we got a valid today date
         if (!today || isNaN(today.getTime())) {
           throw new Error("Could not parse or establish report date from the sheet.");
         }
 
-        // 4. Group all unique store names
         const allStores = new Set();
         for (const row of jsonData) {
           if (row["BRANCH NAME"]) {
@@ -101,7 +194,6 @@ export default function App() {
           throw new Error("No branches found in the spreadsheet branch list.");
         }
 
-        // Set success state, trigger a minor timeout, then load Dashboard
         setValidationSuccess(true);
         setTimeout(() => {
           setReportData({
@@ -188,85 +280,27 @@ export default function App() {
         {/* Google-style Top App Bar */}
         <header className="w-full bg-[var(--surface-color)] border-b border-[var(--border-color)] px-6 py-3 flex items-center justify-between sticky top-0 z-50">
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3">
-              <img src="/pigeon.png" alt="Pigeon Logo" className="h-10 object-contain rounded-md" />
-              <span className="text-xl font-normal text-[#5f6368] tracking-tight">
+            <div 
+              className="flex items-center gap-3 cursor-pointer group"
+              onClick={() => setActiveTab("home")}
+            >
+              <img src="/pigeon.png" alt="Pigeon Logo" className="h-10 object-contain rounded-md transition-transform group-hover:scale-105" />
+              <span className="text-xl font-normal text-[#5f6368] tracking-tight hidden sm:block">
                 Stovekraft <span className="text-[#202124] font-medium">Shyam</span>
               </span>
             </div>
 
-            <div className="hidden sm:flex items-center gap-1 border-l border-[#dadce0] pl-6">
-              <button
-                onClick={() => setActiveTab("validator")}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeTab === "validator" 
-                    ? "bg-[#e8f0fe] text-[#1a73e8]" 
-                    : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
-                }`}
-              >
-                Daily Sales Validator
-              </button>
-              <button
-                onClick={() => setActiveTab("orders")}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeTab === "orders" 
-                    ? "bg-[#e8f0fe] text-[#1a73e8]" 
-                    : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
-                }`}
-              >
-                Order Processing
-              </button>
-              <button
-                onClick={() => setActiveTab("generator")}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeTab === "generator" 
-                    ? "bg-[#e8f0fe] text-[#1a73e8]" 
-                    : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
-                }`}
-              >
-                Requirement Generator
-              </button>
-              <button
-                onClick={() => setActiveTab("mrp")}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeTab === "mrp" 
-                    ? "bg-[#e8f0fe] text-[#1a73e8]" 
-                    : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
-                }`}
-              >
-                MRP Checker
-              </button>
-              <button
-                onClick={() => setActiveTab("quotation")}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeTab === "quotation" 
-                    ? "bg-[#e8f0fe] text-[#1a73e8]" 
-                    : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
-                }`}
-              >
-                Quotation
-              </button>
-              <button
-                onClick={() => setActiveTab("stock")}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeTab === "stock" 
-                    ? "bg-[#e8f0fe] text-[#1a73e8]" 
-                    : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
-                }`}
-              >
-                Stock Analyzer
-              </button>
-              <button
-                onClick={() => setActiveTab("inward-tracker")}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeTab === "inward-tracker" 
-                    ? "bg-[#e8f0fe] text-[#1a73e8]" 
-                    : "text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124]"
-                }`}
-              >
-                Inward Tracker
-              </button>
-            </div>
+            {activeTab !== "home" && (
+              <div className="flex items-center border-l border-[#dadce0] pl-6">
+                <button
+                  onClick={() => setActiveTab("home")}
+                  className="flex items-center gap-2 text-sm font-medium text-[#5f6368] hover:text-[#1a73e8] hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors"
+                >
+                  <ArrowLeft size={16} />
+                  Back to Dashboard
+                </button>
+              </div>
+            )}
           </div>
         
           {activeTab === "validator" && !reportData && (
@@ -300,83 +334,46 @@ export default function App() {
           )}
         </header>
 
-        {/* Mobile Tabs */}
-        <div className="sm:hidden flex overflow-x-auto border-b border-[#dadce0] bg-white scrollbar-hide">
-          <button
-            onClick={() => setActiveTab("validator")}
-            className={`flex-shrink-0 whitespace-nowrap px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === "validator"
-                ? "border-[#1a73e8] text-[#1a73e8]"
-                : "border-transparent text-[#5f6368]"
-            }`}
-          >
-            Daily Sales
-          </button>
-          <button
-            onClick={() => setActiveTab("orders")}
-            className={`flex-shrink-0 whitespace-nowrap px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === "orders"
-                ? "border-[#1a73e8] text-[#1a73e8]"
-                : "border-transparent text-[#5f6368]"
-            }`}
-          >
-            Orders
-          </button>
-          <button
-            onClick={() => setActiveTab("generator")}
-            className={`flex-shrink-0 whitespace-nowrap px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === "generator"
-                ? "border-[#1a73e8] text-[#1a73e8]"
-                : "border-transparent text-[#5f6368]"
-            }`}
-          >
-            Generator
-          </button>
-          <button
-            onClick={() => setActiveTab("mrp")}
-            className={`flex-shrink-0 whitespace-nowrap px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === "mrp"
-                ? "border-[#1a73e8] text-[#1a73e8]"
-                : "border-transparent text-[#5f6368]"
-            }`}
-          >
-            MRP Check
-          </button>
-          <button
-            onClick={() => setActiveTab("quotation")}
-            className={`flex-shrink-0 whitespace-nowrap px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === "quotation"
-                ? "border-[#1a73e8] text-[#1a73e8]"
-                : "border-transparent text-[#5f6368]"
-            }`}
-          >
-            Quotation
-          </button>
-          <button
-            onClick={() => setActiveTab("stock")}
-            className={`flex-shrink-0 whitespace-nowrap px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === "stock"
-                ? "border-[#1a73e8] text-[#1a73e8]"
-                : "border-transparent text-[#5f6368]"
-            }`}
-          >
-            Stock Analyzer
-          </button>
-          <button
-            onClick={() => setActiveTab("inward-tracker")}
-            className={`flex-shrink-0 whitespace-nowrap px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === "inward-tracker"
-                ? "border-[#1a73e8] text-[#1a73e8]"
-                : "border-transparent text-[#5f6368]"
-            }`}
-          >
-            Inward Tracker
-          </button>
-        </div>
-
         <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-8">
           <AnimatePresence mode="wait">
-            {activeTab === "validator" ? (
+            {activeTab === "home" ? (
+              <motion.div
+                key="home-dashboard"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="w-full"
+              >
+                <div className="text-center mb-12">
+                  <h1 className="text-4xl font-medium text-[#202124] tracking-tight mb-3">Welcome to your Workspace</h1>
+                  <p className="text-lg text-[#5f6368]">Select a tool below to begin your work today.</p>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {TOOLS.map((tool) => (
+                    <div
+                      key={tool.id}
+                      onClick={() => setActiveTab(tool.id)}
+                      className={`bg-white rounded-2xl p-6 border ${tool.borderColor} ${tool.hoverBorder} shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group relative overflow-hidden flex flex-col h-full`}
+                    >
+                      <div className={`absolute top-0 right-0 w-32 h-32 rounded-bl-full ${tool.color} opacity-30 transition-transform duration-500 group-hover:scale-110`} />
+                      
+                      <div className={`w-14 h-14 rounded-2xl ${tool.color} flex items-center justify-center mb-6 relative z-10 transition-transform duration-300 group-hover:-translate-y-1`}>
+                        {tool.icon}
+                      </div>
+                      
+                      <h3 className="text-xl font-semibold text-gray-900 mb-3 relative z-10">{tool.title}</h3>
+                      <p className="text-sm text-gray-500 leading-relaxed relative z-10 flex-grow">{tool.description}</p>
+                      
+                      <div className="mt-6 flex items-center text-sm font-medium text-gray-400 group-hover:text-blue-600 transition-colors">
+                        Launch Tool &rarr;
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            ) : activeTab === "validator" ? (
               <motion.div
                 key="validator-tab"
                 initial={{ opacity: 0, x: -10 }}
@@ -487,7 +484,7 @@ export default function App() {
               >
                 <StockAnalyzer />
               </motion.div>
-            ) : (
+            ) : activeTab === "inward-tracker" ? (
               <motion.div
                 key="inward-tracker-tab"
                 initial={{ opacity: 0, x: 10 }}
@@ -497,11 +494,21 @@ export default function App() {
               >
                 <InwardTracker />
               </motion.div>
+            ) : (
+              <motion.div
+                key="best-sellers-tab"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <BestSellers />
+              </motion.div>
             )}
           </AnimatePresence>
         </main>
 
-        <footer className="w-full text-center py-6 text-sm text-[#5f6368] bg-[#f8f9fa] border-t border-[#dadce0]">
+        <footer className="w-full text-center py-6 text-sm text-[#5f6368] bg-[#f8f9fa] border-t border-[#dadce0] mt-auto">
           <p>Processed locally in your browser. No files are uploaded to any server.</p>
         </footer>
       </div>
