@@ -7,7 +7,9 @@ import * as XLSX from "xlsx";
  */
 export function parseBillDate(dateStr) {
   if (!dateStr || typeof dateStr !== "string") return null;
-  const match = dateStr.match(/^(\d{2})[/\-](\d{2})[/\-](\d{4})$/);
+  const trimmed = dateStr.trim();
+  // Match DD/MM/YYYY or DD-MM-YYYY, ignoring anything after a space (like time)
+  const match = trimmed.match(/^(\d{2})[/\-](\d{2})[/\-](\d{4})(?:\s+.*)?$/);
   if (!match) return null;
   return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
 }
@@ -95,4 +97,90 @@ export function getTargetDate(worksheet, jsonData) {
   }
 
   return { today, todayStr };
+}
+
+// Local Database implementation using IndexedDB (Replaces Firebase)
+function getDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('DashboardDB', 1);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('historicalData')) {
+        db.createObjectStore('historicalData');
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+/**
+ * Save data to IndexedDB
+ * @param {Array} data 
+ */
+export async function saveHistoricalData(data) {
+  try {
+    const db = await getDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('historicalData', 'readwrite');
+      const store = tx.objectStore('historicalData');
+      const req = store.put(data, 'main_chunk');
+      req.onsuccess = () => resolve(true);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (error) {
+    throw new Error(`Local DB Save Error: ${error.message}`);
+  }
+}
+
+/**
+ * Load data from IndexedDB
+ */
+export async function loadHistoricalData() {
+  try {
+    const db = await getDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('historicalData', 'readonly');
+      const store = tx.objectStore('historicalData');
+      const req = store.get('main_chunk');
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (error) {
+    console.error("Local DB Load Error:", error);
+    return null;
+  }
+}
+
+/**
+ * Append data to IndexedDB
+ * @param {Array} newData 
+ */
+export async function appendHistoricalData(newData) {
+  try {
+    const existingData = (await loadHistoricalData()) || [];
+    const mergedData = [...existingData, ...newData];
+    await saveHistoricalData(mergedData);
+    return true;
+  } catch (error) {
+    throw new Error(`Local DB Append Error: ${error.message}`);
+  }
+}
+
+/**
+ * Clear data from IndexedDB
+ */
+export async function clearHistoricalData() {
+  try {
+    const db = await getDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('historicalData', 'readwrite');
+      const store = tx.objectStore('historicalData');
+      const req = store.clear();
+      req.onsuccess = () => resolve(true);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (error) {
+    throw new Error(`Local DB Clear Error: ${error.message}`);
+  }
 }

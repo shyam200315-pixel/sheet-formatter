@@ -166,7 +166,8 @@ export default function RequirementGenerator() {
 
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-      saveAs(blob, "Generated_Order_Requirement.xlsx");
+      const dateStr = new Date().toISOString().split('T')[0];
+      saveAs(blob, `Generated_Order_Requirement_${dateStr}.xlsx`);
       toast.success("Excel file generated successfully!");
     } catch (err) {
       console.error(err);

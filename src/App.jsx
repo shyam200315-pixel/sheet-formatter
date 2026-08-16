@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as XLSX from "xlsx";
-import { findHeaderRowIndex, getTargetDate, parseBillDate } from "./helpers";
+import { findHeaderRowIndex, getTargetDate, parseBillDate, appendHistoricalData, loadHistoricalData } from "./helpers";
 import FileDropZone from "./components/FileDropZone";
 import DashboardView from "./components/DashboardView";
 import OrderProcessing from "./components/OrderProcessing";
@@ -14,7 +14,7 @@ import MacDock from "./components/MacDock";
 import { motion, AnimatePresence } from "framer-motion";
 import SpaceBackground from "./components/SpaceBackground";
 import { Sun, Moon, Settings } from "lucide-react";
-import { Toaster } from 'react-hot-toast';
+import { Toaster, toast } from 'react-hot-toast';
 import { 
   Calculator, 
   ShoppingCart, 
@@ -24,8 +24,10 @@ import {
   BarChart2, 
   PackageCheck, 
   TrendingUp,
-  ArrowLeft 
+  ArrowLeft,
+  Database
 } from 'lucide-react';
+import HistoricalSales from "./components/HistoricalSales";
 
 const TOOLS = [
   {
@@ -99,6 +101,15 @@ const TOOLS = [
     color: "bg-rose-100",
     borderColor: "border-rose-200",
     hoverBorder: "hover:border-rose-400"
+  },
+  {
+    id: "historical-sales",
+    title: "Historical Sales Report",
+    description: "Manage and query long-term historical sales data securely.",
+    icon: <Database className="w-8 h-8 text-slate-600" />,
+    color: "bg-slate-100",
+    borderColor: "border-slate-200",
+    hoverBorder: "hover:border-slate-400"
   }
 ];
 
@@ -160,6 +171,24 @@ export default function App() {
   // Ensure we always start on the home dashboard on fresh load or reload
   useEffect(() => {
     setActiveTab("home");
+    
+    // Check if it's the 1st of the month and notify the user to upload historical sales
+    const today = new Date();
+    if (today.getDate() === 1) {
+      setTimeout(() => {
+        toast("It's the 1st of the month! Please upload last month's Historical Sales sheet in the Historical Sales dashboard to keep your data up to date.", {
+          icon: '📅',
+          duration: 10000,
+          style: {
+            border: '1px solid #3b82f6',
+            padding: '16px',
+            color: '#1e3a8a',
+            background: '#eff6ff',
+            fontWeight: 500
+          },
+        });
+      }, 2000);
+    }
   }, []);
 
   const handleGridMouseMove = (e) => {
@@ -235,14 +264,30 @@ export default function App() {
 
         jsonData = jsonData.map(row => {
           const newRow = { ...row };
-          if (newRow[" FROM BRANCH NAME "]) {
-            newRow["BRANCH NAME"] = newRow[" FROM BRANCH NAME "];
-          } else if (newRow["FROM BRANCH NAME"]) {
-            newRow["BRANCH NAME"] = newRow["FROM BRANCH NAME"];
+          
+          // Normalize Branch Name
+          const storeKeys = ["BRANCH NAME", " FROM BRANCH NAME ", "FROM BRANCH NAME", "STORE NAME", "TO STORE"];
+          for (const key of storeKeys) {
+            if (newRow[key]) {
+              newRow["BRANCH NAME"] = newRow[key];
+              break;
+            }
           }
-          if (newRow["NET AMOUNT"]) {
-            newRow["NET SALE AMOUNT"] = newRow["NET AMOUNT"];
+          
+          // Normalize Amount
+          const amountKeys = ["NET SALE AMOUNT", "NET AMOUNT", "SALES AMOUNT", "AMOUNT", "TOTAL"];
+          for (const key of amountKeys) {
+            if (newRow[key]) {
+              newRow["NET SALE AMOUNT"] = newRow[key];
+              break;
+            }
           }
+          
+          // Normalize Date
+          if (newRow["DATE"] && !newRow["BILL DATE"]) {
+            newRow["BILL DATE"] = newRow["DATE"];
+          }
+          
           return newRow;
         });
 
@@ -634,6 +679,16 @@ export default function App() {
                     transition={{ duration: 0.2 }}
                   >
                     <InwardTracker />
+                  </motion.div>
+                ) : activeTab === "historical-sales" ? (
+                  <motion.div
+                    key="historical-sales-tab"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <HistoricalSales />
                   </motion.div>
                 ) : (
                   <motion.div

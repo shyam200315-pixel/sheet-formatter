@@ -227,7 +227,8 @@ export default function InwardTracker() {
 
       // Write buffer and save file
       const buffer = await workbook.xlsx.writeBuffer();
-      saveAs(new Blob([buffer]), "Pending_Inwards_Report.xlsx");
+      const dateStr = new Date().toISOString().split('T')[0];
+      saveAs(new Blob([buffer]), `Pending_Inwards_Report_${dateStr}.xlsx`);
       toast.success("Formatted Excel report downloaded successfully!");
     } catch (err) {
       console.error(err);
