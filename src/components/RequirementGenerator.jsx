@@ -12,6 +12,8 @@ export default function RequirementGenerator() {
   const [masterDict, setMasterDict] = useState({});
   const [parsedData, setParsedData] = useState([]);
   const [error, setError] = useState("");
+  const [storeCode, setStoreCode] = useState("");
+  const [storeName, setStoreName] = useState("");
 
   // Load master.json on mount
   useEffect(() => {
@@ -109,6 +111,13 @@ export default function RequirementGenerator() {
     setParsedData(results);
   };
 
+  const getAutoState = (code) => {
+    const lowerCode = code.toLowerCase();
+    if (lowerCode.includes('wmh')) return 'MH';
+    if (lowerCode.includes('wmp')) return 'MP';
+    return '';
+  };
+
   const handleDownload = async () => {
     if (parsedData.length === 0) return;
 
@@ -138,7 +147,9 @@ export default function RequirementGenerator() {
       });
 
       parsedData.forEach((item) => {
-        const rowData = ["", "", "", "", item.code, item.name, item.category, item.qty];
+        const currentDate = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
+        const currentState = getAutoState(storeCode);
+        const rowData = [currentDate, currentState, storeCode, storeName, item.code, item.name, item.category, item.qty];
         const dataRow = worksheet.addRow(rowData);
         dataRow.alignment = { vertical: "middle", horizontal: "center" };
         dataRow.height = 20;
@@ -167,7 +178,8 @@ export default function RequirementGenerator() {
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       const dateStr = new Date().toISOString().split('T')[0];
-      saveAs(blob, `Generated_Order_Requirement_${dateStr}.xlsx`);
+      const fileNamePrefix = storeName ? `${storeName.toUpperCase()} STOCK DATED ` : 'Generated_Order_Requirement_';
+      saveAs(blob, `${fileNamePrefix}${dateStr}.xlsx`);
       toast.success("Excel file generated successfully!");
     } catch (err) {
       console.error(err);
@@ -183,6 +195,33 @@ export default function RequirementGenerator() {
           <FileText className="text-[#1a73e8]" />
           Input Requirement Data
         </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <label className="block text-sm font-medium text-[#5f6368] dark:text-gray-300 mb-2">
+              Store Code
+            </label>
+            <input
+              type="text"
+              value={storeCode}
+              onChange={(e) => setStoreCode(e.target.value)}
+              placeholder="e.g., WMH001"
+              className="w-full p-3 border border-[#dadce0] rounded-md focus:border-[#1a73e8] focus:ring-1 focus:ring-[#1a73e8] outline-none bg-white/60 dark:bg-slate-800/60"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-[#5f6368] dark:text-gray-300 mb-2">
+              Store Name
+            </label>
+            <input
+              type="text"
+              value={storeName}
+              onChange={(e) => setStoreName(e.target.value)}
+              placeholder="Enter Store Name"
+              className="w-full p-3 border border-[#dadce0] rounded-md focus:border-[#1a73e8] focus:ring-1 focus:ring-[#1a73e8] outline-none bg-white/60 dark:bg-slate-800/60"
+            />
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
           <div>
