@@ -9,7 +9,9 @@ import {
   UploadCloud,
   Layers,
   Database,
-  DollarSign
+  DollarSign,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { motion, AnimatePresence } from "framer-motion";
@@ -34,6 +36,7 @@ export default function StockAnalyzer() {
   const [selectedStore, setSelectedStore] = useState("All Stores");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [searchTerm, setSearchTerm] = useState("");
+  const [expandedRows, setExpandedRows] = useState(new Set());
   const fileInputRef = useRef(null);
 
   const handleFileUpload = (e) => {
@@ -126,6 +129,16 @@ export default function StockAnalyzer() {
     setSelectedStore("All Stores");
     setSelectedCategory("All Categories");
     setSearchTerm("");
+    setExpandedRows(new Set());
+  };
+
+  const toggleRow = (id) => {
+    setExpandedRows(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) newSet.delete(id);
+      else newSet.add(id);
+      return newSet;
+    });
   };
 
   // Derived filters and data
@@ -216,13 +229,67 @@ export default function StockAnalyzer() {
         .slice(0, 15);
     }
 
-    // Sort filtered data for table (by stock desc)
-    filtered.sort((a, b) => b.stock - a.stock);
+    // Group filtered data by Item
+    const groupedDataMap = new Map();
+    filtered.forEach(row => {
+      const itemKey = `${row.barcode}-${row.item}`;
+      if (!groupedDataMap.has(itemKey)) {
+        groupedDataMap.set(itemKey, {
+          id: itemKey,
+          barcode: row.barcode,
+          item: row.item,
+          description: row.description,
+          mainProduct: row.mainProduct,
+          gender: row.gender,
+          totalStock: 0,
+          totalValue: 0,
+          branches: new Map()
+        });
+      }
+      const group = groupedDataMap.get(itemKey);
+      group.totalStock += row.stock;
+      group.totalValue += row.value;
+      
+      const branchKey = row.branch;
+      if (!group.branches.has(branchKey)) {
+        group.branches.set(branchKey, {
+          id: `${itemKey}-${branchKey}`,
+          branch: row.branch,
+          totalStock: 0,
+          totalValue: 0,
+          godowns: new Map()
+        });
+      }
+      const branchGroup = group.branches.get(branchKey);
+      branchGroup.totalStock += row.stock;
+      branchGroup.totalValue += row.value;
+
+      const godownKey = row.godown;
+      if (!branchGroup.godowns.has(godownKey)) {
+        branchGroup.godowns.set(godownKey, {
+          godown: row.godown,
+          stock: 0,
+          value: 0
+        });
+      }
+      const godownGroup = branchGroup.godowns.get(godownKey);
+      godownGroup.stock += row.stock;
+      godownGroup.value += row.value;
+    });
+
+    const groupedFilteredData = Array.from(groupedDataMap.values()).map(group => ({
+      ...group,
+      branches: Array.from(group.branches.values()).map(b => ({
+        ...b,
+        godowns: Array.from(b.godowns.values())
+      }))
+    }));
+    groupedFilteredData.sort((a, b) => b.totalStock - a.totalStock);
 
     return {
       stores: storeList,
       categories: catList,
-      filteredData: filtered,
+      filteredData: groupedFilteredData,
       metrics: metricsData,
       chartData: chartResult
     };
@@ -513,87 +580,141 @@ export default function StockAnalyzer() {
               <table className="w-full text-left text-sm whitespace-nowrap">
                 <thead className="sticky top-0 bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border-b border-[#dadce0] shadow-sm z-10">
                   <tr className="text-[#5f6368] dark:text-gray-300 font-medium text-xs uppercase tracking-wider">
+                    <th className="px-6 py-4 font-medium w-10"></th>
                     <th className="px-6 py-4 font-medium">Item Details</th>
-                    {selectedStore === "All Stores" && (
-                      <th className="px-6 py-4 font-medium">Branch</th>
-                    )}
-                    <th className="px-6 py-4 font-medium hidden md:table-cell">Godown</th>
-                    <th className="px-6 py-4 font-medium text-right">Quantity</th>
-                    <th className="px-6 py-4 font-medium text-right hidden sm:table-cell">Value</th>
+                    <th className="px-6 py-4 font-medium text-right">Total Quantity</th>
+                    <th className="px-6 py-4 font-medium text-right hidden sm:table-cell">Total Value</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#f1f3f4]">
                   {filteredData.length === 0 ? (
                     <tr>
-                      <td colSpan={selectedStore === "All Stores" ? "5" : "4"} className="px-6 py-12 text-center text-[#5f6368] dark:text-gray-300">
+                      <td colSpan="4" className="px-6 py-12 text-center text-[#5f6368] dark:text-gray-300">
                         <Package size={32} className="mx-auto mb-3 opacity-20" />
                         <p>No items found matching the selected filters.</p>
                       </td>
                     </tr>
                   ) : (
                     filteredData.slice(0, 100).map((row, idx) => (
-                      <tr key={row.id} className="hover:bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] transition-colors group">
-                        <td className="px-6 py-3">
-                          <div className="flex flex-col">
-                            <span className="font-medium text-[#202124] dark:text-white text-wrap line-clamp-2 leading-tight max-w-sm whitespace-normal">
-                              {row.description}
-                            </span>
-                            <div className="flex items-center gap-2 mt-1 flex-wrap">
-                              <span className="text-[11px] text-[#5f6368] dark:text-gray-300 font-mono bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] px-1.5 py-0.5 rounded" title="Item Name">
-                                {row.item}
-                              </span>
-                              <span className="text-[11px] text-[#5f6368] dark:text-gray-300 font-mono bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] px-1.5 py-0.5 rounded" title="Barcode">
-                                {row.barcode}
-                              </span>
-                              <span className="text-[11px] text-[#0f9d58] bg-[#e6f4ea] px-1.5 py-0.5 rounded font-medium">
-                                {row.mainProduct}
-                              </span>
-                              {selectedCategory === "All Categories" && (
-                                <span className="text-[11px] text-[#1a73e8] bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] px-1.5 py-0.5 rounded font-medium">
-                                  {row.gender}
-                                </span>
-                              )}
-                              <span className={`md:hidden px-1.5 py-0.5 rounded text-[11px] font-medium ${
-                                row.godown.toUpperCase().includes('EXCHANGE') 
-                                  ? 'bg-[#fce8e6] text-[#c5221f]' 
-                                  : 'bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#5f6368] dark:text-gray-300'
-                              }`}>
-                                {row.godown}
-                              </span>
-                            </div>
-                          </div>
-                        </td>
-                        {selectedStore === "All Stores" && (
+                      <React.Fragment key={row.id}>
+                        <tr 
+                          onClick={() => toggleRow(row.id)}
+                          className="hover:bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] transition-colors group cursor-pointer"
+                        >
+                          <td className="px-6 py-3 text-center">
+                            {expandedRows.has(row.id) ? <ChevronUp size={18} className="text-[#5f6368]" /> : <ChevronDown size={18} className="text-[#5f6368]" />}
+                          </td>
                           <td className="px-6 py-3">
                             <div className="flex flex-col">
-                              <span className="font-medium text-[#202124] dark:text-white text-xs">
-                                {row.branch.split('-')[0].trim()}
+                              <span className="font-medium text-[#202124] dark:text-white text-wrap line-clamp-2 leading-tight max-w-sm whitespace-normal">
+                                {row.description}
                               </span>
-                              <span className="text-[10px] text-[#5f6368] dark:text-gray-300 truncate max-w-[140px]" title={row.branch}>
-                                {row.branch.split('-').slice(1).join('-').trim()}
-                              </span>
+                              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                <span className="text-[11px] text-[#5f6368] dark:text-gray-300 font-mono bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] px-1.5 py-0.5 rounded" title="Item Name">
+                                  {row.item}
+                                </span>
+                                <span className="text-[11px] text-[#5f6368] dark:text-gray-300 font-mono bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] px-1.5 py-0.5 rounded" title="Barcode">
+                                  {row.barcode}
+                                </span>
+                                <span className="text-[11px] text-[#0f9d58] bg-[#e6f4ea] px-1.5 py-0.5 rounded font-medium">
+                                  {row.mainProduct}
+                                </span>
+                                {selectedCategory === "All Categories" && (
+                                  <span className="text-[11px] text-[#1a73e8] bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] px-1.5 py-0.5 rounded font-medium">
+                                    {row.gender}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </td>
+                          <td className="px-6 py-3 text-right">
+                            <div className="flex flex-col items-end">
+                              <span className="font-medium text-[#202124] dark:text-white text-base">{row.totalStock}</span>
+                              <span className="sm:hidden text-[10px] text-[#5f6368] dark:text-gray-300">{formatCurrency(row.totalValue)}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-3 text-[#5f6368] dark:text-gray-300 text-right hidden sm:table-cell">
+                            {formatCurrency(row.totalValue)}
+                          </td>
+                        </tr>
+                        {expandedRows.has(row.id) && (
+                          <tr>
+                            <td colSpan="4" className="bg-white/40 dark:bg-slate-900/40 p-0 border-b border-[#dadce0]">
+                              <div className="px-6 sm:px-16 py-4">
+                                <h4 className="text-xs font-medium text-[#5f6368] uppercase tracking-wider mb-3">Branch Breakdown</h4>
+                                <table className="w-full text-sm">
+                                  <thead>
+                                    <tr className="text-left text-[#5f6368] border-b border-[#dadce0]">
+                                      <th className="py-2 font-medium w-8"></th>
+                                      <th className="py-2 font-medium">Branch</th>
+                                      <th className="py-2 font-medium text-right">Total Qty</th>
+                                      <th className="py-2 font-medium text-right hidden sm:table-cell">Total Value</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-[#f1f3f4]">
+                                    {row.branches.map((b, bIdx) => (
+                                      <React.Fragment key={bIdx}>
+                                        <tr 
+                                          className="hover:bg-white/60 dark:bg-slate-800/60 cursor-pointer transition-colors" 
+                                          onClick={() => toggleRow(b.id)}
+                                        >
+                                          <td className="py-2.5 text-center">
+                                            {expandedRows.has(b.id) ? <ChevronUp size={14} className="text-[#5f6368]" /> : <ChevronDown size={14} className="text-[#5f6368]" />}
+                                          </td>
+                                          <td className="py-2.5">
+                                            <div className="flex flex-col">
+                                              <span className="font-medium text-[#202124] dark:text-white text-xs">{b.branch.split('-')[0].trim()}</span>
+                                              <span className="text-[10px] text-[#5f6368] dark:text-gray-300">{b.branch.split('-').slice(1).join('-').trim()}</span>
+                                            </div>
+                                          </td>
+                                          <td className="py-2.5 text-right font-medium text-[#202124] dark:text-white text-xs sm:text-sm">
+                                            <div className="flex flex-col items-end">
+                                              <span>{b.totalStock}</span>
+                                              <span className="sm:hidden text-[10px] text-[#5f6368] dark:text-gray-300 font-normal">{formatCurrency(b.totalValue)}</span>
+                                            </div>
+                                          </td>
+                                          <td className="py-2.5 text-right text-[#5f6368] hidden sm:table-cell text-xs sm:text-sm">{formatCurrency(b.totalValue)}</td>
+                                        </tr>
+                                        {expandedRows.has(b.id) && (
+                                          <tr>
+                                            <td colSpan="4" className="bg-white/80 dark:bg-slate-800/80 p-0 border-b border-[#dadce0]">
+                                              <div className="pl-14 pr-4 py-2">
+                                                <table className="w-full text-xs">
+                                                  <tbody>
+                                                    {b.godowns.map((g, gIdx) => (
+                                                      <tr key={gIdx} className="border-b border-[#f1f3f4] last:border-0 dark:border-slate-700/50">
+                                                        <td className="py-2">
+                                                          <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+                                                            g.godown.toUpperCase().includes('EXCHANGE') || g.godown.toUpperCase().includes('DAMAGE')
+                                                              ? 'bg-[#fce8e6] text-[#c5221f]' 
+                                                              : 'bg-white dark:bg-slate-700 text-[#5f6368] dark:text-gray-300 border border-[#dadce0] dark:border-gray-600'
+                                                          }`}>
+                                                            {g.godown}
+                                                          </span>
+                                                        </td>
+                                                        <td className="py-2 text-right font-medium text-[#202124] dark:text-white">
+                                                          {g.stock}
+                                                        </td>
+                                                        <td className="py-2 text-right text-[#5f6368] hidden sm:table-cell">
+                                                          {formatCurrency(g.value)}
+                                                        </td>
+                                                      </tr>
+                                                    ))}
+                                                  </tbody>
+                                                </table>
+                                              </div>
+                                            </td>
+                                          </tr>
+                                        )}
+                                      </React.Fragment>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </td>
+                          </tr>
                         )}
-                        <td className="px-6 py-3 text-[#5f6368] dark:text-gray-300 hidden md:table-cell">
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${
-                            row.godown.toUpperCase().includes('EXCHANGE') 
-                              ? 'bg-[#fce8e6] text-[#c5221f]' 
-                              : 'bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#5f6368] dark:text-gray-300'
-                          }`}>
-                            {row.godown}
-                          </span>
-                        </td>
-                        <td className="px-6 py-3 text-right">
-                          <div className="flex flex-col items-end">
-                            <span className="font-medium text-[#202124] dark:text-white text-base">{row.stock}</span>
-                            <span className="sm:hidden text-[10px] text-[#5f6368] dark:text-gray-300">{formatCurrency(row.value)}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-3 text-[#5f6368] dark:text-gray-300 text-right hidden sm:table-cell">
-                          {formatCurrency(row.value)}
-                        </td>
-                      </tr>
+                      </React.Fragment>
                     ))
                   )}
                 </tbody>
