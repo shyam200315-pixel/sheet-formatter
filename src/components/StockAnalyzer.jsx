@@ -11,9 +11,12 @@ import {
   Database,
   DollarSign,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Download
 } from "lucide-react";
 import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   BarChart, 
@@ -160,10 +163,12 @@ export default function StockAnalyzer() {
     let filtered = stockData.filter(row => {
       const matchStore = selectedStore === "All Stores" || row.branch === selectedStore;
       const matchCat = selectedCategory === "All Categories" || row.gender === selectedCategory;
-      const matchSearch = searchTerm === "" || 
-        row.item.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        row.barcode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        row.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const searchTerms = searchTerm.split(',').map(t => t.trim().toLowerCase()).filter(t => t !== "");
+      const matchSearch = searchTerms.length === 0 || searchTerms.some(term => 
+        row.item.toLowerCase().includes(term) || 
+        row.barcode.toLowerCase().includes(term) ||
+        row.description.toLowerCase().includes(term)
+      );
       
       return matchStore && matchCat && matchSearch;
     });
@@ -348,6 +353,125 @@ export default function StockAnalyzer() {
     return `₹${Math.floor(val).toLocaleString("en-IN")}`;
   };
 
+  const handleExport = async () => {
+    if (!filteredData || filteredData.length === 0) {
+      toast.error("No data available to export");
+      return;
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Stock Report');
+
+    sheet.columns = [
+      { header: 'Date', key: 'date', width: 12 },
+      { header: 'State', key: 'state', width: 8 },
+      { header: 'STORE CODE', key: 'storeCode', width: 15 },
+      { header: 'Store Name', key: 'storeName', width: 25 },
+      { header: 'ITEM CODE', key: 'itemCode', width: 15 },
+      { header: 'ITEM DESCRIPTION', key: 'itemDesc', width: 45 },
+      { header: 'Category', key: 'category', width: 25 },
+      { header: 'Available Stock', key: 'mainStock', width: 15 },
+      { header: 'Damage Stock', key: 'damageStock', width: 15 }
+    ];
+
+    sheet.getRow(1).eachCell((cell) => {
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF1a73e8' }
+      };
+      cell.font = {
+        color: { argb: 'FFFFFFFF' },
+        bold: true
+      };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' }
+      };
+    });
+
+    const today = new Date();
+    const formattedDate = `${String(today.getDate()).padStart(2, '0')}.${String(today.getMonth() + 1).padStart(2, '0')}.${today.getFullYear()}`;
+
+    let exportRows = [];
+
+    filteredData.forEach(itemGroup => {
+      itemGroup.branches.forEach(branchGroup => {
+        let mainStock = 0;
+        let damageStock = 0;
+        
+        branchGroup.godowns.forEach(godown => {
+          const gName = godown.godown.toUpperCase();
+          if (gName.includes('EXCHANGE') || gName.includes('DAMAGE')) {
+            damageStock += godown.stock;
+          } else {
+            mainStock += godown.stock;
+          }
+        });
+        
+        if (mainStock > 0 || damageStock > 0) {
+          const parts = branchGroup.branch.split('-').map(s => s.trim());
+          const storeCode = parts[0] || "";
+          const storeName = parts.length > 1 ? parts[parts.length - 1] : "";
+          let state = "";
+          if (storeCode.length >= 3) {
+            state = storeCode.substring(1, 3);
+          }
+
+          exportRows.push({
+            date: formattedDate,
+            state: state,
+            storeCode: storeCode,
+            storeName: storeName,
+            itemCode: itemGroup.barcode,
+            itemDesc: itemGroup.description,
+            category: itemGroup.mainProduct !== "Unknown" ? itemGroup.mainProduct : itemGroup.gender,
+            mainStock: mainStock,
+            damageStock: damageStock
+          });
+        }
+      });
+    });
+
+    // Sort by Item Description, then by Store Code
+    exportRows.sort((a, b) => {
+      if (a.itemDesc !== b.itemDesc) {
+        return a.itemDesc.localeCompare(b.itemDesc);
+      }
+      return a.storeCode.localeCompare(b.storeCode);
+    });
+
+    exportRows.forEach(rowData => {
+      const row = sheet.addRow(rowData);
+      row.eachCell((cell, colNumber) => {
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+        if (colNumber === 4 || colNumber === 6) {
+          cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+        } else {
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        }
+      });
+    });
+
+    try {
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(blob, 'Stock_Report.xlsx');
+      toast.success("Excel file downloaded successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to generate Excel file.");
+    }
+  };
+
   return (
     <div className="w-full pb-16 animate-in fade-in duration-300">
       {/* Header section */}
@@ -423,7 +547,7 @@ export default function StockAnalyzer() {
           </label>
           <input
             type="text"
-            placeholder="Search by name or barcode..."
+            placeholder="Search multiple codes (comma separated)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border-none rounded-lg pl-10 pr-4 py-3 text-[#202124] dark:text-white focus:ring-2 focus:ring-[#1a73e8] outline-none transition-shadow"
@@ -574,6 +698,13 @@ export default function StockAnalyzer() {
                 <h3 className="text-lg font-medium text-[#202124] dark:text-white">Detailed Stock Breakdown</h3>
                 <p className="text-xs text-[#5f6368] dark:text-gray-300 mt-0.5">Showing {filteredData.length} records</p>
               </div>
+              <button
+                onClick={handleExport}
+                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-[#1a73e8] hover:bg-[#1557b0] rounded-lg transition-colors shadow-sm"
+              >
+                <Download size={16} />
+                <span>Export Excel</span>
+              </button>
             </div>
             
             <div className="flex-1 overflow-auto bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)]">
