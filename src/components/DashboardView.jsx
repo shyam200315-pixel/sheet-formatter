@@ -19,6 +19,8 @@ import {
   Image as ImageIcon
 } from "lucide-react";
 import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 import { toBlob } from "html-to-image";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -96,6 +98,28 @@ export default function DashboardView({
   const [isUploadingScrap, setIsUploadingScrap] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const tableRef = React.useRef(null);
+
+  const [detailedStartDate, setDetailedStartDate] = useState(() => {
+    if (reportData && reportData.today) {
+      const d = new Date(reportData.today.getFullYear(), reportData.today.getMonth(), 1);
+      // Format as YYYY-MM-DD for date input
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${d.getFullYear()}-${mm}-${dd}`;
+    }
+    return "";
+  });
+  
+  const [detailedEndDate, setDetailedEndDate] = useState(() => {
+    if (reportData && reportData.today) {
+      const d = reportData.today;
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${d.getFullYear()}-${mm}-${dd}`;
+    }
+    return "";
+  });
+
 
   const handleScrapUpload = (e) => {
     const file = e.target.files && e.target.files[0];
@@ -314,6 +338,70 @@ export default function DashboardView({
     };
   }, [jsonData, allStores, today, todayStr, totalDays, computedMetrics.storeSalesToday]);
 
+  // Detailed Analytics Metrics
+  const detailedMetrics = useMemo(() => {
+    if (!detailedStartDate || !detailedEndDate) return [];
+
+    const startParts = detailedStartDate.split('-');
+    const start = new Date(startParts[0], startParts[1] - 1, startParts[2]);
+    start.setHours(0, 0, 0, 0);
+
+    const endParts = detailedEndDate.split('-');
+    const end = new Date(endParts[0], endParts[1] - 1, endParts[2]);
+    end.setHours(23, 59, 59, 999);
+
+    const storeStats = {};
+
+    for (const row of jsonData) {
+      const billDate = parseBillDate(row["BILL DATE"]);
+      if (!billDate) continue;
+
+      if (billDate >= start && billDate <= end) {
+        const storeName = row["BRANCH NAME"] || "UNKNOWN";
+        const voucher = String(row["NEW VOUCHER NO."] || "");
+        const qty = Number(row["NET QTY"]) || 0;
+        const sale = Number(row["NET SALE AMOUNT"]) || 0;
+        const cashAmt = Number(row["CASH AMOUNT"]) || 0;
+        const debitCreditAmt = Number(row["Debit/Credit"]) || 0;
+        const plutusAmt = Number(row["Plutus"]) || 0;
+        const creditCardDesc = String(row["CREDIT CARD NO."] || "").toUpperCase();
+
+        const isCash = cashAmt > 0;
+        const isOnline = debitCreditAmt > 0 || plutusAmt > 0 || creditCardDesc.includes('ONLINE') || creditCardDesc.includes('UPI');
+
+        if (!storeStats[storeName]) {
+          storeStats[storeName] = {
+            name: storeName,
+            totalSale: 0,
+            totalQty: 0,
+            totalBills: 0,
+            cashBills: 0,
+            onlineBills: 0,
+            riBills: 0,
+            biBills: 0,
+            exBills: 0
+          };
+        }
+
+        const stats = storeStats[storeName];
+        stats.totalSale += sale;
+        stats.totalQty += qty;
+        stats.totalBills += 1;
+
+        if (isCash) stats.cashBills += 1;
+        if (isOnline) stats.onlineBills += 1;
+        
+        if (voucher.includes('RI-')) stats.riBills += 1;
+        if (voucher.includes('BI-')) stats.biBills += 1;
+        if (voucher.includes('EX-')) stats.exBills += 1;
+      }
+    }
+
+    const result = Object.values(storeStats);
+    result.sort((a, b) => a.name.localeCompare(b.name));
+    return result;
+  }, [jsonData, detailedStartDate, detailedEndDate, parseBillDate]);
+
   // Compute daily data for Area Chart (cumulative actual vs target trajectory)
   const chartData = useMemo(() => {
     const data = [];
@@ -474,6 +562,211 @@ export default function DashboardView({
     element.click();
     document.body.removeChild(element);
     toast.success("Report downloaded successfully!");
+  };
+
+  const exportDetailedToExcel = async () => {
+    if (!detailedStartDate || !detailedEndDate) {
+      toast.error("Please select a date range.");
+      return;
+    }
+
+    const startParts = detailedStartDate.split('-');
+    const start = new Date(startParts[0], startParts[1] - 1, startParts[2]);
+    start.setHours(0, 0, 0, 0);
+
+    const endParts = detailedEndDate.split('-');
+    const end = new Date(endParts[0], endParts[1] - 1, endParts[2]);
+    end.setHours(23, 59, 59, 999);
+
+    const storeStats = {};
+    const uniqueDates = new Set();
+
+    for (const row of jsonData) {
+      const billDate = parseBillDate(row["BILL DATE"]);
+      if (!billDate) continue;
+
+      if (billDate >= start && billDate <= end) {
+        const dd = String(billDate.getDate()).padStart(2, '0');
+        const mm = String(billDate.getMonth() + 1).padStart(2, '0');
+        const yyyy = billDate.getFullYear();
+        const dateStr = `${dd}/${mm}/${yyyy}`;
+        uniqueDates.add(dateStr);
+
+        const storeName = row["BRANCH NAME"] || "UNKNOWN";
+        const qty = Number(row["NET QTY"]) || 0;
+        const sale = Number(row["NET SALE AMOUNT"]) || 0;
+
+        if (!storeStats[storeName]) {
+          storeStats[storeName] = {
+            name: storeName,
+            dates: {}
+          };
+        }
+        
+        if (!storeStats[storeName].dates[dateStr]) {
+          storeStats[storeName].dates[dateStr] = {
+            totalSale: 0,
+            totalQty: 0,
+            totalBills: 0
+          };
+        }
+
+        const stats = storeStats[storeName].dates[dateStr];
+        stats.totalSale += sale;
+        stats.totalQty += qty;
+        stats.totalBills += 1;
+      }
+    }
+
+    if (Object.keys(storeStats).length === 0) {
+      toast.error("No data available for the selected dates.");
+      return;
+    }
+
+    const sortedDates = Array.from(uniqueDates).sort((a, b) => {
+      const [dayA, monthA, yearA] = a.split('/');
+      const [dayB, monthB, yearB] = b.split('/');
+      const dateA = new Date(yearA, monthA - 1, dayA);
+      const dateB = new Date(yearB, monthB - 1, dayB);
+      return dateA - dateB;
+    });
+    
+    const sortedStores = Object.values(storeStats).sort((a, b) => a.name.localeCompare(b.name));
+    
+    const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Weekly Analytics");
+
+    // Setup columns
+    worksheet.columns = [
+      { key: 'date', width: 15 },
+      { key: 'weekday', width: 15 },
+      { key: 'bills', width: 18 },
+      { key: 'qty', width: 12 },
+      { key: 'sales', width: 18 },
+      { key: 'conv', width: 15 },
+      { key: 'atv', width: 12 },
+      { key: 'upt', width: 12 },
+      { key: 'asp', width: 12 },
+    ];
+
+    const borderStyle = {
+      top: { style: 'thin' },
+      left: { style: 'thin' },
+      bottom: { style: 'thin' },
+      right: { style: 'thin' }
+    };
+    
+    const alignmentStyle = { vertical: 'middle', horizontal: 'center' };
+
+    sortedStores.forEach(store => {
+      // Store Name Header
+      const storeRow = worksheet.addRow([`STORE: ${store.name}`]);
+      worksheet.mergeCells(storeRow.number, 1, storeRow.number, 9);
+      const storeCell = storeRow.getCell(1);
+      storeCell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 12 };
+      storeCell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF1F4E78' } // Dark blue
+      };
+      storeCell.alignment = alignmentStyle;
+      
+      for (let i = 1; i <= 9; i++) {
+        storeRow.getCell(i).border = borderStyle;
+      }
+
+      // Columns Header
+      const headerRow = worksheet.addRow([
+        "Date", "Weekday", "Bill Made Total", "Sales Qty", "Retail Sales (RI)", "Conversion%", "ATV", "UPT", "ASP"
+      ]);
+      
+      headerRow.eachCell((cell) => {
+        cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FF2F75B5' } // Lighter blue
+        };
+        cell.alignment = alignmentStyle;
+        cell.border = borderStyle;
+      });
+
+      let grandTotalBills = 0;
+      let grandTotalQty = 0;
+      let grandTotalSales = 0;
+
+      sortedDates.forEach(dateStr => {
+        const dStats = store.dates[dateStr];
+        const bills = dStats ? dStats.totalBills : 0;
+        const qty = dStats ? dStats.totalQty : 0;
+        const sales = dStats ? Math.floor(dStats.totalSale) : 0;
+        
+        const [dd, mm, yyyy] = dateStr.split('/');
+        const dObj = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+        const weekday = weekdays[dObj.getDay()];
+        const dateFormatted = `${Number(dd)}-${monthNames[dObj.getMonth()]}`;
+
+        const atv = bills > 0 ? (sales / bills).toFixed(2) : 0;
+        const upt = bills > 0 ? (qty / bills).toFixed(2) : 0;
+        const asp = qty > 0 ? (sales / qty).toFixed(2) : 0;
+
+        const row = worksheet.addRow([
+          dateFormatted,
+          weekday,
+          bills,
+          qty,
+          sales,
+          "", // Conversion%
+          Number(atv),
+          Number(upt),
+          Number(asp)
+        ]);
+
+        row.eachCell((cell) => {
+          cell.alignment = alignmentStyle;
+          cell.border = borderStyle;
+        });
+
+        grandTotalBills += bills;
+        grandTotalQty += qty;
+        grandTotalSales += sales;
+      });
+      
+      // Totals Row
+      const totalRow = worksheet.addRow([
+        "TOTAL",
+        "",
+        grandTotalBills,
+        grandTotalQty,
+        grandTotalSales,
+        "",
+        grandTotalBills > 0 ? Number((grandTotalSales / grandTotalBills).toFixed(2)) : 0,
+        grandTotalBills > 0 ? Number((grandTotalQty / grandTotalBills).toFixed(2)) : 0,
+        grandTotalQty > 0 ? Number((grandTotalSales / grandTotalQty).toFixed(2)) : 0
+      ]);
+
+      totalRow.eachCell((cell) => {
+        cell.font = { bold: true };
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFF2F2F2' } // Light gray
+        };
+        cell.alignment = alignmentStyle;
+        cell.border = borderStyle;
+      });
+
+      // Add empty row
+      worksheet.addRow([]);
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `Detailed_Sales_Analysis_${detailedStartDate}_to_${detailedEndDate}.xlsx`);
+    toast.success("Detailed Report Excel downloaded!");
   };
 
   // Filter stores based on search query
@@ -872,6 +1165,12 @@ export default function DashboardView({
               >
                 Below 5K today ({filteredBelow5k.length})
               </button>
+              <button 
+                onClick={() => setActiveTab("detailed-analysis")}
+                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === "detailed-analysis" ? "bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] text-[#202124] dark:text-white shadow-sm" : "text-[#5f6368] dark:text-gray-300 hover:text-[#202124] dark:text-white"}`}
+              >
+                Detailed Analysis
+              </button>
             </div>
 
             <div className="flex items-center gap-2">
@@ -905,7 +1204,78 @@ export default function DashboardView({
           </div>
 
           <div className="overflow-x-auto max-h-[400px]">
-            {activeTab === "all-stores" || activeTab === "mp-stores" ? (
+            {activeTab === "detailed-analysis" ? (
+              <div className="p-4 bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] min-h-[400px]">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-medium text-[#5f6368] dark:text-gray-300 uppercase tracking-wider mb-0.5">From</label>
+                      <input 
+                        type="date" 
+                        value={detailedStartDate}
+                        onChange={(e) => setDetailedStartDate(e.target.value)}
+                        className="google-input px-3 py-1.5 text-sm"
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-medium text-[#5f6368] dark:text-gray-300 uppercase tracking-wider mb-0.5">To</label>
+                      <input 
+                        type="date" 
+                        value={detailedEndDate}
+                        onChange={(e) => setDetailedEndDate(e.target.value)}
+                        className="google-input px-3 py-1.5 text-sm"
+                      />
+                    </div>
+                  </div>
+                  <button 
+                    onClick={exportDetailedToExcel}
+                    className="flex items-center gap-2 btn-primary px-4 py-2 text-sm shadow-sm whitespace-nowrap"
+                  >
+                    <Download size={16} /> Export to Excel
+                  </button>
+                </div>
+                
+                <div className="overflow-x-auto max-h-[300px]">
+                  <table className="google-table text-sm">
+                    <thead className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] sticky top-0 shadow-sm z-10">
+                      <tr>
+                        <th>Branch Name</th>
+                        <th className="text-right">Bills</th>
+                        <th className="text-right">Total Qty</th>
+                        <th className="text-right">Total Sales</th>
+                        <th className="text-right">Cash Bills</th>
+                        <th className="text-right">Online Bills</th>
+                        <th className="text-right">RI</th>
+                        <th className="text-right">BI</th>
+                        <th className="text-right">EX</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {detailedMetrics.filter(s => s.name.toLowerCase().includes(storeSearch.toLowerCase())).map((store) => (
+                        <tr key={store.name}>
+                          <td className="font-medium text-xs max-w-[200px] truncate" title={store.name}>{store.name}</td>
+                          <td className="text-right font-medium text-[#1a73e8]">{store.totalBills}</td>
+                          <td className="text-right text-[#5f6368] dark:text-gray-300">{store.totalQty}</td>
+                          <td className="text-right font-medium text-[#137333]">{formatCurrency(store.totalSale)}</td>
+                          <td className="text-right text-[#5f6368] dark:text-gray-300">{store.cashBills}</td>
+                          <td className="text-right text-[#5f6368] dark:text-gray-300">{store.onlineBills}</td>
+                          <td className="text-right text-[#5f6368] dark:text-gray-300">{store.riBills}</td>
+                          <td className="text-right text-[#5f6368] dark:text-gray-300">{store.biBills}</td>
+                          <td className="text-right text-[#5f6368] dark:text-gray-300">{store.exBills}</td>
+                        </tr>
+                      ))}
+                      {detailedMetrics.filter(s => s.name.toLowerCase().includes(storeSearch.toLowerCase())).length === 0 && (
+                        <tr>
+                          <td colSpan="9" className="text-center text-[#5f6368] dark:text-gray-300 py-8">
+                            No data for selected dates
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : activeTab === "all-stores" || activeTab === "mp-stores" ? (
               <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)]">
                 <table className="google-table">
                 <thead className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] sticky top-0 shadow-sm">
