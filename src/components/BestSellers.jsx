@@ -10,7 +10,20 @@ export default function BestSellers() {
   const [viewMode, setViewMode] = useState("category"); // 'category' | 'store'
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedStore, setSelectedStore] = useState("All");
+  const [selectedStateFilter, setSelectedStateFilter] = useState("All States");
   const [expandedCategories, setExpandedCategories] = useState({});
+
+  const getStateFromBranch = (branch) => {
+    if (!branch) return "";
+    const storeCode = branch.split('-')[0].trim();
+    if (storeCode.length >= 3) {
+      const st = storeCode.substring(1, 3).toUpperCase();
+      if (st === "MP" || st === "MH") return st;
+    }
+    if (branch.toUpperCase().includes(" MP")) return "MP";
+    if (branch.toUpperCase().includes(" MH")) return "MH";
+    return "Other";
+  };
 
   const handleFileSelect = (file) => {
     setError("");
@@ -85,6 +98,7 @@ export default function BestSellers() {
     setError("");
     setSelectedCategory("All");
     setSelectedStore("All");
+    setSelectedStateFilter("All States");
     setExpandedCategories({});
   };
 
@@ -118,6 +132,9 @@ export default function BestSellers() {
 
       if (!store || qty <= 0) return;
       
+      const state = getStateFromBranch(store);
+      if (selectedStateFilter !== "All States" && state !== selectedStateFilter) return;
+
       // Ignore EXCHANGE category as per user request
       if (category && category.toUpperCase() === 'EXCHANGE') return;
 
@@ -193,7 +210,7 @@ export default function BestSellers() {
       categoryBreakdown,
       storeCategoryItemSales
     };
-  }, [jsonData, selectedCategory, selectedStore]);
+  }, [jsonData, selectedCategory, selectedStore, selectedStateFilter]);
 
   if (!jsonData) {
     return (
@@ -234,6 +251,22 @@ export default function BestSellers() {
               Item-wise collection analysis
             </p>
           </div>
+        </div>
+        
+        <div className="w-full md:w-64">
+          <label className="block text-xs font-medium text-[#5f6368] dark:text-gray-300 mb-1 uppercase tracking-wider">State Filter</label>
+          <select
+            value={selectedStateFilter}
+            onChange={(e) => {
+              setSelectedStateFilter(e.target.value);
+              setSelectedStore("All");
+            }}
+            className="w-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5"
+          >
+            <option value="All States">All States</option>
+            <option value="MP">Madhya Pradesh (MP)</option>
+            <option value="MH">Maharashtra (MH)</option>
+          </select>
         </div>
       </div>
 

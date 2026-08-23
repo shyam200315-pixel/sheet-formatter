@@ -38,9 +38,22 @@ export default function StockAnalyzer() {
   const [isParsing, setIsParsing] = useState(false);
   const [selectedStore, setSelectedStore] = useState("All Stores");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [selectedStateFilter, setSelectedStateFilter] = useState("All States");
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedRows, setExpandedRows] = useState(new Set());
   const fileInputRef = useRef(null);
+
+  const getStateFromBranch = (branch) => {
+    if (!branch) return "";
+    const storeCode = branch.split('-')[0].trim();
+    if (storeCode.length >= 3) {
+      const st = storeCode.substring(1, 3).toUpperCase();
+      if (st === "MP" || st === "MH") return st;
+    }
+    if (branch.toUpperCase().includes(" MP")) return "MP";
+    if (branch.toUpperCase().includes(" MH")) return "MH";
+    return "Other";
+  };
 
   const handleFileUpload = (e) => {
     const file = e.target.files && e.target.files[0];
@@ -131,6 +144,7 @@ export default function StockAnalyzer() {
     setStockData(null);
     setSelectedStore("All Stores");
     setSelectedCategory("All Categories");
+    setSelectedStateFilter("All States");
     setSearchTerm("");
     setExpandedRows(new Set());
   };
@@ -152,7 +166,10 @@ export default function StockAnalyzer() {
     const catSet = new Set();
     
     stockData.forEach(row => {
-      if (row.branch) storeSet.add(row.branch);
+      const state = getStateFromBranch(row.branch);
+      if (selectedStateFilter === "All States" || state === selectedStateFilter) {
+        if (row.branch) storeSet.add(row.branch);
+      }
       if (row.gender) catSet.add(row.gender);
     });
 
@@ -161,6 +178,8 @@ export default function StockAnalyzer() {
 
     // Filter
     let filtered = stockData.filter(row => {
+      const state = getStateFromBranch(row.branch);
+      const matchState = selectedStateFilter === "All States" || state === selectedStateFilter;
       const matchStore = selectedStore === "All Stores" || row.branch === selectedStore;
       const matchCat = selectedCategory === "All Categories" || row.gender === selectedCategory;
       const searchTerms = searchTerm.split(',').map(t => t.trim().toLowerCase()).filter(t => t !== "");
@@ -170,7 +189,7 @@ export default function StockAnalyzer() {
         row.description.toLowerCase().includes(term)
       );
       
-      return matchStore && matchCat && matchSearch;
+      return matchState && matchStore && matchCat && matchSearch;
     });
 
     // Metrics
@@ -298,7 +317,7 @@ export default function StockAnalyzer() {
       metrics: metricsData,
       chartData: chartResult
     };
-  }, [stockData, selectedStore, selectedCategory, searchTerm]);
+  }, [stockData, selectedStore, selectedCategory, selectedStateFilter, searchTerm]);
 
   // Render initial upload screen
   if (!stockData) {
@@ -498,8 +517,31 @@ export default function StockAnalyzer() {
       </div>
 
       {/* Filters */}
-      <div className="google-card p-4 mb-8 bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] shadow-sm flex flex-col md:flex-row gap-4 items-end">
-        <div className="flex-1 w-full">
+      <div className="google-card p-4 mb-8 bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] shadow-sm grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+        <div className="w-full">
+          <label className="flex items-center gap-2 text-sm font-medium text-[#5f6368] dark:text-gray-300 mb-2">
+            <Filter size={16} /> State
+          </label>
+          <div className="relative">
+            <select
+              value={selectedStateFilter}
+              onChange={(e) => {
+                setSelectedStateFilter(e.target.value);
+                setSelectedStore("All Stores");
+              }}
+              className="w-full appearance-none bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border-none rounded-lg px-4 py-3 text-[#202124] dark:text-white focus:ring-2 focus:ring-[#1a73e8] outline-none font-medium transition-shadow cursor-pointer"
+            >
+              <option value="All States">All States</option>
+              <option value="MP">Madhya Pradesh (MP)</option>
+              <option value="MH">Maharashtra (MH)</option>
+            </select>
+            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+              <svg className="w-4 h-4 text-[#5f6368] dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
+          </div>
+        </div>
+
+        <div className="w-full">
           <label className="flex items-center gap-2 text-sm font-medium text-[#5f6368] dark:text-gray-300 mb-2">
             <Store size={16} /> Select Branch
           </label>
@@ -520,7 +562,7 @@ export default function StockAnalyzer() {
           </div>
         </div>
 
-        <div className="flex-1 w-full">
+        <div className="w-full">
           <label className="flex items-center gap-2 text-sm font-medium text-[#5f6368] dark:text-gray-300 mb-2">
             <Layers size={16} /> Category (Gender)
           </label>
@@ -541,7 +583,7 @@ export default function StockAnalyzer() {
           </div>
         </div>
 
-        <div className="flex-1 w-full relative">
+        <div className="w-full relative">
           <label className="flex items-center gap-2 text-sm font-medium text-[#5f6368] dark:text-gray-300 mb-2">
             <Search size={16} /> Search Items
           </label>
