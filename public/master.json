@@ -2571,9 +2571,41 @@
     "name": "PG HEAVY BOTTOM SS SAUCE PAN 160MM",
     "group": "NONSTICK COOKWARE"
   },
+  "19004826": {
+    "name": "PIGEON CHIMNEY ATMOS 60 (BLDC)",
+    "group": "CHIMNEY"
+  },
+  "19004827": {
+    "name": "PIGEON CHIMNEY ATMOS 75 (BLDC)",
+    "group": "CHIMNEY"
+  },
+  "19004828": {
+    "name": "PIGEON CHIMNEY - XTREME DLX 60 (BLDC)",
+    "group": "CHIMNEY"
+  },
+  "19004829": {
+    "name": "PIGEON CHIMNEY - XTREME DLX 75 (BLDC)",
+    "group": "CHIMNEY"
+  },
+  "19004830": {
+    "name": "PIGEON CHIMNEY - XTREME DLX 90 (BLDC)",
+    "group": "CHIMNEY"
+  },
+  "19004831": {
+    "name": "PIGEON CHIMNEY - BLACK DIAMOND 60 (BLDC)",
+    "group": "CHIMNEY"
+  },
+  "19004832": {
+    "name": "PIGEON CHIMNEY - BLACK DIAMOND 90 (BLDC)",
+    "group": "CHIMNEY"
+  },
   "19004858": {
     "name": "3GLACIER 750 ML",
     "category": "From Catalogue"
+  },
+  "19004906": {
+    "name": "PIGEON CHIMNEY ATMOS 90 (BLDC)",
+    "group": "CHIMNEY"
   },
   "CMF": {
     "name": "Color Me Flyer",
