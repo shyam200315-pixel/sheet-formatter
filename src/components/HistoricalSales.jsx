@@ -65,7 +65,7 @@ export default function HistoricalSales() {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (password === "shyam2003") {
+    if (password === "150603") {
       setIsAuthenticated(true);
       toast.success("Access Granted");
     } else {
@@ -382,7 +382,14 @@ export default function HistoricalSales() {
               <input
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setPassword(val);
+                  if (val === "150603") {
+                    setIsAuthenticated(true);
+                    toast.success("Access Granted");
+                  }
+                }}
                 placeholder="Enter password..."
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-slate-800/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-white"
                 autoFocus
