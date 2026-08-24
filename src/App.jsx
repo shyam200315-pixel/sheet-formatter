@@ -273,6 +273,11 @@ export default function App() {
               break;
             }
           }
+
+          // Fix Pune branch being incorrectly marked as WMP in source Excel
+          if (newRow["BRANCH NAME"] && newRow["BRANCH NAME"].toUpperCase().includes("PUN")) {
+            newRow["BRANCH NAME"] = newRow["BRANCH NAME"].replace(/WMP/gi, "WMH");
+          }
           
           // Normalize Amount
           const amountKeys = ["NET SALE AMOUNT", "NET AMOUNT", "SALES AMOUNT", "AMOUNT", "TOTAL"];
@@ -476,26 +481,7 @@ export default function App() {
               <div className="flex flex-col">
                 <label className="text-[11px] font-medium text-[#5f6368] dark:text-gray-300 uppercase tracking-wider mb-0.5">Target</label>
                 <div className="flex items-center gap-1 text-[#1a73e8] font-medium text-sm">
-                  <span>₹</span>
-                  <input
-                    type="number"
-                    value={monthlyTarget}
-                    onChange={(e) => setMonthlyTarget(Number(e.target.value))}
-                    className="bg-transparent w-24 focus:outline-none focus:border-b focus:border-[#1a73e8]"
-                  />
-                </div>
-              </div>
-              <div className="w-px h-8 bg-[#dadce0]"></div>
-              <div className="flex flex-col">
-                <label className="text-[11px] font-medium text-[#5f6368] dark:text-gray-300 uppercase tracking-wider mb-0.5">Commitment</label>
-                <div className="flex items-center gap-1 text-[#1a73e8] font-medium text-sm">
-                  <span>₹</span>
-                  <input
-                    type="number"
-                    value={monthlyCommitment}
-                    onChange={(e) => setMonthlyCommitment(Number(e.target.value))}
-                    className="bg-transparent w-24 focus:outline-none focus:border-b focus:border-[#1a73e8]"
-                  />
+                  <span>₹ {monthlyTarget}</span>
                 </div>
               </div>
             </div>
@@ -579,21 +565,9 @@ export default function App() {
                         <div className="md:hidden w-full max-w-md bg-white dark:bg-slate-800/60 border border-[#dadce0] dark:border-slate-700 rounded-lg p-4 mb-6 shadow-sm flex flex-col gap-4">
                           <div>
                             <label className="block text-xs font-medium text-[#5f6368] dark:text-gray-300 mb-1">Monthly Target (₹)</label>
-                            <input
-                              type="number"
-                              value={monthlyTarget}
-                              onChange={(e) => setMonthlyTarget(Number(e.target.value))}
-                              className="google-input w-full p-2 text-sm"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-[#5f6368] dark:text-gray-300 mb-1">Monthly Commitment (₹)</label>
-                            <input
-                              type="number"
-                              value={monthlyCommitment}
-                              onChange={(e) => setMonthlyCommitment(Number(e.target.value))}
-                              className="google-input w-full p-2 text-sm"
-                            />
+                            <div className="google-input w-full p-2 text-sm bg-gray-50 dark:bg-slate-700">
+                              {monthlyTarget}
+                            </div>
                           </div>
                         </div>
 

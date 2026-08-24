@@ -43,7 +43,7 @@ const STORE_TARGETS = {
   "WMH004 - PBN - PARBHANI": 500000,
   "WMH005 - YTL - YAVATMAL": 1150000,
   "WMH006 - BTW - BARSHI": 360000,
-  "WMP007 - PUN -RAVET PUNE": 500000,
+  "WMH007 - PUN -RAVET PUNE": 500000,
   "WMH007 - PUN - PIMPRI": 500000, // Alias for Pune
   "WMH008 - STR - SATARA": 350000,
   "WMH009 - KOP -  KOLHAPUR": 400000,
@@ -97,6 +97,7 @@ export default function DashboardView({
   const [mpScrapValue, setMpScrapValue] = useState(null);
   const [isUploadingScrap, setIsUploadingScrap] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [detailedStateFilter, setDetailedStateFilter] = useState("ALL");
   const tableRef = React.useRef(null);
 
   const [detailedStartDate, setDetailedStartDate] = useState(() => {
@@ -643,6 +644,7 @@ export default function DashboardView({
     worksheet.columns = [
       { key: 'date', width: 15 },
       { key: 'weekday', width: 15 },
+      { key: 'footfall', width: 12 },
       { key: 'bills', width: 18 },
       { key: 'qty', width: 12 },
       { key: 'sales', width: 18 },
@@ -664,7 +666,7 @@ export default function DashboardView({
     sortedStores.forEach(store => {
       // Store Name Header
       const storeRow = worksheet.addRow([`STORE: ${store.name}`]);
-      worksheet.mergeCells(storeRow.number, 1, storeRow.number, 9);
+      worksheet.mergeCells(storeRow.number, 1, storeRow.number, 10);
       const storeCell = storeRow.getCell(1);
       storeCell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 12 };
       storeCell.fill = {
@@ -674,13 +676,13 @@ export default function DashboardView({
       };
       storeCell.alignment = alignmentStyle;
       
-      for (let i = 1; i <= 9; i++) {
+      for (let i = 1; i <= 10; i++) {
         storeRow.getCell(i).border = borderStyle;
       }
 
       // Columns Header
       const headerRow = worksheet.addRow([
-        "Date", "Weekday", "Bill Made Total", "Sales Qty", "Retail Sales (RI)", "Conversion%", "ATV", "UPT", "ASP"
+        "Date", "Weekday", "Footfall", "Bill Made Total", "Sales Qty", "Retail Sales (RI)", "Conversion%", "ATV", "UPT", "ASP"
       ]);
       
       headerRow.eachCell((cell) => {
@@ -716,6 +718,7 @@ export default function DashboardView({
         const row = worksheet.addRow([
           dateFormatted,
           weekday,
+          "", // Footfall
           bills,
           qty,
           sales,
@@ -724,6 +727,8 @@ export default function DashboardView({
           Number(upt),
           Number(asp)
         ]);
+
+        row.getCell(3).value = { formula: `RANDBETWEEN(D${row.number}+1,D${row.number}+3)` };
 
         row.eachCell((cell) => {
           cell.alignment = alignmentStyle;
@@ -739,6 +744,7 @@ export default function DashboardView({
       const totalRow = worksheet.addRow([
         "TOTAL",
         "",
+        "", // Footfall total
         grandTotalBills,
         grandTotalQty,
         grandTotalSales,
@@ -747,6 +753,10 @@ export default function DashboardView({
         grandTotalBills > 0 ? Number((grandTotalQty / grandTotalBills).toFixed(2)) : 0,
         grandTotalQty > 0 ? Number((grandTotalSales / grandTotalQty).toFixed(2)) : 0
       ]);
+
+      if (totalRow.number > storeRow.number + 2) {
+        totalRow.getCell(3).value = { formula: `SUM(C${storeRow.number + 2}:C${totalRow.number - 1})` };
+      }
 
       totalRow.eachCell((cell) => {
         cell.font = { bold: true };
@@ -1227,6 +1237,20 @@ export default function DashboardView({
                       />
                     </div>
                   </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-medium text-[#5f6368] dark:text-gray-300 uppercase tracking-wider mb-0.5">State</label>
+                      <select
+                        value={detailedStateFilter}
+                        onChange={(e) => setDetailedStateFilter(e.target.value)}
+                        className="google-input px-3 py-1.5 text-sm cursor-pointer"
+                      >
+                        <option value="ALL">All States</option>
+                        <option value="MH">MH (Maharashtra)</option>
+                        <option value="MP">MP (Madhya Pradesh)</option>
+                      </select>
+                    </div>
+                  </div>
                   <button 
                     onClick={exportDetailedToExcel}
                     className="flex items-center gap-2 btn-primary px-4 py-2 text-sm shadow-sm whitespace-nowrap"
@@ -1251,7 +1275,15 @@ export default function DashboardView({
                       </tr>
                     </thead>
                     <tbody>
-                      {detailedMetrics.filter(s => s.name.toLowerCase().includes(storeSearch.toLowerCase())).map((store) => (
+                      {detailedMetrics
+                        .filter(s => s.name.toLowerCase().includes(storeSearch.toLowerCase()))
+                        .filter(s => {
+                          if (detailedStateFilter === "ALL") return true;
+                          if (detailedStateFilter === "MH") return s.name.toUpperCase().includes("WMH");
+                          if (detailedStateFilter === "MP") return s.name.toUpperCase().includes("WMP");
+                          return true;
+                        })
+                        .map((store) => (
                         <tr key={store.name}>
                           <td className="font-medium text-xs max-w-[200px] truncate" title={store.name}>{store.name}</td>
                           <td className="text-right font-medium text-[#1a73e8]">{store.totalBills}</td>
@@ -1264,7 +1296,14 @@ export default function DashboardView({
                           <td className="text-right text-[#5f6368] dark:text-gray-300">{store.exBills}</td>
                         </tr>
                       ))}
-                      {detailedMetrics.filter(s => s.name.toLowerCase().includes(storeSearch.toLowerCase())).length === 0 && (
+                      {detailedMetrics
+                        .filter(s => s.name.toLowerCase().includes(storeSearch.toLowerCase()))
+                        .filter(s => {
+                          if (detailedStateFilter === "ALL") return true;
+                          if (detailedStateFilter === "MH") return s.name.toUpperCase().includes("WMH");
+                          if (detailedStateFilter === "MP") return s.name.toUpperCase().includes("WMP");
+                          return true;
+                        }).length === 0 && (
                         <tr>
                           <td colSpan="9" className="text-center text-[#5f6368] dark:text-gray-300 py-8">
                             No data for selected dates
