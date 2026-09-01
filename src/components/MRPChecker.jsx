@@ -47,11 +47,6 @@ function getComputedOffer(item) {
       label = `Offer Rate: ₹${p.toLocaleString('en-IN')}`;
       scheme = `New Offer (₹${p.toLocaleString('en-IN')})`;
       if (rawMrp && rawMrp > p) discPct = Math.round(((rawMrp - p) / rawMrp) * 100);
-    } else if (o.offerPrice && typeof o.offerPrice === 'number' && o.offerPrice >= 10) {
-      p = o.offerPrice;
-      label = `Festival Offer: ₹${p.toLocaleString('en-IN')}`;
-      scheme = o.offerName ? `Festival Offer (${o.offerName})` : `Special Offer Rate`;
-      if (rawMrp && rawMrp > p) discPct = Math.round(((rawMrp - p) / rawMrp) * 100);
     } else if (o.discRate && typeof o.discRate === 'number' && o.discRate >= 10 && o.discType === 'Flat Rate') {
       p = o.discRate;
       label = `Flat Rate: ₹${p.toLocaleString('en-IN')}`;
@@ -140,16 +135,6 @@ function renderSchemeRateDetail(offer, rawMrp) {
         <span className="text-gray-500 dark:text-gray-400">Offer Price:</span>
         <span className="font-bold text-orange-600 dark:text-orange-400 text-sm">
           ₹{offer.newOffer.toLocaleString('en-IN')}
-        </span>
-      </div>
-    );
-  }
-  if (offer.offerPrice && typeof offer.offerPrice === 'number' && offer.offerPrice >= 10) {
-    return (
-      <div className="flex items-center justify-between text-xs mt-2 pt-2 border-t border-orange-200/50 dark:border-slate-700">
-        <span className="text-gray-500 dark:text-gray-400">Special Festival Rate:</span>
-        <span className="font-bold text-orange-600 dark:text-orange-400 text-sm">
-          ₹{offer.offerPrice.toLocaleString('en-IN')}
         </span>
       </div>
     );
@@ -347,7 +332,7 @@ export default function MRPChecker() {
 
   const sampleChips = [
     { label: "19000330 (Storm Tawa - 50% Off)", query: "19000330" },
-    { label: "19003040 (Airfryer - ₹2,995)", query: "19003040" },
+    { label: "19003040 (Airfryer - ₹3,099)", query: "19003040" },
     { label: "19003278 (Cooktop - ₹3,089)", query: "19003278" },
     { label: "16002127 (Trivia Bottle)", query: "16002127" },
     { label: "16000890 (Cast Iron - Buy 1@30% Buy 2@40%)", query: "16000890" }

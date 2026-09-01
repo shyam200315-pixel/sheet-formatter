@@ -5678,11 +5678,6 @@
       {
         "scheme": "Buy 1 @ 30% & Buy 2+ @ 40%",
         "description": "Buy 1 @ 30% Off | Buy 2 or more @ 40% Off"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "discPct": null,
-        "description": "Special Offer: ₹undefined (MRP: ₹undefined)"
       }
     ],
     "sap_code": "102 SS"
@@ -5785,29 +5780,9 @@
       {
         "scheme": "Buy 1 @ 30% & Buy 2+ @ 40%",
         "description": "Buy 1 @ 30% Off | Buy 2 or more @ 40% Off"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "offerName": "PG ICT PRIME 1800W + ALUMINIUM PRESSURE COOKER IB  3 LTR  CAL",
-        "mrp": 4735,
-        "offerPrice": 2250,
-        "discPct": "52%",
-        "newOffer": 2495,
-        "description": "Special Offer: ₹2495 (MRP: ₹4735)"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "offerName": "ALUMINIUM PRESSURE COOKER IB  3 LTR  CAL  + PIGEON NONSTICK APPACHETTY  WITH LID  SP + Tawa 250 spl",
-        "mrp": 3544,
-        "offerPrice": 1599,
-        "discPct": "55%",
-        "newOffer": 1499,
-        "description": "Special Offer: ₹1499 (MRP: ₹3544)"
       }
     ],
-    "sap_code": "116 SS",
-    "active_offer_price": 1499,
-    "active_offer_label": "Offer Price ₹1499"
+    "sap_code": "116 SS"
   },
   "19000026": {
     "name": "ALUMINIUM PRESSURE COOKER IB  5 LTR  CAL",
@@ -5868,20 +5843,9 @@
         "discType": "Flat Discount",
         "effectiveAug31": 0.5,
         "description": "Flat 50% Discount"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "offerName": "Buy PIGEON NONSTICK FLAT TAWA250 + PIGEON NONSTICK APPACHETTY  WITH LID  SP Free",
-        "mrp": 2000,
-        "offerPrice": 1099,
-        "discPct": "45%",
-        "newOffer": "done",
-        "description": "Special Offer: ₹done (MRP: ₹2000)"
       }
     ],
-    "sap_code": "151 BL",
-    "active_offer_price": 1099,
-    "active_offer_label": "Offer Price ₹1099"
+    "sap_code": "151 BL"
   },
   "19000031": {
     "name": "PIGEON NONSTICK FLAT TAWA280",
@@ -6153,19 +6117,6 @@
         "discType": "Flat Discount",
         "effectiveAug31": 0.5,
         "description": "Flat 50% Discount"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "offerName": "Buy any nonstick cookware + PIGEON NONSTICK FLAT TAWA 280  SPECIAL (",
-        "mrp": "-",
-        "offerPrice": "-",
-        "discPct": "-",
-        "description": "Special Offer: ₹- (MRP: ₹-)"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "discPct": null,
-        "description": "Special Offer: ₹undefined (MRP: ₹undefined)"
       }
     ],
     "sap_code": "179 BL"
@@ -6647,12 +6598,6 @@
       {
         "scheme": "Flat 50% Off",
         "description": "Flat 50% Off on Selected Item"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "discPct": null,
-        "newOffer": "Removed",
-        "description": "Special Offer: ₹Removed (MRP: ₹undefined)"
       }
     ],
     "sap_code": "12458-LG NA"
@@ -7291,12 +7236,6 @@
         "discType": "Flat Discount",
         "effectiveAug31": 0.5,
         "description": "Flat 50% Discount"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "discPct": null,
-        "newOffer": "Removed",
-        "description": "Special Offer: ₹Removed (MRP: ₹undefined)"
       }
     ],
     "sap_code": "14029 RD"
@@ -7360,11 +7299,6 @@
         "discType": "Flat Discount",
         "effectiveAug31": 0.5,
         "description": "Flat 50% Discount"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "discPct": null,
-        "description": "Special Offer: ₹undefined (MRP: ₹undefined)"
       }
     ],
     "sap_code": "14033 BL"
@@ -7837,13 +7771,7 @@
     "difference": 500,
     "source": "file1",
     "sap_code": "14336 BL-SS",
-    "offers": [
-      {
-        "scheme": "Festival / Special Offer",
-        "discPct": null,
-        "description": "Special Offer: ₹undefined (MRP: ₹undefined)"
-      }
-    ]
+    "offers": []
   },
   "19000428": {
     "name": "PIGEON - THERMA FRESH GLASS LUNCH BOX 3",
@@ -7931,34 +7859,11 @@
         "discType": "Flat Rate",
         "effectiveAug31": 2610,
         "description": "Flat Rate: ₹2610"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "offerName": "Ayush 2 BR",
-        "mrp": 4749,
-        "offerPrice": 1999,
-        "discPct": "58%",
-        "newOffer": 3999,
-        "description": "Special Offer: ₹3999 (MRP: ₹4749)"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "offerName": "Family Pack",
-        "mrp": 17772,
-        "offerPrice": 7990,
-        "discPct": "55%",
-        "newOffer": "Done",
-        "description": "Special Offer: ₹Done (MRP: ₹17772)"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "discPct": null,
-        "description": "Special Offer: ₹undefined (MRP: ₹undefined)"
       }
     ],
-    "active_offer_price": 7990,
-    "active_offer_label": "Offer Price ₹7990",
-    "sap_code": "14401 BL-SS"
+    "sap_code": "14401 BL-SS",
+    "active_offer_price": 2610,
+    "active_offer_label": "Flat Rate ₹2610"
   },
   "19000458": {
     "name": "PG LED BATTEN T5 20W - STAR",
@@ -8030,11 +7935,6 @@
       {
         "scheme": "Buy 1 @ 30% & Buy 2+ @ 40%",
         "description": "Buy 1 @ 30% Off | Buy 2 or more @ 40% Off"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "discPct": null,
-        "description": "Special Offer: ₹undefined (MRP: ₹undefined)"
       }
     ],
     "sap_code": "14430 BL-WH"
@@ -9061,11 +8961,6 @@
         "discType": "Flat Discount",
         "effectiveAug31": 0.5,
         "description": "Flat 50% Discount"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "discPct": null,
-        "description": "Special Offer: ₹undefined (MRP: ₹undefined)"
       }
     ],
     "sap_code": "236S BL"
@@ -12332,20 +12227,11 @@
         "newOffer": 3099,
         "effectiveAug31": 3099,
         "description": "Flat Rate: ₹3099"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "offerName": "Airfryer",
-        "mrp": 5995,
-        "offerPrice": 2795,
-        "discPct": "53%",
-        "newOffer": 2995,
-        "description": "Special Offer: ₹2995 (MRP: ₹5995)"
       }
     ],
-    "active_offer_price": 2995,
-    "active_offer_label": "Offer Price ₹2995",
-    "sap_code": "15045N GR"
+    "sap_code": "15045N GR",
+    "active_offer_price": 3099,
+    "active_offer_label": "Flat Rate ₹3099"
   },
   "19003041": {
     "name": "PIGEON GLASSTOP SPECIAL 3BR (ECONOMY)",
@@ -12411,20 +12297,9 @@
         "newOffer": 0.35,
         "effectiveAug31": 0.4,
         "description": "Flat 50% Discount"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "offerName": "Mixer Grinder 750w XEV9",
-        "mrp": 5199,
-        "offerPrice": 2599,
-        "discPct": "50%",
-        "newOffer": 2999,
-        "description": "Special Offer: ₹2999 (MRP: ₹5199)"
       }
     ],
-    "sap_code": "15597 IVR",
-    "active_offer_price": 2999,
-    "active_offer_label": "Offer Price ₹2999"
+    "sap_code": "15597 IVR"
   },
   "19003057": {
     "name": "PG 1.2 LTR SPARK DOUBLE-WALLED KETTLE",
@@ -13179,11 +13054,6 @@
         "discType": "Flat Discount",
         "effectiveAug31": 0.4,
         "description": "Flat 30% Discount"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "discPct": null,
-        "description": "Special Offer: ₹undefined (MRP: ₹undefined)"
       }
     ],
     "sap_code": "15794 NA"
@@ -15516,11 +15386,6 @@
         "discType": "Flat Discount",
         "effectiveAug31": 0.5,
         "description": "Flat 50% Discount"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "discPct": null,
-        "description": "Special Offer: ₹undefined (MRP: ₹undefined)"
       }
     ],
     "sap_code": "16263 BL"
@@ -18263,19 +18128,7 @@
     "difference": 0,
     "source": "file1",
     "sap_code": "19004598 NA",
-    "offers": [
-      {
-        "scheme": "Festival / Special Offer",
-        "offerName": "Valido Chimney + PIGEON GLASSTOP AYUSH 3 BR",
-        "mrp": 25239,
-        "offerPrice": 10990,
-        "discPct": "56%",
-        "newOffer": "No change",
-        "description": "Special Offer: ₹No change (MRP: ₹25239)"
-      }
-    ],
-    "active_offer_price": 10990,
-    "active_offer_label": "Offer Price ₹10990"
+    "offers": []
   },
   "19004599": {
     "name": "PIGEON CHIMNEY  - BLACK DIAMOND -90",
@@ -18390,20 +18243,9 @@
         "newOffer": 0.35,
         "effectiveAug31": 0.4,
         "description": "Flat 50% Discount"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "offerName": "Nutri 600w",
-        "mrp": 5199,
-        "offerPrice": 2599,
-        "discPct": "50%",
-        "newOffer": 2999,
-        "description": "Special Offer: ₹2999 (MRP: ₹5199)"
       }
     ],
-    "sap_code": "19004621 NA",
-    "active_offer_price": 2999,
-    "active_offer_label": "Offer Price ₹2999"
+    "sap_code": "19004621 NA"
   },
   "19004624": {
     "name": "Item from PDF: 19004624",
@@ -18437,11 +18279,6 @@
       {
         "scheme": "Buy 1 @ 30% & Buy 2+ @ 40%",
         "description": "Buy 1 @ 30% Off | Buy 2 or more @ 40% Off"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "discPct": null,
-        "description": "Special Offer: ₹undefined (MRP: ₹undefined)"
       }
     ],
     "sap_code": "19004626"
@@ -18847,28 +18684,9 @@
       {
         "scheme": "Buy 1 @ 30% & Buy 2+ @ 40%",
         "description": "Buy 1 @ 30% Off | Buy 2 or more @ 40% Off"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "offerName": "PIGEON INSTAMAMI NOODLE MAKER + PIGEON INSTAMAMI NOODLE MAKER Stand",
-        "mrp": 5290,
-        "offerPrice": 2199,
-        "discPct": "58%",
-        "newOffer": "done",
-        "description": "Special Offer: ₹done (MRP: ₹5290)"
-      },
-      {
-        "scheme": "Festival / Special Offer",
-        "offerName": "PIGEON GLASSTOP AYUSH 2 BR + PIGEON INSTAMAMI NOODLE MAKER",
-        "mrp": 8390,
-        "offerPrice": 3999,
-        "discPct": "52%",
-        "description": "Special Offer: ₹3999 (MRP: ₹8390)"
       }
     ],
-    "sap_code": "19004816 NA",
-    "active_offer_price": 3999,
-    "active_offer_label": "Offer Price ₹3999"
+    "sap_code": "19004816 NA"
   },
   "19004826": {
     "name": "PIGEON CHIMNEY ATMOS 60 (BLDC)",
