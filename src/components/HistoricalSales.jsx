@@ -65,7 +65,7 @@ export default function HistoricalSales() {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (password === "150603") {
+    if (password === "shyam2003") {
       setIsAuthenticated(true);
       toast.success("Access Granted");
     } else {
@@ -385,7 +385,7 @@ export default function HistoricalSales() {
                 onChange={(e) => {
                   const val = e.target.value;
                   setPassword(val);
-                  if (val === "150603") {
+                  if (val === "shyam2003") {
                     setIsAuthenticated(true);
                     toast.success("Access Granted");
                   }
