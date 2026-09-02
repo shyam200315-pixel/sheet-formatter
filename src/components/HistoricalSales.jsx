@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import * as XLSX from "xlsx";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import { appendHistoricalData, loadHistoricalData, clearHistoricalData, parseBillDate, findHeaderRowIndex, saveKnownStores, normalizeStoreName } from "../helpers";
+import { appendHistoricalData, loadHistoricalData, clearHistoricalData, parseBillDate, findHeaderRowIndex } from "../helpers";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock, Upload, Database, FileSpreadsheet, Search, Trash2, Calendar, Store, X, TrendingUp, DollarSign, Package } from "lucide-react";
 import toast from "react-hot-toast";
@@ -57,10 +57,9 @@ export default function HistoricalSales() {
     data.forEach(row => {
       const storeName = row["STORE NAME"] || row["BRANCH NAME"] || row["FROM BRANCH NAME"] || row[" FROM BRANCH NAME "] || row["TO STORE"];
       if (storeName) {
-        storeSet.add(normalizeStoreName(storeName));
+        storeSet.add(storeName.trim().toUpperCase());
       }
     });
-    saveKnownStores(storeSet);
     setStores(Array.from(storeSet).sort());
   };
 
