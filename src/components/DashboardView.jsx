@@ -35,34 +35,42 @@ import {
   Bar,
   Cell
 } from "recharts";
+import { MASTER_STORES, normalizeStoreName, getKnownStores, saveKnownStores } from "../helpers";
 
-const STORE_TARGETS = {
+export const STORE_TARGETS = {
+  // Maharashtra (10 stores)
   "WMH001 - NED - VAZIRABAD": 350000,
   "WMH002 - NED - BHAGYA NAGAR": 450000,
   "WMH003 - BDE - BEED": 800000,
   "WMH004 - PBN - PARBHANI": 400000,
   "WMH005 - YTL - YAVATMAL": 1500000,
   "WMH006 - BTW - BARSHI": 360000,
+  "WMH007 - PUN - RAVET PUNE": 600000,
   "WMH007 - PUN -RAVET PUNE": 600000,
-  "WMH007 - PUN - PIMPRI": 600000, // Alias for Pune
+  "WMH007 - PUN - PIMPRI": 600000,
   "WMH008 - STR - SATARA": 450000,
-  "WMH009 - KOP -  KOLHAPUR": 450000,
   "WMH009 - KOP - KOLHAPUR": 450000,
+  "WMH009 - KOP -  KOLHAPUR": 450000,
   "WMH011 - BDL - BADLAPUR": 550000,
+  // Madhya Pradesh (8 stores)
   "WMP001 - BPL - SEHORE CITY": 430000,
   "WMP002 - BPL - GULMOHAR COLONY": 430000,
   "WMP003 - IND - MR 09 ROAD": 465000,
   "WMP004 - IND - ANNAPURNA RD": 350000,
   "WMP005 - STA - SATNA": 300000,
   "WMP005 - STN - SATNA": 300000,
-  "WMP006 - BPL -  KOLAR ROAD": 400000,
   "WMP006 - BPL - KOLAR ROAD": 400000,
+  "WMP006 - BPL -  KOLAR ROAD": 400000,
   "WMP007 - REW - REWA": 350000,
   "WMP008 - SVP - SHIVPURI": 350000
 };
 
 const getStoreTarget = (storeName) => {
   if (!storeName) return null;
+  const canonical = normalizeStoreName(storeName);
+  if (STORE_TARGETS[canonical]) return STORE_TARGETS[canonical];
+  if (STORE_TARGETS[storeName]) return STORE_TARGETS[storeName];
+  
   const nameClean = storeName.replace(/\s+/g, '').toUpperCase();
   for (const [key, value] of Object.entries(STORE_TARGETS)) {
     const keyClean = key.replace(/\s+/g, '').toUpperCase();
@@ -204,13 +212,23 @@ export default function DashboardView({
     todayStr,
     today,
     totalDays,
-    allStores,
+    allStores: rawStores,
     todayStoreSales,
     formattedRow,
     storesBelowFiveThousand,
     jsonData,
     parseBillDate,
   } = reportData;
+
+  // Master list of all known stores (18 base + any dynamically added stores)
+  const allStores = useMemo(() => {
+    const set = new Set(getKnownStores());
+    if (rawStores) {
+      rawStores.forEach(s => set.add(normalizeStoreName(s)));
+    }
+    saveKnownStores(set);
+    return set;
+  }, [rawStores]);
 
   // Recalculate metrics based on current targets
   const computedMetrics = useMemo(() => {
@@ -238,7 +256,7 @@ export default function DashboardView({
           billDate <= today
         ) {
           mtdSales += saleAmount;
-          const storeName = row["BRANCH NAME"];
+          const storeName = normalizeStoreName(row["BRANCH NAME"]);
           if (storeName) {
             storeSalesMTD[storeName] = (storeSalesMTD[storeName] || 0) + saleAmount;
             if (row["BILL DATE"] === todayStr) {
@@ -258,7 +276,7 @@ export default function DashboardView({
     const avgPerStoreToday = allStores.size > 0 ? Math.floor(todaySales / allStores.size) : 0;
     const avgPerStoreMTD = allStores.size > 0 ? Math.floor(mtdSales / allStores.size) : 0;
 
-    // Stores below 5k based on current calculations
+    // Stores below 5k based on current calculations (including 0 sales)
     const below5k = [];
     for (const storeName of allStores) {
       const salesToday = storeSalesToday[storeName] || 0;
@@ -279,9 +297,9 @@ export default function DashboardView({
       storeSalesToday,
       below5k,
     };
-  }, [jsonData, allStores, today, todayStr, totalDays, monthlyCommitment]);
+  }, [jsonData, allStores, today, todayStr, totalDays, monthlyCommitment, parseBillDate]);
 
-  // MP Specific Metrics
+  // MP Specific Metrics (8 MP stores)
   const mpMetrics = useMemo(() => {
     const currentDay = today.getDate();
     const remainingDays = totalDays - currentDay;
@@ -296,7 +314,7 @@ export default function DashboardView({
     for (const row of jsonData) {
       const billDate = parseBillDate(row["BILL DATE"]);
       const saleAmount = Number(row["NET SALE AMOUNT"]);
-      const storeName = row["BRANCH NAME"];
+      const storeName = normalizeStoreName(row["BRANCH NAME"]);
 
       if (billDate && !isNaN(saleAmount) && storeName && storeName.toUpperCase().includes("WMP")) {
         if (
@@ -340,7 +358,7 @@ export default function DashboardView({
       below5k,
       mpCommitment,
     };
-  }, [jsonData, allStores, today, todayStr, totalDays, computedMetrics.storeSalesToday]);
+  }, [jsonData, allStores, today, todayStr, totalDays, computedMetrics.storeSalesToday, parseBillDate]);
 
   // Detailed Analytics Metrics
   const detailedMetrics = useMemo(() => {
@@ -809,17 +827,24 @@ export default function DashboardView({
     sortedByPercent.forEach((store, index) => {
       if (store.achievedPercent === null) {
         store.colorTier = "gray";
-      } else if (index < 5) {
+      } else if (store.achievedPercent === 0 || store.mtdSales === 0) {
+        store.colorTier = "red";
+      } else if (index < 5 && store.achievedPercent > 0) {
         store.colorTier = "green";
-      } else if (index < 10) {
+      } else if (index < 10 && store.achievedPercent > 0) {
         store.colorTier = "yellow";
       } else {
         store.colorTier = "red";
       }
     });
 
-    // Finally sort by MTD sales for the table display order
-    return stores.sort((a, b) => b.mtdSales - a.mtdSales);
+    // Finally sort by MTD sales for the table display order, then alphabetically
+    return stores.sort((a, b) => {
+      if (b.mtdSales !== a.mtdSales) {
+        return b.mtdSales - a.mtdSales;
+      }
+      return a.name.localeCompare(b.name);
+    });
   }, [allStores, computedMetrics.storeSalesToday, computedMetrics.storeSalesMTD, storeSearch]);
 
   const filteredBelow5k = useMemo(() => {
@@ -1339,7 +1364,7 @@ export default function DashboardView({
                             {formatCurrency(store.todaySales)}
                           </span>
                         ) : (
-                          <span className="text-[#9aa0a6]">-</span>
+                          <span className="text-[#9aa0a6] font-medium">₹0</span>
                         )}
                       </td>
                       <td className="text-[#5f6368] dark:text-gray-300">{formatCurrency(store.mtdSales)}</td>
@@ -1496,8 +1521,8 @@ export default function DashboardView({
                 <tr key={store.name} className={idx % 2 === 0 ? "bg-[#f8f9fa]" : "bg-white"}>
                   <td className="py-3 px-4 font-medium text-[#202124] dark:text-white" style={{ borderBottom: "1px solid #dadce0" }}>{store.name}</td>
                   <td className="py-3 px-4" style={{ borderBottom: "1px solid #dadce0" }}>
-                    <span className={`font-semibold ${store.todaySales < 5000 ? "text-[#b06000]" : "text-[#137333]"}`}>
-                      {store.todaySales > 0 ? formatCurrency(store.todaySales) : "-"}
+                    <span className={`font-semibold ${store.todaySales > 0 ? (store.todaySales < 5000 ? "text-[#b06000]" : "text-[#137333]") : "text-[#9aa0a6]"}`}>
+                      {store.todaySales > 0 ? formatCurrency(store.todaySales) : "₹0"}
                     </span>
                   </td>
                   <td className="py-3 px-4 font-medium text-[#5f6368] dark:text-gray-300" style={{ borderBottom: "1px solid #dadce0" }}>{formatCurrency(store.mtdSales)}</td>

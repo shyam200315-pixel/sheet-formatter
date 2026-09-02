@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as XLSX from "xlsx";
-import { findHeaderRowIndex, getTargetDate, parseBillDate, appendHistoricalData, loadHistoricalData } from "./helpers";
+import { findHeaderRowIndex, getTargetDate, parseBillDate, appendHistoricalData, loadHistoricalData, MASTER_STORES, normalizeStoreName, getKnownStores, saveKnownStores } from "./helpers";
 import FileDropZone from "./components/FileDropZone";
 import DashboardView from "./components/DashboardView";
 import OrderProcessing from "./components/OrderProcessing";
@@ -274,9 +274,8 @@ export default function App() {
             }
           }
 
-          // Fix Pune branch being incorrectly marked as WMP in source Excel
-          if (newRow["BRANCH NAME"] && newRow["BRANCH NAME"].toUpperCase().includes("PUN")) {
-            newRow["BRANCH NAME"] = newRow["BRANCH NAME"].replace(/WMP/gi, "WMH");
+          if (newRow["BRANCH NAME"]) {
+            newRow["BRANCH NAME"] = normalizeStoreName(newRow["BRANCH NAME"]);
           }
           
           // Normalize Amount
@@ -313,12 +312,15 @@ export default function App() {
           throw new Error("Could not parse or establish report date from the sheet.");
         }
 
-        const allStores = new Set();
+        // Always include all known stores (default 18 + any newly added/discovered stores from previous months)
+        const allStores = new Set(getKnownStores());
         for (const row of jsonData) {
           if (row["BRANCH NAME"]) {
             allStores.add(row["BRANCH NAME"]);
           }
         }
+        // Save any newly discovered stores permanently so they are remembered in all future months
+        saveKnownStores(allStores);
 
         if (allStores.size === 0) {
           throw new Error("No branches found in the spreadsheet branch list.");
