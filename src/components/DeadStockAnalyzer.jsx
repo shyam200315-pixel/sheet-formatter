@@ -686,6 +686,127 @@ export default function DeadStockAnalyzer({ onBack }) {
     });
   };
 
+  // Export Order Audit Excel
+  const exportOrderAuditExcel = () => {
+    if (!auditedOrders || auditedOrders.length === 0) {
+      toast.error("No audited order lines to export!");
+      return;
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Order Requirement Audit");
+
+    sheet.columns = [
+      { header: "ORDERING STORE", key: "store", width: 18 },
+      { header: "ITEM CODE", key: "itemCode", width: 16 },
+      { header: "DESCRIPTION", key: "description", width: 45 },
+      { header: "REQ QTY", key: "reqQty", width: 12 },
+      { header: "STORE SALES", key: "storeSales", width: 14 },
+      { header: "AUDIT RISK", key: "auditRisk", width: 22 },
+      { header: "TRANSFER MATCH (SAME STATE)", key: "transferMatch", width: 45 }
+    ];
+
+    const headerRow = sheet.getRow(1);
+    headerRow.font = { bold: true, color: { argb: "FFFFFF" }, size: 11 };
+    headerRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "1E293B" } };
+    headerRow.alignment = { vertical: "middle", horizontal: "center" };
+    headerRow.height = 28;
+
+    auditedOrders.forEach(ord => {
+      const storeStr = `${ord.storeCode} (${ord.storeState})`;
+      const auditRiskStr = ord.isHighRisk ? "High Risk (0 Sales)" : "Approved";
+      const transferMatchStr = ord.transferMatch
+        ? `Transfer ${ord.transferMatch.suggestedQty} units from ${ord.transferMatch.fromStore} (${ord.transferMatch.fromState})`
+        : `No surplus in ${ord.storeState} (Place Purchase Order)`;
+
+      const row = sheet.addRow({
+        store: storeStr,
+        itemCode: ord.itemCode,
+        description: ord.description,
+        reqQty: ord.reqQty,
+        storeSales: ord.periodSales,
+        auditRisk: auditRiskStr,
+        transferMatch: transferMatchStr
+      });
+
+      row.height = 24;
+
+      row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+        cell.border = {
+          top: { style: "thin", color: { argb: "CBD5E1" } },
+          bottom: { style: "thin", color: { argb: "CBD5E1" } },
+          left: { style: "thin", color: { argb: "CBD5E1" } },
+          right: { style: "thin", color: { argb: "CBD5E1" } }
+        };
+
+        if (colNumber === 1) {
+          cell.alignment = { vertical: "middle", horizontal: "center" };
+          cell.font = { bold: true };
+        } else if (colNumber === 2) {
+          cell.alignment = { vertical: "middle", horizontal: "center" };
+          cell.font = { bold: true, color: { argb: "0284C7" } };
+        } else if (colNumber === 3) {
+          cell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+        } else if (colNumber === 4) {
+          cell.alignment = { vertical: "middle", horizontal: "center" };
+          cell.font = { bold: true };
+        } else if (colNumber === 5) {
+          cell.alignment = { vertical: "middle", horizontal: "center" };
+          if (ord.periodSales === 0) {
+            cell.font = { bold: true, color: { argb: "DC2626" } };
+          } else {
+            cell.font = { bold: true, color: { argb: "16A34A" } };
+          }
+        } else if (colNumber === 6) {
+          cell.alignment = { vertical: "middle", horizontal: "center" };
+          if (ord.isHighRisk) {
+            cell.fill = {
+              type: "pattern",
+              pattern: "solid",
+              fgColor: { argb: "FEE2E2" }
+            };
+            cell.font = { bold: true, color: { argb: "991B1B" } };
+          } else {
+            cell.fill = {
+              type: "pattern",
+              pattern: "solid",
+              fgColor: { argb: "DCFCE7" }
+            };
+            cell.font = { bold: true, color: { argb: "166534" } };
+          }
+        } else if (colNumber === 7) {
+          cell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+          if (ord.transferMatch) {
+            cell.fill = {
+              type: "pattern",
+              pattern: "solid",
+              fgColor: { argb: "E0F2FE" }
+            };
+            cell.font = { bold: true, color: { argb: "0369A1" } };
+          } else {
+            cell.font = { color: { argb: "94A3B8" } };
+          }
+        }
+      });
+    });
+
+    sheet.columns.forEach(column => {
+      let maxLen = column.header ? column.header.length : 10;
+      column.eachCell({ includeEmpty: true }, (cell, rowNumber) => {
+        if (rowNumber > 1 && cell.value) {
+          const str = String(cell.value);
+          if (str.length > maxLen) maxLen = str.length;
+        }
+      });
+      column.width = Math.min(Math.max(maxLen + 4, 12), 60);
+    });
+
+    workbook.xlsx.writeBuffer().then(b => {
+      saveAs(new Blob([b]), `Order_Requirement_Audit_Results_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      toast.success("Order Audit Excel Exported!");
+    });
+  };
+
   // CHECK IF INITIAL UPLOAD STAGE IS NEEDED (Like Daily Sales Validator)
   const isInitialState = !salesDataRaw || !stockDataRaw;
 
@@ -1096,13 +1217,22 @@ export default function DeadStockAnalyzer({ onBack }) {
                         File: {orderFileName}
                       </p>
                     </div>
-                    <button
-                      onClick={() => orderInputRef.current?.click()}
-                      className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center gap-1.5"
-                    >
-                      <input ref={orderInputRef} type="file" accept=".xlsx,.xls" onChange={handleOrderUpload} className="hidden" />
-                      <RefreshCw className="w-3.5 h-3.5" /> Change Order File
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={exportOrderAuditExcel}
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center gap-1.5"
+                      >
+                        <Download className="w-3.5 h-3.5" /> Download Audit Excel
+                      </button>
+
+                      <button
+                        onClick={() => orderInputRef.current?.click()}
+                        className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center gap-1.5"
+                      >
+                        <input ref={orderInputRef} type="file" accept=".xlsx,.xls" onChange={handleOrderUpload} className="hidden" />
+                        <RefreshCw className="w-3.5 h-3.5" /> Change Order File
+                      </button>
+                    </div>
                   </div>
 
                   <div className="overflow-x-auto">
