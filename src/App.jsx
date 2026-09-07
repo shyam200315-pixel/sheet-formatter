@@ -25,11 +25,22 @@ import {
   PackageCheck, 
   TrendingUp,
   ArrowLeft,
-  Database
+  Database,
+  AlertTriangle
 } from 'lucide-react';
 import HistoricalSales from "./components/HistoricalSales";
+import DeadStockAnalyzer from "./components/DeadStockAnalyzer";
 
 const TOOLS = [
+  {
+    id: "dead-stock",
+    title: "Dead Stock & Order Intelligence",
+    description: "Analyze L3M non-moving stock, set retention limits, and audit purchase orders.",
+    icon: <AlertTriangle className="w-8 h-8 text-rose-600" />,
+    color: "bg-rose-100",
+    borderColor: "border-rose-200",
+    hoverBorder: "hover:border-rose-400"
+  },
   {
     id: "validator",
     title: "Daily Sales Validator",
@@ -667,6 +678,16 @@ export default function App() {
                     transition={{ duration: 0.2 }}
                   >
                     <HistoricalSales />
+                  </motion.div>
+                ) : activeTab === "dead-stock" ? (
+                  <motion.div
+                    key="dead-stock-tab"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <DeadStockAnalyzer onBack={() => setActiveTab("home")} />
                   </motion.div>
                 ) : (
                   <motion.div

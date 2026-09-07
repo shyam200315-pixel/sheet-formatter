@@ -1,0 +1,1176 @@
+import React, { useState, useMemo, useRef } from "react";
+import toast from "react-hot-toast";
+import { 
+  Package, 
+  Search, 
+  ArrowLeft, 
+  UploadCloud, 
+  Download, 
+  AlertTriangle, 
+  TrendingUp, 
+  ArrowRightLeft, 
+  ShoppingCart, 
+  CheckCircle2, 
+  XCircle, 
+  Sliders, 
+  Sparkles, 
+  Calendar, 
+  MapPin,
+  CheckCircle,
+  RefreshCw,
+  FileSpreadsheet
+} from "lucide-react";
+import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+
+// Store Code extraction (e.g. 'WMH001 - NED - VAZIRABAD' -> 'WMH001')
+const extractStoreCode = (branchStr) => {
+  if (!branchStr || typeof branchStr !== "string") return "UNKNOWN";
+  const trimmed = branchStr.trim();
+  const match = trimmed.match(/^WM[HM]\d{3}/i);
+  if (match) return match[0].toUpperCase();
+  return trimmed.split(/[\s\-]/)[0].toUpperCase();
+};
+
+// State extraction (MH vs MP)
+const getStateFromStore = (storeStr) => {
+  if (!storeStr || typeof storeStr !== "string") return "MH";
+  const upper = storeStr.toUpperCase().trim();
+  if (upper.startsWith("WMP") || upper.includes(" MP")) return "MP";
+  if (upper.startsWith("WMH") || upper.includes(" MH")) return "MH";
+  return "MH";
+};
+
+// Date parser
+const parseAnyDate = (dateVal) => {
+  if (!dateVal) return null;
+  if (typeof dateVal === "number") {
+    return new Date(Math.round((dateVal - (25567 + 2)) * 86400 * 1000));
+  }
+  const str = String(dateVal).trim();
+  if (str.includes("/")) {
+    const parts = str.split("/");
+    if (parts.length === 3) {
+      const day = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const year = parseInt(parts[2], 10);
+      if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+        return new Date(year, month, day);
+      }
+    }
+  }
+  const parsed = new Date(str);
+  return isNaN(parsed.getTime()) ? null : parsed;
+};
+
+export default function DeadStockAnalyzer({ onBack }) {
+  // Raw Data
+  const [salesDataRaw, setSalesDataRaw] = useState(null);
+  const [stockDataRaw, setStockDataRaw] = useState(null);
+  const [orderDataRaw, setOrderDataRaw] = useState(null);
+
+  // File Names
+  const [salesFileName, setSalesFileName] = useState("");
+  const [stockFileName, setStockFileName] = useState("");
+  const [orderFileName, setOrderFileName] = useState("");
+
+  // Loading flags
+  const [isParsingSales, setIsParsingSales] = useState(false);
+  const [isParsingStock, setIsParsingStock] = useState(false);
+  const [isParsingOrder, setIsParsingOrder] = useState(false);
+
+  // Sales Period Metadata
+  const [salesPeriodInfo, setSalesPeriodInfo] = useState({
+    periodDays: 90,
+    periodMonths: 3.0,
+    labelText: "Sales Period"
+  });
+
+  // Settings
+  const [strictSameState, setStrictSameState] = useState(true);
+  const [retentionQty, setRetentionQty] = useState(2); // Units to keep at store
+
+  // Filters
+  const [selectedStore, setSelectedStore] = useState("All Stores");
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState("DEAD"); // 'DEAD' | 'ACTIVE' | 'ALL'
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Active Tab: 'dead-stock' | 'order-audit'
+  const [activeTab, setActiveTab] = useState("dead-stock");
+
+  const salesInputRef = useRef(null);
+  const stockInputRef = useRef(null);
+  const orderInputRef = useRef(null);
+
+  // Reset files
+  const handleResetFiles = () => {
+    setSalesDataRaw(null);
+    setStockDataRaw(null);
+    setOrderDataRaw(null);
+    setSalesFileName("");
+    setStockFileName("");
+    setOrderFileName("");
+  };
+
+  // Parse Sales File
+  const handleSalesUpload = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setSalesFileName(file.name);
+    setIsParsingSales(true);
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const data = new Uint8Array(evt.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+
+        let headerIdx = -1;
+        for (let i = 0; i < Math.min(30, jsonData.length); i++) {
+          const row = jsonData[i];
+          if (!row) continue;
+          const uppercaseCells = row.map(c => String(c).trim().toUpperCase());
+          if (uppercaseCells.includes("BRANCH NAME") && (uppercaseCells.includes("BILL DATE") || uppercaseCells.includes("ITEM CODE"))) {
+            headerIdx = i;
+            break;
+          }
+        }
+
+        if (headerIdx === -1) {
+          for (let i = 0; i < Math.min(30, jsonData.length); i++) {
+            const row = jsonData[i];
+            if (row && row.some(cell => String(cell).toUpperCase() === "BRANCH NAME")) {
+              headerIdx = i;
+              break;
+            }
+          }
+        }
+
+        if (headerIdx === -1) {
+          throw new Error("Sales file must contain a header row with 'BRANCH NAME'.");
+        }
+
+        const headers = jsonData[headerIdx].map(h => String(h).trim().toUpperCase());
+        const branchCol = headers.indexOf("BRANCH NAME") !== -1 ? headers.indexOf("BRANCH NAME") : headers.findIndex(h => h.includes("BRANCH"));
+        const itemCol = headers.indexOf("ITEM CODE") !== -1 ? headers.indexOf("ITEM CODE") : headers.findIndex(h => h.includes("ITEM CODE"));
+        const addlItemCol = headers.findIndex(h => h.includes("ADDL ITEM") || h.includes("BARCODE"));
+        const descCol = headers.findIndex(h => h.includes("DESCRIPTION") || h.includes("MODEL"));
+        const brandCol = headers.findIndex(h => h.includes("BRAND"));
+        const catCol = headers.findIndex(h => h.includes("CATEGORY"));
+        const qtyCol = headers.indexOf("NET QTY") !== -1 ? headers.indexOf("NET QTY") : headers.findIndex(h => h === "TOTAL QTY" || h.includes("QTY"));
+        const amountCol = headers.findIndex(h => h.includes("NET SALE AMOUNT") || h.includes("GROSS SALE"));
+        const dateCol = headers.findIndex(h => h.includes("BILL DATE"));
+
+        const salesMap = {};
+        let minDate = null;
+        let maxDate = null;
+
+        for (let i = headerIdx + 1; i < jsonData.length; i++) {
+          const row = jsonData[i];
+          if (!row || !row[branchCol]) continue;
+
+          const rawBranch = String(row[branchCol]).trim();
+          const storeCode = extractStoreCode(rawBranch);
+          const rawItemCode = itemCol !== -1 && row[itemCol] ? String(row[itemCol]).trim() : "";
+          const rawAddlCode = addlItemCol !== -1 && row[addlItemCol] ? String(row[addlItemCol]).trim() : "";
+          const itemCode = rawItemCode || rawAddlCode;
+
+          if (!itemCode) continue;
+
+          const desc = descCol !== -1 && row[descCol] ? String(row[descCol]).trim() : "";
+          const brand = brandCol !== -1 && row[brandCol] ? String(row[brandCol]).trim() : "";
+          const category = catCol !== -1 && row[catCol] ? String(row[catCol]).trim() : "";
+          const qty = qtyCol !== -1 ? parseFloat(row[qtyCol]) || 0 : 0;
+          const amount = amountCol !== -1 ? parseFloat(row[amountCol]) || 0 : 0;
+          const billDateStr = dateCol !== -1 && row[dateCol] ? String(row[dateCol]).trim() : "";
+
+          if (billDateStr) {
+            const dObj = parseAnyDate(billDateStr);
+            if (dObj) {
+              if (!minDate || dObj < minDate) minDate = dObj;
+              if (!maxDate || dObj > maxDate) maxDate = dObj;
+            }
+          }
+
+          const key = `${storeCode}::${itemCode}`;
+          if (!salesMap[key]) {
+            salesMap[key] = {
+              storeCode,
+              storeState: getStateFromStore(storeCode),
+              branchName: rawBranch,
+              itemCode,
+              description: desc,
+              brand,
+              category,
+              l3mQty: 0,
+              l3mAmount: 0
+            };
+          }
+
+          salesMap[key].l3mQty += qty;
+          salesMap[key].l3mAmount += amount;
+        }
+
+        let periodDays = 90;
+        if (minDate && maxDate) {
+          periodDays = Math.max(1, Math.round((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+        }
+        const periodMonths = Math.max(0.5, periodDays / 30);
+
+        let dateLabel = `${periodDays} Days (~${periodMonths.toFixed(1)} Months)`;
+        if (minDate && maxDate) {
+          dateLabel += ` (${minDate.toLocaleDateString('en-IN')} to ${maxDate.toLocaleDateString('en-IN')})`;
+        }
+
+        setSalesPeriodInfo({ periodDays, periodMonths, labelText: dateLabel });
+        setSalesDataRaw(salesMap);
+        toast.success(`Sales File Loaded (${Object.keys(salesMap).length} items)`);
+      } catch (err) {
+        console.error(err);
+        toast.error(`Error parsing Sales File: ${err.message}`);
+      } finally {
+        setIsParsingSales(false);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  // Parse Stock File
+  const handleStockUpload = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setStockFileName(file.name);
+    setIsParsingStock(true);
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const data = new Uint8Array(evt.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+
+        let headerIdx = -1;
+        for (let i = 0; i < Math.min(30, jsonData.length); i++) {
+          const row = jsonData[i];
+          if (!row) continue;
+          const uppercaseCells = row.map(c => String(c).trim().toUpperCase());
+          if (uppercaseCells.includes("BRANCH NAME") && uppercaseCells.includes("CLOSING STOCK")) {
+            headerIdx = i;
+            break;
+          }
+        }
+
+        if (headerIdx === -1) {
+          throw new Error("Stock file header not found! Sheet must contain 'BRANCH NAME' and 'CLOSING STOCK' columns.");
+        }
+
+        const headers = jsonData[headerIdx].map(h => String(h).trim().toUpperCase());
+        const branchCol = headers.indexOf("BRANCH NAME");
+        const barcodeCol = headers.indexOf("BARCODE");
+        const itemNameCol = headers.indexOf("ITEM NAME");
+        const descCol = headers.indexOf("ITEM DESCRIPTION");
+        const godownCol = headers.indexOf("GODOWN NAME");
+        const brandCol = headers.indexOf("BRAND NAME");
+        const mainProdCol = headers.indexOf("MAIN PRODUCT");
+        const stockCol = headers.indexOf("CLOSING STOCK");
+        const valueCol = headers.indexOf("CLOSING VALUE(LANDED COST)");
+        const mrpCol = headers.indexOf("ITEM M.R.P");
+
+        const stockItems = [];
+
+        for (let i = headerIdx + 1; i < jsonData.length; i++) {
+          const row = jsonData[i];
+          if (!row || !row[branchCol]) continue;
+
+          const rawBranch = String(row[branchCol]).trim();
+          const storeCode = extractStoreCode(rawBranch);
+          const storeState = getStateFromStore(storeCode);
+          const rawBarcode = barcodeCol !== -1 && row[barcodeCol] ? String(row[barcodeCol]).trim() : "";
+          const rawItemName = itemNameCol !== -1 && row[itemNameCol] ? String(row[itemNameCol]).trim() : "";
+          
+          let itemCode = rawBarcode;
+          if (!itemCode && rawItemName) {
+            itemCode = rawItemName.split(" ")[0];
+          }
+
+          if (!itemCode) continue;
+
+          const desc = descCol !== -1 && row[descCol] ? String(row[descCol]).trim() : rawItemName;
+          const brand = brandCol !== -1 && row[brandCol] ? String(row[brandCol]).trim() : "";
+          const category = mainProdCol !== -1 && row[mainProdCol] ? String(row[mainProdCol]).trim() : "";
+          const closingStock = stockCol !== -1 ? parseFloat(row[stockCol]) || 0 : 0;
+          const closingValue = valueCol !== -1 ? parseFloat(row[valueCol]) || 0 : 0;
+          const mrp = mrpCol !== -1 ? parseFloat(row[mrpCol]) || 0 : 0;
+
+          if (closingStock <= 0) continue;
+
+          let unitCost = closingValue > 0 && closingStock > 0 ? (closingValue / closingStock) : (mrp || 0);
+
+          stockItems.push({
+            id: `stk_${storeCode}_${itemCode}_${i}`,
+            storeCode,
+            storeState,
+            branchName: rawBranch,
+            itemCode,
+            description: desc,
+            brand: brand || "General",
+            category: category || "General",
+            closingStock,
+            closingValue: closingValue || (closingStock * mrp),
+            unitCost
+          });
+        }
+
+        setStockDataRaw(stockItems);
+        toast.success(`Current Stock Loaded (${stockItems.length} active stock lines)`);
+      } catch (err) {
+        console.error(err);
+        toast.error(`Error parsing Stock File: ${err.message}`);
+      } finally {
+        setIsParsingStock(false);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  // Parse Order Requirement File
+  const handleOrderUpload = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setOrderFileName(file.name);
+    setIsParsingOrder(true);
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const data = new Uint8Array(evt.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+
+        let headerIdx = -1;
+        for (let i = 0; i < Math.min(15, jsonData.length); i++) {
+          const row = jsonData[i];
+          if (row && row.some(cell => String(cell).toUpperCase().includes("STORE CODE") || String(cell).toUpperCase().includes("REQ QTY"))) {
+            headerIdx = i;
+            break;
+          }
+        }
+
+        if (headerIdx === -1) {
+          throw new Error("Order Requirement header not found! Must contain 'STORE CODE' and 'Req Qty'.");
+        }
+
+        const headers = jsonData[headerIdx].map(h => String(h).trim().toUpperCase());
+        const storeCodeCol = headers.findIndex(h => h.includes("STORE CODE"));
+        const storeNameCol = headers.findIndex(h => h.includes("STORE NAME"));
+        const itemCodeCol = headers.findIndex(h => h.includes("ITEM CODE"));
+        const descCol = headers.findIndex(h => h.includes("DESCRIPTION"));
+        const reqQtyCol = headers.findIndex(h => h.includes("REQ QTY"));
+
+        const orderLines = [];
+        for (let i = headerIdx + 1; i < jsonData.length; i++) {
+          const row = jsonData[i];
+          if (!row || !row[storeCodeCol]) continue;
+
+          const rawStoreCode = String(row[storeCodeCol]).trim();
+          const storeCode = extractStoreCode(rawStoreCode);
+          const storeState = getStateFromStore(storeCode);
+          const storeName = storeNameCol !== -1 && row[storeNameCol] ? String(row[storeNameCol]).trim() : storeCode;
+          const itemCode = itemCodeCol !== -1 && row[itemCodeCol] ? String(row[itemCodeCol]).trim() : "";
+          const desc = descCol !== -1 && row[descCol] ? String(row[descCol]).trim() : "";
+          const reqQty = reqQtyCol !== -1 ? parseFloat(row[reqQtyCol]) || 0 : 0;
+
+          if (!itemCode || reqQty <= 0) continue;
+
+          orderLines.push({
+            id: `ord_${i}`,
+            storeCode,
+            storeState,
+            storeName,
+            itemCode,
+            description: desc,
+            reqQty
+          });
+        }
+
+        setOrderDataRaw(orderLines);
+        setActiveTab("order-audit");
+        toast.success(`Order File Loaded (${orderLines.length} order items)`);
+      } catch (err) {
+        console.error(err);
+        toast.error(`Error parsing Order File: ${err.message}`);
+      } finally {
+        setIsParsingOrder(false);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  // Merged Analysis Engine
+  const mergedAnalysis = useMemo(() => {
+    if (!stockDataRaw) return null;
+
+    const salesMap = salesDataRaw || {};
+    const itemSurplusStoreMap = {};
+    const itemSalesStoreMap = {};
+
+    const items = stockDataRaw.map(stock => {
+      const key = `${stock.storeCode}::${stock.itemCode}`;
+      const sales = salesMap[key] || { l3mQty: 0 };
+      const periodSales = sales.l3mQty;
+
+      // Status
+      const isDead = periodSales === 0;
+      const status = isDead ? "DEAD" : "ACTIVE";
+
+      // Retention & Surplus
+      const retainedQty = isDead ? Math.min(stock.closingStock, retentionQty) : stock.closingStock;
+      const surplusQty = isDead ? Math.max(0, stock.closingStock - retainedQty) : 0;
+      const surplusValue = surplusQty * stock.unitCost;
+
+      if (surplusQty > 0) {
+        if (!itemSurplusStoreMap[stock.itemCode]) itemSurplusStoreMap[stock.itemCode] = [];
+        itemSurplusStoreMap[stock.itemCode].push({
+          storeCode: stock.storeCode,
+          storeState: stock.storeState,
+          branchName: stock.branchName,
+          surplusQty,
+          unitCost: stock.unitCost
+        });
+      }
+
+      if (periodSales > 0) {
+        if (!itemSalesStoreMap[stock.itemCode]) itemSalesStoreMap[stock.itemCode] = [];
+        itemSalesStoreMap[stock.itemCode].push({
+          storeCode: stock.storeCode,
+          storeState: stock.storeState,
+          periodSales
+        });
+      }
+
+      return {
+        ...stock,
+        periodSales,
+        status,
+        retainedQty,
+        surplusQty,
+        surplusValue
+      };
+    });
+
+    // Destination Store Matching (MH -> MH, MP -> MP)
+    const finalItems = items.map(item => {
+      if (item.surplusQty > 0) {
+        const sellingStores = itemSalesStoreMap[item.itemCode] || [];
+        let candidates = sellingStores.filter(s => s.storeCode !== item.storeCode);
+
+        if (strictSameState) {
+          candidates = candidates.filter(s => s.storeState === item.storeState);
+        }
+
+        let recDest = strictSameState ? `Central ${item.storeState} Warehouse` : "Central Warehouse";
+        if (candidates.length > 0) {
+          candidates.sort((a, b) => b.periodSales - a.periodSales);
+          recDest = `${candidates[0].storeCode} (${candidates[0].storeState} - Sold ${candidates[0].periodSales} units)`;
+        }
+
+        return { ...item, recommendedDestination: recDest };
+      }
+      return item;
+    });
+
+    const storeList = Array.from(new Set(finalItems.map(i => i.storeCode))).sort();
+
+    return {
+      items: finalItems,
+      storeList,
+      itemSurplusStoreMap
+    };
+  }, [stockDataRaw, salesDataRaw, retentionQty, strictSameState]);
+
+  // Overall Unfiltered Stock Metrics (Independent of status filter!)
+  const metrics = useMemo(() => {
+    if (!mergedAnalysis) return { totalVal: 0, deadVal: 0, activeVal: 0, surplusVal: 0, totalUnits: 0, deadUnits: 0, activeUnits: 0, surplusUnits: 0, deadSkus: 0, activeSkus: 0 };
+    
+    const baseItems = mergedAnalysis.items.filter(item => {
+      if (selectedStore !== "All Stores" && item.storeCode !== selectedStore) return false;
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        return item.itemCode.toLowerCase().includes(term) || item.description.toLowerCase().includes(term) || item.storeCode.toLowerCase().includes(term);
+      }
+      return true;
+    });
+
+    let totalVal = 0, deadVal = 0, activeVal = 0, surplusVal = 0;
+    let totalUnits = 0, deadUnits = 0, activeUnits = 0, surplusUnits = 0;
+    let deadSkus = 0, activeSkus = 0;
+
+    baseItems.forEach(i => {
+      totalVal += i.closingValue;
+      totalUnits += i.closingStock;
+
+      if (i.status === "DEAD") {
+        deadVal += i.closingValue;
+        deadUnits += i.closingStock;
+        surplusVal += i.surplusValue;
+        surplusUnits += i.surplusQty;
+        deadSkus++;
+      } else {
+        activeVal += i.closingValue;
+        activeUnits += i.closingStock;
+        activeSkus++;
+      }
+    });
+
+    return { totalVal, deadVal, activeVal, surplusVal, totalUnits, deadUnits, activeUnits, surplusUnits, deadSkus, activeSkus };
+  }, [mergedAnalysis, selectedStore, searchTerm]);
+
+  // Filtered Items for Display Table
+  const filteredItems = useMemo(() => {
+    if (!mergedAnalysis) return [];
+    return mergedAnalysis.items.filter(item => {
+      if (selectedStore !== "All Stores" && item.storeCode !== selectedStore) return false;
+      if (selectedStatusFilter !== "ALL" && item.status !== selectedStatusFilter) return false;
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        return item.itemCode.toLowerCase().includes(term) || item.description.toLowerCase().includes(term) || item.storeCode.toLowerCase().includes(term);
+      }
+      return true;
+    });
+  }, [mergedAnalysis, selectedStore, selectedStatusFilter, searchTerm]);
+
+  // Order Audit List
+  const auditedOrders = useMemo(() => {
+    if (!orderDataRaw || !mergedAnalysis) return [];
+    const salesMap = salesDataRaw || {};
+    const { itemSurplusStoreMap } = mergedAnalysis;
+
+    return orderDataRaw.map(ord => {
+      const key = `${ord.storeCode}::${ord.itemCode}`;
+      const sales = salesMap[key] || { l3mQty: 0 };
+      const periodSales = sales.l3mQty;
+
+      const surplusList = itemSurplusStoreMap[ord.itemCode] || [];
+      let sources = surplusList.filter(s => s.storeCode !== ord.storeCode);
+      if (strictSameState) {
+        sources = sources.filter(s => s.storeState === ord.storeState);
+      }
+
+      let isHighRisk = periodSales === 0;
+      let transferMatch = null;
+
+      if (sources.length > 0) {
+        sources.sort((a, b) => b.surplusQty - a.surplusQty);
+        transferMatch = {
+          fromStore: sources[0].storeCode,
+          fromState: sources[0].storeState,
+          availableSurplus: sources[0].surplusQty,
+          suggestedQty: Math.min(ord.reqQty, sources[0].surplusQty)
+        };
+      }
+
+      return {
+        ...ord,
+        periodSales,
+        isHighRisk,
+        transferMatch
+      };
+    });
+  }, [orderDataRaw, mergedAnalysis, salesDataRaw, strictSameState]);
+
+  // Fixed Master Store Color Map (WMP001 -> Light Blue, WMP002 -> Light Green, etc.)
+  const FIXED_STORE_COLORS = {
+    "WMP001": "BFDBFE",
+    "WMP002": "DCFCE7",
+    "WMP003": "FEF08A",
+    "WMP004": "FFEDD5",
+    "WMP005": "E9D5FF",
+    "WMP006": "FECDD3",
+    "WMP007": "CFFAFE",
+    "WMP008": "FCE7F3",
+    "WMH001": "BFDBFE",
+    "WMH002": "DCFCE7",
+    "WMH003": "FEF08A",
+    "WMH004": "FFEDD5",
+    "WMH005": "E9D5FF",
+    "WMH006": "FECDD3",
+    "WMH007": "CFFAFE",
+    "WMH008": "FCE7F3",
+    "WMH009": "CCFBF1",
+    "WMH011": "D1EDBF"
+  };
+
+  // Export Surplus Excel
+  const exportSurplusExcel = () => {
+    if (!filteredItems) return;
+    const deadItems = filteredItems.filter(i => i.status === "DEAD" && i.surplusQty > 0);
+    if (deadItems.length === 0) {
+      toast.error("No surplus items to export!");
+      return;
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Surplus Transfer Advice");
+
+    sheet.columns = [
+      { header: "STORE", key: "storeCode", width: 16 },
+      { header: "STATE", key: "storeState", width: 10 },
+      { header: "ITEM CODE", key: "itemCode", width: 18 },
+      { header: "PRODUCT DESCRIPTION", key: "description", width: 45 },
+      { header: "TOTAL STOCK", key: "closingStock", width: 14 },
+      { header: "RETAINED (DISPLAY)", key: "retainedQty", width: 18 },
+      { header: "SURPLUS TO MOVE", key: "surplusQty", width: 18 },
+      { header: "WHERE TO SEND (RECOMMENDED)", key: "recommendedDestination", width: 45 }
+    ];
+
+    const headerRow = sheet.getRow(1);
+    headerRow.font = { bold: true, color: { argb: "FFFFFF" }, size: 11 };
+    headerRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "1E293B" } };
+    headerRow.alignment = { vertical: "middle", horizontal: "center" };
+    headerRow.height = 28;
+
+    deadItems.forEach(i => {
+      const dest = i.recommendedDestination || "";
+      const targetStoreMatch = dest.match(/WM[HM]\d{3}/i);
+      let destFillColor = null;
+
+      if (targetStoreMatch) {
+        const targetStoreCode = targetStoreMatch[0].toUpperCase();
+        destFillColor = FIXED_STORE_COLORS[targetStoreCode] || "E2E8F0";
+      }
+
+      const row = sheet.addRow({
+        storeCode: i.storeCode,
+        storeState: i.storeState,
+        itemCode: i.itemCode,
+        description: i.description,
+        closingStock: i.closingStock,
+        retainedQty: i.retainedQty,
+        surplusQty: i.surplusQty,
+        recommendedDestination: i.recommendedDestination
+      });
+
+      row.height = 22;
+
+      row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+        cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+        cell.border = {
+          top: { style: "thin", color: { argb: "CBD5E1" } },
+          bottom: { style: "thin", color: { argb: "CBD5E1" } },
+          left: { style: "thin", color: { argb: "CBD5E1" } },
+          right: { style: "thin", color: { argb: "CBD5E1" } }
+        };
+
+        if (colNumber === 8 && destFillColor) {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: destFillColor }
+          };
+          cell.font = { bold: true };
+        }
+      });
+    });
+
+    workbook.xlsx.writeBuffer().then(b => {
+      saveAs(new Blob([b]), `Dead_Stock_Transfer_Advice_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      toast.success("Excel Exported with Store Color Coding!");
+    });
+  };
+
+  // CHECK IF INITIAL UPLOAD STAGE IS NEEDED (Like Daily Sales Validator)
+  const isInitialState = !salesDataRaw || !stockDataRaw;
+
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 p-4 md:p-6 space-y-6">
+      {/* Top Header Navigation */}
+      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={onBack}
+            className="p-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl transition-all shadow-sm"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <AlertTriangle className="w-6 h-6 text-rose-500" />
+              Dead Stock & Smart Transfer Manager
+            </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Find non-moving stock, keep 2 display units per store, and transfer surplus stock within MH & MP.
+            </p>
+          </div>
+        </div>
+
+        {!isInitialState && (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleResetFiles}
+              className="px-3 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Change Files
+            </button>
+
+            <button
+              onClick={exportSurplusExcel}
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow flex items-center gap-2 transition-all"
+            >
+              <Download className="w-4 h-4" />
+              Download Transfer Sheet (Excel)
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* INITIAL LANDING UPLOAD SCREEN (Shown when files are not uploaded yet) */}
+      {isInitialState ? (
+        <div className="max-w-4xl mx-auto space-y-6 my-8">
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+              Upload Files to Generate Dead Stock Report
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Please upload both your <span className="font-bold text-blue-600 dark:text-blue-400">Sales History File</span> and <span className="font-bold text-rose-600 dark:text-rose-400">Current Stock File</span> below.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Sales Dropzone */}
+            <div 
+              onClick={() => salesInputRef.current?.click()}
+              className={`p-8 rounded-3xl border-2 border-dashed cursor-pointer transition-all text-center flex flex-col items-center justify-center space-y-3 ${
+                salesDataRaw 
+                  ? "border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/20" 
+                  : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-blue-500 shadow-sm"
+              }`}
+            >
+              <input ref={salesInputRef} type="file" accept=".xlsx,.xls" onChange={handleSalesUpload} className="hidden" />
+              <div className={`p-4 rounded-2xl ${salesDataRaw ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400" : "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400"}`}>
+                <Calendar className="w-8 h-8" />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">File 1</div>
+                <div className="text-base font-extrabold text-slate-900 dark:text-white mt-1">
+                  {salesFileName ? salesFileName : "Upload Sales Report"}
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                  {isParsingSales ? "Loading..." : salesDataRaw ? `✓ ${salesPeriodInfo.labelText}` : "Daily Collection Excel"}
+                </div>
+              </div>
+            </div>
+
+            {/* Stock Dropzone */}
+            <div 
+              onClick={() => stockInputRef.current?.click()}
+              className={`p-8 rounded-3xl border-2 border-dashed cursor-pointer transition-all text-center flex flex-col items-center justify-center space-y-3 ${
+                stockDataRaw 
+                  ? "border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/20" 
+                  : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-rose-500 shadow-sm"
+              }`}
+            >
+              <input ref={stockInputRef} type="file" accept=".xlsx,.xls" onChange={handleStockUpload} className="hidden" />
+              <div className={`p-4 rounded-2xl ${stockDataRaw ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400" : "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400"}`}>
+                <Package className="w-8 h-8" />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">File 2</div>
+                <div className="text-base font-extrabold text-slate-900 dark:text-white mt-1">
+                  {stockFileName ? stockFileName : "Upload Current Stock Report"}
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                  {isParsingStock ? "Loading..." : stockDataRaw ? `✓ ${stockDataRaw.length} Lines Loaded` : "Closing Stock On-Hand Excel"}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center pt-2">
+            {salesDataRaw && stockDataRaw ? (
+              <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-700 dark:text-emerald-400 font-bold text-sm">
+                ✓ Both files loaded successfully! Report generated below.
+              </div>
+            ) : (
+              <p className="text-xs text-slate-400">
+                Tip: After selecting both files above, your store stock analysis will automatically unlock.
+              </p>
+            )}
+          </div>
+        </div>
+      ) : (
+        /* FULL DASHBOARD VIEW (Unlocked after both files are uploaded) */
+        <>
+          {/* Summary KPI Filter Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Card 1: Total Stock On-Hand */}
+            <div 
+              onClick={() => setSelectedStatusFilter("ALL")}
+              className={`bg-white dark:bg-slate-900 border rounded-2xl p-4 shadow-sm cursor-pointer transition-all hover:scale-[1.02] ${
+                selectedStatusFilter === "ALL" ? "border-slate-900 dark:border-white ring-2 ring-slate-400/50" : "border-slate-200 dark:border-slate-800"
+              }`}
+            >
+              <div className="text-xs font-bold text-slate-400 uppercase">Total Stock On-Hand</div>
+              <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+                ₹{Math.round(metrics.totalVal).toLocaleString('en-IN')}
+              </div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-bold">
+                {metrics.totalUnits.toLocaleString()} total units (Click to view all)
+              </div>
+            </div>
+
+            {/* Card 2: Total Dead Stock */}
+            <div 
+              onClick={() => setSelectedStatusFilter("DEAD")}
+              className={`bg-rose-50 dark:bg-rose-950/20 border rounded-2xl p-4 shadow-sm cursor-pointer transition-all hover:scale-[1.02] ${
+                selectedStatusFilter === "DEAD" ? "border-rose-500 ring-2 ring-rose-500/50" : "border-rose-200 dark:border-rose-500/40"
+              }`}
+            >
+              <div className="text-xs font-bold text-rose-700 dark:text-rose-400 uppercase flex items-center gap-1">
+                <AlertTriangle className="w-3.5 h-3.5" /> Total Dead Stock (0 Sales)
+              </div>
+              <div className="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1">
+                ₹{Math.round(metrics.deadVal).toLocaleString('en-IN')}
+              </div>
+              <div className="text-xs text-rose-800 dark:text-rose-300/80 mt-1 font-bold">
+                {metrics.deadUnits.toLocaleString()} units ({metrics.deadSkus} SKUs)
+              </div>
+            </div>
+
+            {/* Card 3: Active / Running Items */}
+            <div 
+              onClick={() => setSelectedStatusFilter("ACTIVE")}
+              className={`bg-emerald-50 dark:bg-emerald-950/20 border rounded-2xl p-4 shadow-sm cursor-pointer transition-all hover:scale-[1.02] ${
+                selectedStatusFilter === "ACTIVE" ? "border-emerald-500 ring-2 ring-emerald-500/50" : "border-emerald-200 dark:border-emerald-500/40"
+              }`}
+            >
+              <div className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase flex items-center gap-1">
+                <CheckCircle className="w-3.5 h-3.5" /> Active / Running Stock
+              </div>
+              <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
+                ₹{Math.round(metrics.activeVal).toLocaleString('en-IN')}
+              </div>
+              <div className="text-xs text-emerald-800 dark:text-emerald-300/80 mt-1 font-bold">
+                {metrics.activeUnits.toLocaleString()} units ({metrics.activeSkus} SKUs) (Click to view)
+              </div>
+            </div>
+
+            {/* Card 4: Retention Rule Control */}
+            <div className="bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-500/40 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+              <div className="text-xs font-bold text-purple-700 dark:text-purple-300 uppercase flex items-center justify-between">
+                <span>Surplus to Move</span>
+                <span className="text-[11px] font-black text-cyan-600 dark:text-cyan-400">₹{Math.round(metrics.surplusVal).toLocaleString('en-IN')}</span>
+              </div>
+              <div className="flex items-center gap-2 my-1">
+                <span className="text-xs text-slate-700 dark:text-slate-300 font-medium">Keep at store:</span>
+                <input 
+                  type="number" 
+                  min="0" 
+                  max="20" 
+                  value={retentionQty} 
+                  onChange={(e) => setRetentionQty(Math.max(0, parseInt(e.target.value) || 0))}
+                  className="w-14 px-2 py-1 bg-white dark:bg-slate-900 border border-purple-300 dark:border-purple-500/50 rounded text-center text-slate-900 dark:text-white font-extrabold text-sm focus:outline-none"
+                />
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">units</span>
+              </div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                {metrics.surplusUnits.toLocaleString()} surplus dead units to transfer.
+              </div>
+            </div>
+          </div>
+
+          {/* Controls & Search */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+            <div className="flex flex-wrap items-center gap-3 flex-1">
+              {/* Search */}
+              <div className="relative flex-1 min-w-[200px]">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input 
+                  type="text" 
+                  placeholder="Search Item Code or Product Name..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none"
+                />
+              </div>
+
+              {/* Store Selector */}
+              <select 
+                value={selectedStore} 
+                onChange={(e) => setSelectedStore(e.target.value)}
+                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none"
+              >
+                <option value="All Stores">All Stores ({mergedAnalysis.storeList.length})</option>
+                {mergedAnalysis.storeList.map(st => (
+                  <option key={st} value={st}>{st} ({getStateFromStore(st)})</option>
+                ))}
+              </select>
+
+              {/* Status Filter */}
+              <select 
+                value={selectedStatusFilter} 
+                onChange={(e) => setSelectedStatusFilter(e.target.value)}
+                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none"
+              >
+                <option value="DEAD">🔴 Dead Stock Only (0 Sales)</option>
+                <option value="ACTIVE">🟢 Active / Running Items Only (Sales &gt; 0)</option>
+                <option value="ALL">📋 Show All Stock Items (Dead + Active)</option>
+              </select>
+
+              {/* Same State Rule Toggle */}
+              <button
+                onClick={() => setStrictSameState(!strictSameState)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 ${
+                  strictSameState 
+                    ? "bg-amber-50 dark:bg-amber-500/20 border-amber-300 dark:border-amber-500/50 text-amber-800 dark:text-amber-300" 
+                    : "bg-slate-100 dark:bg-slate-950 border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400"
+                }`}
+              >
+                <MapPin className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                {strictSameState ? "Intra-State Only (MH↔MH, MP↔MP)" : "Cross State Allowed"}
+              </button>
+            </div>
+
+            <div className="text-xs text-slate-500 dark:text-slate-400 font-bold">
+              Showing <span className="text-slate-900 dark:text-white font-extrabold">{filteredItems.length}</span> items
+            </div>
+          </div>
+
+          {/* Navigation Tabs */}
+          <div className="flex border-b border-slate-200 dark:border-slate-800 space-x-2">
+            <button
+              onClick={() => setActiveTab("dead-stock")}
+              className={`px-4 py-2 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 ${
+                activeTab === "dead-stock"
+                  ? "border-rose-500 text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 rounded-t-xl"
+                  : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+              }`}
+            >
+              <AlertTriangle className="w-4 h-4" />
+              Stock Table & Transfer Recommendations ({filteredItems.length})
+            </button>
+
+            <button
+              onClick={() => setActiveTab("order-audit")}
+              className={`px-4 py-2 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 ${
+                activeTab === "order-audit"
+                  ? "border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-500/10 rounded-t-xl"
+                  : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+              }`}
+            >
+              <ShoppingCart className="w-4 h-4" />
+              Order Requirement Auditor {orderDataRaw ? `(${orderDataRaw.length})` : "(Upload File Inside)"}
+            </button>
+          </div>
+
+          {/* Tab 1: Dead / Active Stock Table View */}
+          {activeTab === "dead-stock" && (
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-400 font-extrabold uppercase border-b border-slate-200 dark:border-slate-800">
+                      <th className="p-3">Store</th>
+                      <th className="p-3">State</th>
+                      <th className="p-3">Item Code</th>
+                      <th className="p-3">Product Name & Description</th>
+                      <th className="p-3 text-center">Total Sales (Qty Sold)</th>
+                      <th className="p-3 text-center">On-Hand Stock</th>
+                      <th className="p-3 text-center">Keep</th>
+                      <th className="p-3 text-center bg-cyan-50 dark:bg-cyan-950/40 text-cyan-800 dark:text-cyan-300">Surplus to Move</th>
+                      <th className="p-3">Where to Send? (Same State)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-800 dark:text-slate-200">
+                    {filteredItems.length === 0 ? (
+                      <tr>
+                        <td colSpan="9" className="p-8 text-center text-slate-400 text-sm">
+                          No matching stock items found for selected filter.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredItems.map((item) => (
+                        <tr 
+                          key={item.id} 
+                          className={`hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors ${
+                            item.status === "DEAD" ? "bg-rose-50/50 dark:bg-rose-950/10" : "bg-emerald-50/30 dark:bg-emerald-950/10"
+                          }`}
+                        >
+                          <td className="p-3 font-bold text-slate-900 dark:text-white">
+                            {item.storeCode}
+                          </td>
+                          <td className="p-3">
+                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-black ${
+                              item.storeState === 'MH' ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-500/30' : 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30'
+                            }`}>
+                              {item.storeState}
+                            </span>
+                          </td>
+                          <td className="p-3 font-mono font-bold text-slate-800 dark:text-slate-200">
+                            {item.itemCode}
+                          </td>
+                          <td className="p-3 max-w-sm">
+                            <div className="font-bold text-slate-900 dark:text-white truncate" title={item.description}>
+                              {item.description}
+                            </div>
+                            <div className="text-[10px] text-slate-400">Brand: {item.brand}</div>
+                          </td>
+                          <td className="p-3 text-center font-extrabold">
+                            {item.periodSales === 0 ? (
+                              <span className="px-2 py-0.5 bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400 rounded">0</span>
+                            ) : (
+                              <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded font-black">{item.periodSales}</span>
+                            )}
+                          </td>
+                          <td className="p-3 text-center font-bold text-slate-900 dark:text-white">
+                            {item.closingStock}
+                          </td>
+                          <td className="p-3 text-center font-bold text-purple-700 dark:text-purple-300">
+                            {item.retainedQty}
+                          </td>
+                          <td className="p-3 text-center font-black bg-cyan-50/70 dark:bg-cyan-950/30 text-cyan-800 dark:text-cyan-300">
+                            {item.surplusQty > 0 ? (
+                              <span className="px-2 py-0.5 bg-cyan-100 dark:bg-cyan-500/20 border border-cyan-300 dark:border-cyan-500/40 rounded text-cyan-800 dark:text-cyan-300">
+                                {item.surplusQty} units
+                              </span>
+                            ) : (
+                              <span className="text-slate-400">0</span>
+                            )}
+                          </td>
+                          <td className="p-3 text-xs font-bold text-cyan-700 dark:text-cyan-300">
+                            {item.surplusQty > 0 ? (
+                              <div className="flex items-center gap-1">
+                                <ArrowRightLeft className="w-3.5 h-3.5 shrink-0 text-cyan-600 dark:text-cyan-400" />
+                                <span>{item.recommendedDestination}</span>
+                              </div>
+                            ) : (
+                              <span className="text-slate-400">-</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Tab 2: Order Audit Tab (With Upload Dropzone Inside!) */}
+          {activeTab === "order-audit" && (
+            <div className="space-y-4">
+              {!orderDataRaw ? (
+                <div className="bg-white dark:bg-slate-900 border-2 border-dashed border-cyan-300 dark:border-cyan-700 rounded-3xl p-10 text-center space-y-4 max-w-xl mx-auto shadow-sm">
+                  <div 
+                    onClick={() => orderInputRef.current?.click()}
+                    className="cursor-pointer space-y-3"
+                  >
+                    <input ref={orderInputRef} type="file" accept=".xlsx,.xls" onChange={handleOrderUpload} className="hidden" />
+                    <div className="w-16 h-16 rounded-2xl bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-400 flex items-center justify-center mx-auto">
+                      <ShoppingCart className="w-8 h-8" />
+                    </div>
+                    <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
+                      Upload Order Requirement File
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                      Click here to upload your <code className="text-cyan-600 dark:text-cyan-400 font-bold">Processed_Order_Requirement.xlsx</code> file. System will cross-audit order quantities against sales & dead stock transfers.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+                  <div className="p-4 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <div>
+                      <h3 className="font-extrabold text-slate-900 dark:text-white text-sm">
+                        Purchase Order Audit Results ({auditedOrders.length} lines)
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        File: {orderFileName}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => orderInputRef.current?.click()}
+                      className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center gap-1.5"
+                    >
+                      <input ref={orderInputRef} type="file" accept=".xlsx,.xls" onChange={handleOrderUpload} className="hidden" />
+                      <RefreshCw className="w-3.5 h-3.5" /> Change Order File
+                    </button>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-400 font-extrabold uppercase border-b border-slate-200 dark:border-slate-800">
+                          <th className="p-3">Ordering Store</th>
+                          <th className="p-3">Item Code</th>
+                          <th className="p-3">Description</th>
+                          <th className="p-3 text-center">Req Qty</th>
+                          <th className="p-3 text-center">Store Sales</th>
+                          <th className="p-3">Audit Risk</th>
+                          <th className="p-3">Transfer Match (Same State)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-800 dark:text-slate-200">
+                        {auditedOrders.map(ord => (
+                          <tr key={ord.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
+                            <td className="p-3 font-bold text-slate-900 dark:text-white">
+                              {ord.storeCode} ({ord.storeState})
+                            </td>
+                            <td className="p-3 font-mono font-bold text-cyan-600 dark:text-cyan-300">
+                              {ord.itemCode}
+                            </td>
+                            <td className="p-3 max-w-xs font-medium text-slate-900 dark:text-white truncate" title={ord.description}>
+                              {ord.description}
+                            </td>
+                            <td className="p-3 text-center font-bold text-slate-900 dark:text-white">
+                              {ord.reqQty}
+                            </td>
+                            <td className="p-3 text-center font-bold">
+                              {ord.periodSales === 0 ? (
+                                <span className="text-rose-600 dark:text-rose-400 font-extrabold">0</span>
+                              ) : (
+                                <span className="text-emerald-600 dark:text-emerald-400">{ord.periodSales}</span>
+                              )}
+                            </td>
+                            <td className="p-3">
+                              {ord.isHighRisk ? (
+                                <span className="px-2 py-0.5 bg-rose-100 dark:bg-rose-500/20 border border-rose-300 dark:border-rose-500/40 text-rose-700 dark:text-rose-300 rounded font-bold text-[11px] flex items-center gap-1 w-fit">
+                                  <XCircle className="w-3 h-3" /> High Risk (0 Sales)
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/40 text-emerald-700 dark:text-emerald-300 rounded font-bold text-[11px] flex items-center gap-1 w-fit">
+                                  <CheckCircle2 className="w-3 h-3" /> Approved
+                                </span>
+                              )}
+                            </td>
+                            <td className="p-3">
+                              {ord.transferMatch ? (
+                                <div className="p-1.5 bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-500/30 rounded text-cyan-800 dark:text-cyan-200 text-[11px] font-bold">
+                                  Transfer {ord.transferMatch.suggestedQty} units from {ord.transferMatch.fromStore} ({ord.transferMatch.fromState})
+                                </div>
+                              ) : (
+                                <span className="text-slate-400">No surplus in {ord.storeState} (Place Purchase Order)</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}

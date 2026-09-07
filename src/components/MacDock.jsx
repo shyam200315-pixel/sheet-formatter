@@ -8,12 +8,14 @@ import {
   BarChart2, 
   PackageCheck, 
   Tags, 
-  FileText 
+  FileText,
+  AlertTriangle
 } from 'lucide-react';
 
 const DOCK_ITEMS = [
   { id: 'home', label: 'Home', icon: Home, color: 'text-blue-500' },
   { id: 'validator', label: 'Daily Sales', icon: Calculator, color: 'text-sky-500' },
+  { id: 'dead-stock', label: 'Dead Stock', icon: AlertTriangle, color: 'text-rose-500' },
   { id: 'best-sellers', label: 'Best Sellers', icon: TrendingUp, color: 'text-fuchsia-500' },
   { id: 'orders', label: 'Orders', icon: ShoppingCart, color: 'text-indigo-500' },
   { id: 'generator', label: 'Requirements', icon: ListChecks, color: 'text-emerald-500' },
