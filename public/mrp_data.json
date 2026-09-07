@@ -11144,10 +11144,10 @@
     "offers": [
       {
         "scheme": "Flat Rate / Flat Discount",
-        "discRate": 0.3,
+        "discRate": 0.4,
         "discType": "Flat Discount",
         "effectiveAug31": 0.4,
-        "description": "Flat 30% Discount"
+        "description": "Flat 40% Discount"
       }
     ]
   },
@@ -11419,10 +11419,10 @@
     "offers": [
       {
         "scheme": "Flat Rate / Flat Discount",
-        "discRate": 0.3,
+        "discRate": 0.4,
         "discType": "Flat Discount",
         "effectiveAug31": 0.4,
-        "description": "Flat 30% Discount"
+        "description": "Flat 40% Discount"
       }
     ],
     "sap_code": "14292",
@@ -11780,14 +11780,12 @@
     "offers": [
       {
         "scheme": "Flat Rate / Flat Discount",
-        "discRate": 2375,
-        "discType": "Flat Rate",
-        "effectiveAug31": 2375,
-        "description": "Flat Rate: ₹2375"
+        "discRate": 0.4,
+        "discType": "Flat Discount",
+        "effectiveAug31": 0.4,
+        "description": "Flat 40% Discount"
       }
     ],
-    "active_offer_price": 2375,
-    "active_offer_label": "Flat Rate ₹2375",
     "sap_code": "14429",
     "sap_code_with_color": "14429 BL",
     "sub_category": "INDUCTION COOKTOP",
@@ -11925,7 +11923,16 @@
     "sub_category": "COOKTOP",
     "sap_category": "Pigeon Ind",
     "brand_category": 10,
-    "gst": "GST 18%"
+    "gst": "GST 18%",
+    "offers": [
+      {
+        "scheme": "Flat Rate / Flat Discount",
+        "discRate": 0.4,
+        "discType": "Flat Discount",
+        "effectiveAug31": 0.4,
+        "description": "Flat 40% Discount"
+      }
+    ]
   },
   "19000508": {
     "name": "GILMA  LPG STOVE 3 BR NERO ELITE AUTO",
@@ -11965,10 +11972,10 @@
     "offers": [
       {
         "scheme": "Flat Rate / Flat Discount",
-        "discRate": 0.3,
+        "discRate": 0.4,
         "discType": "Flat Discount",
         "effectiveAug31": 0.4,
-        "description": "Flat 30% Discount"
+        "description": "Flat 40% Discount"
       }
     ],
     "sap_code": "12002-M",
@@ -12002,14 +12009,12 @@
     "offers": [
       {
         "scheme": "Flat Rate / Flat Discount",
-        "discRate": 1799,
-        "discType": "Flat Rate",
-        "effectiveAug31": 1799,
-        "description": "Flat Rate: ₹1799"
+        "discRate": 0.4,
+        "discType": "Flat Discount",
+        "effectiveAug31": 0.4,
+        "description": "Flat 40% Discount"
       }
     ],
-    "active_offer_price": 1799,
-    "active_offer_label": "Flat Rate ₹1799",
     "sap_code": "12114-M",
     "sap_code_with_color": "12114-M NA",
     "sub_category": "INDUCTION COOKTOP",
@@ -12041,10 +12046,10 @@
     "offers": [
       {
         "scheme": "Flat Rate / Flat Discount",
-        "discRate": 0.3,
+        "discRate": 0.4,
         "discType": "Flat Discount",
         "effectiveAug31": 0.4,
-        "description": "Flat 30% Discount"
+        "description": "Flat 40% Discount"
       }
     ]
   },
@@ -12103,14 +12108,12 @@
     "offers": [
       {
         "scheme": "Flat Rate / Flat Discount",
-        "discRate": 2599,
-        "discType": "Flat Rate",
-        "effectiveAug31": 2599,
-        "description": "Flat Rate: ₹2599"
+        "discRate": 0.4,
+        "discType": "Flat Discount",
+        "effectiveAug31": 0.4,
+        "description": "Flat 40% Discount"
       }
     ],
-    "active_offer_price": 2599,
-    "active_offer_label": "Flat Rate ₹2599",
     "sap_code": "12566-M",
     "sap_code_with_color": "12566-M BL",
     "sub_category": "INDUCTION COOKTOP",
@@ -12375,14 +12378,12 @@
     "offers": [
       {
         "scheme": "Flat Rate / Flat Discount",
-        "discRate": 2599,
-        "discType": "Flat Rate",
-        "effectiveAug31": 2599,
-        "description": "Flat Rate: ₹2599"
+        "discRate": 0.4,
+        "discType": "Flat Discount",
+        "effectiveAug31": 0.4,
+        "description": "Flat 40% Discount"
       }
     ],
-    "active_offer_price": 2599,
-    "active_offer_label": "Flat Rate ₹2599",
     "sap_code": "659-M",
     "sap_code_with_color": "659-M BL",
     "sub_category": "INDUCTION COOKTOP",
@@ -12400,10 +12401,10 @@
     "offers": [
       {
         "scheme": "Flat Rate / Flat Discount",
-        "discRate": 0.3,
+        "discRate": 0.4,
         "discType": "Flat Discount",
         "effectiveAug31": 0.4,
-        "description": "Flat 30% Discount"
+        "description": "Flat 40% Discount"
       }
     ],
     "sap_code": "667-M",
@@ -12423,10 +12424,10 @@
     "offers": [
       {
         "scheme": "Flat Rate / Flat Discount",
-        "discRate": 0.3,
+        "discRate": 0.4,
         "discType": "Flat Discount",
         "effectiveAug31": 0.4,
-        "description": "Flat 30% Discount"
+        "description": "Flat 40% Discount"
       }
     ]
   },
@@ -12440,10 +12441,10 @@
     "offers": [
       {
         "scheme": "Flat Rate / Flat Discount",
-        "discRate": 0.3,
+        "discRate": 0.4,
         "discType": "Flat Discount",
         "effectiveAug31": 0.4,
-        "description": "Flat 30% Discount"
+        "description": "Flat 40% Discount"
       }
     ],
     "sap_code": "675-M",
@@ -14312,14 +14313,12 @@
     "offers": [
       {
         "scheme": "Flat Rate / Flat Discount",
-        "discRate": 2599,
-        "discType": "Flat Rate",
-        "effectiveAug31": 2599,
-        "description": "Flat Rate: ₹2599"
+        "discRate": 0.4,
+        "discType": "Flat Discount",
+        "effectiveAug31": 0.4,
+        "description": "Flat 40% Discount"
       }
     ],
-    "active_offer_price": 2599,
-    "active_offer_label": "Flat Rate ₹2599",
     "sap_code": "19001341",
     "sap_code_with_color": "19001341 BL",
     "sub_category": "INDUCTION COOKTOP",
@@ -15998,7 +15997,16 @@
     "sub_category": "INDUCTION COOKTOP",
     "sap_category": "Pigeon Ind",
     "brand_category": 10,
-    "gst": "GST 18%"
+    "gst": "GST 18%",
+    "offers": [
+      {
+        "scheme": "Flat Rate / Flat Discount",
+        "discRate": 0.4,
+        "discType": "Flat Discount",
+        "effectiveAug31": 0.4,
+        "description": "Flat 40% Discount"
+      }
+    ]
   },
   "19001764": {
     "name": "PIGEON COPPER FORGED 10 PC SET",
@@ -17788,14 +17796,12 @@
     "offers": [
       {
         "scheme": "Flat Rate / Flat Discount",
-        "discRate": 2599,
-        "discType": "Flat Rate",
-        "effectiveAug31": 3089,
-        "description": "Flat Rate: ₹3089"
+        "discRate": 0.4,
+        "discType": "Flat Discount",
+        "effectiveAug31": 0.4,
+        "description": "Flat 40% Discount"
       }
     ],
-    "active_offer_price": 3089,
-    "active_offer_label": "Flat Rate ₹3089",
     "sap_code": "15665",
     "sap_code_with_color": "15665 NA",
     "sub_category": "INDUCTION COOKTOP",
@@ -18543,10 +18549,10 @@
     "offers": [
       {
         "scheme": "Flat Rate / Flat Discount",
-        "discRate": 0.3,
+        "discRate": 0.4,
         "discType": "Flat Discount",
         "effectiveAug31": 0.4,
-        "description": "Flat 30% Discount"
+        "description": "Flat 40% Discount"
       }
     ],
     "sap_code": "15794",
@@ -19355,10 +19361,10 @@
     "offers": [
       {
         "scheme": "Flat Rate / Flat Discount",
-        "discRate": 0.3,
+        "discRate": 0.4,
         "discType": "Flat Discount",
         "effectiveAug31": 0.4,
-        "description": "Flat 30% Discount"
+        "description": "Flat 40% Discount"
       }
     ],
     "sap_code": "15941",
@@ -21367,10 +21373,10 @@
     "offers": [
       {
         "scheme": "Flat Rate / Flat Discount",
-        "discRate": 0.3,
+        "discRate": 0.4,
         "discType": "Flat Discount",
         "effectiveAug31": 0.4,
-        "description": "Flat 30% Discount"
+        "description": "Flat 40% Discount"
       }
     ]
   },
@@ -22796,7 +22802,16 @@
     "sub_category": "INDUCTION COOKTOP",
     "sap_category": "Pigeon Ind",
     "brand_category": 10,
-    "gst": "GST 18%"
+    "gst": "GST 18%",
+    "offers": [
+      {
+        "scheme": "Flat Rate / Flat Discount",
+        "discRate": 0.4,
+        "discType": "Flat Discount",
+        "effectiveAug31": 0.4,
+        "description": "Flat 40% Discount"
+      }
+    ]
   },
   "19004266": {
     "name": "PG INOX HYD DUO CAP 900ML BLK",
@@ -23368,10 +23383,10 @@
     "offers": [
       {
         "scheme": "Flat Rate / Flat Discount",
-        "discRate": 0.3,
+        "discRate": 0.4,
         "discType": "Flat Discount",
         "effectiveAug31": 0.4,
-        "description": "Flat 30% Discount"
+        "description": "Flat 40% Discount"
       }
     ],
     "sap_code": "19004337",
@@ -26543,14 +26558,12 @@
     "offers": [
       {
         "scheme": "Flat Rate / Flat Discount",
-        "discRate": 8090,
-        "discType": "Flat Rate",
-        "effectiveAug31": 7999,
-        "description": "Flat Rate: ₹7999"
+        "discRate": 0.4,
+        "discType": "Flat Discount",
+        "effectiveAug31": 0.4,
+        "description": "Flat 40% Discount"
       }
     ],
-    "active_offer_price": 7999,
-    "active_offer_label": "Flat Rate ₹7999",
     "sap_code": "19004980",
     "sap_code_with_color": "19004980 NA",
     "sub_category": "INDUCTION COOKTOP",
@@ -26568,14 +26581,12 @@
     "offers": [
       {
         "scheme": "Flat Rate / Flat Discount",
-        "discRate": 8090,
-        "discType": "Flat Rate",
-        "effectiveAug31": 7999,
-        "description": "Flat Rate: ₹7999"
+        "discRate": 0.4,
+        "discType": "Flat Discount",
+        "effectiveAug31": 0.4,
+        "description": "Flat 40% Discount"
       }
     ],
-    "active_offer_price": 7999,
-    "active_offer_label": "Flat Rate ₹7999",
     "sap_code": "19004981",
     "sap_code_with_color": "19004981 NA",
     "sub_category": "INDUCTION COOKTOP",
@@ -26770,7 +26781,16 @@
     "sub_category": "(NIL)",
     "sap_category": "Pigeon Ind",
     "brand_category": 10,
-    "gst": "GST 18%"
+    "gst": "GST 18%",
+    "offers": [
+      {
+        "scheme": "Flat Rate / Flat Discount",
+        "discRate": 0.4,
+        "discType": "Flat Discount",
+        "effectiveAug31": 0.4,
+        "description": "Flat 40% Discount"
+      }
+    ]
   },
   "19005065": {
     "name": "PIGEON SS CKR INOX PRESSURE PAN-  4 LTR",
@@ -26882,7 +26902,16 @@
     "sub_category": "INDUCTION COOKTOP",
     "sap_category": "Pigeon Ind",
     "brand_category": 10,
-    "gst": "GST 18%"
+    "gst": "GST 18%",
+    "offers": [
+      {
+        "scheme": "Flat Rate / Flat Discount",
+        "discRate": 0.4,
+        "discType": "Flat Discount",
+        "effectiveAug31": 0.4,
+        "description": "Flat 40% Discount"
+      }
+    ]
   },
   "19005160": {
     "name": "PG AIR PURIFIER",
