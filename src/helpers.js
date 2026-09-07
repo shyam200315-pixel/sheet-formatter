@@ -92,39 +92,84 @@ export function normalizeStoreName(storeName) {
   if (!storeName || typeof storeName !== "string") return storeName || "";
   let trimmed = storeName.trim();
   
-  // Fix Pune branch being incorrectly marked as WMP in source Excel
-  if (trimmed.toUpperCase().includes("PUN")) {
-    trimmed = trimmed.replace(/WMP/gi, "WMH");
+  // Replace letter 'O' with '0' in store code patterns (e.g. WMHOO7 -> WMH007, WMPOO6 -> WMP006)
+  trimmed = trimmed.replace(/^WM([HM])([O0-9]{1,3})/i, (_, state, num) => {
+    return `WM${state.toUpperCase()}${num.replace(/O/gi, "0")}`;
+  });
+
+  const clean = trimmed.replace(/[\s\-_]+/g, "").toUpperCase();
+
+  // 1. High-priority keyword / alias matching (overrides wrong state prefix like WMH006 for Kolar or WMP007 for Pune)
+  if (clean.includes("KOLAR")) {
+    return "WMP006 - BPL - KOLAR ROAD";
+  }
+  if (clean.includes("BARSHI") || clean.includes("BTW")) {
+    return "WMH006 - BTW - BARSHI";
+  }
+  if (clean.includes("PUN") || clean.includes("PIMPRI") || clean.includes("RAVET")) {
+    return "WMH007 - PUN - RAVET PUNE";
+  }
+  if (clean.includes("SATNA") || clean.includes("STN")) {
+    return "WMP005 - STA - SATNA";
+  }
+  if (clean.includes("SEHORE")) {
+    return "WMP001 - BPL - SEHORE CITY";
+  }
+  if (clean.includes("GULMOHAR")) {
+    return "WMP002 - BPL - GULMOHAR COLONY";
+  }
+  if (clean.includes("MR09") || clean.includes("MR9")) {
+    return "WMP003 - IND - MR 09 ROAD";
+  }
+  if (clean.includes("ANNAPURNA")) {
+    return "WMP004 - IND - ANNAPURNA RD";
+  }
+  if (clean.includes("REWA")) {
+    return "WMP007 - REW - REWA";
+  }
+  if (clean.includes("SHIVPURI")) {
+    return "WMP008 - SVP - SHIVPURI";
+  }
+  if (clean.includes("VAZIRABAD")) {
+    return "WMH001 - NED - VAZIRABAD";
+  }
+  if (clean.includes("BHAGYA")) {
+    return "WMH002 - NED - BHAGYA NAGAR";
+  }
+  if (clean.includes("BEED")) {
+    return "WMH003 - BDE - BEED";
+  }
+  if (clean.includes("PARBHANI")) {
+    return "WMH004 - PBN - PARBHANI";
+  }
+  if (clean.includes("YAVATMAL")) {
+    return "WMH005 - YTL - YAVATMAL";
+  }
+  if (clean.includes("SATARA")) {
+    return "WMH008 - STR - SATARA";
+  }
+  if (clean.includes("KOLHAPUR")) {
+    return "WMH009 - KOP - KOLHAPUR";
+  }
+  if (clean.includes("BADLAPUR")) {
+    return "WMH011 - BDL - BADLAPUR";
   }
 
-  // Try matching by store code prefix like WMH001, WMP005, etc.
-  const codeMatch = trimmed.match(/^(WM[HM]\d{3})/i);
-  if (codeMatch) {
-    const code = codeMatch[1].toUpperCase();
-    const found = MASTER_STORES.find(s => s.toUpperCase().startsWith(code));
-    if (found) return found;
-  }
-
-  // Try matching by exact clean text without whitespace
-  const clean = trimmed.replace(/\s+/g, "").toUpperCase();
+  // 2. Exact match against master store cleaned strings
   for (const master of MASTER_STORES) {
-    if (master.replace(/\s+/g, "").toUpperCase() === clean) {
+    if (master.replace(/[\s\-_]+/g, "").toUpperCase() === clean) {
       return master;
     }
   }
 
-  // Handle specific aliases / partial names
-  if (clean.includes("PUN") || clean.includes("PIMPRI") || clean.includes("RAVET")) {
-    return "WMH007 - PUN - RAVET PUNE";
-  }
-  if (clean.includes("SATNA")) {
-    return "WMP005 - STA - SATNA";
-  }
-  if (clean.includes("KOLAR")) {
-    return "WMP006 - BPL - KOLAR ROAD";
-  }
-  if (clean.includes("KOLHAPUR")) {
-    return "WMH009 - KOP - KOLHAPUR";
+  // 3. Try matching by store code prefix with flexible digits (e.g. WMP006, WMP06, WMP6, WMP-006, WMP 006)
+  const flexibleCodeMatch = trimmed.match(/^WM([HM])[- ]?(\d{1,3})/i);
+  if (flexibleCodeMatch) {
+    const state = flexibleCodeMatch[1].toUpperCase();
+    const num = flexibleCodeMatch[2].padStart(3, "0");
+    const formattedCode = `WM${state}${num}`;
+    const found = MASTER_STORES.find(s => s.toUpperCase().startsWith(formattedCode));
+    if (found) return found;
   }
 
   return trimmed;
@@ -132,17 +177,36 @@ export function normalizeStoreName(storeName) {
 
 
 /**
- * Parses a string in DD/MM/YYYY or DD-MM-YYYY format into a Date object.
- * @param {string} dateStr 
+ * Parses a string in DD/MM/YYYY or DD-MM-YYYY format, Excel serial numbers, or Date objects into a valid Date.
+ * @param {string|number|Date} dateVal 
  * @returns {Date|null}
  */
-export function parseBillDate(dateStr) {
-  if (!dateStr || typeof dateStr !== "string") return null;
-  const trimmed = dateStr.trim();
-  // Match DD/MM/YYYY or DD-MM-YYYY, ignoring anything after a space (like time)
-  const match = trimmed.match(/^(\d{2})[/\-](\d{2})[/\-](\d{4})(?:\s+.*)?$/);
-  if (!match) return null;
-  return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
+export function parseBillDate(dateVal) {
+  if (dateVal === null || dateVal === undefined || dateVal === "") return null;
+  if (dateVal instanceof Date && !isNaN(dateVal.getTime())) return dateVal;
+  
+  if (typeof dateVal === "number") {
+    // Excel serial number (1900 date system)
+    return new Date(Math.round((dateVal - 25569) * 86400 * 1000));
+  }
+
+  const dateStr = String(dateVal).trim();
+  if (!dateStr) return null;
+
+  // Match DD/MM/YYYY or DD-MM-YYYY or D/M/YYYY or D-M-YYYY, ignoring anything after a space (like time)
+  const matchDmy = dateStr.match(/^(\d{1,2})[/\-](\d{1,2})[/\-](\d{4})(?:\s+.*)?$/);
+  if (matchDmy) {
+    return new Date(Number(matchDmy[3]), Number(matchDmy[2]) - 1, Number(matchDmy[1]));
+  }
+
+  // Match YYYY-MM-DD or YYYY/MM/DD
+  const matchYmd = dateStr.match(/^(\d{4})[/\-](\d{1,2})[/\-](\d{1,2})(?:\s+.*)?$/);
+  if (matchYmd) {
+    return new Date(Number(matchYmd[1]), Number(matchYmd[2]) - 1, Number(matchYmd[3]));
+  }
+
+  const fallback = new Date(dateStr);
+  return isNaN(fallback.getTime()) ? null : fallback;
 }
 
 /**

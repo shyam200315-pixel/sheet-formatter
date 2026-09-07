@@ -379,7 +379,8 @@ export default function DashboardView({
       if (!billDate) continue;
 
       if (billDate >= start && billDate <= end) {
-        const storeName = row["BRANCH NAME"] || "UNKNOWN";
+        const rawStore = row["BRANCH NAME"] || "UNKNOWN";
+        const storeName = normalizeStoreName(rawStore) || rawStore;
         const voucher = String(row["NEW VOUCHER NO."] || "");
         const qty = Number(row["NET QTY"]) || 0;
         const sale = Number(row["NET SALE AMOUNT"]) || 0;
@@ -614,7 +615,8 @@ export default function DashboardView({
         const dateStr = `${dd}/${mm}/${yyyy}`;
         uniqueDates.add(dateStr);
 
-        const storeName = row["BRANCH NAME"] || "UNKNOWN";
+        const rawStore = row["BRANCH NAME"] || "UNKNOWN";
+        const storeName = normalizeStoreName(rawStore) || rawStore;
         const qty = Number(row["NET QTY"]) || 0;
         const sale = Number(row["NET SALE AMOUNT"]) || 0;
 

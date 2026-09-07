@@ -473,11 +473,23 @@ export default function MRPChecker() {
               <div className="bg-gradient-to-r from-blue-50/80 via-indigo-50/80 to-purple-50/80 dark:from-slate-800/80 dark:via-indigo-950/40 dark:to-slate-800/80 rounded-2xl p-6 border border-blue-100 dark:border-slate-700 shadow-sm">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="space-y-1.5">
-                    {activeItem.data.category && (
-                      <span className="inline-block px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-[#1a73e8] dark:text-blue-300 text-xs font-bold rounded-full uppercase tracking-wider">
-                        {activeItem.data.category}
-                      </span>
-                    )}
+                    <div className="flex flex-wrap items-center gap-2">
+                      {activeItem.data.category && (
+                        <span className="inline-block px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-[#1a73e8] dark:text-blue-300 text-xs font-bold rounded-full uppercase tracking-wider">
+                          {activeItem.data.category}
+                        </span>
+                      )}
+                      {activeItem.data.sub_category && (
+                        <span className="inline-block px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 text-xs font-semibold rounded-full border border-indigo-200/50 dark:border-indigo-800/40">
+                          {activeItem.data.sub_category}
+                        </span>
+                      )}
+                      {activeItem.data.gst && (
+                        <span className="inline-block px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-semibold rounded-full border border-emerald-200/50 dark:border-emerald-800/40">
+                          {activeItem.data.gst}
+                        </span>
+                      )}
+                    </div>
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white leading-snug">
                       {activeItem.data.name}
                     </h3>
@@ -505,6 +517,13 @@ export default function MRPChecker() {
                           >
                             {copiedCode === 'sap' ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                           </button>
+                        </div>
+                      )}
+
+                      {activeItem.data.sap_code_with_color && activeItem.data.sap_code_with_color !== activeItem.data.sap_code && (
+                        <div className="flex items-center gap-1.5 bg-white/80 dark:bg-slate-800/80 px-3 py-1 rounded-lg border border-gray-200 dark:border-slate-700">
+                          <span className="text-gray-500 dark:text-gray-400 text-xs">Variant:</span>
+                          <span className="font-mono font-bold text-purple-600 dark:text-purple-400">{activeItem.data.sap_code_with_color}</span>
                         </div>
                       )}
                     </div>

@@ -264,32 +264,34 @@ export default function App() {
 
         jsonData = jsonData.map(row => {
           const newRow = { ...row };
+          const keys = Object.keys(row);
           
           // Normalize Branch Name
-          const storeKeys = ["BRANCH NAME", " FROM BRANCH NAME ", "FROM BRANCH NAME", "STORE NAME", "TO STORE"];
-          for (const key of storeKeys) {
-            if (newRow[key]) {
-              newRow["BRANCH NAME"] = newRow[key];
+          for (const k of ["BRANCH NAME", "FROM BRANCH NAME", "STORE NAME", "TO STORE", "BRANCH", "STORE"]) {
+            const matchedKey = keys.find(key => key.trim().toUpperCase() === k);
+            if (matchedKey && newRow[matchedKey]) {
+              newRow["BRANCH NAME"] = normalizeStoreName(String(newRow[matchedKey]));
               break;
             }
           }
-
-          if (newRow["BRANCH NAME"]) {
-            newRow["BRANCH NAME"] = normalizeStoreName(newRow["BRANCH NAME"]);
-          }
           
           // Normalize Amount
-          const amountKeys = ["NET SALE AMOUNT", "NET AMOUNT", "SALES AMOUNT", "AMOUNT", "TOTAL"];
-          for (const key of amountKeys) {
-            if (newRow[key]) {
-              newRow["NET SALE AMOUNT"] = newRow[key];
+          for (const k of ["NET SALE AMOUNT", "NET AMOUNT", "SALES AMOUNT", "AMOUNT", "TOTAL", "NET SALE", "SALE AMOUNT", "TOTAL AMOUNT"]) {
+            const matchedKey = keys.find(key => key.trim().toUpperCase() === k);
+            if (matchedKey && newRow[matchedKey] !== "" && newRow[matchedKey] !== null && newRow[matchedKey] !== undefined) {
+              const val = typeof newRow[matchedKey] === "number" ? newRow[matchedKey] : parseFloat(String(newRow[matchedKey]).replace(/,/g, ''));
+              newRow["NET SALE AMOUNT"] = !isNaN(val) ? val : newRow[matchedKey];
               break;
             }
           }
           
           // Normalize Date
-          if (newRow["DATE"] && !newRow["BILL DATE"]) {
-            newRow["BILL DATE"] = newRow["DATE"];
+          for (const k of ["BILL DATE", "DATE", "BILLDATE", "INVOICE DATE", "TRANSACTION DATE"]) {
+            const matchedKey = keys.find(key => key.trim().toUpperCase() === k);
+            if (matchedKey && newRow[matchedKey]) {
+              newRow["BILL DATE"] = newRow[matchedKey];
+              break;
+            }
           }
           
           return newRow;

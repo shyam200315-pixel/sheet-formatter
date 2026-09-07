@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Trophy, Tag, Store, Package, TrendingUp, Filter, ArrowLeft, LayoutList, ChevronDown, ChevronUp, ChevronRight } from 'lucide-react';
 import * as XLSX from "xlsx";
 import FileDropZone from "./FileDropZone";
+import { normalizeStoreName } from "../helpers";
 
 export default function BestSellers() {
   const [jsonData, setJsonData] = useState(null);
@@ -15,6 +16,9 @@ export default function BestSellers() {
 
   const getStateFromBranch = (branch) => {
     if (!branch) return "";
+    const canonical = normalizeStoreName(branch);
+    if (canonical.startsWith("WMH")) return "MH";
+    if (canonical.startsWith("WMP")) return "MP";
     const storeCode = branch.split('-')[0].trim();
     if (storeCode.length >= 3) {
       const st = storeCode.substring(1, 3).toUpperCase();
@@ -125,7 +129,8 @@ export default function BestSellers() {
     const storeCategoryItemSales = {}; // store -> { category -> { item -> qty } }
 
     jsonData.forEach(row => {
-      const store = row["BRANCH NAME"]?.trim();
+      const rawStore = row["BRANCH NAME"]?.trim();
+      const store = normalizeStoreName(rawStore) || rawStore;
       const item = row["ITEM DESCRIPTION"]?.trim();
       const category = row["CATEGORY"]?.trim();
       const qty = Number(row["NET QTY"]) || 0;

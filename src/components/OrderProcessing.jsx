@@ -6,6 +6,7 @@ import { saveAs } from "file-saver";
 import { Download, AlertCircle, FileSpreadsheet, RefreshCcw, Table2 } from "lucide-react";
 import SimpleFileDropZone from "./SimpleFileDropZone";
 import { motion, AnimatePresence } from "framer-motion";
+import { normalizeStoreName } from "../helpers";
 
 export default function OrderProcessing() {
   const [orderReqFile, setOrderReqFile] = useState(null);
@@ -111,7 +112,12 @@ export default function OrderProcessing() {
 
       const normalizeStoreCode = (code) => {
         if (!code) return "";
-        let c = String(code).trim().toUpperCase();
+        const str = String(code).trim();
+        const canonical = normalizeStoreName(str);
+        const match = canonical.match(/^(WM[HM]\d{3})/i);
+        if (match) return match[1].toUpperCase();
+
+        let c = str.toUpperCase();
         // Fix common typo: replace letter 'O' with number '0' if the code looks like 3 letters followed by numbers/Os (e.g., WMHOO7 -> WMH007)
         if (/^[A-Z]{3}[O0-9]{1,4}$/.test(c)) {
           return c.substring(0, 3) + c.substring(3).replace(/O/g, "0");

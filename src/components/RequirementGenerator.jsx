@@ -6,6 +6,7 @@ import { Download, AlertCircle, FileText, Table2, UploadCloud } from "lucide-rea
 import { motion, AnimatePresence } from "framer-motion";
 import SimpleFileDropZone from "./SimpleFileDropZone";
 import * as XLSX from "xlsx";
+import { normalizeStoreName } from "../helpers";
 
 export default function RequirementGenerator() {
   const [inputText, setInputText] = useState("");
@@ -112,9 +113,13 @@ export default function RequirementGenerator() {
   };
 
   const getAutoState = (code) => {
+    if (!code) return '';
+    const canonical = normalizeStoreName(code);
+    if (canonical.startsWith('WMH')) return 'MH';
+    if (canonical.startsWith('WMP')) return 'MP';
     const lowerCode = code.toLowerCase();
-    if (lowerCode.includes('wmh')) return 'MH';
-    if (lowerCode.includes('wmp')) return 'MP';
+    if (lowerCode.includes('wmh') || lowerCode.includes('mh')) return 'MH';
+    if (lowerCode.includes('wmp') || lowerCode.includes('mp')) return 'MP';
     return '';
   };
 
