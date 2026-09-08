@@ -23,7 +23,8 @@ import {
   Save,
   PlusCircle,
   DatabaseZap,
-  Check
+  Check,
+  Trash2
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import ExcelJS from "exceljs";
@@ -32,6 +33,7 @@ import {
   loadHistoricalData, 
   appendHistoricalData, 
   saveHistoricalData, 
+  clearHistoricalData,
   processSalesRowsToMap, 
   findHeaderRowIndex,
   extractStoreCode as extractStoreCodeHelper,
@@ -116,13 +118,35 @@ export default function DeadStockAnalyzer({ onBack }) {
   const orderInputRef = useRef(null);
   const appendSalesInputRef = useRef(null);
 
-  // Check saved DB count on mount
+  // Check and auto-load saved sales DB on mount
   useEffect(() => {
-    const checkDb = async () => {
+    const initDb = async () => {
       try {
-        const dbRows = await loadHistoricalData();
+        let dbRows = await loadHistoricalData();
+
+        // Auto-seed from public/seed_sales.json if DB is empty
+        if (!dbRows || dbRows.length === 0) {
+          try {
+            const res = await fetch("/seed_sales.json");
+            if (res.ok) {
+              const seedRows = await res.json();
+              if (seedRows && seedRows.length > 0) {
+                await saveHistoricalData(seedRows);
+                dbRows = seedRows;
+              }
+            }
+          } catch (e) {
+            // Ignore seed fetch error silently on mount
+          }
+        }
+
         if (dbRows && dbRows.length > 0) {
-          setSavedDbCount(dbRows.length);
+          const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(dbRows);
+          setSalesDataRaw(salesMap);
+          setSalesPeriodInfo(periodInfo);
+          setSalesFileName(`Saved DB (${totalRows.toLocaleString()} lines - ${periodInfo.labelText})`);
+          setUseSavedSalesDB(true);
+          setSavedDbCount(totalRows);
         } else {
           setSavedDbCount(0);
         }
@@ -130,7 +154,7 @@ export default function DeadStockAnalyzer({ onBack }) {
         console.error(e);
       }
     };
-    checkDb();
+    initDb();
   }, []);
 
   // Load Saved Sales DB
@@ -217,6 +241,27 @@ export default function DeadStockAnalyzer({ onBack }) {
       toast.error(`Failed to read file: ${err.message}`, { id: toastId });
     }
     e.target.value = null;
+  };
+
+  // Clear Saved Sales DB from IndexedDB and state
+  const handleClearSalesDB = async () => {
+    if (window.confirm("Are you sure you want to clear all saved sales data from the database?")) {
+      try {
+        await clearHistoricalData();
+        setSalesDataRaw(null);
+        setSalesFileName("");
+        setUseSavedSalesDB(false);
+        setSavedDbCount(0);
+        setSalesPeriodInfo({
+          periodDays: 90,
+          periodMonths: 3.0,
+          labelText: "No Sales Data"
+        });
+        toast.success("Saved Sales Database cleared successfully! Upload a fresh sales file.");
+      } catch (err) {
+        toast.error(`Clear failed: ${err.message}`);
+      }
+    }
   };
 
   // Reset files
@@ -711,6 +756,7 @@ export default function DeadStockAnalyzer({ onBack }) {
       const key = `${ord.storeCode}::${ord.itemCode}`;
       const sales = salesMap[key] || { l3mQty: 0 };
       const periodSales = sales.l3mQty;
+      const stockAtStore = ord.availStock !== undefined ? parseFloat(ord.availStock) || 0 : 0;
 
       const surplusList = itemSurplusStoreMap[ord.itemCode] || [];
       let sources = surplusList.filter(s => s.storeCode !== ord.storeCode);
@@ -718,12 +764,20 @@ export default function DeadStockAnalyzer({ onBack }) {
         sources = sources.filter(s => s.storeState === ord.storeState);
       }
 
-      let isHighRisk = periodSales === 0;
-      let statusTag = isHighRisk ? "REJECTED" : "APPROVED";
-      let statusLabel = isHighRisk ? "REJECTED" : "APPROVED";
-      let reason = isHighRisk 
-        ? `Rejected: 0 Sales at ${ord.storeCode} in reference period (April-August).`
-        : `Approved: Active seller at ${ord.storeCode} (${periodSales} units sold in Apr-Aug).`;
+      // REJECT ONLY IF: store already has stock in hand (stockAtStore > 0) AND 0 sales in reference period.
+      // IF stockAtStore === 0, APPROVE IT because store needs display/minimum stock!
+      const isHighRisk = stockAtStore > 0 && periodSales === 0;
+      const statusTag = isHighRisk ? "REJECTED" : "APPROVED";
+      const statusLabel = isHighRisk ? "REJECTED" : "APPROVED";
+
+      let reason = "";
+      if (isHighRisk) {
+        reason = `Rejected: Store already has ${stockAtStore} unit(s) in hand but 0 sales in reference period.`;
+      } else if (periodSales > 0) {
+        reason = `Approved: Active seller at ${ord.storeCode} (${periodSales} units sold in reference period).`;
+      } else {
+        reason = `Approved: Zero stock in hand at ${ord.storeCode} (restocking approved for minimum store stock).`;
+      }
 
       let transferMatch = null;
       if (sources.length > 0) {
@@ -740,7 +794,7 @@ export default function DeadStockAnalyzer({ onBack }) {
         ...ord,
         dateVal: ord.dateVal || "",
         category: ord.category || "",
-        availStock: ord.availStock !== undefined ? ord.availStock : 0,
+        availStock: stockAtStore,
         periodSales,
         isHighRisk,
         statusTag,
@@ -770,7 +824,8 @@ export default function DeadStockAnalyzer({ onBack }) {
       storeCode: s.storeCode,
       storeState: s.storeState,
       itemCode: s.itemCode,
-      reqQty: s.closingStock
+      reqQty: s.closingStock,
+      availStock: s.closingStock
     })) : []);
 
     let totalLines = baseSource.length;
@@ -784,7 +839,10 @@ export default function DeadStockAnalyzer({ onBack }) {
       totalReqQty += (ord.reqQty || 0);
       const key = `${ord.storeCode}::${ord.itemCode}`;
       const periodSales = (salesMap[key] || {}).l3mQty || 0;
-      if (periodSales > 0) {
+      const stockAtStore = ord.availStock !== undefined ? parseFloat(ord.availStock) || 0 : 0;
+
+      const isRejected = stockAtStore > 0 && periodSales === 0;
+      if (!isRejected) {
         approvedCount++;
       } else {
         rejectedCount++;
@@ -1100,104 +1158,186 @@ export default function DeadStockAnalyzer({ onBack }) {
         )}
       </div>
 
-      {/* INITIAL LANDING UPLOAD SCREEN (Shown when files are not uploaded yet) */}
+      {/* INITIAL LANDING UPLOAD SCREEN (Split into 2 Parts: Top = Dead Stock Analyzer, Bottom = Stock Processor) */}
       {isInitialState ? (
-        <div className="max-w-4xl mx-auto space-y-6 my-8">
-          <div className="text-center space-y-2">
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white">
-              Upload Files to Generate Dead Stock Report
-            </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              Select your <span className="font-bold text-blue-600 dark:text-blue-400">Sales History File</span> and <span className="font-bold text-rose-600 dark:text-rose-400">Current Stock / Processing File</span> below.
-            </p>
-          </div>
+        <div className="max-w-4xl mx-auto space-y-7 my-6">
 
-          {/* Main 2 Upload Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* File 1: Sales Dropzone */}
-            <div 
-              onClick={() => salesInputRef.current?.click()}
-              className={`p-8 rounded-3xl border-2 border-dashed cursor-pointer transition-all text-center flex flex-col items-center justify-center space-y-3 ${
-                salesDataRaw 
-                  ? "border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/20" 
-                  : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-blue-500 shadow-sm"
-              }`}
-            >
-              <input ref={salesInputRef} type="file" accept=".xlsx,.xls" onChange={handleSalesUpload} className="hidden" />
-              <div className={`p-4 rounded-2xl ${salesDataRaw ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400" : "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400"}`}>
-                <Calendar className="w-8 h-8" />
+          {/* ========================================================================= */}
+          {/* TOP PART: DEAD STOCK ANALYZER */}
+          {/* ========================================================================= */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 md:p-7 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden space-y-5">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-rose-400 pointer-events-none" />
+            
+            {/* Section Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 rounded-xl">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 tracking-tight">
+                      Dead Stock Analyzer
+                    </h2>
+                    <span className="px-2.5 py-0.5 text-xs font-semibold bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 rounded-full border border-rose-100 dark:border-rose-900/40">
+                      1-Step Dashboard
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-normal mt-0.5">
+                    Sales History (6-8 months) is saved permanently. Upload your Closing Stock file to open the dashboard.
+                  </p>
+                </div>
               </div>
-              <div>
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">File 1</div>
-                <div className="text-base font-extrabold text-slate-900 dark:text-white mt-1">
-                  {salesFileName ? salesFileName : "Upload Sales Report"}
-                </div>
-                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
-                  {isParsingSales ? "Loading..." : salesDataRaw ? `✓ ${salesPeriodInfo.labelText}` : "Daily Collection Excel"}
-                </div>
+
+              {/* Sales DB Status & Add Month Button */}
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Saved Sales DB Status Badge */}
+                {salesDataRaw && useSavedSalesDB ? (
+                  <div className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-xs font-medium rounded-xl flex items-center gap-1.5">
+                    <DatabaseZap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span>✓ Sales History Saved ({savedDbCount ? savedDbCount.toLocaleString() : 'Active'} Rows)</span>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleLoadSavedSalesDB}
+                    disabled={isLoadingDb}
+                    className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-xl shadow-sm transition-all flex items-center gap-1.5"
+                  >
+                    <DatabaseZap className="w-3.5 h-3.5" />
+                    {isLoadingDb ? "Loading DB..." : "⚡ Load Saved Sales DB"}
+                  </button>
+                )}
+
+                {/* Append New Month Sales Data Button */}
+                <button
+                  onClick={() => appendSalesInputRef.current?.click()}
+                  title="Upload new month sales Excel to add into saved sales DB"
+                  className="px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-rose-600 dark:text-rose-400 border border-rose-200/70 dark:border-rose-900/50 text-xs font-medium rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+                >
+                  <input ref={appendSalesInputRef} type="file" accept=".xlsx,.xls" onChange={handleAppendSalesToDB} className="hidden" />
+                  <PlusCircle className="w-3.5 h-3.5 text-rose-500" />
+                  <span>Add New Month Sales</span>
+                </button>
+
+                {/* Clear Saved DB Button */}
+                <button
+                  onClick={handleClearSalesDB}
+                  title="Clear all saved sales history data from local database"
+                  className="px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700 text-xs font-medium rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                  <span>Clear Saved DB</span>
+                </button>
               </div>
             </div>
 
-            {/* File 2: Stock Dropzone */}
+            {/* Top Upload Box - Closing Stock In-Hand Upload */}
             <div 
               onClick={() => stockInputRef.current?.click()}
-              className={`p-6 rounded-3xl border-2 border-dashed cursor-pointer transition-all text-center flex flex-col items-center justify-center space-y-4 ${
+              className={`p-7 rounded-2xl border border-dashed cursor-pointer transition-all duration-200 text-center flex flex-col items-center justify-center space-y-2.5 group ${
                 stockDataRaw 
-                  ? "border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/20" 
-                  : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-rose-500 shadow-sm"
+                  ? "border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20" 
+                  : "border-rose-200/90 dark:border-rose-900/40 bg-rose-50/20 dark:bg-rose-950/10 hover:border-rose-400 dark:hover:border-rose-700 hover:bg-rose-50/40 shadow-sm"
               }`}
             >
               <input ref={stockInputRef} type="file" accept=".xlsx,.xls" onChange={handleStockUpload} className="hidden" />
-              <div className={`p-4 rounded-2xl ${stockDataRaw ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400" : "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400"}`}>
+              <div className={`p-3.5 rounded-xl transition-transform duration-200 group-hover:scale-105 ${stockDataRaw ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400" : "bg-rose-100/70 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400"}`}>
                 <Package className="w-8 h-8" />
               </div>
               <div>
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">File 2</div>
-                <div className="text-base font-extrabold text-slate-900 dark:text-white mt-1">
-                  {stockFileName ? stockFileName : "Upload Current Stock Report"}
+                <div className="text-xs font-semibold text-rose-500 dark:text-rose-400 tracking-wide uppercase">Closing Stock File</div>
+                <div className="text-base font-semibold text-slate-800 dark:text-slate-100 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors mt-0.5">
+                  {stockFileName ? stockFileName : "Upload Closing Stock In Hand File"}
                 </div>
-                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
-                  {isParsingStock ? "Loading..." : stockDataRaw ? `✓ ${stockDataRaw.length} Lines Loaded` : "Closing Stock On-Hand Excel"}
+                <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 font-normal">
+                  {isParsingStock ? "Processing Stock File..." : stockDataRaw ? `✓ ${stockDataRaw.length.toLocaleString()} Stock Lines Loaded` : "Select Closing Stock On-Hand Excel (.xlsx / .xls)"}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* File 3: Upload Processing File Block (Slightly Smaller Block Below) */}
-          <div 
-            onClick={() => orderInputRef.current?.click()}
-            className={`p-5 rounded-3xl border-2 border-dashed cursor-pointer transition-all text-center flex items-center justify-center space-x-4 max-w-xl mx-auto ${
-              orderDataRaw 
-                ? "border-cyan-500 bg-cyan-50/60 dark:bg-cyan-950/20" 
-                : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-cyan-500 shadow-sm"
-            }`}
-          >
-            <input ref={orderInputRef} type="file" accept=".xlsx,.xls" onChange={handleOrderUpload} className="hidden" />
-            <div className={`p-3 rounded-2xl shrink-0 ${orderDataRaw ? "bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-400" : "bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-400"}`}>
-              <ShoppingCart className="w-6 h-6" />
-            </div>
-            <div className="text-left">
-              <div className="text-[10px] font-extrabold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider">File 3 (Optional)</div>
-              <div className="text-sm font-extrabold text-slate-900 dark:text-white">
-                {orderFileName ? orderFileName : "Upload Processing File"}
+
+          {/* ========================================================================= */}
+          {/* BOTTOM PART: STOCK PROCESSOR */}
+          {/* ========================================================================= */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 md:p-7 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden space-y-5">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-cyan-500 pointer-events-none" />
+
+            {/* Section Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-xl">
+                  <ShoppingCart className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 tracking-tight">
+                      Stock Processor
+                    </h2>
+                    <span className="px-2.5 py-0.5 text-xs font-semibold bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 rounded-full border border-indigo-100 dark:border-indigo-900/40">
+                      1-Step Order Auditor
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-normal mt-0.5">
+                    Sales History (6-8 months) is saved permanently. Upload your Processing Requirement file to open the Order Audit Dashboard.
+                  </p>
+                </div>
               </div>
-              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                {isParsingOrder ? "Loading..." : orderDataRaw ? `✓ ${orderDataRaw.length} Order Lines Loaded` : "Processed_Order_Requirement.xlsx"}
+
+              {/* Saved Sales DB Status Badge & Clear Option */}
+              <div className="flex items-center gap-2 flex-wrap">
+                {salesDataRaw && useSavedSalesDB ? (
+                  <div className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-xs font-medium rounded-xl flex items-center gap-1.5">
+                    <DatabaseZap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span>✓ Sales History Saved ({savedDbCount ? savedDbCount.toLocaleString() : 'Active'} Rows)</span>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleLoadSavedSalesDB}
+                    disabled={isLoadingDb}
+                    className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-xl shadow-sm transition-all flex items-center gap-1.5"
+                  >
+                    <DatabaseZap className="w-3.5 h-3.5" />
+                    {isLoadingDb ? "Loading DB..." : "⚡ Load Saved Sales DB"}
+                  </button>
+                )}
+
+                <button
+                  onClick={handleClearSalesDB}
+                  title="Clear all saved sales history data from local database"
+                  className="px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700 text-xs font-medium rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                  <span>Clear Saved DB</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Bottom Upload Box - Processing File (Processed_Order_Requirement.xlsx) */}
+            <div 
+              onClick={() => orderInputRef.current?.click()}
+              className={`p-7 rounded-2xl border border-dashed cursor-pointer transition-all duration-200 text-center flex flex-col items-center justify-center space-y-2.5 group ${
+                orderDataRaw 
+                  ? "border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20" 
+                  : "border-indigo-200/90 dark:border-indigo-900/40 bg-indigo-50/20 dark:bg-indigo-950/10 hover:border-indigo-400 dark:hover:border-indigo-700 hover:bg-indigo-50/40 shadow-sm"
+              }`}
+            >
+              <input ref={orderInputRef} type="file" accept=".xlsx,.xls" onChange={handleOrderUpload} className="hidden" />
+              <div className={`p-3.5 rounded-xl transition-transform duration-200 group-hover:scale-105 ${orderDataRaw ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400" : "bg-indigo-100/70 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"}`}>
+                <ShoppingCart className="w-8 h-8" />
+              </div>
+              <div>
+                <div className="text-xs font-semibold text-indigo-500 dark:text-indigo-400 tracking-wide uppercase">Processing File</div>
+                <div className="text-base font-semibold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors mt-0.5">
+                  {orderFileName ? orderFileName : "Upload Processing File (Processed_Order_Requirement.xlsx)"}
+                </div>
+                <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 font-normal">
+                  {isParsingOrder ? "Processing Order File..." : orderDataRaw ? `✓ ${orderDataRaw.length.toLocaleString()} Order Lines Loaded` : "Select Processed_Order_Requirement Excel (.xlsx / .xls)"}
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="text-center pt-1">
-            {salesDataRaw && stockDataRaw ? (
-              <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-700 dark:text-emerald-400 font-bold text-sm">
-                ✓ Files loaded successfully! Report generated below.
-              </div>
-            ) : (
-              <p className="text-xs text-slate-400">
-                Tip: Select your Sales & Current Stock files above, or click <b>⚡ Use Saved Sales DB</b> to unlock analysis.
-              </p>
-            )}
-          </div>
         </div>
       ) : (
         /* FULL DASHBOARD VIEW (Unlocked after files are uploaded) */
@@ -1262,13 +1402,13 @@ export default function DeadStockAnalyzer({ onBack }) {
                   }`}
                 >
                   <div className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Approved Items (Active Sales)
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Approved Items (Sales &gt; 0 or Stock = 0)
                   </div>
                   <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
                     {orderMetrics.approvedCount.toLocaleString()}
                   </div>
                   <div className="text-xs text-emerald-800 dark:text-emerald-300/80 mt-1 font-bold">
-                    {((orderMetrics.approvedCount / (orderMetrics.totalLines || 1)) * 100).toFixed(1)}% approved (Sales in Apr-Aug)
+                    {((orderMetrics.approvedCount / (orderMetrics.totalLines || 1)) * 100).toFixed(1)}% approved (Active or 0 Stock)
                   </div>
                 </div>
 
@@ -1280,13 +1420,13 @@ export default function DeadStockAnalyzer({ onBack }) {
                   }`}
                 >
                   <div className="text-xs font-bold text-rose-700 dark:text-rose-400 uppercase flex items-center gap-1.5">
-                    <XCircle className="w-3.5 h-3.5" /> Rejected Items (0 Sales)
+                    <XCircle className="w-3.5 h-3.5" /> Rejected Items (Unsold Stock In Hand)
                   </div>
                   <div className="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1">
                     {orderMetrics.rejectedCount.toLocaleString()}
                   </div>
                   <div className="text-xs text-rose-800 dark:text-rose-300/80 mt-1 font-bold">
-                    {((orderMetrics.rejectedCount / (orderMetrics.totalLines || 1)) * 100).toFixed(1)}% blocked (0 sales in Apr-Aug)
+                    {((orderMetrics.rejectedCount / (orderMetrics.totalLines || 1)) * 100).toFixed(1)}% blocked (Stock &gt; 0 & 0 sales)
                   </div>
                 </div>
 
