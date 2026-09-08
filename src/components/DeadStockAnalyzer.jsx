@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import { 
   Package, 
@@ -18,28 +18,34 @@ import {
   MapPin,
   CheckCircle,
   RefreshCw,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Database,
+  Save,
+  PlusCircle,
+  DatabaseZap,
+  Check
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { 
+  loadHistoricalData, 
+  appendHistoricalData, 
+  saveHistoricalData, 
+  processSalesRowsToMap, 
+  findHeaderRowIndex,
+  extractStoreCode as extractStoreCodeHelper,
+  getStateFromStore as getStateFromStoreHelper
+} from "../helpers";
 
 // Store Code extraction (e.g. 'WMH001 - NED - VAZIRABAD' -> 'WMH001')
 const extractStoreCode = (branchStr) => {
-  if (!branchStr || typeof branchStr !== "string") return "UNKNOWN";
-  const trimmed = branchStr.trim();
-  const match = trimmed.match(/^WM[HM]\d{3}/i);
-  if (match) return match[0].toUpperCase();
-  return trimmed.split(/[\s\-]/)[0].toUpperCase();
+  return extractStoreCodeHelper(branchStr);
 };
 
 // State extraction (MH vs MP)
 const getStateFromStore = (storeStr) => {
-  if (!storeStr || typeof storeStr !== "string") return "MH";
-  const upper = storeStr.toUpperCase().trim();
-  if (upper.startsWith("WMP") || upper.includes(" MP")) return "MP";
-  if (upper.startsWith("WMH") || upper.includes(" MH")) return "MH";
-  return "MH";
+  return getStateFromStoreHelper(storeStr);
 };
 
 // Date parser
@@ -75,6 +81,11 @@ export default function DeadStockAnalyzer({ onBack }) {
   const [stockFileName, setStockFileName] = useState("");
   const [orderFileName, setOrderFileName] = useState("");
 
+  // Saved Database state
+  const [useSavedSalesDB, setUseSavedSalesDB] = useState(false);
+  const [savedDbCount, setSavedDbCount] = useState(null);
+  const [isLoadingDb, setIsLoadingDb] = useState(false);
+
   // Loading flags
   const [isParsingSales, setIsParsingSales] = useState(false);
   const [isParsingStock, setIsParsingStock] = useState(false);
@@ -95,6 +106,7 @@ export default function DeadStockAnalyzer({ onBack }) {
   const [selectedStore, setSelectedStore] = useState("All Stores");
   const [selectedStatusFilter, setSelectedStatusFilter] = useState("DEAD"); // 'DEAD' | 'ACTIVE' | 'ALL'
   const [searchTerm, setSearchTerm] = useState("");
+  const [auditFilter, setAuditFilter] = useState("ALL"); // 'ALL' | 'DENE_CHAHIYE' | 'NAHI_DENE_CHAHIYE'
 
   // Active Tab: 'dead-stock' | 'order-audit'
   const [activeTab, setActiveTab] = useState("dead-stock");
@@ -102,6 +114,110 @@ export default function DeadStockAnalyzer({ onBack }) {
   const salesInputRef = useRef(null);
   const stockInputRef = useRef(null);
   const orderInputRef = useRef(null);
+  const appendSalesInputRef = useRef(null);
+
+  // Check saved DB count on mount
+  useEffect(() => {
+    const checkDb = async () => {
+      try {
+        const dbRows = await loadHistoricalData();
+        if (dbRows && dbRows.length > 0) {
+          setSavedDbCount(dbRows.length);
+        } else {
+          setSavedDbCount(0);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    checkDb();
+  }, []);
+
+  // Load Saved Sales DB
+  const handleLoadSavedSalesDB = async () => {
+    setIsLoadingDb(true);
+    try {
+      let dbRows = await loadHistoricalData();
+
+      // Auto-seed from public/seed_sales.json if DB is empty
+      if (!dbRows || dbRows.length === 0) {
+        const toastSeedId = toast.loading("Loading default April-August Sales History file...");
+        try {
+          const res = await fetch("/seed_sales.json");
+          if (res.ok) {
+            const seedRows = await res.json();
+            if (seedRows && seedRows.length > 0) {
+              await saveHistoricalData(seedRows);
+              dbRows = seedRows;
+              toast.success(`Initialized Database with April-August Sales (${seedRows.length.toLocaleString()} rows)!`, { id: toastSeedId });
+            }
+          }
+        } catch (err) {
+          toast.error("Failed to seed default sales data.", { id: toastSeedId });
+        }
+      }
+
+      if (!dbRows || dbRows.length === 0) {
+        toast.error("No historical sales data found. Please upload a sales file first.");
+        setIsLoadingDb(false);
+        return;
+      }
+
+      const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(dbRows);
+      setSalesDataRaw(salesMap);
+      setSalesPeriodInfo(periodInfo);
+      setSalesFileName(`Saved DB (${totalRows.toLocaleString()} lines - ${periodInfo.labelText})`);
+      setUseSavedSalesDB(true);
+      setSavedDbCount(totalRows);
+      toast.success(`⚡ Loaded ${totalRows.toLocaleString()} sales records from Saved Database!`);
+    } catch (err) {
+      console.error(err);
+      toast.error(`Failed to load saved sales DB: ${err.message}`);
+    } finally {
+      setIsLoadingDb(false);
+    }
+  };
+
+  // Append new month sales data to DB
+  const handleAppendSalesToDB = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const toastId = toast.loading("Appending new month sales file to local database...");
+    try {
+      const reader = new FileReader();
+      reader.onload = async (evt) => {
+        try {
+          const data = new Uint8Array(evt.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const headerIdx = findHeaderRowIndex(worksheet);
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "", range: headerIdx });
+
+          if (jsonData.length === 0) {
+            toast.error("File is empty", { id: toastId });
+            return;
+          }
+
+          await appendHistoricalData(jsonData);
+          const freshData = await loadHistoricalData();
+          const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(freshData);
+          setSalesDataRaw(salesMap);
+          setSalesPeriodInfo(periodInfo);
+          setSalesFileName(`Saved DB (${totalRows.toLocaleString()} lines - ${periodInfo.labelText})`);
+          setSavedDbCount(totalRows);
+          setUseSavedSalesDB(true);
+          toast.success(`Successfully added new month sales! Total in DB: ${totalRows.toLocaleString()} lines`, { id: toastId });
+        } catch (err) {
+          toast.error(`Append failed: ${err.message}`, { id: toastId });
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } catch (err) {
+      toast.error(`Failed to read file: ${err.message}`, { id: toastId });
+    }
+    e.target.value = null;
+  };
 
   // Reset files
   const handleResetFiles = () => {
@@ -111,6 +227,7 @@ export default function DeadStockAnalyzer({ onBack }) {
     setSalesFileName("");
     setStockFileName("");
     setOrderFileName("");
+    setUseSavedSalesDB(false);
   };
 
   // Parse Sales File
@@ -246,6 +363,10 @@ export default function DeadStockAnalyzer({ onBack }) {
     setStockFileName(file.name);
     setIsParsingStock(true);
 
+    if (!salesDataRaw) {
+      handleLoadSavedSalesDB();
+    }
+
     const reader = new FileReader();
     reader.onload = (evt) => {
       try {
@@ -346,6 +467,10 @@ export default function DeadStockAnalyzer({ onBack }) {
     setOrderFileName(file.name);
     setIsParsingOrder(true);
 
+    if (!salesDataRaw) {
+      handleLoadSavedSalesDB();
+    }
+
     const reader = new FileReader();
     reader.onload = (evt) => {
       try {
@@ -369,11 +494,17 @@ export default function DeadStockAnalyzer({ onBack }) {
         }
 
         const headers = jsonData[headerIdx].map(h => String(h).trim().toUpperCase());
+        const dateCol = headers.findIndex(h => h === "DATE" || h.includes("BILL DATE") || h.includes("ORDER DATE"));
+        const stateCol = headers.findIndex(h => h === "STATE");
         const storeCodeCol = headers.findIndex(h => h.includes("STORE CODE"));
         const storeNameCol = headers.findIndex(h => h.includes("STORE NAME"));
         const itemCodeCol = headers.findIndex(h => h.includes("ITEM CODE"));
         const descCol = headers.findIndex(h => h.includes("DESCRIPTION"));
-        const reqQtyCol = headers.findIndex(h => h.includes("REQ QTY"));
+        const catCol = headers.findIndex(h => h.includes("CATEGORY"));
+        const reqQtyCol = headers.findIndex(h => h.includes("REQ QTY") || h.includes("ORDER QTY") || h.includes("REQUIRED"));
+        const availStockCol = headers.findIndex(h => 
+          (h.includes("AVAIL") || h.includes("STORE STOCK") || h.includes("STOCK AT STORE") || h.includes("CLOSING STOCK") || h.includes("ON HAND") || (h.includes("STOCK") && !h.includes("REQ"))) && !h.includes("REQ QTY")
+        );
 
         const orderLines = [];
         for (let i = headerIdx + 1; i < jsonData.length; i++) {
@@ -382,22 +513,28 @@ export default function DeadStockAnalyzer({ onBack }) {
 
           const rawStoreCode = String(row[storeCodeCol]).trim();
           const storeCode = extractStoreCode(rawStoreCode);
-          const storeState = getStateFromStore(storeCode);
+          const storeState = stateCol !== -1 && row[stateCol] ? String(row[stateCol]).trim() : getStateFromStore(storeCode);
           const storeName = storeNameCol !== -1 && row[storeNameCol] ? String(row[storeNameCol]).trim() : storeCode;
+          const dateVal = dateCol !== -1 && row[dateCol] ? String(row[dateCol]).trim() : "";
           const itemCode = itemCodeCol !== -1 && row[itemCodeCol] ? String(row[itemCodeCol]).trim() : "";
           const desc = descCol !== -1 && row[descCol] ? String(row[descCol]).trim() : "";
+          const category = catCol !== -1 && row[catCol] ? String(row[catCol]).trim() : "";
           const reqQty = reqQtyCol !== -1 ? parseFloat(row[reqQtyCol]) || 0 : 0;
+          const availStock = availStockCol !== -1 && row[availStockCol] !== undefined ? parseFloat(row[availStockCol]) || 0 : 0;
 
           if (!itemCode || reqQty <= 0) continue;
 
           orderLines.push({
             id: `ord_${i}`,
+            dateVal,
             storeCode,
             storeState,
             storeName,
             itemCode,
             description: desc,
-            reqQty
+            category,
+            reqQty,
+            availStock
           });
         }
 
@@ -416,13 +553,13 @@ export default function DeadStockAnalyzer({ onBack }) {
 
   // Merged Analysis Engine
   const mergedAnalysis = useMemo(() => {
-    if (!stockDataRaw) return null;
-
     const salesMap = salesDataRaw || {};
     const itemSurplusStoreMap = {};
     const itemSalesStoreMap = {};
 
-    const items = stockDataRaw.map(stock => {
+    const stockItems = stockDataRaw || [];
+
+    const items = stockItems.map(stock => {
       const key = `${stock.storeCode}::${stock.itemCode}`;
       const sales = salesMap[key] || { l3mQty: 0 };
       const periodSales = sales.l3mQty;
@@ -487,14 +624,17 @@ export default function DeadStockAnalyzer({ onBack }) {
       return item;
     });
 
-    const storeList = Array.from(new Set(finalItems.map(i => i.storeCode))).sort();
+    const storeList = Array.from(new Set([
+      ...finalItems.map(i => i.storeCode),
+      ...(orderDataRaw ? orderDataRaw.map(o => o.storeCode) : [])
+    ])).sort();
 
     return {
       items: finalItems,
       storeList,
       itemSurplusStoreMap
     };
-  }, [stockDataRaw, salesDataRaw, retentionQty, strictSameState]);
+  }, [stockDataRaw, salesDataRaw, orderDataRaw, retentionQty, strictSameState]);
 
   // Overall Unfiltered Stock Metrics (Independent of status filter!)
   const metrics = useMemo(() => {
@@ -547,13 +687,27 @@ export default function DeadStockAnalyzer({ onBack }) {
     });
   }, [mergedAnalysis, selectedStore, selectedStatusFilter, searchTerm]);
 
-  // Order Audit List
+  // Order Audit / Processing List (Evaluates Order Req or Stock against Sales DB)
   const auditedOrders = useMemo(() => {
-    if (!orderDataRaw || !mergedAnalysis) return [];
+    if (!mergedAnalysis) return [];
     const salesMap = salesDataRaw || {};
     const { itemSurplusStoreMap } = mergedAnalysis;
 
-    return orderDataRaw.map(ord => {
+    // Use orderDataRaw if available, else derive from stockDataRaw
+    const baseSource = orderDataRaw || (stockDataRaw ? stockDataRaw.map(s => ({
+      id: s.id,
+      dateVal: "",
+      storeCode: s.storeCode,
+      storeState: s.storeState,
+      storeName: s.branchName,
+      itemCode: s.itemCode,
+      description: s.description,
+      category: s.category || "",
+      reqQty: s.closingStock,
+      availStock: s.closingStock
+    })) : []);
+
+    return baseSource.map(ord => {
       const key = `${ord.storeCode}::${ord.itemCode}`;
       const sales = salesMap[key] || { l3mQty: 0 };
       const periodSales = sales.l3mQty;
@@ -565,8 +719,13 @@ export default function DeadStockAnalyzer({ onBack }) {
       }
 
       let isHighRisk = periodSales === 0;
-      let transferMatch = null;
+      let statusTag = isHighRisk ? "REJECTED" : "APPROVED";
+      let statusLabel = isHighRisk ? "REJECTED" : "APPROVED";
+      let reason = isHighRisk 
+        ? `Rejected: 0 Sales at ${ord.storeCode} in reference period (April-August).`
+        : `Approved: Active seller at ${ord.storeCode} (${periodSales} units sold in Apr-Aug).`;
 
+      let transferMatch = null;
       if (sources.length > 0) {
         sources.sort((a, b) => b.surplusQty - a.surplusQty);
         transferMatch = {
@@ -579,12 +738,73 @@ export default function DeadStockAnalyzer({ onBack }) {
 
       return {
         ...ord,
+        dateVal: ord.dateVal || "",
+        category: ord.category || "",
+        availStock: ord.availStock !== undefined ? ord.availStock : 0,
         periodSales,
         isHighRisk,
+        statusTag,
+        statusLabel,
+        reason,
         transferMatch
       };
+    }).filter(ord => {
+      if (selectedStore !== "All Stores" && ord.storeCode !== selectedStore) return false;
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        const matchesCode = ord.itemCode.toLowerCase().includes(term);
+        const matchesDesc = ord.description.toLowerCase().includes(term);
+        const matchesStore = ord.storeCode.toLowerCase().includes(term);
+        if (!matchesCode && !matchesDesc && !matchesStore) return false;
+      }
+      if (auditFilter === "APPROVED") return ord.statusTag === "APPROVED";
+      if (auditFilter === "REJECTED") return ord.statusTag === "REJECTED";
+      return true;
     });
-  }, [orderDataRaw, mergedAnalysis, salesDataRaw, strictSameState]);
+  }, [orderDataRaw, stockDataRaw, mergedAnalysis, salesDataRaw, strictSameState, auditFilter, selectedStore, searchTerm]);
+
+  // Summary Metrics for Order Requirement Audit Dashboard
+  const orderMetrics = useMemo(() => {
+    const salesMap = salesDataRaw || {};
+    const baseSource = orderDataRaw || (stockDataRaw ? stockDataRaw.map(s => ({
+      storeCode: s.storeCode,
+      storeState: s.storeState,
+      itemCode: s.itemCode,
+      reqQty: s.closingStock
+    })) : []);
+
+    let totalLines = baseSource.length;
+    let approvedCount = 0;
+    let rejectedCount = 0;
+    let totalReqQty = 0;
+    const storeSet = new Set();
+
+    baseSource.forEach(ord => {
+      if (ord.storeCode) storeSet.add(ord.storeCode);
+      totalReqQty += (ord.reqQty || 0);
+      const key = `${ord.storeCode}::${ord.itemCode}`;
+      const periodSales = (salesMap[key] || {}).l3mQty || 0;
+      if (periodSales > 0) {
+        approvedCount++;
+      } else {
+        rejectedCount++;
+      }
+    });
+
+    return {
+      totalLines,
+      approvedCount,
+      rejectedCount,
+      storesCount: storeSet.size,
+      totalReqQty
+    };
+  }, [orderDataRaw, stockDataRaw, salesDataRaw]);
+
+  // CHECK IF INITIAL UPLOAD STAGE IS NEEDED
+  const isInitialState = !salesDataRaw || (!stockDataRaw && !orderDataRaw);
+
+  // Active Dashboard Mode
+  const isOrderDashboard = activeTab === "order-audit" || (!stockDataRaw && !!orderDataRaw);
 
   // Fixed Master Store Color Map (WMP001 -> Light Blue, WMP002 -> Light Green, etc.)
   const FIXED_STORE_COLORS = {
@@ -697,41 +917,46 @@ export default function DeadStockAnalyzer({ onBack }) {
     const sheet = workbook.addWorksheet("Order Requirement Audit");
 
     sheet.columns = [
-      { header: "ORDERING STORE", key: "store", width: 18 },
+      { header: "Date", key: "date", width: 14 },
+      { header: "State", key: "state", width: 10 },
+      { header: "STORE CODE", key: "storeCode", width: 16 },
+      { header: "Store Name", key: "storeName", width: 22 },
       { header: "ITEM CODE", key: "itemCode", width: 16 },
-      { header: "DESCRIPTION", key: "description", width: 45 },
-      { header: "REQ QTY", key: "reqQty", width: 12 },
-      { header: "STORE SALES", key: "storeSales", width: 14 },
-      { header: "AUDIT RISK", key: "auditRisk", width: 22 },
-      { header: "TRANSFER MATCH (SAME STATE)", key: "transferMatch", width: 45 }
+      { header: "ITEM DESCRIPTION", key: "description", width: 45 },
+      { header: "Category", key: "category", width: 18 },
+      { header: "Req Qty", key: "reqQty", width: 12 },
+      { header: "Available Stock", key: "availStock", width: 16 },
+      { header: "L3M Sale", key: "periodSales", width: 14 },
+      { header: "Recommendation", key: "recommendation", width: 20 }
     ];
 
     const headerRow = sheet.getRow(1);
     headerRow.font = { bold: true, color: { argb: "FFFFFF" }, size: 11 };
-    headerRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "1E293B" } };
+    headerRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "1976D2" } };
     headerRow.alignment = { vertical: "middle", horizontal: "center" };
     headerRow.height = 28;
 
-    auditedOrders.forEach(ord => {
-      const storeStr = `${ord.storeCode} (${ord.storeState})`;
-      const auditRiskStr = ord.isHighRisk ? "High Risk (0 Sales)" : "Approved";
-      const transferMatchStr = ord.transferMatch
-        ? `Transfer ${ord.transferMatch.suggestedQty} units from ${ord.transferMatch.fromStore} (${ord.transferMatch.fromState})`
-        : `No surplus in ${ord.storeState} (Place Purchase Order)`;
+    const todayStr = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
 
+    auditedOrders.forEach(ord => {
       const row = sheet.addRow({
-        store: storeStr,
-        itemCode: ord.itemCode,
-        description: ord.description,
-        reqQty: ord.reqQty,
-        storeSales: ord.periodSales,
-        auditRisk: auditRiskStr,
-        transferMatch: transferMatchStr
+        date: ord.dateVal || todayStr,
+        state: ord.storeState || "",
+        storeCode: ord.storeCode || "",
+        storeName: ord.storeName || ord.storeCode || "",
+        itemCode: ord.itemCode || "",
+        description: ord.description || "",
+        category: ord.category || "",
+        reqQty: ord.reqQty || 0,
+        availStock: ord.availStock || 0,
+        periodSales: ord.periodSales || 0,
+        recommendation: ord.statusLabel || ""
       });
 
-      row.height = 24;
+      row.height = 22;
 
       row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+        cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
         cell.border = {
           top: { style: "thin", color: { argb: "CBD5E1" } },
           bottom: { style: "thin", color: { argb: "CBD5E1" } },
@@ -739,26 +964,17 @@ export default function DeadStockAnalyzer({ onBack }) {
           right: { style: "thin", color: { argb: "CBD5E1" } }
         };
 
-        if (colNumber === 1) {
-          cell.alignment = { vertical: "middle", horizontal: "center" };
-          cell.font = { bold: true };
-        } else if (colNumber === 2) {
-          cell.alignment = { vertical: "middle", horizontal: "center" };
-          cell.font = { bold: true, color: { argb: "0284C7" } };
-        } else if (colNumber === 3) {
-          cell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
-        } else if (colNumber === 4) {
-          cell.alignment = { vertical: "middle", horizontal: "center" };
+        if (colNumber === 1 || colNumber === 2 || colNumber === 3 || colNumber === 4 || colNumber === 8 || colNumber === 9) {
           cell.font = { bold: true };
         } else if (colNumber === 5) {
-          cell.alignment = { vertical: "middle", horizontal: "center" };
+          cell.font = { bold: true, color: { argb: "0284C7" } };
+        } else if (colNumber === 10) {
           if (ord.periodSales === 0) {
             cell.font = { bold: true, color: { argb: "DC2626" } };
           } else {
             cell.font = { bold: true, color: { argb: "16A34A" } };
           }
-        } else if (colNumber === 6) {
-          cell.alignment = { vertical: "middle", horizontal: "center" };
+        } else if (colNumber === 11) {
           if (ord.isHighRisk) {
             cell.fill = {
               type: "pattern",
@@ -773,18 +989,6 @@ export default function DeadStockAnalyzer({ onBack }) {
               fgColor: { argb: "DCFCE7" }
             };
             cell.font = { bold: true, color: { argb: "166534" } };
-          }
-        } else if (colNumber === 7) {
-          cell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
-          if (ord.transferMatch) {
-            cell.fill = {
-              type: "pattern",
-              pattern: "solid",
-              fgColor: { argb: "E0F2FE" }
-            };
-            cell.font = { bold: true, color: { argb: "0369A1" } };
-          } else {
-            cell.font = { color: { argb: "94A3B8" } };
           }
         }
       });
@@ -807,9 +1011,6 @@ export default function DeadStockAnalyzer({ onBack }) {
     });
   };
 
-  // CHECK IF INITIAL UPLOAD STAGE IS NEEDED (Like Daily Sales Validator)
-  const isInitialState = !salesDataRaw || !stockDataRaw;
-
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 p-4 md:p-6 space-y-6">
       {/* Top Header Navigation */}
@@ -823,17 +1024,53 @@ export default function DeadStockAnalyzer({ onBack }) {
           </button>
           <div>
             <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-              <AlertTriangle className="w-6 h-6 text-rose-500" />
-              Dead Stock & Smart Transfer Manager
+              {isOrderDashboard ? (
+                <>
+                  <ShoppingCart className="w-6 h-6 text-cyan-500" />
+                  Sales-Based Order Processing & Audit Dashboard
+                </>
+              ) : (
+                <>
+                  <AlertTriangle className="w-6 h-6 text-rose-500" />
+                  Dead Stock & Smart Transfer Manager
+                </>
+              )}
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Find non-moving stock, keep 2 display units per store, and transfer surplus stock within MH & MP.
+              {isOrderDashboard ? (
+                "Audit store requirement sheets against historical sales database to auto-approve active items & reject non-sellers."
+              ) : (
+                "Find non-moving stock, keep 2 display units per store, and transfer surplus stock within MH & MP."
+              )}
             </p>
           </div>
         </div>
 
         {!isInitialState && (
           <div className="flex items-center gap-3">
+            <button
+              onClick={handleLoadSavedSalesDB}
+              disabled={isLoadingDb}
+              className={`px-3 py-2 font-extrabold text-xs rounded-xl shadow transition-all flex items-center gap-1.5 ${
+                useSavedSalesDB
+                  ? "bg-emerald-600 hover:bg-emerald-500 text-white"
+                  : "bg-blue-600 hover:bg-blue-500 text-white"
+              }`}
+            >
+              <DatabaseZap className="w-3.5 h-3.5" />
+              {isLoadingDb ? "Loading DB..." : useSavedSalesDB ? "✓ Sales DB Active" : "⚡ Use Saved Sales DB"}
+            </button>
+
+            <button
+              onClick={() => appendSalesInputRef.current?.click()}
+              title="Append new month sales file into DB"
+              className="px-3 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+            >
+              <input ref={appendSalesInputRef} type="file" accept=".xlsx,.xls" onChange={handleAppendSalesToDB} className="hidden" />
+              <PlusCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span>Add Month Sales</span>
+            </button>
+
             <button
               onClick={handleResetFiles}
               className="px-3 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5"
@@ -842,13 +1079,23 @@ export default function DeadStockAnalyzer({ onBack }) {
               Change Files
             </button>
 
-            <button
-              onClick={exportSurplusExcel}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow flex items-center gap-2 transition-all"
-            >
-              <Download className="w-4 h-4" />
-              Download Transfer Sheet (Excel)
-            </button>
+            {isOrderDashboard ? (
+              <button
+                onClick={exportOrderAuditExcel}
+                className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs rounded-xl shadow flex items-center gap-2 transition-all"
+              >
+                <Download className="w-4 h-4" />
+                Download Audit Report (Excel)
+              </button>
+            ) : (
+              <button
+                onClick={exportSurplusExcel}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow flex items-center gap-2 transition-all"
+              >
+                <Download className="w-4 h-4" />
+                Download Transfer Sheet (Excel)
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -861,12 +1108,13 @@ export default function DeadStockAnalyzer({ onBack }) {
               Upload Files to Generate Dead Stock Report
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Please upload both your <span className="font-bold text-blue-600 dark:text-blue-400">Sales History File</span> and <span className="font-bold text-rose-600 dark:text-rose-400">Current Stock File</span> below.
+              Select your <span className="font-bold text-blue-600 dark:text-blue-400">Sales History File</span> and <span className="font-bold text-rose-600 dark:text-rose-400">Current Stock / Processing File</span> below.
             </p>
           </div>
 
+          {/* Main 2 Upload Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Sales Dropzone */}
+            {/* File 1: Sales Dropzone */}
             <div 
               onClick={() => salesInputRef.current?.click()}
               className={`p-8 rounded-3xl border-2 border-dashed cursor-pointer transition-all text-center flex flex-col items-center justify-center space-y-3 ${
@@ -890,10 +1138,10 @@ export default function DeadStockAnalyzer({ onBack }) {
               </div>
             </div>
 
-            {/* Stock Dropzone */}
+            {/* File 2: Stock Dropzone */}
             <div 
               onClick={() => stockInputRef.current?.click()}
-              className={`p-8 rounded-3xl border-2 border-dashed cursor-pointer transition-all text-center flex flex-col items-center justify-center space-y-3 ${
+              className={`p-6 rounded-3xl border-2 border-dashed cursor-pointer transition-all text-center flex flex-col items-center justify-center space-y-4 ${
                 stockDataRaw 
                   ? "border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/20" 
                   : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-rose-500 shadow-sm"
@@ -915,388 +1163,541 @@ export default function DeadStockAnalyzer({ onBack }) {
             </div>
           </div>
 
-          <div className="text-center pt-2">
+          {/* File 3: Upload Processing File Block (Slightly Smaller Block Below) */}
+          <div 
+            onClick={() => orderInputRef.current?.click()}
+            className={`p-5 rounded-3xl border-2 border-dashed cursor-pointer transition-all text-center flex items-center justify-center space-x-4 max-w-xl mx-auto ${
+              orderDataRaw 
+                ? "border-cyan-500 bg-cyan-50/60 dark:bg-cyan-950/20" 
+                : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-cyan-500 shadow-sm"
+            }`}
+          >
+            <input ref={orderInputRef} type="file" accept=".xlsx,.xls" onChange={handleOrderUpload} className="hidden" />
+            <div className={`p-3 rounded-2xl shrink-0 ${orderDataRaw ? "bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-400" : "bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-400"}`}>
+              <ShoppingCart className="w-6 h-6" />
+            </div>
+            <div className="text-left">
+              <div className="text-[10px] font-extrabold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider">File 3 (Optional)</div>
+              <div className="text-sm font-extrabold text-slate-900 dark:text-white">
+                {orderFileName ? orderFileName : "Upload Processing File"}
+              </div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                {isParsingOrder ? "Loading..." : orderDataRaw ? `✓ ${orderDataRaw.length} Order Lines Loaded` : "Processed_Order_Requirement.xlsx"}
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center pt-1">
             {salesDataRaw && stockDataRaw ? (
               <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-700 dark:text-emerald-400 font-bold text-sm">
-                ✓ Both files loaded successfully! Report generated below.
+                ✓ Files loaded successfully! Report generated below.
               </div>
             ) : (
               <p className="text-xs text-slate-400">
-                Tip: After selecting both files above, your store stock analysis will automatically unlock.
+                Tip: Select your Sales & Current Stock files above, or click <b>⚡ Use Saved Sales DB</b> to unlock analysis.
               </p>
             )}
           </div>
         </div>
       ) : (
-        /* FULL DASHBOARD VIEW (Unlocked after both files are uploaded) */
+        /* FULL DASHBOARD VIEW (Unlocked after files are uploaded) */
         <>
-          {/* Summary KPI Filter Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* Card 1: Total Stock On-Hand */}
-            <div 
-              onClick={() => setSelectedStatusFilter("ALL")}
-              className={`bg-white dark:bg-slate-900 border rounded-2xl p-4 shadow-sm cursor-pointer transition-all hover:scale-[1.02] ${
-                selectedStatusFilter === "ALL" ? "border-slate-900 dark:border-white ring-2 ring-slate-400/50" : "border-slate-200 dark:border-slate-800"
-              }`}
-            >
-              <div className="text-xs font-bold text-slate-400 uppercase">Total Stock On-Hand</div>
-              <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">
-                ₹{Math.round(metrics.totalVal).toLocaleString('en-IN')}
-              </div>
-              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-bold">
-                {metrics.totalUnits.toLocaleString()} total units (Click to view all)
-              </div>
-            </div>
-
-            {/* Card 2: Total Dead Stock */}
-            <div 
-              onClick={() => setSelectedStatusFilter("DEAD")}
-              className={`bg-rose-50 dark:bg-rose-950/20 border rounded-2xl p-4 shadow-sm cursor-pointer transition-all hover:scale-[1.02] ${
-                selectedStatusFilter === "DEAD" ? "border-rose-500 ring-2 ring-rose-500/50" : "border-rose-200 dark:border-rose-500/40"
-              }`}
-            >
-              <div className="text-xs font-bold text-rose-700 dark:text-rose-400 uppercase flex items-center gap-1">
-                <AlertTriangle className="w-3.5 h-3.5" /> Total Dead Stock (0 Sales)
-              </div>
-              <div className="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1">
-                ₹{Math.round(metrics.deadVal).toLocaleString('en-IN')}
-              </div>
-              <div className="text-xs text-rose-800 dark:text-rose-300/80 mt-1 font-bold">
-                {metrics.deadUnits.toLocaleString()} units ({metrics.deadSkus} SKUs)
-              </div>
-            </div>
-
-            {/* Card 3: Active / Running Items */}
-            <div 
-              onClick={() => setSelectedStatusFilter("ACTIVE")}
-              className={`bg-emerald-50 dark:bg-emerald-950/20 border rounded-2xl p-4 shadow-sm cursor-pointer transition-all hover:scale-[1.02] ${
-                selectedStatusFilter === "ACTIVE" ? "border-emerald-500 ring-2 ring-emerald-500/50" : "border-emerald-200 dark:border-emerald-500/40"
-              }`}
-            >
-              <div className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase flex items-center gap-1">
-                <CheckCircle className="w-3.5 h-3.5" /> Active / Running Stock
-              </div>
-              <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
-                ₹{Math.round(metrics.activeVal).toLocaleString('en-IN')}
-              </div>
-              <div className="text-xs text-emerald-800 dark:text-emerald-300/80 mt-1 font-bold">
-                {metrics.activeUnits.toLocaleString()} units ({metrics.activeSkus} SKUs) (Click to view)
-              </div>
-            </div>
-
-            {/* Card 4: Retention Rule Control */}
-            <div className="bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-500/40 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
-              <div className="text-xs font-bold text-purple-700 dark:text-purple-300 uppercase flex items-center justify-between">
-                <span>Surplus to Move</span>
-                <span className="text-[11px] font-black text-cyan-600 dark:text-cyan-400">₹{Math.round(metrics.surplusVal).toLocaleString('en-IN')}</span>
-              </div>
-              <div className="flex items-center gap-2 my-1">
-                <span className="text-xs text-slate-700 dark:text-slate-300 font-medium">Keep at store:</span>
-                <input 
-                  type="number" 
-                  min="0" 
-                  max="20" 
-                  value={retentionQty} 
-                  onChange={(e) => setRetentionQty(Math.max(0, parseInt(e.target.value) || 0))}
-                  className="w-14 px-2 py-1 bg-white dark:bg-slate-900 border border-purple-300 dark:border-purple-500/50 rounded text-center text-slate-900 dark:text-white font-extrabold text-sm focus:outline-none"
-                />
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">units</span>
-              </div>
-              <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                {metrics.surplusUnits.toLocaleString()} surplus dead units to transfer.
-              </div>
-            </div>
-          </div>
-
-          {/* Controls & Search */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 shadow-sm">
-            <div className="flex flex-wrap items-center gap-3 flex-1">
-              {/* Search */}
-              <div className="relative flex-1 min-w-[200px]">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input 
-                  type="text" 
-                  placeholder="Search Item Code or Product Name..." 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none"
-                />
-              </div>
-
-              {/* Store Selector */}
-              <select 
-                value={selectedStore} 
-                onChange={(e) => setSelectedStore(e.target.value)}
-                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none"
-              >
-                <option value="All Stores">All Stores ({mergedAnalysis.storeList.length})</option>
-                {mergedAnalysis.storeList.map(st => (
-                  <option key={st} value={st}>{st} ({getStateFromStore(st)})</option>
-                ))}
-              </select>
-
-              {/* Status Filter */}
-              <select 
-                value={selectedStatusFilter} 
-                onChange={(e) => setSelectedStatusFilter(e.target.value)}
-                className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none"
-              >
-                <option value="DEAD">🔴 Dead Stock Only (0 Sales)</option>
-                <option value="ACTIVE">🟢 Active / Running Items Only (Sales &gt; 0)</option>
-                <option value="ALL">📋 Show All Stock Items (Dead + Active)</option>
-              </select>
-
-              {/* Same State Rule Toggle */}
+          {/* Dashboard Mode Selector Tabs (Shown if both stock & order files exist) */}
+          {stockDataRaw && orderDataRaw && (
+            <div className="flex border-b border-slate-200 dark:border-slate-800 space-x-2 pb-1">
               <button
-                onClick={() => setStrictSameState(!strictSameState)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 ${
-                  strictSameState 
-                    ? "bg-amber-50 dark:bg-amber-500/20 border-amber-300 dark:border-amber-500/50 text-amber-800 dark:text-amber-300" 
-                    : "bg-slate-100 dark:bg-slate-950 border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400"
+                onClick={() => setActiveTab("dead-stock")}
+                className={`px-4 py-2 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 ${
+                  activeTab === "dead-stock"
+                    ? "border-rose-500 text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 rounded-t-xl"
+                    : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                 }`}
               >
-                <MapPin className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                {strictSameState ? "Intra-State Only (MH↔MH, MP↔MP)" : "Cross State Allowed"}
+                <AlertTriangle className="w-4 h-4 text-rose-500" />
+                Dead Stock Manager ({filteredItems.length} Stock Items)
               </button>
-            </div>
 
-            <div className="text-xs text-slate-500 dark:text-slate-400 font-bold">
-              Showing <span className="text-slate-900 dark:text-white font-extrabold">{filteredItems.length}</span> items
-            </div>
-          </div>
-
-          {/* Navigation Tabs */}
-          <div className="flex border-b border-slate-200 dark:border-slate-800 space-x-2">
-            <button
-              onClick={() => setActiveTab("dead-stock")}
-              className={`px-4 py-2 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 ${
-                activeTab === "dead-stock"
-                  ? "border-rose-500 text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 rounded-t-xl"
-                  : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-              }`}
-            >
-              <AlertTriangle className="w-4 h-4" />
-              Stock Table & Transfer Recommendations ({filteredItems.length})
-            </button>
-
-            <button
-              onClick={() => setActiveTab("order-audit")}
-              className={`px-4 py-2 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 ${
-                activeTab === "order-audit"
-                  ? "border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-500/10 rounded-t-xl"
-                  : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-              }`}
-            >
-              <ShoppingCart className="w-4 h-4" />
-              Order Requirement Auditor {orderDataRaw ? `(${orderDataRaw.length})` : "(Upload File Inside)"}
-            </button>
-          </div>
-
-          {/* Tab 1: Dead / Active Stock Table View */}
-          {activeTab === "dead-stock" && (
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-400 font-extrabold uppercase border-b border-slate-200 dark:border-slate-800">
-                      <th className="p-3">Store</th>
-                      <th className="p-3">State</th>
-                      <th className="p-3">Item Code</th>
-                      <th className="p-3">Product Name & Description</th>
-                      <th className="p-3 text-center">Total Sales (Qty Sold)</th>
-                      <th className="p-3 text-center">On-Hand Stock</th>
-                      <th className="p-3 text-center">Keep</th>
-                      <th className="p-3 text-center bg-cyan-50 dark:bg-cyan-950/40 text-cyan-800 dark:text-cyan-300">Surplus to Move</th>
-                      <th className="p-3">Where to Send? (Same State)</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-800 dark:text-slate-200">
-                    {filteredItems.length === 0 ? (
-                      <tr>
-                        <td colSpan="9" className="p-8 text-center text-slate-400 text-sm">
-                          No matching stock items found for selected filter.
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredItems.map((item) => (
-                        <tr 
-                          key={item.id} 
-                          className={`hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors ${
-                            item.status === "DEAD" ? "bg-rose-50/50 dark:bg-rose-950/10" : "bg-emerald-50/30 dark:bg-emerald-950/10"
-                          }`}
-                        >
-                          <td className="p-3 font-bold text-slate-900 dark:text-white">
-                            {item.storeCode}
-                          </td>
-                          <td className="p-3">
-                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-black ${
-                              item.storeState === 'MH' ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-500/30' : 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30'
-                            }`}>
-                              {item.storeState}
-                            </span>
-                          </td>
-                          <td className="p-3 font-mono font-bold text-slate-800 dark:text-slate-200">
-                            {item.itemCode}
-                          </td>
-                          <td className="p-3 max-w-sm">
-                            <div className="font-bold text-slate-900 dark:text-white truncate" title={item.description}>
-                              {item.description}
-                            </div>
-                            <div className="text-[10px] text-slate-400">Brand: {item.brand}</div>
-                          </td>
-                          <td className="p-3 text-center font-extrabold">
-                            {item.periodSales === 0 ? (
-                              <span className="px-2 py-0.5 bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400 rounded">0</span>
-                            ) : (
-                              <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded font-black">{item.periodSales}</span>
-                            )}
-                          </td>
-                          <td className="p-3 text-center font-bold text-slate-900 dark:text-white">
-                            {item.closingStock}
-                          </td>
-                          <td className="p-3 text-center font-bold text-purple-700 dark:text-purple-300">
-                            {item.retainedQty}
-                          </td>
-                          <td className="p-3 text-center font-black bg-cyan-50/70 dark:bg-cyan-950/30 text-cyan-800 dark:text-cyan-300">
-                            {item.surplusQty > 0 ? (
-                              <span className="px-2 py-0.5 bg-cyan-100 dark:bg-cyan-500/20 border border-cyan-300 dark:border-cyan-500/40 rounded text-cyan-800 dark:text-cyan-300">
-                                {item.surplusQty} units
-                              </span>
-                            ) : (
-                              <span className="text-slate-400">0</span>
-                            )}
-                          </td>
-                          <td className="p-3 text-xs font-bold text-cyan-700 dark:text-cyan-300">
-                            {item.surplusQty > 0 ? (
-                              <div className="flex items-center gap-1">
-                                <ArrowRightLeft className="w-3.5 h-3.5 shrink-0 text-cyan-600 dark:text-cyan-400" />
-                                <span>{item.recommendedDestination}</span>
-                              </div>
-                            ) : (
-                              <span className="text-slate-400">-</span>
-                            )}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+              <button
+                onClick={() => setActiveTab("order-audit")}
+                className={`px-4 py-2 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 ${
+                  activeTab === "order-audit"
+                    ? "border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-500/10 rounded-t-xl"
+                    : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                }`}
+              >
+                <ShoppingCart className="w-4 h-4 text-cyan-500" />
+                Order Processing Auditor ({auditedOrders.length} Order Lines)
+              </button>
             </div>
           )}
 
-          {/* Tab 2: Order Audit Tab (With Upload Dropzone Inside!) */}
-          {activeTab === "order-audit" && (
-            <div className="space-y-4">
-              {!orderDataRaw ? (
-                <div className="bg-white dark:bg-slate-900 border-2 border-dashed border-cyan-300 dark:border-cyan-700 rounded-3xl p-10 text-center space-y-4 max-w-xl mx-auto shadow-sm">
-                  <div 
-                    onClick={() => orderInputRef.current?.click()}
-                    className="cursor-pointer space-y-3"
-                  >
-                    <input ref={orderInputRef} type="file" accept=".xlsx,.xls" onChange={handleOrderUpload} className="hidden" />
-                    <div className="w-16 h-16 rounded-2xl bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-400 flex items-center justify-center mx-auto">
-                      <ShoppingCart className="w-8 h-8" />
-                    </div>
-                    <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
-                      Upload Order Requirement File
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-                      Click here to upload your <code className="text-cyan-600 dark:text-cyan-400 font-bold">Processed_Order_Requirement.xlsx</code> file. System will cross-audit order quantities against sales & dead stock transfers.
-                    </p>
+          {isOrderDashboard ? (
+            /* ==================== 1. DEDICATED ORDER PROCESSING DASHBOARD ==================== */
+            <div className="space-y-6">
+              {/* 4 Focused Order Processing KPI Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {/* Card 1: Total Requested Items */}
+                <div 
+                  onClick={() => setAuditFilter("ALL")}
+                  className={`bg-white dark:bg-slate-900 border rounded-2xl p-4 shadow-sm cursor-pointer transition-all hover:scale-[1.02] ${
+                    auditFilter === "ALL" ? "border-cyan-500 ring-2 ring-cyan-500/50" : "border-slate-200 dark:border-slate-800"
+                  }`}
+                >
+                  <div className="text-xs font-bold text-slate-400 uppercase flex items-center gap-1.5">
+                    <ShoppingCart className="w-3.5 h-3.5 text-cyan-500" /> Total Requested Items
+                  </div>
+                  <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+                    {orderMetrics.totalLines.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-bold">
+                    {orderMetrics.totalReqQty.toLocaleString()} units ({orderMetrics.storesCount} stores)
                   </div>
                 </div>
-              ) : (
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-                  <div className="p-4 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                    <div>
-                      <h3 className="font-extrabold text-slate-900 dark:text-white text-sm">
-                        Purchase Order Audit Results ({auditedOrders.length} lines)
-                      </h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        File: {orderFileName}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={exportOrderAuditExcel}
-                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center gap-1.5"
-                      >
-                        <Download className="w-3.5 h-3.5" /> Download Audit Excel
-                      </button>
 
-                      <button
-                        onClick={() => orderInputRef.current?.click()}
-                        className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center gap-1.5"
-                      >
-                        <input ref={orderInputRef} type="file" accept=".xlsx,.xls" onChange={handleOrderUpload} className="hidden" />
-                        <RefreshCw className="w-3.5 h-3.5" /> Change Order File
-                      </button>
-                    </div>
+                {/* Card 2: Approved Items */}
+                <div 
+                  onClick={() => setAuditFilter("APPROVED")}
+                  className={`bg-emerald-50 dark:bg-emerald-950/20 border rounded-2xl p-4 shadow-sm cursor-pointer transition-all hover:scale-[1.02] ${
+                    auditFilter === "APPROVED" ? "border-emerald-500 ring-2 ring-emerald-500/50" : "border-emerald-200 dark:border-emerald-500/40"
+                  }`}
+                >
+                  <div className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Approved Items (Active Sales)
+                  </div>
+                  <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
+                    {orderMetrics.approvedCount.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-emerald-800 dark:text-emerald-300/80 mt-1 font-bold">
+                    {((orderMetrics.approvedCount / (orderMetrics.totalLines || 1)) * 100).toFixed(1)}% approved (Sales in Apr-Aug)
+                  </div>
+                </div>
+
+                {/* Card 3: Rejected Items */}
+                <div 
+                  onClick={() => setAuditFilter("REJECTED")}
+                  className={`bg-rose-50 dark:bg-rose-950/20 border rounded-2xl p-4 shadow-sm cursor-pointer transition-all hover:scale-[1.02] ${
+                    auditFilter === "REJECTED" ? "border-rose-500 ring-2 ring-rose-500/50" : "border-rose-200 dark:border-rose-500/40"
+                  }`}
+                >
+                  <div className="text-xs font-bold text-rose-700 dark:text-rose-400 uppercase flex items-center gap-1.5">
+                    <XCircle className="w-3.5 h-3.5" /> Rejected Items (0 Sales)
+                  </div>
+                  <div className="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1">
+                    {orderMetrics.rejectedCount.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-rose-800 dark:text-rose-300/80 mt-1 font-bold">
+                    {((orderMetrics.rejectedCount / (orderMetrics.totalLines || 1)) * 100).toFixed(1)}% blocked (0 sales in Apr-Aug)
+                  </div>
+                </div>
+
+                {/* Card 4: Ordering Stores */}
+                <div className="bg-cyan-50 dark:bg-cyan-950/20 border border-cyan-200 dark:border-cyan-500/40 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+                  <div className="text-xs font-bold text-cyan-700 dark:text-cyan-300 uppercase flex items-center gap-1.5">
+                    <Package className="w-3.5 h-3.5 text-cyan-600" /> Ordering Stores
+                  </div>
+                  <div className="text-2xl font-black text-cyan-900 dark:text-cyan-100 my-1">
+                    {orderMetrics.storesCount} Stores
+                  </div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                    Unique retail stores evaluated in this requirement file.
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Processing Controls Bar */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+                <div className="flex flex-wrap items-center gap-3 flex-1">
+                  {/* Search */}
+                  <div className="relative flex-1 min-w-[220px]">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input 
+                      type="text" 
+                      placeholder="Search Item Code, Description, or Store..." 
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-9 pr-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none"
+                    />
                   </div>
 
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs border-collapse">
-                      <thead>
-                        <tr className="bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-400 font-extrabold uppercase border-b border-slate-200 dark:border-slate-800">
-                          <th className="p-3">Ordering Store</th>
-                          <th className="p-3">Item Code</th>
-                          <th className="p-3">Description</th>
-                          <th className="p-3 text-center">Req Qty</th>
-                          <th className="p-3 text-center">Store Sales</th>
-                          <th className="p-3">Audit Risk</th>
-                          <th className="p-3">Transfer Match (Same State)</th>
+                  {/* Store Selector */}
+                  <select 
+                    value={selectedStore} 
+                    onChange={(e) => setSelectedStore(e.target.value)}
+                    className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none"
+                  >
+                    <option value="All Stores">All Stores ({mergedAnalysis.storeList.length})</option>
+                    {mergedAnalysis.storeList.map(st => (
+                      <option key={st} value={st}>{st} ({getStateFromStore(st)})</option>
+                    ))}
+                  </select>
+
+                  {/* Filter Pills: All | Approved | Rejected */}
+                  <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                    <button
+                      onClick={() => setAuditFilter("ALL")}
+                      className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                        auditFilter === "ALL"
+                          ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm"
+                          : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                      }`}
+                    >
+                      All Items ({orderMetrics.totalLines})
+                    </button>
+
+                    <button
+                      onClick={() => setAuditFilter("APPROVED")}
+                      className={`px-3 py-1 text-xs font-bold rounded-lg transition-all flex items-center gap-1 ${
+                        auditFilter === "APPROVED"
+                          ? "bg-emerald-600 text-white shadow-sm"
+                          : "text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/40"
+                      }`}
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Approved ({orderMetrics.approvedCount})
+                    </button>
+
+                    <button
+                      onClick={() => setAuditFilter("REJECTED")}
+                      className={`px-3 py-1 text-xs font-bold rounded-lg transition-all flex items-center gap-1 ${
+                        auditFilter === "REJECTED"
+                          ? "bg-rose-600 text-white shadow-sm"
+                          : "text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-950/40"
+                      }`}
+                    >
+                      <XCircle className="w-3.5 h-3.5" /> Rejected ({orderMetrics.rejectedCount})
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => orderInputRef.current?.click()}
+                    className="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center gap-1.5"
+                  >
+                    <input ref={orderInputRef} type="file" accept=".xlsx,.xls" onChange={handleOrderUpload} className="hidden" />
+                    <RefreshCw className="w-3.5 h-3.5" /> {orderDataRaw ? "Change Order File" : "Upload Order Req File"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Order Processing Audit Results Table */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+                <div className="p-4 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h3 className="font-extrabold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                      <ShoppingCart className="w-4 h-4 text-cyan-500" />
+                      Sales-Based Order Processing & Audit Results ({auditedOrders.length} lines)
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {orderFileName ? `File: ${orderFileName}` : `Auditing store stock lines against Sales History DB (${salesPeriodInfo.labelText})`}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={exportOrderAuditExcel}
+                      className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center gap-1.5"
+                    >
+                      <Download className="w-3.5 h-3.5" /> Export Audit Sheet (Excel)
+                    </button>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-center text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-400 font-extrabold uppercase border-b border-slate-200 dark:border-slate-800">
+                        <th className="p-3 text-center">Store</th>
+                        <th className="p-3 text-center">Item Code</th>
+                        <th className="p-3 text-center">Description</th>
+                        <th className="p-3 text-center">Category</th>
+                        <th className="p-3 text-center">Req Qty</th>
+                        <th className="p-3 text-center">Stock at Store</th>
+                        <th className="p-3 text-center">Store Sales L3M</th>
+                        <th className="p-3 text-center">Recommendation</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-800 dark:text-slate-200">
+                      {auditedOrders.length === 0 ? (
+                        <tr>
+                          <td colSpan={8} className="p-8 text-center text-slate-400 font-bold">
+                            No audited order lines matching current filter.
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-800 dark:text-slate-200">
-                        {auditedOrders.map(ord => (
+                      ) : (
+                        auditedOrders.map(ord => (
                           <tr key={ord.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
-                            <td className="p-3 font-bold text-slate-900 dark:text-white">
+                            <td className="p-3 text-center font-bold text-slate-900 dark:text-white">
                               {ord.storeCode} ({ord.storeState})
                             </td>
-                            <td className="p-3 font-mono font-bold text-cyan-600 dark:text-cyan-300">
+                            <td className="p-3 text-center font-mono font-bold text-cyan-600 dark:text-cyan-300">
                               {ord.itemCode}
                             </td>
-                            <td className="p-3 max-w-xs font-medium text-slate-900 dark:text-white truncate" title={ord.description}>
+                            <td className="p-3 text-center max-w-xs font-medium text-slate-900 dark:text-white truncate mx-auto" title={ord.description}>
                               {ord.description}
+                            </td>
+                            <td className="p-3 text-center font-semibold text-slate-600 dark:text-slate-400">
+                              {ord.category || "-"}
                             </td>
                             <td className="p-3 text-center font-bold text-slate-900 dark:text-white">
                               {ord.reqQty}
                             </td>
+                            <td className="p-3 text-center font-bold text-slate-700 dark:text-slate-300">
+                              <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded font-extrabold">{ord.availStock ?? 0}</span>
+                            </td>
                             <td className="p-3 text-center font-bold">
                               {ord.periodSales === 0 ? (
-                                <span className="text-rose-600 dark:text-rose-400 font-extrabold">0</span>
+                                <span className="px-2 py-0.5 bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400 rounded font-black">0</span>
                               ) : (
-                                <span className="text-emerald-600 dark:text-emerald-400">{ord.periodSales}</span>
+                                <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded font-black">{ord.periodSales}</span>
                               )}
                             </td>
-                            <td className="p-3">
+                            <td className="p-3 text-center flex justify-center">
                               {ord.isHighRisk ? (
-                                <span className="px-2 py-0.5 bg-rose-100 dark:bg-rose-500/20 border border-rose-300 dark:border-rose-500/40 text-rose-700 dark:text-rose-300 rounded font-bold text-[11px] flex items-center gap-1 w-fit">
-                                  <XCircle className="w-3 h-3" /> High Risk (0 Sales)
+                                <span className="px-2.5 py-1 bg-rose-100 dark:bg-rose-500/20 border border-rose-300 dark:border-rose-500/40 text-rose-700 dark:text-rose-300 rounded-lg font-black text-[11px] flex items-center gap-1.5 w-fit">
+                                  <XCircle className="w-3.5 h-3.5 shrink-0" /> REJECTED
                                 </span>
                               ) : (
-                                <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/40 text-emerald-700 dark:text-emerald-300 rounded font-bold text-[11px] flex items-center gap-1 w-fit">
-                                  <CheckCircle2 className="w-3 h-3" /> Approved
+                                <span className="px-2.5 py-1 bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/40 text-emerald-700 dark:text-emerald-300 rounded-lg font-black text-[11px] flex items-center gap-1.5 w-fit">
+                                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> APPROVED
                                 </span>
-                              )}
-                            </td>
-                            <td className="p-3">
-                              {ord.transferMatch ? (
-                                <div className="p-1.5 bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-500/30 rounded text-cyan-800 dark:text-cyan-200 text-[11px] font-bold">
-                                  Transfer {ord.transferMatch.suggestedQty} units from {ord.transferMatch.fromStore} ({ord.transferMatch.fromState})
-                                </div>
-                              ) : (
-                                <span className="text-slate-400">No surplus in {ord.storeState} (Place Purchase Order)</span>
                               )}
                             </td>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* ==================== 2. DEDICATED DEAD STOCK DASHBOARD ==================== */
+            <div className="space-y-6">
+              {/* Summary KPI Filter Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {/* Card 1: Total Stock On-Hand */}
+                <div 
+                  onClick={() => setSelectedStatusFilter("ALL")}
+                  className={`bg-white dark:bg-slate-900 border rounded-2xl p-4 shadow-sm cursor-pointer transition-all hover:scale-[1.02] ${
+                    selectedStatusFilter === "ALL" ? "border-slate-900 dark:border-white ring-2 ring-slate-400/50" : "border-slate-200 dark:border-slate-800"
+                  }`}
+                >
+                  <div className="text-xs font-bold text-slate-400 uppercase">Total Stock On-Hand</div>
+                  <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+                    ₹{Math.round(metrics.totalVal).toLocaleString('en-IN')}
+                  </div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-bold">
+                    {metrics.totalUnits.toLocaleString()} total units (Click to view all)
                   </div>
                 </div>
-              )}
+
+                {/* Card 2: Total Dead Stock */}
+                <div 
+                  onClick={() => setSelectedStatusFilter("DEAD")}
+                  className={`bg-rose-50 dark:bg-rose-950/20 border rounded-2xl p-4 shadow-sm cursor-pointer transition-all hover:scale-[1.02] ${
+                    selectedStatusFilter === "DEAD" ? "border-rose-500 ring-2 ring-rose-500/50" : "border-rose-200 dark:border-rose-500/40"
+                  }`}
+                >
+                  <div className="text-xs font-bold text-rose-700 dark:text-rose-400 uppercase flex items-center gap-1">
+                    <AlertTriangle className="w-3.5 h-3.5" /> Total Dead Stock (0 Sales)
+                  </div>
+                  <div className="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1">
+                    ₹{Math.round(metrics.deadVal).toLocaleString('en-IN')}
+                  </div>
+                  <div className="text-xs text-rose-800 dark:text-rose-300/80 mt-1 font-bold">
+                    {metrics.deadUnits.toLocaleString()} units ({metrics.deadSkus} SKUs)
+                  </div>
+                </div>
+
+                {/* Card 3: Active / Running Items */}
+                <div 
+                  onClick={() => setSelectedStatusFilter("ACTIVE")}
+                  className={`bg-emerald-50 dark:bg-emerald-950/20 border rounded-2xl p-4 shadow-sm cursor-pointer transition-all hover:scale-[1.02] ${
+                    selectedStatusFilter === "ACTIVE" ? "border-emerald-500 ring-2 ring-emerald-500/50" : "border-emerald-200 dark:border-emerald-500/40"
+                  }`}
+                >
+                  <div className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase flex items-center gap-1">
+                    <CheckCircle className="w-3.5 h-3.5" /> Active / Running Stock
+                  </div>
+                  <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
+                    ₹{Math.round(metrics.activeVal).toLocaleString('en-IN')}
+                  </div>
+                  <div className="text-xs text-emerald-800 dark:text-emerald-300/80 mt-1 font-bold">
+                    {metrics.activeUnits.toLocaleString()} units ({metrics.activeSkus} SKUs) (Click to view)
+                  </div>
+                </div>
+
+                {/* Card 4: Retention Rule Control */}
+                <div className="bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-500/40 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+                  <div className="text-xs font-bold text-purple-700 dark:text-purple-300 uppercase flex items-center justify-between">
+                    <span>Surplus to Move</span>
+                    <span className="text-[11px] font-black text-cyan-600 dark:text-cyan-400">₹{Math.round(metrics.surplusVal).toLocaleString('en-IN')}</span>
+                  </div>
+                  <div className="flex items-center gap-2 my-1">
+                    <span className="text-xs text-slate-700 dark:text-slate-300 font-medium">Keep at store:</span>
+                    <input 
+                      type="number" 
+                      min="0" 
+                      max="20" 
+                      value={retentionQty} 
+                      onChange={(e) => setRetentionQty(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="w-14 px-2 py-1 bg-white dark:bg-slate-900 border border-purple-300 dark:border-purple-500/50 rounded text-center text-slate-900 dark:text-white font-extrabold text-sm focus:outline-none"
+                    />
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">units</span>
+                  </div>
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                    {metrics.surplusUnits.toLocaleString()} surplus dead units to transfer.
+                  </div>
+                </div>
+              </div>
+
+              {/* Controls & Search */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+                <div className="flex flex-wrap items-center gap-3 flex-1">
+                  {/* Search */}
+                  <div className="relative flex-1 min-w-[200px]">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input 
+                      type="text" 
+                      placeholder="Search Item Code or Product Name..." 
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-9 pr-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none"
+                    />
+                  </div>
+
+                  {/* Store Selector */}
+                  <select 
+                    value={selectedStore} 
+                    onChange={(e) => setSelectedStore(e.target.value)}
+                    className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none"
+                  >
+                    <option value="All Stores">All Stores ({mergedAnalysis.storeList.length})</option>
+                    {mergedAnalysis.storeList.map(st => (
+                      <option key={st} value={st}>{st} ({getStateFromStore(st)})</option>
+                    ))}
+                  </select>
+
+                  {/* Status Filter */}
+                  <select 
+                    value={selectedStatusFilter} 
+                    onChange={(e) => setSelectedStatusFilter(e.target.value)}
+                    className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none"
+                  >
+                    <option value="DEAD">🔴 Dead Stock Only (0 Sales)</option>
+                    <option value="ACTIVE">🟢 Active / Running Items Only (Sales &gt; 0)</option>
+                    <option value="ALL">📋 Show All Stock Items (Dead + Active)</option>
+                  </select>
+
+                  {/* Same State Rule Toggle */}
+                  <button
+                    onClick={() => setStrictSameState(!strictSameState)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 ${
+                      strictSameState 
+                        ? "bg-amber-50 dark:bg-amber-500/20 border-amber-300 dark:border-amber-500/50 text-amber-800 dark:text-amber-300" 
+                        : "bg-slate-100 dark:bg-slate-950 border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400"
+                    }`}
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                    {strictSameState ? "Intra-State Only (MH↔MH, MP↔MP)" : "Cross State Allowed"}
+                  </button>
+                </div>
+
+                <div className="text-xs text-slate-500 dark:text-slate-400 font-bold">
+                  Showing <span className="text-slate-900 dark:text-white font-extrabold">{filteredItems.length}</span> items
+                </div>
+              </div>
+
+              {/* Dead Stock Table */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-400 font-extrabold uppercase border-b border-slate-200 dark:border-slate-800">
+                        <th className="p-3">Store</th>
+                        <th className="p-3">State</th>
+                        <th className="p-3">Item Code</th>
+                        <th className="p-3">Product Name & Description</th>
+                        <th className="p-3 text-center">Total Sales (Qty Sold)</th>
+                        <th className="p-3 text-center">On-Hand Stock</th>
+                        <th className="p-3 text-center">Keep</th>
+                        <th className="p-3 text-center bg-cyan-50 dark:bg-cyan-950/40 text-cyan-800 dark:text-cyan-300">Surplus to Move</th>
+                        <th className="p-3">Where to Send? (Same State)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-800 dark:text-slate-200">
+                      {filteredItems.length === 0 ? (
+                        <tr>
+                          <td colSpan="9" className="p-8 text-center text-slate-400 text-sm">
+                            No matching stock items found for selected filter.
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredItems.map((item) => (
+                          <tr 
+                            key={item.id} 
+                            className={`hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors ${
+                              item.status === "DEAD" ? "bg-rose-50/50 dark:bg-rose-950/10" : "bg-emerald-50/30 dark:bg-emerald-950/10"
+                            }`}
+                          >
+                            <td className="p-3 font-bold text-slate-900 dark:text-white">
+                              {item.storeCode}
+                            </td>
+                            <td className="p-3">
+                              <span className={`px-1.5 py-0.5 rounded text-[10px] font-black ${
+                                item.storeState === 'MH' ? 'bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-500/30' : 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30'
+                              }`}>
+                                {item.storeState}
+                              </span>
+                            </td>
+                            <td className="p-3 font-mono font-bold text-slate-800 dark:text-slate-200">
+                              {item.itemCode}
+                            </td>
+                            <td className="p-3 max-w-sm">
+                              <div className="font-bold text-slate-900 dark:text-white truncate" title={item.description}>
+                                {item.description}
+                              </div>
+                              <div className="text-[10px] text-slate-400">Brand: {item.brand}</div>
+                            </td>
+                            <td className="p-3 text-center font-extrabold">
+                              {item.periodSales === 0 ? (
+                                <span className="px-2 py-0.5 bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400 rounded">0</span>
+                              ) : (
+                                <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded font-black">{item.periodSales}</span>
+                              )}
+                            </td>
+                            <td className="p-3 text-center font-bold text-slate-900 dark:text-white">
+                              {item.closingStock}
+                            </td>
+                            <td className="p-3 text-center font-bold text-purple-700 dark:text-purple-300">
+                              {item.retainedQty}
+                            </td>
+                            <td className="p-3 text-center font-black bg-cyan-50/70 dark:bg-cyan-950/30 text-cyan-800 dark:text-cyan-300">
+                              {item.surplusQty > 0 ? (
+                                <span className="px-2 py-0.5 bg-cyan-100 dark:bg-cyan-500/20 border border-cyan-300 dark:border-cyan-500/40 rounded text-cyan-800 dark:text-cyan-300">
+                                  {item.surplusQty} units
+                                </span>
+                              ) : (
+                                <span className="text-slate-400">0</span>
+                              )}
+                            </td>
+                            <td className="p-3 text-xs font-bold text-cyan-700 dark:text-cyan-300">
+                              {item.surplusQty > 0 ? (
+                                <div className="flex items-center gap-1">
+                                  <ArrowRightLeft className="w-3.5 h-3.5 shrink-0 text-cyan-600 dark:text-cyan-400" />
+                                  <span>{item.recommendedDestination}</span>
+                                </div>
+                              ) : (
+                                <span className="text-slate-400">-</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           )}
         </>

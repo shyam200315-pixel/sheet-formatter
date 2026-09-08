@@ -379,3 +379,118 @@ export async function clearHistoricalData() {
     throw new Error(`Local DB Clear Error: ${error.message}`);
   }
 }
+
+/**
+ * Extracts store code (e.g. 'WMH001 - NED - VAZIRABAD' -> 'WMH001')
+ */
+export const extractStoreCode = (branchStr) => {
+  if (!branchStr || typeof branchStr !== "string") return "UNKNOWN";
+  const trimmed = branchStr.trim();
+  const match = trimmed.match(/^WM[HM]\d{3}/i);
+  if (match) return match[0].toUpperCase();
+  const norm = normalizeStoreName(trimmed);
+  const matchNorm = norm.match(/^WM[HM]\d{3}/i);
+  if (matchNorm) return matchNorm[0].toUpperCase();
+  return trimmed.split(/[\s\-]/)[0].toUpperCase();
+};
+
+/**
+ * State extraction (MH vs MP)
+ */
+export const getStateFromStore = (storeStr) => {
+  if (!storeStr || typeof storeStr !== "string") return "MH";
+  const upper = storeStr.toUpperCase().trim();
+  if (upper.startsWith("WMP") || upper.includes(" MP")) return "MP";
+  if (upper.startsWith("WMH") || upper.includes(" MH")) return "MH";
+  return "MH";
+};
+
+/**
+ * Transforms array of sales row objects from IndexedDB or JSON into a sales map indexed by `${storeCode}::${itemCode}`
+ */
+export function processSalesRowsToMap(salesRows) {
+  if (!salesRows || !Array.isArray(salesRows) || salesRows.length === 0) {
+    return { salesMap: {}, periodInfo: { periodDays: 90, periodMonths: 3.0, labelText: "No Sales Data" }, totalRows: 0 };
+  }
+
+  const salesMap = {};
+  let minDate = null;
+  let maxDate = null;
+  let validRowsCount = 0;
+
+  for (const row of salesRows) {
+    if (!row || typeof row !== "object") continue;
+
+    const getVal = (candidateKeys) => {
+      for (const k of candidateKeys) {
+        for (const key in row) {
+          if (key.trim().toUpperCase() === k.toUpperCase()) {
+            return row[key];
+          }
+        }
+      }
+      return "";
+    };
+
+    const rawBranch = String(getVal(["BRANCH NAME", "FROM BRANCH NAME", "STORE NAME", "BRANCH"]) || "").trim();
+    if (!rawBranch) continue;
+
+    const storeCode = extractStoreCode(rawBranch);
+    const rawItemCode = String(getVal(["ITEM CODE", "BARCODE", "POS ITEM CODE", "HANA CODE"]) || "").trim();
+    const rawAddlCode = String(getVal(["ADDL ITEM CODE"]) || "").trim();
+    const itemCode = (rawItemCode || rawAddlCode).toUpperCase();
+    if (!itemCode) continue;
+
+    const desc = String(getVal(["ITEM DESCRIPTION", "DESCRIPTION", "MODEL NAME"]) || "").trim();
+    const brand = String(getVal(["BRAND", "BRAND NAME"]) || "").trim();
+    const category = String(getVal(["CATEGORY", "MAIN PRODUCT"]) || "").trim();
+    const qty = parseFloat(getVal(["NET QTY", "TOTAL QTY", "QTY", "SOLD QTY", "QUANTITY"])) || 0;
+    const amount = parseFloat(getVal(["NET SALE AMOUNT", "GROSS SALE AMOUNT", "AMOUNT", "NET AMOUNT", "SALES AMOUNT"])) || 0;
+    const billDateStr = String(getVal(["BILL DATE", "DATE"]) || "").trim();
+
+    if (billDateStr) {
+      const dObj = parseBillDate(billDateStr);
+      if (dObj) {
+        if (!minDate || dObj < minDate) minDate = dObj;
+        if (!maxDate || dObj > maxDate) maxDate = dObj;
+      }
+    }
+
+    const key = `${storeCode}::${itemCode}`;
+    if (!salesMap[key]) {
+      salesMap[key] = {
+        storeCode,
+        storeState: getStateFromStore(storeCode),
+        branchName: rawBranch,
+        itemCode,
+        description: desc,
+        brand,
+        category,
+        l3mQty: 0,
+        l3mAmount: 0
+      };
+    }
+
+    salesMap[key].l3mQty += qty;
+    salesMap[key].l3mAmount += amount;
+    validRowsCount++;
+  }
+
+  let periodDays = 90;
+  if (minDate && maxDate) {
+    periodDays = Math.max(1, Math.round((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+  }
+  const periodMonths = Math.max(0.5, periodDays / 30);
+
+  let dateLabel = `${periodDays} Days (~${periodMonths.toFixed(1)} Months)`;
+  if (minDate && maxDate) {
+    dateLabel += ` (${minDate.toLocaleDateString('en-IN')} to ${maxDate.toLocaleDateString('en-IN')})`;
+  }
+
+  return {
+    salesMap,
+    periodInfo: { periodDays, periodMonths, labelText: dateLabel, minDate, maxDate },
+    totalRows: validRowsCount
+  };
+}
+
