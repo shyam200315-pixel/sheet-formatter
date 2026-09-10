@@ -30,8 +30,19 @@ import {
 } from 'lucide-react';
 import HistoricalSales from "./components/HistoricalSales";
 import DeadStockAnalyzer from "./components/DeadStockAnalyzer";
+import InstitutionalChecker from "./components/InstitutionalChecker";
+import { Lock } from 'lucide-react';
 
 const TOOLS = [
+  {
+    id: "institutional",
+    title: "Institutional Offers & Slab Rates",
+    description: "Password-protected lookup for HANA code MRP, tax %, and quantity slab landing prices.",
+    icon: <Lock className="w-8 h-8 text-amber-600" />,
+    color: "bg-amber-100",
+    borderColor: "border-amber-200",
+    hoverBorder: "hover:border-amber-400"
+  },
   {
     id: "dead-stock",
     title: "Dead Stock & Order Intelligence",
@@ -678,6 +689,16 @@ export default function App() {
                     transition={{ duration: 0.2 }}
                   >
                     <HistoricalSales />
+                  </motion.div>
+                ) : activeTab === "institutional" ? (
+                  <motion.div
+                    key="institutional-tab"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <InstitutionalChecker onBack={() => setActiveTab("home")} />
                   </motion.div>
                 ) : activeTab === "dead-stock" ? (
                   <motion.div

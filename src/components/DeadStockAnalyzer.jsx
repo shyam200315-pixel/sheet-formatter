@@ -757,6 +757,10 @@ export default function DeadStockAnalyzer({ onBack }) {
       const sales = salesMap[key] || { l3mQty: 0 };
       const periodSales = sales.l3mQty;
       const stockAtStore = ord.availStock !== undefined ? parseFloat(ord.availStock) || 0 : 0;
+      const rawReqQty = ord.reqQty !== undefined ? parseFloat(ord.reqQty) || 0 : 0;
+
+      // Hardcoded Rule: If L3M sale is 0, cap required quantity at 3 items (do not send >3 regardless of store demand)
+      const effectiveReqQty = periodSales === 0 ? Math.min(rawReqQty, 3) : rawReqQty;
 
       const surplusList = itemSurplusStoreMap[ord.itemCode] || [];
       let sources = surplusList.filter(s => s.storeCode !== ord.storeCode);
@@ -776,7 +780,7 @@ export default function DeadStockAnalyzer({ onBack }) {
       } else if (periodSales > 0) {
         reason = `Approved: Active seller at ${ord.storeCode} (${periodSales} units sold in reference period).`;
       } else {
-        reason = `Approved: Zero stock in hand at ${ord.storeCode} (restocking approved for minimum store stock).`;
+        reason = `Approved: Zero stock in hand at ${ord.storeCode} (restocking approved for minimum store stock, max 3 units).`;
       }
 
       let transferMatch = null;
@@ -786,12 +790,13 @@ export default function DeadStockAnalyzer({ onBack }) {
           fromStore: sources[0].storeCode,
           fromState: sources[0].storeState,
           availableSurplus: sources[0].surplusQty,
-          suggestedQty: Math.min(ord.reqQty, sources[0].surplusQty)
+          suggestedQty: Math.min(effectiveReqQty, sources[0].surplusQty)
         };
       }
 
       return {
         ...ord,
+        reqQty: effectiveReqQty,
         dateVal: ord.dateVal || "",
         category: ord.category || "",
         availStock: stockAtStore,
@@ -836,9 +841,12 @@ export default function DeadStockAnalyzer({ onBack }) {
 
     baseSource.forEach(ord => {
       if (ord.storeCode) storeSet.add(ord.storeCode);
-      totalReqQty += (ord.reqQty || 0);
       const key = `${ord.storeCode}::${ord.itemCode}`;
       const periodSales = (salesMap[key] || {}).l3mQty || 0;
+      const rawReqQty = ord.reqQty !== undefined ? parseFloat(ord.reqQty) || 0 : 0;
+      const effectiveReqQty = periodSales === 0 ? Math.min(rawReqQty, 3) : rawReqQty;
+
+      totalReqQty += effectiveReqQty;
       const stockAtStore = ord.availStock !== undefined ? parseFloat(ord.availStock) || 0 : 0;
 
       const isRejected = stockAtStore > 0 && periodSales === 0;
