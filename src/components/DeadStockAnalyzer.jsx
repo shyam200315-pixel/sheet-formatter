@@ -124,22 +124,6 @@ export default function DeadStockAnalyzer({ onBack }) {
       try {
         let dbRows = await loadHistoricalData();
 
-        // Auto-seed from public/seed_sales.json if DB is empty
-        if (!dbRows || dbRows.length === 0) {
-          try {
-            const res = await fetch("/seed_sales.json");
-            if (res.ok) {
-              const seedRows = await res.json();
-              if (seedRows && seedRows.length > 0) {
-                await saveHistoricalData(seedRows);
-                dbRows = seedRows;
-              }
-            }
-          } catch (e) {
-            // Ignore seed fetch error silently on mount
-          }
-        }
-
         if (dbRows && dbRows.length > 0) {
           const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(dbRows);
           setSalesDataRaw(salesMap);
@@ -162,24 +146,6 @@ export default function DeadStockAnalyzer({ onBack }) {
     setIsLoadingDb(true);
     try {
       let dbRows = await loadHistoricalData();
-
-      // Auto-seed from public/seed_sales.json if DB is empty
-      if (!dbRows || dbRows.length === 0) {
-        const toastSeedId = toast.loading("Loading default April-August Sales History file...");
-        try {
-          const res = await fetch("/seed_sales.json");
-          if (res.ok) {
-            const seedRows = await res.json();
-            if (seedRows && seedRows.length > 0) {
-              await saveHistoricalData(seedRows);
-              dbRows = seedRows;
-              toast.success(`Initialized Database with April-August Sales (${seedRows.length.toLocaleString()} rows)!`, { id: toastSeedId });
-            }
-          }
-        } catch (err) {
-          toast.error("Failed to seed default sales data.", { id: toastSeedId });
-        }
-      }
 
       if (!dbRows || dbRows.length === 0) {
         toast.error("No historical sales data found. Please upload a sales file first.");
