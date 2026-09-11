@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import * as XLSX from "xlsx";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import { appendHistoricalData, loadHistoricalData, clearHistoricalData, parseBillDate, findHeaderRowIndex } from "../helpers";
+import { appendHistoricalData, loadHistoricalData, clearHistoricalData, parseBillDate, findHeaderRowIndex, normalizeStoreName } from "../helpers";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock, Upload, Database, FileSpreadsheet, Search, Trash2, Calendar, Store, X, TrendingUp, DollarSign, Package, Receipt } from "lucide-react";
 import toast from "react-hot-toast";
@@ -81,12 +81,56 @@ export default function HistoricalSales() {
   ];
   const DATE_KEYS = ["BILL DATE", "DATE", "VOUCHER DATE", "INVOICE DATE", "DOC DATE", "TRANSACTION DATE"];
 
+  const getBillNoVal = (row, idx) => {
+    if (!row || typeof row !== "object") return `__row_${idx}`;
+
+    // 1. Check explicit candidate list
+    const explicit = getRowVal(row, BILL_KEYS);
+    if (explicit !== undefined && explicit !== null && String(explicit).trim() !== "") {
+      return String(explicit).trim();
+    }
+
+    // 2. Fuzzy search through all keys of the row
+    const keys = Object.keys(row);
+    const excludePattern = /(STORE|BRANCH|DATE|QTY|QUANTITY|AMOUNT|PRICE|TOTAL|NET|GROSS|ITEM|CODE|NAME|BRAND|CATEGORY|GST|TAX|RATE|DISC|VAL|COST|MARGIN|PROFIT|PERCENT)/i;
+    const includePattern = /(BILL|VOUCH|INV|MEMO|REF|DOC|RECPT|RECEIPT|CHALLAN|TRANS|TXN|SLNO|NO|NUM|#)/i;
+
+    for (const key of keys) {
+      const cleanKey = key.trim();
+      if (includePattern.test(cleanKey) && !excludePattern.test(cleanKey)) {
+        const val = row[key];
+        if (val !== undefined && val !== null && String(val).trim() !== "") {
+          return String(val).trim();
+        }
+      }
+    }
+
+    // 3. Fallback check if values in any row look like bill/voucher numbers
+    for (const key of keys) {
+      if (excludePattern.test(key)) continue;
+      const val = String(row[key] || "").trim();
+      if (/^(V|BILL|INV|VCH|REF|CM|DOC)[-/\s]?\d+/i.test(val)) {
+        return val;
+      }
+    }
+
+    // 4. Fallback if the sheet has no bill number column: each row is 1 transaction/bill
+    return `__row_${idx}`;
+  };
+
+  const getStoreNameVal = (row) => {
+    const raw = getRowVal(row, STORE_KEYS);
+    if (!raw) return "";
+    const norm = normalizeStoreName(String(raw));
+    return (norm || String(raw)).trim().toUpperCase();
+  };
+
   const extractStores = (data) => {
     const storeSet = new Set();
     data.forEach(row => {
-      const storeName = getRowVal(row, STORE_KEYS);
-      if (storeName) {
-        storeSet.add(String(storeName).trim().toUpperCase());
+      const sName = getStoreNameVal(row);
+      if (sName) {
+        storeSet.add(sName);
       }
     });
     setStores(Array.from(storeSet).sort());
@@ -167,13 +211,12 @@ export default function HistoricalSales() {
     let grandTotalQty = 0;
     const globalBillsSet = new Set();
 
-    dbData.forEach(row => {
-      const rawStore = getRowVal(row, STORE_KEYS);
-      if (rawStore) {
-        const sName = String(rawStore).trim().toUpperCase();
+    dbData.forEach((row, idx) => {
+      const sName = getStoreNameVal(row);
+      if (sName) {
         const qty = parseFloat(getRowVal(row, QTY_KEYS)) || 0;
         const amount = parseFloat(getRowVal(row, AMOUNT_KEYS)) || 0;
-        const billNo = String(getRowVal(row, BILL_KEYS)).trim();
+        const billNo = getBillNoVal(row, idx);
         
         if (!storeTotals[sName]) storeTotals[sName] = { rev: 0, qty: 0 };
         storeTotals[sName].rev += amount;
@@ -203,16 +246,16 @@ export default function HistoricalSales() {
     if (selectedStores.length === 0) return { aggregatedData: [], insights: calculatedInsights };
 
     const storeData = dbData.filter(row => {
-      const rawStore = getRowVal(row, STORE_KEYS);
-      return rawStore && selectedStores.includes(String(rawStore).trim().toUpperCase());
+      const sName = getStoreNameVal(row);
+      return sName && selectedStores.includes(sName);
     });
 
     // Add parsed dates
-    const parsedData = storeData.map(row => {
+    const parsedData = storeData.map((row, idx) => {
       const rawDate = getRowVal(row, DATE_KEYS);
       let parsedDate = parseBillDate(rawDate);
       if (!parsedDate && rawDate) parsedDate = new Date(rawDate);
-      return { ...row, _parsedDate: parsedDate };
+      return { ...row, _parsedDate: parsedDate, _originalIdx: idx };
     }).filter(row => row._parsedDate && !isNaN(row._parsedDate));
 
     // Parse start and end months
@@ -231,13 +274,13 @@ export default function HistoricalSales() {
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     filteredData.forEach(row => {
-      const storeName = String(getRowVal(row, STORE_KEYS)).trim().toUpperCase();
+      const storeName = getStoreNameVal(row);
       const d = row._parsedDate;
       const monthKey = `${monthNames[d.getMonth()]}-${d.getFullYear()}`;
       
       const qty = parseFloat(getRowVal(row, QTY_KEYS)) || 0;
       const amount = parseFloat(getRowVal(row, AMOUNT_KEYS)) || 0;
-      const billNo = String(getRowVal(row, BILL_KEYS)).trim();
+      const billNo = getBillNoVal(row, row._originalIdx || 0);
 
       if (!monthMap[monthKey]) {
         monthMap[monthKey] = { _dateObj: new Date(d.getFullYear(), d.getMonth(), 1) };
