@@ -52,12 +52,41 @@ export default function HistoricalSales() {
     setIsLoading(false);
   };
 
+  // Helper for flexible case-insensitive and whitespace-tolerant key matching
+  const getRowVal = (row, candidateKeys) => {
+    if (!row || typeof row !== "object") return "";
+    for (const k of candidateKeys) {
+      if (row[k] !== undefined && row[k] !== null && row[k] !== "") return row[k];
+    }
+    const rowKeys = Object.keys(row);
+    for (const k of candidateKeys) {
+      const target = k.trim().toUpperCase();
+      const foundKey = rowKeys.find(rk => rk.trim().toUpperCase() === target);
+      if (foundKey && row[foundKey] !== undefined && row[foundKey] !== null && row[foundKey] !== "") {
+        return row[foundKey];
+      }
+    }
+    return "";
+  };
+
+  const STORE_KEYS = ["STORE NAME", "BRANCH NAME", "FROM BRANCH NAME", "TO STORE", "BRANCH", "STORE"];
+  const QTY_KEYS = ["SOLD QTY", "QTY", "QUANTITY", "NET QTY", "TOTAL QTY", "SOLD QUANTITY"];
+  const AMOUNT_KEYS = ["NET AMOUNT", "SALES AMOUNT", "AMOUNT", "TOTAL", "NET SALE AMOUNT", "GROSS AMOUNT", "TOTAL AMOUNT", "NET SALES"];
+  const BILL_KEYS = [
+    "BILL NO.", "BILL NO", "BILL_NO", "BILLNO", 
+    "VOUCHER NO.", "VOUCHER NO", "VOUCHER_NO", "VOUCHERNO", 
+    "INVOICE NO.", "INVOICE NO", "INVOICE_NO", "INVOICE NUMBER", "BILL NUMBER", 
+    "DOC NO.", "DOC NO", "DOC_NO", "DOCUMENT NO", "DOCUMENT NO.", 
+    "TRANS NO", "TRANSACTION NO", "SL NO", "SL. NO.", "BILL", "VOUCHER", "INVOICE"
+  ];
+  const DATE_KEYS = ["BILL DATE", "DATE", "VOUCHER DATE", "INVOICE DATE", "DOC DATE", "TRANSACTION DATE"];
+
   const extractStores = (data) => {
     const storeSet = new Set();
     data.forEach(row => {
-      const storeName = row["STORE NAME"] || row["BRANCH NAME"] || row["FROM BRANCH NAME"] || row[" FROM BRANCH NAME "] || row["TO STORE"];
+      const storeName = getRowVal(row, STORE_KEYS);
       if (storeName) {
-        storeSet.add(storeName.trim().toUpperCase());
+        storeSet.add(String(storeName).trim().toUpperCase());
       }
     });
     setStores(Array.from(storeSet).sort());
@@ -139,12 +168,12 @@ export default function HistoricalSales() {
     const globalBillsSet = new Set();
 
     dbData.forEach(row => {
-      const storeName = row["STORE NAME"] || row["BRANCH NAME"] || row["FROM BRANCH NAME"] || row[" FROM BRANCH NAME "] || row["TO STORE"];
-      if (storeName) {
-        const sName = storeName.trim().toUpperCase();
-        const qty = parseFloat(row["SOLD QTY"] || row["QTY"] || row["QUANTITY"] || row["NET QTY"]) || 0;
-        const amount = parseFloat(row["NET AMOUNT"] || row["SALES AMOUNT"] || row["AMOUNT"] || row["TOTAL"] || row["NET SALE AMOUNT"]) || 0;
-        const billNo = String(row["BILL NO."] || row["BILL NO"] || row["VOUCHER NO."] || row["VOUCHER NO"] || row["INVOICE NO"] || row["INVOICE NO."] || "").trim();
+      const rawStore = getRowVal(row, STORE_KEYS);
+      if (rawStore) {
+        const sName = String(rawStore).trim().toUpperCase();
+        const qty = parseFloat(getRowVal(row, QTY_KEYS)) || 0;
+        const amount = parseFloat(getRowVal(row, AMOUNT_KEYS)) || 0;
+        const billNo = String(getRowVal(row, BILL_KEYS)).trim();
         
         if (!storeTotals[sName]) storeTotals[sName] = { rev: 0, qty: 0 };
         storeTotals[sName].rev += amount;
@@ -174,13 +203,13 @@ export default function HistoricalSales() {
     if (selectedStores.length === 0) return { aggregatedData: [], insights: calculatedInsights };
 
     const storeData = dbData.filter(row => {
-      const storeName = row["STORE NAME"] || row["BRANCH NAME"] || row["FROM BRANCH NAME"] || row[" FROM BRANCH NAME "] || row["TO STORE"];
-      return storeName && selectedStores.includes(storeName.trim().toUpperCase());
+      const rawStore = getRowVal(row, STORE_KEYS);
+      return rawStore && selectedStores.includes(String(rawStore).trim().toUpperCase());
     });
 
     // Add parsed dates
     const parsedData = storeData.map(row => {
-      const rawDate = row["BILL DATE"] || row["DATE"];
+      const rawDate = getRowVal(row, DATE_KEYS);
       let parsedDate = parseBillDate(rawDate);
       if (!parsedDate && rawDate) parsedDate = new Date(rawDate);
       return { ...row, _parsedDate: parsedDate };
@@ -202,13 +231,13 @@ export default function HistoricalSales() {
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     filteredData.forEach(row => {
-      const storeName = (row["STORE NAME"] || row["BRANCH NAME"] || row["FROM BRANCH NAME"] || row[" FROM BRANCH NAME "] || row["TO STORE"]).trim().toUpperCase();
+      const storeName = String(getRowVal(row, STORE_KEYS)).trim().toUpperCase();
       const d = row._parsedDate;
       const monthKey = `${monthNames[d.getMonth()]}-${d.getFullYear()}`;
       
-      const qty = parseFloat(row["SOLD QTY"] || row["QTY"] || row["QUANTITY"] || row["NET QTY"]) || 0;
-      const amount = parseFloat(row["NET AMOUNT"] || row["SALES AMOUNT"] || row["AMOUNT"] || row["TOTAL"] || row["NET SALE AMOUNT"]) || 0;
-      const billNo = String(row["BILL NO."] || row["BILL NO"] || row["VOUCHER NO."] || row["VOUCHER NO"] || row["INVOICE NO"] || row["INVOICE NO."] || "").trim();
+      const qty = parseFloat(getRowVal(row, QTY_KEYS)) || 0;
+      const amount = parseFloat(getRowVal(row, AMOUNT_KEYS)) || 0;
+      const billNo = String(getRowVal(row, BILL_KEYS)).trim();
 
       if (!monthMap[monthKey]) {
         monthMap[monthKey] = { _dateObj: new Date(d.getFullYear(), d.getMonth(), 1) };

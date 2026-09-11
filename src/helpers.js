@@ -224,8 +224,8 @@ export function findHeaderRowIndex(worksheet) {
       const cell = worksheet[XLSX.utils.encode_cell({ r, c })];
       if (cell && cell.v) {
         const val = String(cell.v).trim().toUpperCase();
-        if (val === "BRANCH NAME" || val === "FROM BRANCH NAME" || val === "FROM STORE" || val === "TO STORE") foundBranchName = true;
-        if (val === "BILL DATE") foundBillDate = true;
+        if (val === "BRANCH NAME" || val === "FROM BRANCH NAME" || val === "FROM STORE" || val === "TO STORE" || val === "STORE NAME" || val === "BRANCH" || val === "STORE") foundBranchName = true;
+        if (val === "BILL DATE" || val === "DATE" || val === "VOUCHER DATE" || val === "INVOICE DATE" || val === "DOC DATE" || val === "TRANSACTION DATE") foundBillDate = true;
       }
     }
     if (foundBranchName && foundBillDate) {
