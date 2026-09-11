@@ -219,16 +219,16 @@ export function findHeaderRowIndex(worksheet) {
   const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1:A1");
   for (let r = range.s.r; r <= range.e.r; r++) {
     let foundBranchName = false;
-    let foundBillDate = false;
+    let foundDateOrVoucher = false;
     for (let c = range.s.c; c <= range.e.c; c++) {
       const cell = worksheet[XLSX.utils.encode_cell({ r, c })];
       if (cell && cell.v) {
         const val = String(cell.v).trim().toUpperCase();
-        if (val === "BRANCH NAME" || val === "FROM BRANCH NAME" || val === "FROM STORE" || val === "TO STORE" || val === "STORE NAME" || val === "BRANCH" || val === "STORE") foundBranchName = true;
-        if (val === "BILL DATE" || val === "DATE" || val === "VOUCHER DATE" || val === "INVOICE DATE" || val === "DOC DATE" || val === "TRANSACTION DATE") foundBillDate = true;
+        if (val.includes("BRANCH") || val.includes("STORE")) foundBranchName = true;
+        if (val.includes("DATE") || val.includes("VOUCHER") || val.includes("BILL") || val.includes("INVOICE")) foundDateOrVoucher = true;
       }
     }
-    if (foundBranchName && foundBillDate) {
+    if (foundBranchName && foundDateOrVoucher) {
       return r;
     }
   }

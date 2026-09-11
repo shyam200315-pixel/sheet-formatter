@@ -52,18 +52,30 @@ export default function HistoricalSales() {
     setIsLoading(false);
   };
 
-  // Helper for flexible case-insensitive and whitespace-tolerant key matching
+  // Helper for flexible case-insensitive, whitespace and punctuation-tolerant key matching
   const getRowVal = (row, candidateKeys) => {
     if (!row || typeof row !== "object") return "";
+    // 1. Exact candidate check
     for (const k of candidateKeys) {
       if (row[k] !== undefined && row[k] !== null && row[k] !== "") return row[k];
     }
     const rowKeys = Object.keys(row);
+    // 2. Case-insensitive & trimmed candidate check
     for (const k of candidateKeys) {
       const target = k.trim().toUpperCase();
       const foundKey = rowKeys.find(rk => rk.trim().toUpperCase() === target);
       if (foundKey && row[foundKey] !== undefined && row[foundKey] !== null && row[foundKey] !== "") {
         return row[foundKey];
+      }
+    }
+    // 3. Clean string candidate check (stripping spaces, dots, underscores, dashes)
+    const cleanTargets = candidateKeys.map(k => k.replace(/[\s._\-]+/g, "").toUpperCase());
+    for (const rk of rowKeys) {
+      const cleanRk = rk.replace(/[\s._\-]+/g, "").toUpperCase();
+      if (cleanTargets.includes(cleanRk)) {
+        if (row[rk] !== undefined && row[rk] !== null && row[rk] !== "") {
+          return row[rk];
+        }
       }
     }
     return "";
@@ -73,43 +85,45 @@ export default function HistoricalSales() {
   const QTY_KEYS = ["SOLD QTY", "QTY", "QUANTITY", "NET QTY", "TOTAL QTY", "SOLD QUANTITY"];
   const AMOUNT_KEYS = ["NET AMOUNT", "SALES AMOUNT", "AMOUNT", "TOTAL", "NET SALE AMOUNT", "GROSS AMOUNT", "TOTAL AMOUNT", "NET SALES"];
   const BILL_KEYS = [
-    "BILL NO.", "BILL NO", "BILL_NO", "BILLNO", 
-    "VOUCHER NO.", "VOUCHER NO", "VOUCHER_NO", "VOUCHERNO", 
-    "INVOICE NO.", "INVOICE NO", "INVOICE_NO", "INVOICE NUMBER", "BILL NUMBER", 
+    "NEW VOUCHER NO.", "NEW VOUCHER NO", "NEW VOUCHER_NO", "NEW VOUCHERNO",
+    "NEW BILL NO.", "NEW BILL NO", "NEW INVOICE NO.", "NEW INVOICE NO",
+    "VOUCHER NO.", "VOUCHER NO", "VOUCHER_NO", "VOUCHERNO", "VOUCHER",
+    "BILL NO.", "BILL NO", "BILL_NO", "BILLNO", "BILL",
+    "INVOICE NO.", "INVOICE NO", "INVOICE_NO", "INVOICE NUMBER", "BILL NUMBER", "VOUCHER NUMBER",
     "DOC NO.", "DOC NO", "DOC_NO", "DOCUMENT NO", "DOCUMENT NO.", 
-    "TRANS NO", "TRANSACTION NO", "SL NO", "SL. NO.", "BILL", "VOUCHER", "INVOICE"
+    "TRANS NO", "TRANSACTION NO", "SL NO", "SL. NO."
   ];
   const DATE_KEYS = ["BILL DATE", "DATE", "VOUCHER DATE", "INVOICE DATE", "DOC DATE", "TRANSACTION DATE"];
 
   const getBillNoVal = (row, idx) => {
     if (!row || typeof row !== "object") return `__row_${idx}`;
 
-    // 1. Check explicit candidate list
+    // 1. Check explicit candidate list (including NEW VOUCHER NO.)
     const explicit = getRowVal(row, BILL_KEYS);
     if (explicit !== undefined && explicit !== null && String(explicit).trim() !== "") {
       return String(explicit).trim();
     }
 
-    // 2. Fuzzy search through all keys of the row
+    // 2. Search row keys for any key containing VOUCHER, BILL, INVOICE, DOC, MEMO, REF, TXN
     const keys = Object.keys(row);
-    const excludePattern = /(STORE|BRANCH|DATE|QTY|QUANTITY|AMOUNT|PRICE|TOTAL|NET|GROSS|ITEM|CODE|NAME|BRAND|CATEGORY|GST|TAX|RATE|DISC|VAL|COST|MARGIN|PROFIT|PERCENT)/i;
-    const includePattern = /(BILL|VOUCH|INV|MEMO|REF|DOC|RECPT|RECEIPT|CHALLAN|TRANS|TXN|SLNO|NO|NUM|#)/i;
-
     for (const key of keys) {
-      const cleanKey = key.trim();
-      if (includePattern.test(cleanKey) && !excludePattern.test(cleanKey)) {
-        const val = row[key];
-        if (val !== undefined && val !== null && String(val).trim() !== "") {
-          return String(val).trim();
+      const clean = key.replace(/[\s._\-]+/g, "").toUpperCase();
+      if (clean.includes("VOUCHER") || clean.includes("BILL") || clean.includes("INVOICE") || clean.includes("MEMO") || clean.includes("DOC") || clean.includes("RECEIPT") || clean.includes("CHALLAN") || clean.includes("REF")) {
+        if (!/(STORE|BRANCH|DATE|QTY|QUANTITY|AMOUNT|PRICE|TOTAL|NET|GROSS|ITEM|CODE|NAME|BRAND|CATEGORY|GST|TAX|RATE|DISC|COST)/i.test(clean)) {
+          const val = row[key];
+          if (val !== undefined && val !== null && String(val).trim() !== "") {
+            return String(val).trim();
+          }
         }
       }
     }
 
-    // 3. Fallback check if values in any row look like bill/voucher numbers
+    // 3. Fallback check if values in any row look like bill/voucher numbers (e.g. 'RI - 1 WMP001', 'V-1001')
     for (const key of keys) {
-      if (excludePattern.test(key)) continue;
+      const cleanKey = key.toUpperCase();
+      if (cleanKey.includes("STORE") || cleanKey.includes("BRANCH") || cleanKey.includes("DATE") || cleanKey.includes("QTY") || cleanKey.includes("AMOUNT") || cleanKey.includes("TOTAL") || cleanKey.includes("ITEM") || cleanKey.includes("CODE")) continue;
       const val = String(row[key] || "").trim();
-      if (/^(V|BILL|INV|VCH|REF|CM|DOC)[-/\s]?\d+/i.test(val)) {
+      if (/^(RI\s*-\s*\d+|V|BILL|INV|VCH|REF|CM|DOC)[-/\s]?/i.test(val)) {
         return val;
       }
     }
