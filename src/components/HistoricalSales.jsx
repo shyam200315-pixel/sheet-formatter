@@ -4,7 +4,7 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { appendHistoricalData, loadHistoricalData, clearHistoricalData, parseBillDate, findHeaderRowIndex } from "../helpers";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lock, Upload, Database, FileSpreadsheet, Search, Trash2, Calendar, Store, X, TrendingUp, DollarSign, Package } from "lucide-react";
+import { Lock, Upload, Database, FileSpreadsheet, Search, Trash2, Calendar, Store, X, TrendingUp, DollarSign, Package, Receipt } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function HistoricalSales() {
@@ -136,6 +136,7 @@ export default function HistoricalSales() {
     const storeTotals = {};
     let grandTotalRev = 0;
     let grandTotalQty = 0;
+    const globalBillsSet = new Set();
 
     dbData.forEach(row => {
       const storeName = row["STORE NAME"] || row["BRANCH NAME"] || row["FROM BRANCH NAME"] || row[" FROM BRANCH NAME "] || row["TO STORE"];
@@ -143,6 +144,7 @@ export default function HistoricalSales() {
         const sName = storeName.trim().toUpperCase();
         const qty = parseFloat(row["SOLD QTY"] || row["QTY"] || row["QUANTITY"] || row["NET QTY"]) || 0;
         const amount = parseFloat(row["NET AMOUNT"] || row["SALES AMOUNT"] || row["AMOUNT"] || row["TOTAL"] || row["NET SALE AMOUNT"]) || 0;
+        const billNo = String(row["BILL NO."] || row["BILL NO"] || row["VOUCHER NO."] || row["VOUCHER NO"] || row["INVOICE NO"] || row["INVOICE NO."] || "").trim();
         
         if (!storeTotals[sName]) storeTotals[sName] = { rev: 0, qty: 0 };
         storeTotals[sName].rev += amount;
@@ -150,6 +152,7 @@ export default function HistoricalSales() {
         
         grandTotalRev += amount;
         grandTotalQty += qty;
+        if (billNo) globalBillsSet.add(`${sName}::${billNo}`);
       }
     });
 
@@ -162,7 +165,8 @@ export default function HistoricalSales() {
       bestStore: bestStore.name,
       bestStoreRev: bestStore.rev,
       totalRev: grandTotalRev,
-      totalQty: grandTotalQty
+      totalQty: grandTotalQty,
+      totalBills: globalBillsSet.size
     };
 
     // 2. Now calculate the specific Monthly Aggregated Data for the Preview Table and Export
@@ -193,7 +197,7 @@ export default function HistoricalSales() {
     const filteredData = parsedData.filter(row => row._parsedDate >= startDateObj && row._parsedDate <= endDateObj);
 
     // Aggregate by month (MMM-YYYY)
-    const monthMap = {}; // { 'Aug-2025': { _dateObj, store1: { rev, qty }, store2: ... } }
+    const monthMap = {}; // { 'Aug-2025': { _dateObj, store1: { rev, qty, billsSet }, store2: ... } }
 
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -204,17 +208,21 @@ export default function HistoricalSales() {
       
       const qty = parseFloat(row["SOLD QTY"] || row["QTY"] || row["QUANTITY"] || row["NET QTY"]) || 0;
       const amount = parseFloat(row["NET AMOUNT"] || row["SALES AMOUNT"] || row["AMOUNT"] || row["TOTAL"] || row["NET SALE AMOUNT"]) || 0;
-      
+      const billNo = String(row["BILL NO."] || row["BILL NO"] || row["VOUCHER NO."] || row["VOUCHER NO"] || row["INVOICE NO"] || row["INVOICE NO."] || "").trim();
+
       if (!monthMap[monthKey]) {
         monthMap[monthKey] = { _dateObj: new Date(d.getFullYear(), d.getMonth(), 1) };
         selectedStores.forEach(s => {
-          monthMap[monthKey][s] = { rev: 0, qty: 0 };
+          monthMap[monthKey][s] = { rev: 0, qty: 0, billsSet: new Set() };
         });
       }
       
       if (monthMap[monthKey][storeName]) {
         monthMap[monthKey][storeName].rev += amount;
         monthMap[monthKey][storeName].qty += qty;
+        if (billNo) {
+          monthMap[monthKey][storeName].billsSet.add(billNo);
+        }
       }
     });
 
@@ -226,6 +234,7 @@ export default function HistoricalSales() {
       selectedStores.forEach(s => {
         res[`${s} Sales`] = monthMap[m][s].rev;
         res[`${s} Qty`] = monthMap[m][s].qty;
+        res[`${s} Bills`] = monthMap[m][s].billsSet.size;
       });
       return res;
     });
@@ -247,7 +256,8 @@ export default function HistoricalSales() {
     const title = `Monthly Sales Report: ${selectedStores.join(" vs ")} (${startMonth} to ${endMonth})`;
     
     // Title Row
-    const endColLetter = String.fromCharCode(65 + (selectedStores.length * 2));
+    const endColIndex = 1 + (selectedStores.length * 3);
+    const endColLetter = String.fromCharCode(64 + endColIndex);
     sheet.mergeCells(`A1:${endColLetter}1`);
     const titleCell = sheet.getCell('A1');
     titleCell.value = title;
@@ -264,6 +274,7 @@ export default function HistoricalSales() {
     selectedStores.forEach(s => {
       headers.push(`${s} Sales (₹)`);
       headers.push(`${s} Qty`);
+      headers.push(`${s} Bills Made`);
     });
     
     const headerRow = sheet.addRow(headers);
@@ -279,19 +290,22 @@ export default function HistoricalSales() {
 
     // Data and Totals
     const totals = {};
-    selectedStores.forEach(s => totals[s] = { rev: 0, qty: 0 });
+    selectedStores.forEach(s => totals[s] = { rev: 0, qty: 0, bills: 0 });
 
     aggregatedData.forEach(row => {
       const dataRow = [row.Month];
       selectedStores.forEach(s => {
         const rev = row[`${s} Sales`] || 0;
         const qty = row[`${s} Qty`] || 0;
+        const bills = row[`${s} Bills`] || 0;
         
         totals[s].rev += rev;
         totals[s].qty += qty;
+        totals[s].bills += bills;
         
         dataRow.push(rev);
         dataRow.push(qty);
+        dataRow.push(bills);
       });
       const sheetRow = sheet.addRow(dataRow);
       
@@ -306,9 +320,12 @@ export default function HistoricalSales() {
         if (colNumber === 1) {
           cell.font = { bold: true };
           cell.alignment = { vertical: 'middle', horizontal: 'left' };
-        } else if (colNumber % 2 === 0) { // Sales
+        } else if ((colNumber - 2) % 3 === 0) { // Sales
           cell.numFmt = '₹#,##0.00';
-        } else { // Qty
+        } else if ((colNumber - 2) % 3 === 1) { // Qty
+          cell.numFmt = '#,##0';
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        } else { // Bills Made
           cell.numFmt = '#,##0';
           cell.alignment = { vertical: 'middle', horizontal: 'center' };
         }
@@ -320,6 +337,7 @@ export default function HistoricalSales() {
     selectedStores.forEach(s => {
       totalDataRow.push(totals[s].rev);
       totalDataRow.push(totals[s].qty);
+      totalDataRow.push(totals[s].bills);
     });
     
     const totalRow = sheet.addRow(totalDataRow);
@@ -336,9 +354,12 @@ export default function HistoricalSales() {
       
       if (colNumber === 1) {
         cell.alignment = { vertical: 'middle', horizontal: 'left' };
-      } else if (colNumber % 2 === 0) { // Sales
+      } else if ((colNumber - 2) % 3 === 0) { // Sales
         cell.numFmt = '₹#,##0.00';
-      } else { // Qty
+      } else if ((colNumber - 2) % 3 === 1) { // Qty
+        cell.numFmt = '#,##0';
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      } else { // Bills Made
         cell.numFmt = '#,##0';
         cell.alignment = { vertical: 'middle', horizontal: 'center' };
       }
@@ -346,7 +367,7 @@ export default function HistoricalSales() {
 
     // Auto-size columns
     sheet.columns.forEach((column, i) => {
-      column.width = i === 0 ? 15 : 20;
+      column.width = i === 0 ? 15 : 18;
     });
 
     const buffer = await workbook.xlsx.writeBuffer();
@@ -399,7 +420,7 @@ export default function HistoricalSales() {
               type="submit"
               className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
-              Unlock Database
+              Unlock Dashboard
             </button>
           </form>
         </motion.div>
@@ -449,7 +470,7 @@ export default function HistoricalSales() {
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
         >
           <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-5 text-white shadow-lg">
             <div className="flex items-center justify-between mb-2">
@@ -472,6 +493,13 @@ export default function HistoricalSales() {
               <Package className="w-5 h-5 text-purple-500" />
             </div>
             <div className="text-2xl font-bold text-gray-900 dark:text-white">{insights.totalQty.toLocaleString()} items</div>
+          </div>
+          <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-2xl p-5 border border-white/80 dark:border-white/10 shadow-lg">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-gray-500 dark:text-gray-400 font-medium">Total Bills Made</span>
+              <Receipt className="w-5 h-5 text-blue-500" />
+            </div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">{insights.totalBills.toLocaleString()} bills</div>
           </div>
         </motion.div>
       )}
@@ -522,27 +550,25 @@ export default function HistoricalSales() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
-                  <Calendar className="w-4 h-4 mr-2" /> Time Range
+                  <Calendar className="w-4 h-4 mr-2" /> Date Range
                 </label>
-                <div className="flex space-x-3">
-                  <div className="flex-1">
-                    <span className="text-xs text-gray-500 block mb-1">From Month</span>
-                    <input
-                      type="month"
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Start Month</span>
+                    <input 
+                      type="month" 
                       value={startMonth}
                       onChange={(e) => setStartMonth(e.target.value)}
-                      disabled={!dbData}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-slate-800/50 focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50 text-gray-900 dark:text-white text-sm"
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-slate-800/50 text-sm outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
                     />
                   </div>
-                  <div className="flex-1">
-                    <span className="text-xs text-gray-500 block mb-1">To Month</span>
-                    <input
-                      type="month"
+                  <div>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">End Month</span>
+                    <input 
+                      type="month" 
                       value={endMonth}
                       onChange={(e) => setEndMonth(e.target.value)}
-                      disabled={!dbData}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-slate-800/50 focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50 text-gray-900 dark:text-white text-sm"
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-slate-800/50 text-sm outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
                     />
                   </div>
                 </div>
@@ -584,6 +610,7 @@ export default function HistoricalSales() {
                         <React.Fragment key={store}>
                           <th className="px-4 py-3 font-semibold border-l border-gray-200 dark:border-gray-700">{store} Sales</th>
                           <th className="px-4 py-3 font-semibold bg-gray-50 dark:bg-slate-800/80">{store} Qty</th>
+                          <th className="px-4 py-3 font-semibold bg-blue-50/50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300">{store} Bills Made</th>
                         </React.Fragment>
                       ))}
                     </tr>
@@ -596,6 +623,7 @@ export default function HistoricalSales() {
                           <React.Fragment key={store}>
                             <td className="px-4 py-3 border-l border-gray-100 dark:border-gray-800">{formatCurrency(row[`${store} Sales`] || 0)}</td>
                             <td className="px-4 py-3 bg-gray-50/50 dark:bg-slate-800/30">{(row[`${store} Qty`] || 0).toLocaleString()}</td>
+                            <td className="px-4 py-3 bg-blue-50/30 dark:bg-blue-900/10 font-semibold text-blue-600 dark:text-blue-400">{(row[`${store} Bills`] || 0).toLocaleString()}</td>
                           </React.Fragment>
                         ))}
                       </tr>
