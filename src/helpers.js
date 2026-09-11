@@ -348,51 +348,13 @@ export async function loadHistoricalData() {
 }
 
 /**
- * Deduplicates sales array by store, bill number, item code, date, and quantity
- */
-export function deduplicateSalesRows(salesRows) {
-  if (!salesRows || !Array.isArray(salesRows)) return [];
-  const seen = new Set();
-  const uniqueRows = [];
-
-  for (const row of salesRows) {
-    if (!row || typeof row !== "object") continue;
-
-    const getVal = (candidateKeys) => {
-      for (const k of candidateKeys) {
-        for (const key in row) {
-          if (key.trim().toUpperCase() === k.toUpperCase()) {
-            return row[key];
-          }
-        }
-      }
-      return "";
-    };
-
-    const store = String(getVal(["BRANCH NAME", "FROM BRANCH NAME", "STORE NAME", "BRANCH"]) || "").trim().toUpperCase();
-    const billNo = String(getVal(["BILL NO.", "BILL NO", "VOUCHER NO.", "VOUCHER NO", "INVOICE NO"]) || "").trim().toUpperCase();
-    const itemCode = String(getVal(["ITEM CODE", "BARCODE", "POS ITEM CODE", "ADDL ITEM CODE"]) || "").trim().toUpperCase();
-    const dateStr = String(getVal(["BILL DATE", "DATE"]) || "").trim();
-    const qty = String(getVal(["NET QTY", "TOTAL QTY", "QTY", "QUANTITY"]) || "").trim();
-
-    const uniqueKey = `${store}::${billNo || 'NOBILL'}::${itemCode}::${dateStr}::${qty}`;
-    if (!seen.has(uniqueKey)) {
-      seen.add(uniqueKey);
-      uniqueRows.push(row);
-    }
-  }
-
-  return uniqueRows;
-}
-
-/**
  * Append data to IndexedDB
  * @param {Array} newData 
  */
 export async function appendHistoricalData(newData) {
   try {
     const existingData = (await loadHistoricalData()) || [];
-    const mergedData = deduplicateSalesRows([...existingData, ...newData]);
+    const mergedData = [...existingData, ...newData];
     await saveHistoricalData(mergedData);
     return true;
   } catch (error) {
@@ -451,13 +413,12 @@ export function processSalesRowsToMap(salesRows) {
     return { salesMap: {}, periodInfo: { periodDays: 90, periodMonths: 3.0, labelText: "No Sales Data" }, totalRows: 0 };
   }
 
-  const cleanRows = deduplicateSalesRows(salesRows);
   const salesMap = {};
   let minDate = null;
   let maxDate = null;
   let validRowsCount = 0;
 
-  for (const row of cleanRows) {
+  for (const row of salesRows) {
     if (!row || typeof row !== "object") continue;
 
     const getVal = (candidateKeys) => {
