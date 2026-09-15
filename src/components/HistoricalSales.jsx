@@ -318,9 +318,17 @@ export default function HistoricalSales() {
     const finalAggregated = sortedMonths.map(m => {
       const res = { Month: m };
       selectedStores.forEach(s => {
-        res[`${s} Sales`] = monthMap[m][s].rev;
-        res[`${s} Qty`] = monthMap[m][s].qty;
-        res[`${s} Bills`] = monthMap[m][s].billsSet.size;
+        const rev = monthMap[m][s].rev;
+        const qty = monthMap[m][s].qty;
+        const bills = monthMap[m][s].billsSet.size;
+        const abv = bills > 0 ? rev / bills : 0;
+        const upt = bills > 0 ? qty / bills : 0;
+
+        res[`${s} Sales`] = rev;
+        res[`${s} Qty`] = qty;
+        res[`${s} Bills`] = bills;
+        res[`${s} ABV`] = abv;
+        res[`${s} UPT`] = upt;
       });
       return res;
     });
@@ -342,9 +350,9 @@ export default function HistoricalSales() {
     const title = `Monthly Sales Report: ${selectedStores.join(" vs ")} (${startMonth} to ${endMonth})`;
     
     // Title Row
-    const endColIndex = 1 + (selectedStores.length * 3);
-    const endColLetter = String.fromCharCode(64 + endColIndex);
-    sheet.mergeCells(`A1:${endColLetter}1`);
+    const endColIndex = 1 + (selectedStores.length * 5);
+    const endColLetter = String.fromCharCode(64 + Math.min(endColIndex, 26)); // ExcelJS handle or col letter
+    sheet.mergeCells(1, 1, 1, endColIndex);
     const titleCell = sheet.getCell('A1');
     titleCell.value = title;
     titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
@@ -361,6 +369,8 @@ export default function HistoricalSales() {
       headers.push(`${s} Sales (₹)`);
       headers.push(`${s} Qty`);
       headers.push(`${s} Bills Made`);
+      headers.push(`${s} ABV (₹)`);
+      headers.push(`${s} UPT`);
     });
     
     const headerRow = sheet.addRow(headers);
@@ -384,6 +394,8 @@ export default function HistoricalSales() {
         const rev = row[`${s} Sales`] || 0;
         const qty = row[`${s} Qty`] || 0;
         const bills = row[`${s} Bills`] || 0;
+        const abv = row[`${s} ABV`] || 0;
+        const upt = row[`${s} UPT`] || 0;
         
         totals[s].rev += rev;
         totals[s].qty += qty;
@@ -392,6 +404,8 @@ export default function HistoricalSales() {
         dataRow.push(rev);
         dataRow.push(qty);
         dataRow.push(bills);
+        dataRow.push(abv);
+        dataRow.push(upt);
       });
       const sheetRow = sheet.addRow(dataRow);
       
@@ -406,14 +420,23 @@ export default function HistoricalSales() {
         if (colNumber === 1) {
           cell.font = { bold: true };
           cell.alignment = { vertical: 'middle', horizontal: 'left' };
-        } else if ((colNumber - 2) % 3 === 0) { // Sales
-          cell.numFmt = '₹#,##0.00';
-        } else if ((colNumber - 2) % 3 === 1) { // Qty
-          cell.numFmt = '#,##0';
-          cell.alignment = { vertical: 'middle', horizontal: 'center' };
-        } else { // Bills Made
-          cell.numFmt = '#,##0';
-          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        } else {
+          const mod = (colNumber - 2) % 5;
+          if (mod === 0) { // Sales
+            cell.numFmt = '₹#,##0.00';
+          } else if (mod === 1) { // Qty
+            cell.numFmt = '#,##0';
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          } else if (mod === 2) { // Bills Made
+            cell.numFmt = '#,##0';
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          } else if (mod === 3) { // ABV
+            cell.numFmt = '₹#,##0.00';
+            cell.alignment = { vertical: 'middle', horizontal: 'right' };
+          } else if (mod === 4) { // UPT
+            cell.numFmt = '0.00';
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          }
         }
       });
     });
@@ -421,9 +444,17 @@ export default function HistoricalSales() {
     // Add Grand Total Row
     const totalDataRow = ["Grand Total"];
     selectedStores.forEach(s => {
-      totalDataRow.push(totals[s].rev);
-      totalDataRow.push(totals[s].qty);
-      totalDataRow.push(totals[s].bills);
+      const gRev = totals[s].rev;
+      const gQty = totals[s].qty;
+      const gBills = totals[s].bills;
+      const gAbv = gBills > 0 ? gRev / gBills : 0;
+      const gUpt = gBills > 0 ? gQty / gBills : 0;
+
+      totalDataRow.push(gRev);
+      totalDataRow.push(gQty);
+      totalDataRow.push(gBills);
+      totalDataRow.push(gAbv);
+      totalDataRow.push(gUpt);
     });
     
     const totalRow = sheet.addRow(totalDataRow);
@@ -440,14 +471,23 @@ export default function HistoricalSales() {
       
       if (colNumber === 1) {
         cell.alignment = { vertical: 'middle', horizontal: 'left' };
-      } else if ((colNumber - 2) % 3 === 0) { // Sales
-        cell.numFmt = '₹#,##0.00';
-      } else if ((colNumber - 2) % 3 === 1) { // Qty
-        cell.numFmt = '#,##0';
-        cell.alignment = { vertical: 'middle', horizontal: 'center' };
-      } else { // Bills Made
-        cell.numFmt = '#,##0';
-        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      } else {
+        const mod = (colNumber - 2) % 5;
+        if (mod === 0) { // Sales
+          cell.numFmt = '₹#,##0.00';
+        } else if (mod === 1) { // Qty
+          cell.numFmt = '#,##0';
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        } else if (mod === 2) { // Bills Made
+          cell.numFmt = '#,##0';
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        } else if (mod === 3) { // ABV
+          cell.numFmt = '₹#,##0.00';
+          cell.alignment = { vertical: 'middle', horizontal: 'right' };
+        } else if (mod === 4) { // UPT
+          cell.numFmt = '0.00';
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        }
       }
     });
 
@@ -464,8 +504,8 @@ export default function HistoricalSales() {
     toast.success("Stylish Report Generated!");
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
+  const formatCurrency = (amount, maxDecimals = 0) => {
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: maxDecimals }).format(amount);
   };
 
   if (!isAuthenticated) {
@@ -697,6 +737,8 @@ export default function HistoricalSales() {
                           <th className="px-4 py-3 font-semibold border-l border-gray-200 dark:border-gray-700">{store} Sales</th>
                           <th className="px-4 py-3 font-semibold bg-gray-50 dark:bg-slate-800/80">{store} Qty</th>
                           <th className="px-4 py-3 font-semibold bg-blue-50/50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300">{store} Bills Made</th>
+                          <th className="px-4 py-3 font-semibold bg-amber-50/50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300">{store} ABV</th>
+                          <th className="px-4 py-3 font-semibold bg-purple-50/50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300">{store} UPT</th>
                         </React.Fragment>
                       ))}
                     </tr>
@@ -707,9 +749,11 @@ export default function HistoricalSales() {
                         <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 dark:text-white">{row.Month}</td>
                         {selectedStores.map(store => (
                           <React.Fragment key={store}>
-                            <td className="px-4 py-3 border-l border-gray-100 dark:border-gray-800">{formatCurrency(row[`${store} Sales`] || 0)}</td>
+                            <td className="px-4 py-3 border-l border-gray-100 dark:border-gray-800">{formatCurrency(row[`${store} Sales`] || 0, 0)}</td>
                             <td className="px-4 py-3 bg-gray-50/50 dark:bg-slate-800/30">{(row[`${store} Qty`] || 0).toLocaleString()}</td>
                             <td className="px-4 py-3 bg-blue-50/30 dark:bg-blue-900/10 font-semibold text-blue-600 dark:text-blue-400">{(row[`${store} Bills`] || 0).toLocaleString()}</td>
+                            <td className="px-4 py-3 bg-amber-50/30 dark:bg-amber-900/10 font-semibold text-amber-600 dark:text-amber-400">{formatCurrency(row[`${store} ABV`] || 0, 2)}</td>
+                            <td className="px-4 py-3 bg-purple-50/30 dark:bg-purple-900/10 font-semibold text-purple-600 dark:text-purple-400">{(row[`${store} UPT`] || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</td>
                           </React.Fragment>
                         ))}
                       </tr>
