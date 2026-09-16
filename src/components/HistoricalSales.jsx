@@ -35,6 +35,42 @@ export default function HistoricalSales() {
     }
   }, [isAuthenticated]);
 
+  // Auto-adjust Date Range (Start Month & End Month) dynamically based on selected stores' opening dates in DB
+  useEffect(() => {
+    if (!dbData || dbData.length === 0) return;
+
+    let targetRows = dbData;
+
+    // Filter by selected stores if any are checked
+    if (selectedStores.length > 0) {
+      targetRows = dbData.filter(row => {
+        const sName = getStoreNameVal(row);
+        return sName && selectedStores.includes(sName);
+      });
+    }
+
+    if (targetRows.length === 0) return;
+
+    let minDate = null;
+    let maxDate = null;
+
+    targetRows.forEach(row => {
+      const rawDate = getRowVal(row, DATE_KEYS);
+      let parsedDate = parseBillDate(rawDate);
+      if (!parsedDate && rawDate) parsedDate = new Date(rawDate);
+
+      if (parsedDate && !isNaN(parsedDate.getTime())) {
+        if (!minDate || parsedDate < minDate) minDate = parsedDate;
+        if (!maxDate || parsedDate > maxDate) maxDate = parsedDate;
+      }
+    });
+
+    if (minDate && maxDate) {
+      setStartMonth(formatMonth(minDate));
+      setEndMonth(formatMonth(maxDate));
+    }
+  }, [selectedStores, dbData]);
+
   const fetchData = async () => {
     setIsLoading(true);
     try {

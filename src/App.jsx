@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as XLSX from "xlsx";
-import { findHeaderRowIndex, getTargetDate, parseBillDate, appendHistoricalData, loadHistoricalData, MASTER_STORES, normalizeStoreName, getKnownStores, saveKnownStores } from "./helpers";
+import { findHeaderRowIndex, getTargetDate, parseBillDate, appendHistoricalData, syncDailyRowsToHistoricalData, loadHistoricalData, MASTER_STORES, normalizeStoreName, getKnownStores, saveKnownStores } from "./helpers";
 import FileDropZone from "./components/FileDropZone";
 import DashboardView from "./components/DashboardView";
 import OrderProcessing from "./components/OrderProcessing";
@@ -259,7 +259,7 @@ export default function App() {
     setValidationSuccess(false);
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: "array" });
@@ -348,6 +348,20 @@ export default function App() {
 
         if (allStores.size === 0) {
           throw new Error("No branches found in the spreadsheet branch list.");
+        }
+
+        // Auto-sync Target Date sales (e.g. 16th Sept) into Historical Database (ignoring older MTD dates 1-15 Sept)
+        try {
+          const syncResult = await syncDailyRowsToHistoricalData(jsonData, worksheet);
+          if (syncResult.syncedCount > 0) {
+            const ignoreMsg = today.getDate() > 1 ? ` (Previous MTD dates 1-${today.getDate() - 1} ignored)` : "";
+            toast.success(
+              `⚡ Auto-synced ${syncResult.syncedCount.toLocaleString()} sales records for ${syncResult.targetDateStr} into Historical DB!${ignoreMsg}`,
+              { duration: 6000, icon: '⚡' }
+            );
+          }
+        } catch (syncErr) {
+          console.warn("Auto-syncing daily sales to Historical DB warning:", syncErr);
         }
 
         setValidationSuccess(true);

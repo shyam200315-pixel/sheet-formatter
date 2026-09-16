@@ -363,6 +363,100 @@ export async function appendHistoricalData(newData) {
 }
 
 /**
+ * Synchronizes daily sales rows into local Historical Database.
+ * CRITICAL RULE: In MTD files (containing e.g. 1st to 16th Sept), ONLY the rows matching the latest Target Date (e.g. 16th Sept)
+ * are extracted and synced. All older MTD dates (1st to 15th Sept) are IGNORED to prevent duplicate entries!
+ * Re-uploading on the same day replaces that single target date's data cleanly.
+ * 
+ * @param {Array} jsonData 
+ * @param {Object} worksheet 
+ * @returns {Promise<{ targetDateStr: string, syncedCount: number, totalDbRows: number }>}
+ */
+export async function syncDailyRowsToHistoricalData(jsonData, worksheet) {
+  if (!jsonData || !Array.isArray(jsonData) || jsonData.length === 0) {
+    return { targetDateStr: "", syncedCount: 0, totalDbRows: 0 };
+  }
+
+  // 1. Establish the latest target date (e.g. 16/09/2026) from worksheet header or sheet rows
+  const { today, todayStr } = getTargetDate(worksheet, jsonData);
+  if (!today || isNaN(today.getTime())) {
+    return { targetDateStr: "", syncedCount: 0, totalDbRows: 0 };
+  }
+
+  const targetDay = today.getDate();
+  const targetMonth = today.getMonth();
+  const targetYear = today.getFullYear();
+
+  // 2. Filter jsonData to keep ONLY rows matching the Target Date (e.g. 16/09/2026)
+  const targetDayRows = jsonData.filter(row => {
+    if (!row || typeof row !== "object") return false;
+    
+    // Find date field
+    let dVal = row["BILL DATE"] || row["DATE"] || row["BILLDATE"] || row["INVOICE DATE"] || row["TRANSACTION DATE"];
+    if (!dVal) {
+      // Search keys for date
+      for (const k in row) {
+        if (k.trim().toUpperCase().includes("DATE")) {
+          dVal = row[k];
+          break;
+        }
+      }
+    }
+    
+    if (!dVal) return false;
+    const parsed = parseBillDate(dVal);
+    if (!parsed || isNaN(parsed.getTime())) return false;
+
+    return (
+      parsed.getDate() === targetDay &&
+      parsed.getMonth() === targetMonth &&
+      parsed.getFullYear() === targetYear
+    );
+  });
+
+  if (targetDayRows.length === 0) {
+    return { targetDateStr: todayStr, syncedCount: 0, totalDbRows: 0 };
+  }
+
+  // 3. Load existing Historical DB
+  const existingDb = (await loadHistoricalData()) || [];
+
+  // 4. Remove any previous entries from Historical DB that match Target Date (to allow clean re-upload on same day without duplicate)
+  const filteredDb = existingDb.filter(row => {
+    let dVal = row["BILL DATE"] || row["DATE"] || row["BILLDATE"] || row["INVOICE DATE"] || row["TRANSACTION DATE"];
+    if (!dVal) {
+      for (const k in row) {
+        if (k.trim().toUpperCase().includes("DATE")) {
+          dVal = row[k];
+          break;
+        }
+      }
+    }
+    if (!dVal) return true; // keep if no date
+    const parsed = parseBillDate(dVal);
+    if (!parsed || isNaN(parsed.getTime())) return true;
+
+    // Remove if it matches target date
+    const isSameDate = (
+      parsed.getDate() === targetDay &&
+      parsed.getMonth() === targetMonth &&
+      parsed.getFullYear() === targetYear
+    );
+    return !isSameDate;
+  });
+
+  // 5. Append new target day rows to filtered DB
+  const updatedDb = [...filteredDb, ...targetDayRows];
+  await saveHistoricalData(updatedDb);
+
+  return {
+    targetDateStr: todayStr,
+    syncedCount: targetDayRows.length,
+    totalDbRows: updatedDb.length
+  };
+}
+
+/**
  * Clear data from IndexedDB
  */
 export async function clearHistoricalData() {
