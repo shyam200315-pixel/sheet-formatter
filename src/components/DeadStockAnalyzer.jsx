@@ -36,6 +36,7 @@ import {
   clearHistoricalData,
   processSalesRowsToMap, 
   findHeaderRowIndex,
+  normalizeItemCode,
   extractStoreCode as extractStoreCodeHelper,
   getStateFromStore as getStateFromStoreHelper
 } from "../helpers";
@@ -249,114 +250,42 @@ export default function DeadStockAnalyzer({ onBack }) {
     setIsParsingSales(true);
 
     const reader = new FileReader();
-    reader.onload = (evt) => {
+    reader.onload = async (evt) => {
       try {
         const data = new Uint8Array(evt.target.result);
         const workbook = XLSX.read(data, { type: "array" });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+        
+        const headerIdx = findHeaderRowIndex(worksheet);
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "", range: headerIdx });
 
-        let headerIdx = -1;
-        for (let i = 0; i < Math.min(30, jsonData.length); i++) {
-          const row = jsonData[i];
-          if (!row) continue;
-          const uppercaseCells = row.map(c => String(c).trim().toUpperCase());
-          if (uppercaseCells.includes("BRANCH NAME") && (uppercaseCells.includes("BILL DATE") || uppercaseCells.includes("ITEM CODE"))) {
-            headerIdx = i;
-            break;
-          }
+        if (!jsonData || jsonData.length === 0) {
+          throw new Error("Sales file is empty or header row could not be identified.");
         }
 
-        if (headerIdx === -1) {
-          for (let i = 0; i < Math.min(30, jsonData.length); i++) {
-            const row = jsonData[i];
-            if (row && row.some(cell => String(cell).toUpperCase() === "BRANCH NAME")) {
-              headerIdx = i;
-              break;
-            }
-          }
+        const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(jsonData);
+
+        if (totalRows === 0 || Object.keys(salesMap).length === 0) {
+          throw new Error("No valid sales records found. Please check column headers (Branch Name, Item Code, Net Qty).");
         }
 
-        if (headerIdx === -1) {
-          throw new Error("Sales file must contain a header row with 'BRANCH NAME'.");
-        }
-
-        const headers = jsonData[headerIdx].map(h => String(h).trim().toUpperCase());
-        const branchCol = headers.indexOf("BRANCH NAME") !== -1 ? headers.indexOf("BRANCH NAME") : headers.findIndex(h => h.includes("BRANCH"));
-        const itemCol = headers.indexOf("ITEM CODE") !== -1 ? headers.indexOf("ITEM CODE") : headers.findIndex(h => h.includes("ITEM CODE"));
-        const addlItemCol = headers.findIndex(h => h.includes("ADDL ITEM") || h.includes("BARCODE"));
-        const descCol = headers.findIndex(h => h.includes("DESCRIPTION") || h.includes("MODEL"));
-        const brandCol = headers.findIndex(h => h.includes("BRAND"));
-        const catCol = headers.findIndex(h => h.includes("CATEGORY"));
-        const qtyCol = headers.indexOf("NET QTY") !== -1 ? headers.indexOf("NET QTY") : headers.findIndex(h => h === "TOTAL QTY" || h.includes("QTY"));
-        const amountCol = headers.findIndex(h => h.includes("NET SALE AMOUNT") || h.includes("GROSS SALE"));
-        const dateCol = headers.findIndex(h => h.includes("BILL DATE"));
-
-        const salesMap = {};
-        let minDate = null;
-        let maxDate = null;
-
-        for (let i = headerIdx + 1; i < jsonData.length; i++) {
-          const row = jsonData[i];
-          if (!row || !row[branchCol]) continue;
-
-          const rawBranch = String(row[branchCol]).trim();
-          const storeCode = extractStoreCode(rawBranch);
-          const rawItemCode = itemCol !== -1 && row[itemCol] ? String(row[itemCol]).trim() : "";
-          const rawAddlCode = addlItemCol !== -1 && row[addlItemCol] ? String(row[addlItemCol]).trim() : "";
-          const itemCode = rawItemCode || rawAddlCode;
-
-          if (!itemCode) continue;
-
-          const desc = descCol !== -1 && row[descCol] ? String(row[descCol]).trim() : "";
-          const brand = brandCol !== -1 && row[brandCol] ? String(row[brandCol]).trim() : "";
-          const category = catCol !== -1 && row[catCol] ? String(row[catCol]).trim() : "";
-          const qty = qtyCol !== -1 ? parseFloat(row[qtyCol]) || 0 : 0;
-          const amount = amountCol !== -1 ? parseFloat(row[amountCol]) || 0 : 0;
-          const billDateStr = dateCol !== -1 && row[dateCol] ? String(row[dateCol]).trim() : "";
-
-          if (billDateStr) {
-            const dObj = parseAnyDate(billDateStr);
-            if (dObj) {
-              if (!minDate || dObj < minDate) minDate = dObj;
-              if (!maxDate || dObj > maxDate) maxDate = dObj;
-            }
-          }
-
-          const key = `${storeCode}::${itemCode}`;
-          if (!salesMap[key]) {
-            salesMap[key] = {
-              storeCode,
-              storeState: getStateFromStore(storeCode),
-              branchName: rawBranch,
-              itemCode,
-              description: desc,
-              brand,
-              category,
-              l3mQty: 0,
-              l3mAmount: 0
-            };
-          }
-
-          salesMap[key].l3mQty += qty;
-          salesMap[key].l3mAmount += amount;
-        }
-
-        let periodDays = 90;
-        if (minDate && maxDate) {
-          periodDays = Math.max(1, Math.round((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24)) + 1);
-        }
-        const periodMonths = Math.max(0.5, periodDays / 30);
-
-        let dateLabel = `${periodDays} Days (~${periodMonths.toFixed(1)} Months)`;
-        if (minDate && maxDate) {
-          dateLabel += ` (${minDate.toLocaleDateString('en-IN')} to ${maxDate.toLocaleDateString('en-IN')})`;
-        }
-
-        setSalesPeriodInfo({ periodDays, periodMonths, labelText: dateLabel });
+        setSalesPeriodInfo(periodInfo);
         setSalesDataRaw(salesMap);
-        toast.success(`Sales File Loaded (${Object.keys(salesMap).length} items)`);
+
+        // Auto append to local IndexedDB to persist for future sessions
+        try {
+          await appendHistoricalData(jsonData);
+          const freshDb = await loadHistoricalData();
+          if (freshDb && freshDb.length > 0) {
+            setSavedDbCount(freshDb.length);
+            setUseSavedSalesDB(true);
+          }
+        } catch (dbErr) {
+          console.warn("Auto-saving to IndexedDB warning:", dbErr);
+        }
+
+        toast.success(`Sales File Loaded (${Object.keys(salesMap).length} item-store keys created from ${totalRows.toLocaleString()} sales lines)`);
       } catch (err) {
         console.error(err);
         toast.error(`Error parsing Sales File: ${err.message}`);
@@ -392,7 +321,7 @@ export default function DeadStockAnalyzer({ onBack }) {
           const row = jsonData[i];
           if (!row) continue;
           const uppercaseCells = row.map(c => String(c).trim().toUpperCase());
-          if (uppercaseCells.includes("BRANCH NAME") && uppercaseCells.includes("CLOSING STOCK")) {
+          if ((uppercaseCells.includes("BRANCH NAME") || uppercaseCells.includes("STORE NAME")) && uppercaseCells.some(c => c.includes("STOCK"))) {
             headerIdx = i;
             break;
           }
@@ -403,16 +332,15 @@ export default function DeadStockAnalyzer({ onBack }) {
         }
 
         const headers = jsonData[headerIdx].map(h => String(h).trim().toUpperCase());
-        const branchCol = headers.indexOf("BRANCH NAME");
-        const barcodeCol = headers.indexOf("BARCODE");
-        const itemNameCol = headers.indexOf("ITEM NAME");
-        const descCol = headers.indexOf("ITEM DESCRIPTION");
-        const godownCol = headers.indexOf("GODOWN NAME");
-        const brandCol = headers.indexOf("BRAND NAME");
-        const mainProdCol = headers.indexOf("MAIN PRODUCT");
-        const stockCol = headers.indexOf("CLOSING STOCK");
-        const valueCol = headers.indexOf("CLOSING VALUE(LANDED COST)");
-        const mrpCol = headers.indexOf("ITEM M.R.P");
+        const branchCol = headers.findIndex(h => h.includes("BRANCH") || h.includes("STORE"));
+        const barcodeCol = headers.findIndex(h => h.includes("BARCODE") || h.includes("ITEM CODE") || h.includes("POS CODE") || h.includes("HANA CODE"));
+        const itemNameCol = headers.findIndex(h => h.includes("ITEM NAME") || h.includes("DESCRIPTION"));
+        const descCol = headers.findIndex(h => h.includes("DESCRIPTION") || h.includes("MODEL"));
+        const brandCol = headers.findIndex(h => h.includes("BRAND"));
+        const mainProdCol = headers.findIndex(h => h.includes("MAIN PRODUCT") || h.includes("CATEGORY"));
+        const stockCol = headers.findIndex(h => h.includes("CLOSING STOCK") || h.includes("STOCK"));
+        const valueCol = headers.findIndex(h => h.includes("VALUE") || h.includes("COST"));
+        const mrpCol = headers.findIndex(h => h.includes("M.R.P") || h.includes("MRP"));
 
         const stockItems = [];
 
@@ -426,11 +354,12 @@ export default function DeadStockAnalyzer({ onBack }) {
           const rawBarcode = barcodeCol !== -1 && row[barcodeCol] ? String(row[barcodeCol]).trim() : "";
           const rawItemName = itemNameCol !== -1 && row[itemNameCol] ? String(row[itemNameCol]).trim() : "";
           
-          let itemCode = rawBarcode;
-          if (!itemCode && rawItemName) {
-            itemCode = rawItemName.split(" ")[0];
+          let rawCode = rawBarcode;
+          if (!rawCode && rawItemName) {
+            rawCode = rawItemName.split(" ")[0];
           }
 
+          const itemCode = normalizeItemCode(rawCode);
           if (!itemCode) continue;
 
           const desc = descCol !== -1 && row[descCol] ? String(row[descCol]).trim() : rawItemName;
@@ -492,27 +421,29 @@ export default function DeadStockAnalyzer({ onBack }) {
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
 
         let headerIdx = -1;
-        for (let i = 0; i < Math.min(15, jsonData.length); i++) {
+        for (let i = 0; i < Math.min(25, jsonData.length); i++) {
           const row = jsonData[i];
-          if (row && row.some(cell => String(cell).toUpperCase().includes("STORE CODE") || String(cell).toUpperCase().includes("REQ QTY"))) {
+          if (!row) continue;
+          const uppercaseCells = row.map(c => String(c).trim().toUpperCase());
+          if (uppercaseCells.some(c => c.includes("STORE") || c.includes("BRANCH")) && uppercaseCells.some(c => c.includes("REQ") || c.includes("ORDER") || c.includes("ITEM") || c.includes("CODE"))) {
             headerIdx = i;
             break;
           }
         }
 
         if (headerIdx === -1) {
-          throw new Error("Order Requirement header not found! Must contain 'STORE CODE' and 'Req Qty'.");
+          throw new Error("Order Requirement header not found! Must contain store and requirement columns.");
         }
 
         const headers = jsonData[headerIdx].map(h => String(h).trim().toUpperCase());
         const dateCol = headers.findIndex(h => h === "DATE" || h.includes("BILL DATE") || h.includes("ORDER DATE"));
         const stateCol = headers.findIndex(h => h === "STATE");
-        const storeCodeCol = headers.findIndex(h => h.includes("STORE CODE"));
-        const storeNameCol = headers.findIndex(h => h.includes("STORE NAME"));
-        const itemCodeCol = headers.findIndex(h => h.includes("ITEM CODE"));
-        const descCol = headers.findIndex(h => h.includes("DESCRIPTION"));
-        const catCol = headers.findIndex(h => h.includes("CATEGORY"));
-        const reqQtyCol = headers.findIndex(h => h.includes("REQ QTY") || h.includes("ORDER QTY") || h.includes("REQUIRED"));
+        const storeCodeCol = headers.findIndex(h => h.includes("STORE CODE") || h.includes("STORE NAME") || h.includes("BRANCH"));
+        const storeNameCol = headers.findIndex(h => h.includes("STORE NAME") || h.includes("BRANCH NAME"));
+        const itemCodeCol = headers.findIndex(h => h.includes("ITEM CODE") || h.includes("BARCODE") || h.includes("POS CODE") || h.includes("HANA CODE") || h === "CODE");
+        const descCol = headers.findIndex(h => h.includes("DESCRIPTION") || h.includes("ITEM NAME") || h.includes("MODEL"));
+        const catCol = headers.findIndex(h => h.includes("CATEGORY") || h.includes("GROUP"));
+        const reqQtyCol = headers.findIndex(h => h.includes("REQ QTY") || h.includes("ORDER QTY") || h.includes("REQUIRED") || h.includes("REQ") || h === "QTY");
         const availStockCol = headers.findIndex(h => 
           (h.includes("AVAIL") || h.includes("STORE STOCK") || h.includes("STOCK AT STORE") || h.includes("CLOSING STOCK") || h.includes("ON HAND") || (h.includes("STOCK") && !h.includes("REQ"))) && !h.includes("REQ QTY")
         );
@@ -527,7 +458,8 @@ export default function DeadStockAnalyzer({ onBack }) {
           const storeState = stateCol !== -1 && row[stateCol] ? String(row[stateCol]).trim() : getStateFromStore(storeCode);
           const storeName = storeNameCol !== -1 && row[storeNameCol] ? String(row[storeNameCol]).trim() : storeCode;
           const dateVal = dateCol !== -1 && row[dateCol] ? String(row[dateCol]).trim() : "";
-          const itemCode = itemCodeCol !== -1 && row[itemCodeCol] ? String(row[itemCodeCol]).trim() : "";
+          const rawItemCode = itemCodeCol !== -1 && row[itemCodeCol] ? String(row[itemCodeCol]).trim() : "";
+          const itemCode = normalizeItemCode(rawItemCode);
           const desc = descCol !== -1 && row[descCol] ? String(row[descCol]).trim() : "";
           const category = catCol !== -1 && row[catCol] ? String(row[catCol]).trim() : "";
           const reqQty = reqQtyCol !== -1 ? parseFloat(row[reqQtyCol]) || 0 : 0;
@@ -551,7 +483,7 @@ export default function DeadStockAnalyzer({ onBack }) {
 
         setOrderDataRaw(orderLines);
         setActiveTab("order-audit");
-        toast.success(`Order File Loaded (${orderLines.length} order items)`);
+        toast.success(`Order File Loaded (${orderLines.length} order lines)`);
       } catch (err) {
         console.error(err);
         toast.error(`Error parsing Order File: ${err.message}`);
@@ -571,7 +503,9 @@ export default function DeadStockAnalyzer({ onBack }) {
     const stockItems = stockDataRaw || [];
 
     const items = stockItems.map(stock => {
-      const key = `${stock.storeCode}::${stock.itemCode}`;
+      const sCode = extractStoreCode(stock.storeCode);
+      const iCode = normalizeItemCode(stock.itemCode);
+      const key = `${sCode}::${iCode}`;
       const sales = salesMap[key] || { l3mQty: 0 };
       const periodSales = sales.l3mQty;
 
@@ -585,9 +519,9 @@ export default function DeadStockAnalyzer({ onBack }) {
       const surplusValue = surplusQty * stock.unitCost;
 
       if (surplusQty > 0) {
-        if (!itemSurplusStoreMap[stock.itemCode]) itemSurplusStoreMap[stock.itemCode] = [];
-        itemSurplusStoreMap[stock.itemCode].push({
-          storeCode: stock.storeCode,
+        if (!itemSurplusStoreMap[iCode]) itemSurplusStoreMap[iCode] = [];
+        itemSurplusStoreMap[iCode].push({
+          storeCode: sCode,
           storeState: stock.storeState,
           branchName: stock.branchName,
           surplusQty,
@@ -596,9 +530,9 @@ export default function DeadStockAnalyzer({ onBack }) {
       }
 
       if (periodSales > 0) {
-        if (!itemSalesStoreMap[stock.itemCode]) itemSalesStoreMap[stock.itemCode] = [];
-        itemSalesStoreMap[stock.itemCode].push({
-          storeCode: stock.storeCode,
+        if (!itemSalesStoreMap[iCode]) itemSalesStoreMap[iCode] = [];
+        itemSalesStoreMap[iCode].push({
+          storeCode: sCode,
           storeState: stock.storeState,
           periodSales
         });
@@ -606,6 +540,8 @@ export default function DeadStockAnalyzer({ onBack }) {
 
       return {
         ...stock,
+        storeCode: sCode,
+        itemCode: iCode,
         periodSales,
         status,
         retainedQty,
@@ -719,7 +655,9 @@ export default function DeadStockAnalyzer({ onBack }) {
     })) : []);
 
     return baseSource.map(ord => {
-      const key = `${ord.storeCode}::${ord.itemCode}`;
+      const sCode = extractStoreCode(ord.storeCode);
+      const iCode = normalizeItemCode(ord.itemCode);
+      const key = `${sCode}::${iCode}`;
       const sales = salesMap[key] || { l3mQty: 0 };
       const periodSales = sales.l3mQty;
       const stockAtStore = ord.availStock !== undefined ? parseFloat(ord.availStock) || 0 : 0;
@@ -728,8 +666,8 @@ export default function DeadStockAnalyzer({ onBack }) {
       // Hardcoded Rule: If L3M sale is 0, cap required quantity at 3 items (do not send >3 regardless of store demand)
       const effectiveReqQty = periodSales === 0 ? Math.min(rawReqQty, 3) : rawReqQty;
 
-      const surplusList = itemSurplusStoreMap[ord.itemCode] || [];
-      let sources = surplusList.filter(s => s.storeCode !== ord.storeCode);
+      const surplusList = itemSurplusStoreMap[iCode] || [];
+      let sources = surplusList.filter(s => s.storeCode !== sCode);
       if (strictSameState) {
         sources = sources.filter(s => s.storeState === ord.storeState);
       }
@@ -744,9 +682,9 @@ export default function DeadStockAnalyzer({ onBack }) {
       if (isHighRisk) {
         reason = `Rejected: Store already has ${stockAtStore} unit(s) in hand but 0 sales in reference period.`;
       } else if (periodSales > 0) {
-        reason = `Approved: Active seller at ${ord.storeCode} (${periodSales} units sold in reference period).`;
+        reason = `Approved: Active seller at ${sCode} (${periodSales} units sold in reference period).`;
       } else {
-        reason = `Approved: Zero stock in hand at ${ord.storeCode} (restocking approved for minimum store stock, max 3 units).`;
+        reason = `Approved: Zero stock in hand at ${sCode} (restocking approved for minimum store stock, max 3 units).`;
       }
 
       let transferMatch = null;
@@ -762,6 +700,8 @@ export default function DeadStockAnalyzer({ onBack }) {
 
       return {
         ...ord,
+        storeCode: sCode,
+        itemCode: iCode,
         reqQty: effectiveReqQty,
         dateVal: ord.dateVal || "",
         category: ord.category || "",
@@ -806,8 +746,10 @@ export default function DeadStockAnalyzer({ onBack }) {
     const storeSet = new Set();
 
     baseSource.forEach(ord => {
-      if (ord.storeCode) storeSet.add(ord.storeCode);
-      const key = `${ord.storeCode}::${ord.itemCode}`;
+      const sCode = extractStoreCode(ord.storeCode);
+      const iCode = normalizeItemCode(ord.itemCode);
+      if (sCode) storeSet.add(sCode);
+      const key = `${sCode}::${iCode}`;
       const periodSales = (salesMap[key] || {}).l3mQty || 0;
       const rawReqQty = ord.reqQty !== undefined ? parseFloat(ord.reqQty) || 0 : 0;
       const effectiveReqQty = periodSales === 0 ? Math.min(rawReqQty, 3) : rawReqQty;

@@ -406,6 +406,19 @@ export const getStateFromStore = (storeStr) => {
 };
 
 /**
+ * Normalizes item code by stripping surrounding whitespace, uppercase conversion, and removing Excel float trailing '.0'
+ * @param {string|number} code 
+ * @returns {string}
+ */
+export function normalizeItemCode(code) {
+  if (code === null || code === undefined || code === "") return "";
+  let str = String(code).trim().toUpperCase();
+  // Remove Excel trailing .0 or .00 if parsed from float cells (e.g. "19004024.0" -> "19004024")
+  str = str.replace(/\.0+$/, "");
+  return str;
+}
+
+/**
  * Transforms array of sales row objects from IndexedDB or JSON into a sales map indexed by `${storeCode}::${itemCode}`
  */
 export function processSalesRowsToMap(salesRows) {
@@ -418,35 +431,67 @@ export function processSalesRowsToMap(salesRows) {
   let maxDate = null;
   let validRowsCount = 0;
 
+  const STORE_KEYS = ["BRANCH NAME", "FROM BRANCH NAME", "STORE NAME", "BRANCH", "STORE", "LOCATION", "OUTLET"];
+  const ITEM_KEYS = ["ITEM CODE", "BARCODE", "POS ITEM CODE", "HANA CODE", "ITEM NO", "PRODUCT CODE", "SKU", "ARTICLE CODE", "ITEM", "CODE"];
+  const ADDL_KEYS = ["ADDL ITEM CODE", "BARCODE", "ADDL ITEM"];
+  const DESC_KEYS = ["ITEM DESCRIPTION", "DESCRIPTION", "MODEL NAME", "ITEM NAME", "PRODUCT NAME"];
+  const BRAND_KEYS = ["BRAND", "BRAND NAME"];
+  const CAT_KEYS = ["CATEGORY", "MAIN PRODUCT", "GROUP NAME", "GROUP"];
+  const QTY_KEYS = ["NET QTY", "TOTAL QTY", "QTY", "SOLD QTY", "QUANTITY", "BILLED QTY", "NO OF QTY"];
+  const AMOUNT_KEYS = ["NET SALE AMOUNT", "GROSS SALE AMOUNT", "AMOUNT", "NET AMOUNT", "SALES AMOUNT", "TOTAL AMOUNT"];
+  const DATE_KEYS = ["BILL DATE", "DATE", "VOUCHER DATE", "INVOICE DATE", "DOC DATE"];
+
   for (const row of salesRows) {
     if (!row || typeof row !== "object") continue;
 
     const getVal = (candidateKeys) => {
+      const rowKeys = Object.keys(row);
+      // 1. Exact or case-insensitive match
       for (const k of candidateKeys) {
-        for (const key in row) {
-          if (key.trim().toUpperCase() === k.toUpperCase()) {
-            return row[key];
+        const target = k.trim().toUpperCase();
+        const foundKey = rowKeys.find(rk => rk.trim().toUpperCase() === target);
+        if (foundKey && row[foundKey] !== undefined && row[foundKey] !== null && String(row[foundKey]).trim() !== "") {
+          return row[foundKey];
+        }
+      }
+      // 2. Clean alphanumeric match (stripping spaces, dots, underscores, dashes)
+      const cleanTargets = candidateKeys.map(k => k.replace(/[\s._\-]+/g, "").toUpperCase());
+      for (const rk of rowKeys) {
+        const cleanRk = rk.replace(/[\s._\-]+/g, "").toUpperCase();
+        if (cleanTargets.includes(cleanRk)) {
+          if (row[rk] !== undefined && row[rk] !== null && String(row[rk]).trim() !== "") {
+            return row[rk];
+          }
+        }
+      }
+      // 3. Substring match
+      for (const k of candidateKeys) {
+        const target = k.trim().toUpperCase();
+        for (const rk of rowKeys) {
+          const upperRk = rk.trim().toUpperCase();
+          if (upperRk.includes(target) && row[rk] !== undefined && row[rk] !== null && String(row[rk]).trim() !== "") {
+            return row[rk];
           }
         }
       }
       return "";
     };
 
-    const rawBranch = String(getVal(["BRANCH NAME", "FROM BRANCH NAME", "STORE NAME", "BRANCH"]) || "").trim();
+    const rawBranch = String(getVal(STORE_KEYS) || "").trim();
     if (!rawBranch) continue;
 
     const storeCode = extractStoreCode(rawBranch);
-    const rawItemCode = String(getVal(["ITEM CODE", "BARCODE", "POS ITEM CODE", "HANA CODE"]) || "").trim();
-    const rawAddlCode = String(getVal(["ADDL ITEM CODE"]) || "").trim();
-    const itemCode = (rawItemCode || rawAddlCode).toUpperCase();
+    const rawItemCode = String(getVal(ITEM_KEYS) || "").trim();
+    const rawAddlCode = String(getVal(ADDL_KEYS) || "").trim();
+    const itemCode = normalizeItemCode(rawItemCode || rawAddlCode);
     if (!itemCode) continue;
 
-    const desc = String(getVal(["ITEM DESCRIPTION", "DESCRIPTION", "MODEL NAME"]) || "").trim();
-    const brand = String(getVal(["BRAND", "BRAND NAME"]) || "").trim();
-    const category = String(getVal(["CATEGORY", "MAIN PRODUCT"]) || "").trim();
-    const qty = parseFloat(getVal(["NET QTY", "TOTAL QTY", "QTY", "SOLD QTY", "QUANTITY"])) || 0;
-    const amount = parseFloat(getVal(["NET SALE AMOUNT", "GROSS SALE AMOUNT", "AMOUNT", "NET AMOUNT", "SALES AMOUNT"])) || 0;
-    const billDateStr = String(getVal(["BILL DATE", "DATE"]) || "").trim();
+    const desc = String(getVal(DESC_KEYS) || "").trim();
+    const brand = String(getVal(BRAND_KEYS) || "").trim();
+    const category = String(getVal(CAT_KEYS) || "").trim();
+    const qty = parseFloat(getVal(QTY_KEYS)) || 0;
+    const amount = parseFloat(getVal(AMOUNT_KEYS)) || 0;
+    const billDateStr = String(getVal(DATE_KEYS) || "").trim();
 
     if (billDateStr) {
       const dObj = parseBillDate(billDateStr);
@@ -493,4 +538,5 @@ export function processSalesRowsToMap(salesRows) {
     totalRows: validRowsCount
   };
 }
+
 
