@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import { 
   Package, 
@@ -33,11 +33,155 @@ import {
 
 const COLORS = ['#1a73e8', '#e53935', '#fbc02d', '#43a047', '#8e24aa', '#3949ab', '#039be5', '#00897b', '#fb8c00', '#d81b60'];
 
+function MultiSelect({ label, icon: Icon, options, selected, onChange, placeholder = "Select..." }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredOptions = useMemo(() => {
+    if (!search.trim()) return options;
+    return options.filter(opt => opt.toLowerCase().includes(search.toLowerCase()));
+  }, [options, search]);
+
+  const toggleOption = (opt) => {
+    const cleanSelected = selected.filter(s => s !== "__NONE__");
+
+    if (selected.length === 0) {
+      const newSel = options.filter(o => o !== opt);
+      onChange(newSel);
+    } else if (cleanSelected.includes(opt)) {
+      const newSel = cleanSelected.filter(s => s !== opt);
+      if (newSel.length === 0) {
+        onChange(["__NONE__"]);
+      } else {
+        onChange(newSel);
+      }
+    } else {
+      const newSel = [...cleanSelected, opt];
+      if (newSel.length === options.length) {
+        onChange([]);
+      } else {
+        onChange(newSel);
+      }
+    }
+  };
+
+  const handleSelectAll = () => {
+    onChange([]);
+    setSearch("");
+  };
+
+  const handleClearAll = () => {
+    onChange(["__NONE__"]);
+    setSearch("");
+  };
+
+  const getDisplayText = () => {
+    if (selected.length === 0) return `All ${label}s (${options.length})`;
+    if (selected.length === 1 && selected[0] === "__NONE__") return `0 Selected (None)`;
+    if (selected.length === 1) return selected[0];
+    return `${selected.length} Selected`;
+  };
+
+  return (
+    <div className="w-full relative" ref={dropdownRef}>
+      <label className="flex items-center gap-2 text-sm font-medium text-[#5f6368] dark:text-gray-300 mb-2">
+        {Icon && <Icon size={16} />} {label}
+      </label>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border-none rounded-lg px-4 py-3 text-[#202124] dark:text-white focus:ring-2 focus:ring-[#1a73e8] outline-none font-medium transition-all text-left cursor-pointer"
+      >
+        <span className="truncate pr-2">{getDisplayText()}</span>
+        <ChevronDown size={18} className={`text-[#5f6368] dark:text-gray-300 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.15 }}
+            className="absolute z-[100] left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-700 p-3 max-h-80 flex flex-col"
+          >
+            <div className="relative mb-2">
+              <Search size={14} className="absolute left-2.5 top-2.5 text-gray-400" />
+              <input
+                type="text"
+                placeholder={`Search ${label.toLowerCase()}...`}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-lg outline-none focus:border-[#1a73e8] text-gray-800 dark:text-gray-200"
+              />
+            </div>
+
+            <div className="flex items-center justify-between px-1 py-1 mb-2 border-b border-gray-100 dark:border-slate-700 text-xs font-medium">
+              <button
+                type="button"
+                onClick={handleSelectAll}
+                className="text-[#1a73e8] hover:underline"
+              >
+                Select All ({options.length})
+              </button>
+              <button
+                type="button"
+                onClick={handleClearAll}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                Clear All
+              </button>
+            </div>
+
+            <div className="overflow-y-auto flex-1 space-y-1 pr-1 custom-scrollbar">
+              {filteredOptions.length === 0 ? (
+                <div className="text-xs text-center py-4 text-gray-400">No matching options</div>
+              ) : (
+                filteredOptions.map((opt) => {
+                  const isChecked = selected.length === 0 || (selected[0] !== "__NONE__" && selected.includes(opt));
+                  return (
+                    <div
+                      key={opt}
+                      onClick={() => toggleOption(opt)}
+                      className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700/60 cursor-pointer text-xs transition-colors select-none"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        readOnly
+                        className="pointer-events-none rounded border-gray-300 text-[#1a73e8] focus:ring-[#1a73e8]"
+                      />
+                      <span className={`truncate flex-1 ${isChecked ? 'font-medium text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`}>
+                        {opt}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function StockAnalyzer() {
   const [stockData, setStockData] = useState(null);
   const [isParsing, setIsParsing] = useState(false);
-  const [selectedStore, setSelectedStore] = useState("All Stores");
-  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [selectedStores, setSelectedStores] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedStateFilter, setSelectedStateFilter] = useState("All States");
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedRows, setExpandedRows] = useState(new Set());
@@ -142,8 +286,8 @@ export default function StockAnalyzer() {
 
   const handleReset = () => {
     setStockData(null);
-    setSelectedStore("All Stores");
-    setSelectedCategory("All Categories");
+    setSelectedStores([]);
+    setSelectedCategories([]);
     setSelectedStateFilter("All States");
     setSearchTerm("");
     setExpandedRows(new Set());
@@ -180,8 +324,19 @@ export default function StockAnalyzer() {
     let filtered = stockData.filter(row => {
       const state = getStateFromBranch(row.branch);
       const matchState = selectedStateFilter === "All States" || state === selectedStateFilter;
-      const matchStore = selectedStore === "All Stores" || row.branch === selectedStore;
-      const matchCat = selectedCategory === "All Categories" || row.gender === selectedCategory;
+      
+      const matchStore = selectedStores.length === 0 
+        ? true 
+        : selectedStores.includes("__NONE__") 
+        ? false 
+        : selectedStores.includes(row.branch);
+
+      const matchCat = selectedCategories.length === 0 
+        ? true 
+        : selectedCategories.includes("__NONE__") 
+        ? false 
+        : selectedCategories.includes(row.gender);
+
       const searchTerms = searchTerm.split(',').map(t => t.trim().toLowerCase()).filter(t => t !== "");
       const matchSearch = searchTerms.length === 0 || searchTerms.some(term => 
         row.item.toLowerCase().includes(term) || 
@@ -211,7 +366,7 @@ export default function StockAnalyzer() {
 
     // Chart Data Formulation
     let chartResult = [];
-    if (searchTerm !== "" && selectedStore === "All Stores") {
+    if (searchTerm !== "" && selectedStores.length === 0) {
       // Group by Store when searching
       const grouped = {};
       filtered.forEach(r => {
@@ -221,7 +376,7 @@ export default function StockAnalyzer() {
         .map(([name, val]) => ({ name: name.split('-')[0].trim(), value: val, fullName: name }))
         .sort((a, b) => b.value - a.value)
         .slice(0, 15);
-    } else if (selectedStore !== "All Stores" && selectedCategory !== "All Categories") {
+    } else if (selectedStores.length === 1 && selectedCategories.length === 1 && selectedStores[0] !== "__NONE__" && selectedCategories[0] !== "__NONE__") {
       // Group by Item Name
       const grouped = {};
       filtered.forEach(r => {
@@ -231,7 +386,7 @@ export default function StockAnalyzer() {
         .map(([name, val]) => ({ name, value: val }))
         .sort((a, b) => b.value - a.value)
         .slice(0, 10);
-    } else if (selectedCategory !== "All Categories") {
+    } else if (selectedCategories.length > 0) {
       // Group by Store
       const grouped = {};
       filtered.forEach(r => {
@@ -317,7 +472,7 @@ export default function StockAnalyzer() {
       metrics: metricsData,
       chartData: chartResult
     };
-  }, [stockData, selectedStore, selectedCategory, selectedStateFilter, searchTerm]);
+  }, [stockData, selectedStores, selectedCategories, selectedStateFilter, searchTerm]);
 
   // Render initial upload screen
   if (!stockData) {
@@ -517,7 +672,7 @@ export default function StockAnalyzer() {
       </div>
 
       {/* Filters */}
-      <div className="google-card p-4 mb-8 bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] shadow-sm grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+      <div className="google-card p-4 mb-8 bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] shadow-sm grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end relative z-30">
         <div className="w-full">
           <label className="flex items-center gap-2 text-sm font-medium text-[#5f6368] dark:text-gray-300 mb-2">
             <Filter size={16} /> State
@@ -527,7 +682,7 @@ export default function StockAnalyzer() {
               value={selectedStateFilter}
               onChange={(e) => {
                 setSelectedStateFilter(e.target.value);
-                setSelectedStore("All Stores");
+                setSelectedStores([]);
               }}
               className="w-full appearance-none bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border-none rounded-lg px-4 py-3 text-[#202124] dark:text-white focus:ring-2 focus:ring-[#1a73e8] outline-none font-medium transition-shadow cursor-pointer"
             >
@@ -542,45 +697,25 @@ export default function StockAnalyzer() {
         </div>
 
         <div className="w-full">
-          <label className="flex items-center gap-2 text-sm font-medium text-[#5f6368] dark:text-gray-300 mb-2">
-            <Store size={16} /> Select Branch
-          </label>
-          <div className="relative">
-            <select
-              value={selectedStore}
-              onChange={(e) => setSelectedStore(e.target.value)}
-              className="w-full appearance-none bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border-none rounded-lg px-4 py-3 text-[#202124] dark:text-white focus:ring-2 focus:ring-[#1a73e8] outline-none font-medium transition-shadow cursor-pointer"
-            >
-              <option value="All Stores">All Stores</option>
-              {stores.map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-              <svg className="w-4 h-4 text-[#5f6368] dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-            </div>
-          </div>
+          <MultiSelect
+            label="Branch"
+            icon={Store}
+            options={stores}
+            selected={selectedStores}
+            onChange={setSelectedStores}
+            placeholder="Select Branches..."
+          />
         </div>
 
         <div className="w-full">
-          <label className="flex items-center gap-2 text-sm font-medium text-[#5f6368] dark:text-gray-300 mb-2">
-            <Layers size={16} /> Category (Gender)
-          </label>
-          <div className="relative">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full appearance-none bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border-none rounded-lg px-4 py-3 text-[#202124] dark:text-white focus:ring-2 focus:ring-[#1a73e8] outline-none font-medium transition-shadow cursor-pointer"
-            >
-              <option value="All Categories">All Categories</option>
-              {categories.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-              <svg className="w-4 h-4 text-[#5f6368] dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-            </div>
-          </div>
+          <MultiSelect
+            label="Category"
+            icon={Layers}
+            options={categories}
+            selected={selectedCategories}
+            onChange={setSelectedCategories}
+            placeholder="Select Categories..."
+          />
         </div>
 
         <div className="w-full relative">
@@ -653,11 +788,11 @@ export default function StockAnalyzer() {
         <div className="lg:col-span-1">
           <div className="google-card p-6 h-full min-h-[400px]">
             <h3 className="text-lg font-medium text-[#202124] dark:text-white mb-1">
-              {searchTerm !== "" && selectedStore === "All Stores"
+              {searchTerm !== "" && selectedStores.length === 0
                 ? "Search Results by Branch"
-                : selectedStore !== "All Stores" && selectedCategory !== "All Categories" 
+                : selectedStores.length > 0 && selectedCategories.length > 0 
                 ? "Top Models by Quantity" 
-                : selectedCategory !== "All Categories" 
+                : selectedCategories.length > 0 
                   ? "Distribution by Branch" 
                   : "Distribution by Category"}
             </h3>
@@ -666,7 +801,7 @@ export default function StockAnalyzer() {
             <div className="w-full h-[300px]">
               {chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  {searchTerm === "" && selectedStore === "All Stores" && selectedCategory === "All Categories" ? (
+                  {searchTerm === "" && selectedStores.length === 0 && selectedCategories.length === 0 ? (
                     <PieChart>
                       <Pie
                         data={chartData}
@@ -719,7 +854,7 @@ export default function StockAnalyzer() {
             </div>
             
             {/* Legend for Pie Chart */}
-            {searchTerm === "" && selectedStore === "All Stores" && selectedCategory === "All Categories" && chartData.length > 0 && (
+            {searchTerm === "" && selectedStores.length === 0 && selectedCategories.length === 0 && chartData.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-2 justify-center">
                 {chartData.slice(0, 8).map((entry, index) => (
                   <div key={entry.name} className="flex items-center gap-1.5 text-xs text-[#5f6368] dark:text-gray-300">
@@ -792,7 +927,7 @@ export default function StockAnalyzer() {
                                 <span className="text-[11px] text-[#0f9d58] bg-[#e6f4ea] px-1.5 py-0.5 rounded font-medium">
                                   {row.mainProduct}
                                 </span>
-                                {selectedCategory === "All Categories" && (
+                                {(selectedCategories.length === 0 || selectedCategories.length > 1) && (
                                   <span className="text-[11px] text-[#1a73e8] bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] px-1.5 py-0.5 rounded font-medium">
                                     {row.gender}
                                   </span>
