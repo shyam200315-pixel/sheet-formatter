@@ -106,10 +106,10 @@ export function normalizeStoreName(storeName) {
   if (clean.includes("BARSHI") || clean.includes("BTW")) {
     return "WMH006 - BTW - BARSHI";
   }
-  if (clean.includes("PUN") || clean.includes("PIMPRI") || clean.includes("RAVET")) {
+  if (clean.includes("WMH007") || clean.includes("PIMPRI") || clean.includes("RAVET")) {
     return "WMH007 - PUN - RAVET PUNE";
   }
-  if (clean.includes("SATNA") || clean.includes("STN")) {
+  if (clean.includes("SATNA")) {
     return "WMP005 - STA - SATNA";
   }
   if (clean.includes("SEHORE")) {
@@ -492,11 +492,11 @@ export const extractStoreCode = (branchStr) => {
  * State extraction (MH vs MP)
  */
 export const getStateFromStore = (storeStr) => {
-  if (!storeStr || typeof storeStr !== "string") return "MH";
+  if (!storeStr || typeof storeStr !== "string") return "OTHER";
   const upper = storeStr.toUpperCase().trim();
-  if (upper.startsWith("WMP") || upper.includes(" MP")) return "MP";
-  if (upper.startsWith("WMH") || upper.includes(" MH")) return "MH";
-  return "MH";
+  if (upper.startsWith("WMP") || upper.includes("WMP")) return "MP";
+  if (upper.startsWith("WMH") || upper.includes("WMH")) return "MH";
+  return "OTHER";
 };
 
 /**

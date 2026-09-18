@@ -31,9 +31,19 @@ import {
 import HistoricalSales from "./components/HistoricalSales";
 import DeadStockAnalyzer from "./components/DeadStockAnalyzer";
 import InstitutionalChecker from "./components/InstitutionalChecker";
-import { Lock } from 'lucide-react';
+import StoreCashAnalyzer from "./components/StoreCashAnalyzer";
+import { Lock, Wallet } from 'lucide-react';
 
 const TOOLS = [
+  {
+    id: "store-cash",
+    title: "Store Cash & Ledger Analyzer",
+    description: "Analyze Cash In Hand for MP & MH stores with Blue Line vs Combined mode toggle.",
+    icon: <Wallet className="w-8 h-8 text-emerald-600" />,
+    color: "bg-emerald-100",
+    borderColor: "border-emerald-200",
+    hoverBorder: "hover:border-emerald-400"
+  },
   {
     id: "institutional",
     title: "Institutional Offers & Slab Rates",
@@ -713,6 +723,16 @@ export default function App() {
                     transition={{ duration: 0.2 }}
                   >
                     <InstitutionalChecker onBack={() => setActiveTab("home")} />
+                  </motion.div>
+                ) : activeTab === "store-cash" ? (
+                  <motion.div
+                    key="store-cash-tab"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <StoreCashAnalyzer onBack={() => setActiveTab("home")} />
                   </motion.div>
                 ) : activeTab === "dead-stock" ? (
                   <motion.div
