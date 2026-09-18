@@ -20,6 +20,9 @@ export default function HistoricalSales() {
   // Query state
   const [stores, setStores] = useState([]);
   const [selectedStores, setSelectedStores] = useState([]);
+  const [storeMaxDates, setStoreMaxDates] = useState({});
+  const [dbLatestDate, setDbLatestDate] = useState(null);
+
   const formatMonth = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
   const defaultEnd = new Date();
   const defaultStart = new Date();
@@ -27,6 +30,20 @@ export default function HistoricalSales() {
 
   const [startMonth, setStartMonth] = useState(formatMonth(defaultStart));
   const [endMonth, setEndMonth] = useState(formatMonth(defaultEnd));
+
+  const formatDateShort = (d) => {
+    if (!d || isNaN(d.getTime())) return "";
+    const day = d.getDate();
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return `${day} ${monthNames[d.getMonth()]}`;
+  };
+
+  const formatDateFull = (d) => {
+    if (!d || isNaN(d.getTime())) return "";
+    const day = d.getDate();
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return `${day} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+  };
 
   // Check if data exists on mount
   useEffect(() => {
@@ -177,13 +194,31 @@ export default function HistoricalSales() {
 
   const extractStores = (data) => {
     const storeSet = new Set();
+    const datesMap = {};
+    let overallMax = null;
+
     data.forEach(row => {
       const sName = getStoreNameVal(row);
       if (sName) {
         storeSet.add(sName);
+        const rawDate = getRowVal(row, DATE_KEYS);
+        let parsedDate = parseBillDate(rawDate);
+        if (!parsedDate && rawDate) parsedDate = new Date(rawDate);
+
+        if (parsedDate && !isNaN(parsedDate.getTime())) {
+          if (!datesMap[sName] || parsedDate > datesMap[sName]) {
+            datesMap[sName] = parsedDate;
+          }
+          if (!overallMax || parsedDate > overallMax) {
+            overallMax = parsedDate;
+          }
+        }
       }
     });
+
     setStores(Array.from(storeSet).sort());
+    setStoreMaxDates(datesMap);
+    setDbLatestDate(overallMax);
   };
 
   const handleLogin = (e) => {
@@ -243,6 +278,8 @@ export default function HistoricalSales() {
         setDbData(null);
         setStores([]);
         setSelectedStores([]);
+        setStoreMaxDates({});
+        setDbLatestDate(null);
         toast.success("Database cleared.");
       } catch (err) {
         console.error(err);
@@ -319,7 +356,7 @@ export default function HistoricalSales() {
     const filteredData = parsedData.filter(row => row._parsedDate >= startDateObj && row._parsedDate <= endDateObj);
 
     // Aggregate by month (MMM-YYYY)
-    const monthMap = {}; // { 'Aug-2025': { _dateObj, store1: { rev, qty, billsSet }, store2: ... } }
+    const monthMap = {}; // { 'Aug-2025': { _dateObj, _maxDate, store1: { rev, qty, billsSet, maxDate }, store2: ... } }
 
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -333,10 +370,17 @@ export default function HistoricalSales() {
       const billNo = getBillNoVal(row, row._originalIdx || 0);
 
       if (!monthMap[monthKey]) {
-        monthMap[monthKey] = { _dateObj: new Date(d.getFullYear(), d.getMonth(), 1) };
+        monthMap[monthKey] = { 
+          _dateObj: new Date(d.getFullYear(), d.getMonth(), 1),
+          _maxDate: null 
+        };
         selectedStores.forEach(s => {
-          monthMap[monthKey][s] = { rev: 0, qty: 0, billsSet: new Set() };
+          monthMap[monthKey][s] = { rev: 0, qty: 0, billsSet: new Set(), maxDate: null };
         });
+      }
+
+      if (!monthMap[monthKey]._maxDate || d > monthMap[monthKey]._maxDate) {
+        monthMap[monthKey]._maxDate = d;
       }
       
       if (monthMap[monthKey][storeName]) {
@@ -345,6 +389,9 @@ export default function HistoricalSales() {
         if (billNo) {
           monthMap[monthKey][storeName].billsSet.add(billNo);
         }
+        if (!monthMap[monthKey][storeName].maxDate || d > monthMap[monthKey][storeName].maxDate) {
+          monthMap[monthKey][storeName].maxDate = d;
+        }
       }
     });
 
@@ -352,19 +399,29 @@ export default function HistoricalSales() {
     const sortedMonths = Object.keys(monthMap).sort((a, b) => monthMap[a]._dateObj - monthMap[b]._dateObj);
     
     const finalAggregated = sortedMonths.map(m => {
-      const res = { Month: m };
+      const rowMaxDate = monthMap[m]._maxDate;
+      const mtdLabel = rowMaxDate ? `Till ${formatDateShort(rowMaxDate)}` : "";
+      const res = { 
+        Month: m,
+        _maxDate: rowMaxDate,
+        mtdLabel: mtdLabel
+      };
+
       selectedStores.forEach(s => {
         const rev = monthMap[m][s].rev;
         const qty = monthMap[m][s].qty;
         const bills = monthMap[m][s].billsSet.size;
         const abv = bills > 0 ? rev / bills : 0;
         const upt = bills > 0 ? qty / bills : 0;
+        const sMaxDate = monthMap[m][s].maxDate;
 
         res[`${s} Sales`] = rev;
         res[`${s} Qty`] = qty;
         res[`${s} Bills`] = bills;
         res[`${s} ABV`] = abv;
         res[`${s} UPT`] = upt;
+        res[`${s} MaxDate`] = sMaxDate;
+        res[`${s} MtdLabel`] = sMaxDate ? `Till ${formatDateShort(sMaxDate)}` : "";
       });
       return res;
     });
@@ -424,8 +481,10 @@ export default function HistoricalSales() {
     const totals = {};
     selectedStores.forEach(s => totals[s] = { rev: 0, qty: 0, bills: 0 });
 
-    aggregatedData.forEach(row => {
-      const dataRow = [row.Month];
+    aggregatedData.forEach((row, idx) => {
+      const isLastRow = idx === aggregatedData.length - 1;
+      const monthDisplay = (isLastRow && row.mtdLabel) ? `${row.Month} (${row.mtdLabel})` : row.Month;
+      const dataRow = [monthDisplay];
       selectedStores.forEach(s => {
         const rev = row[`${s} Sales`] || 0;
         const qty = row[`${s} Qty`] || 0;
@@ -632,36 +691,44 @@ export default function HistoricalSales() {
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6"
         >
           <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-5 text-white shadow-lg">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-blue-100 font-medium">Top Performing Store</span>
+              <span className="text-blue-100 font-medium text-sm">Top Store</span>
               <TrendingUp className="w-5 h-5 text-blue-200" />
             </div>
-            <div className="text-2xl font-bold truncate">{insights.bestStore}</div>
-            <div className="text-sm text-blue-200 mt-1">{formatCurrency(insights.bestStoreRev)} All Time</div>
+            <div className="text-xl font-bold truncate">{insights.bestStore}</div>
+            <div className="text-xs text-blue-200 mt-1">{formatCurrency(insights.bestStoreRev)} All Time</div>
           </div>
           <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-2xl p-5 border border-white/80 dark:border-white/10 shadow-lg">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-500 dark:text-gray-400 font-medium">Total Database Revenue</span>
+              <span className="text-gray-500 dark:text-gray-400 font-medium text-xs">Total Revenue</span>
               <DollarSign className="w-5 h-5 text-emerald-500" />
             </div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(insights.totalRev)}</div>
+            <div className="text-xl font-bold text-gray-900 dark:text-white">{formatCurrency(insights.totalRev)}</div>
           </div>
           <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-2xl p-5 border border-white/80 dark:border-white/10 shadow-lg">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-500 dark:text-gray-400 font-medium">Total Database Qty</span>
+              <span className="text-gray-500 dark:text-gray-400 font-medium text-xs">Total Quantity</span>
               <Package className="w-5 h-5 text-purple-500" />
             </div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{insights.totalQty.toLocaleString()} items</div>
+            <div className="text-xl font-bold text-gray-900 dark:text-white">{insights.totalQty.toLocaleString()} items</div>
           </div>
           <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-2xl p-5 border border-white/80 dark:border-white/10 shadow-lg">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-500 dark:text-gray-400 font-medium">Total Bills Made</span>
+              <span className="text-gray-500 dark:text-gray-400 font-medium text-xs">Total Bills</span>
               <Receipt className="w-5 h-5 text-blue-500" />
             </div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{insights.totalBills.toLocaleString()} bills</div>
+            <div className="text-xl font-bold text-gray-900 dark:text-white">{insights.totalBills.toLocaleString()} bills</div>
+          </div>
+          <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-2xl p-5 border border-white/80 dark:border-white/10 shadow-lg border-l-4 border-l-blue-500">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-gray-500 dark:text-gray-400 font-medium text-xs">Data Available Till</span>
+              <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{dbLatestDate ? formatDateFull(dbLatestDate) : "N/A"}</div>
+            <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Latest MTD Date</div>
           </div>
         </motion.div>
       )}
@@ -780,20 +847,33 @@ export default function HistoricalSales() {
                     </tr>
                   </thead>
                   <tbody>
-                    {aggregatedData.map((row, i) => (
-                      <tr key={i} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
-                        <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 dark:text-white">{row.Month}</td>
-                        {selectedStores.map(store => (
-                          <React.Fragment key={store}>
-                            <td className="px-4 py-3 border-l border-gray-100 dark:border-gray-800">{formatCurrency(row[`${store} Sales`] || 0, 0)}</td>
-                            <td className="px-4 py-3 bg-gray-50/50 dark:bg-slate-800/30">{(row[`${store} Qty`] || 0).toLocaleString()}</td>
-                            <td className="px-4 py-3 bg-blue-50/30 dark:bg-blue-900/10 font-semibold text-blue-600 dark:text-blue-400">{(row[`${store} Bills`] || 0).toLocaleString()}</td>
-                            <td className="px-4 py-3 bg-amber-50/30 dark:bg-amber-900/10 font-semibold text-amber-600 dark:text-amber-400">{formatCurrency(row[`${store} ABV`] || 0, 2)}</td>
-                            <td className="px-4 py-3 bg-purple-50/30 dark:bg-purple-900/10 font-semibold text-purple-600 dark:text-purple-400">{(row[`${store} UPT`] || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</td>
-                          </React.Fragment>
-                        ))}
-                      </tr>
-                    ))}
+                    {aggregatedData.map((row, i) => {
+                      const isLastRow = i === aggregatedData.length - 1;
+                      return (
+                        <tr key={i} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
+                          <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                            <div className="flex flex-col items-start">
+                              <span className="font-semibold text-gray-900 dark:text-white">{row.Month}</span>
+                              {isLastRow && row.mtdLabel && (
+                                <span className="inline-flex items-center px-2 py-0.5 mt-1 rounded text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 border border-blue-200 dark:border-blue-800/50">
+                                  <Calendar className="w-3 h-3 mr-1 text-blue-600 dark:text-blue-400" />
+                                  {row.mtdLabel}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          {selectedStores.map(store => (
+                            <React.Fragment key={store}>
+                              <td className="px-4 py-3 border-l border-gray-100 dark:border-gray-800">{formatCurrency(row[`${store} Sales`] || 0, 0)}</td>
+                              <td className="px-4 py-3 bg-gray-50/50 dark:bg-slate-800/30">{(row[`${store} Qty`] || 0).toLocaleString()}</td>
+                              <td className="px-4 py-3 bg-blue-50/30 dark:bg-blue-900/10 font-semibold text-blue-600 dark:text-blue-400">{(row[`${store} Bills`] || 0).toLocaleString()}</td>
+                              <td className="px-4 py-3 bg-amber-50/30 dark:bg-amber-900/10 font-semibold text-amber-600 dark:text-amber-400">{formatCurrency(row[`${store} ABV`] || 0, 2)}</td>
+                              <td className="px-4 py-3 bg-purple-50/30 dark:bg-purple-900/10 font-semibold text-purple-600 dark:text-purple-400">{(row[`${store} UPT`] || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</td>
+                            </React.Fragment>
+                          ))}
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

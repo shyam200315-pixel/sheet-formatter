@@ -188,7 +188,94 @@ const ToolCard = ({ tool, onClick }) => {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("home");
+  const [visitedTabs, setVisitedTabs] = useState(() => new Set(["home"]));
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    if (activeTab) {
+      setVisitedTabs(prev => {
+        if (prev.has(activeTab)) return prev;
+        const next = new Set(prev);
+        next.add(activeTab);
+        return next;
+      });
+    }
+  }, [activeTab]);
+
+  // Global Shortcut: Enter + 0 (or Shift + Enter + 0) to cycle through bottom dock tabs
+  useEffect(() => {
+    const activeKeys = new Set();
+
+    const DOCK_LABELS = {
+      'home': 'Home Workspace',
+      'store-cash': 'Store Cash Analyzer',
+      'institutional': 'Institutional Checker',
+      'validator': 'Daily Sales Report',
+      'dead-stock': 'Dead Stock Analyzer',
+      'best-sellers': 'Best Sellers Analyzer',
+      'orders': 'Order Processing',
+      'generator': 'Requirement Generator',
+      'stock': 'Stock & Scrap Analyzer',
+      'inward-tracker': 'Inward Tracker',
+      'mrp': 'MRP & Scheme Checker',
+      'quotation': 'Quotation Generator'
+    };
+
+    const handleKeyDown = (e) => {
+      activeKeys.add(e.code);
+      activeKeys.add(e.key);
+
+      const isEnter = activeKeys.has("Enter") || activeKeys.has("NumpadEnter") || e.key === "Enter";
+      const isZero = activeKeys.has("Digit0") || activeKeys.has("Numpad0") || e.key === "0" || e.code === "Digit0" || e.code === "Numpad0";
+
+      if (isEnter && isZero) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const dockIds = [
+          'home', 'store-cash', 'institutional', 'validator', 
+          'dead-stock', 'best-sellers', 'orders', 'generator', 
+          'stock', 'inward-tracker', 'mrp', 'quotation'
+        ];
+
+        setActiveTab(currentTab => {
+          const currentIndex = dockIds.indexOf(currentTab);
+          let nextIndex;
+          if (e.shiftKey) {
+            nextIndex = (currentIndex - 1 + dockIds.length) % dockIds.length;
+          } else {
+            nextIndex = (currentIndex + 1) % dockIds.length;
+          }
+          const nextTab = dockIds[nextIndex];
+          toast(`Switched to ${DOCK_LABELS[nextTab] || nextTab}`, {
+            id: 'shortcut-tab-switch',
+            icon: '🔄',
+            duration: 1500
+          });
+          return nextTab;
+        });
+      }
+    };
+
+    const handleKeyUp = (e) => {
+      activeKeys.delete(e.code);
+      activeKeys.delete(e.key);
+    };
+
+    const handleWindowBlur = () => {
+      activeKeys.clear();
+    };
+
+    window.addEventListener("keydown", handleKeyDown, true);
+    window.addEventListener("keyup", handleKeyUp, true);
+    window.addEventListener("blur", handleWindowBlur);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown, true);
+      window.removeEventListener("keyup", handleKeyUp, true);
+      window.removeEventListener("blur", handleWindowBlur);
+    };
+  }, []);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -254,15 +341,6 @@ export default function App() {
   const [validationSuccess, setValidationSuccess] = useState(false);
   const [monthlyTarget, setMonthlyTarget] = useState(8985000);
   const [monthlyCommitment, setMonthlyCommitment] = useState(8985000);
-
-  // Reset validator state when tab changes to open afresh
-  useEffect(() => {
-    if (activeTab !== "validator") {
-      setReportData(null);
-      setError("");
-      setValidationSuccess(false);
-    }
-  }, [activeTab]);
 
   const handleFileSelect = (file) => {
     setError("");
@@ -540,222 +618,176 @@ export default function App() {
 
 
         <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-8 relative z-10">
-          <AnimatePresence mode="wait">
-            {activeTab === "home" ? (
-                  <motion.div
-                    key="home-dashboard"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="w-full"
-                  >
-                    <div className="relative w-full">
-                      <div className="text-center mb-12 relative z-10">
-                        <motion.h1 
-                          initial={{ opacity: 0, y: -20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="text-4xl font-medium text-[#202124] dark:text-white tracking-tight mb-3"
-                        >
-                          Welcome to your Workspace
-                        </motion.h1>
-                        <motion.p 
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.2 }}
-                          className="text-lg text-[#5f6368] dark:text-gray-300"
-                        >
-                          Select a tool below to begin your work today.
-                        </motion.p>
+          {/* Home Dashboard */}
+          <div className={activeTab === "home" ? "w-full block" : "hidden"}>
+            <div className="relative w-full">
+              <div className="text-center mb-12 relative z-10">
+                <motion.h1 
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-4xl font-medium text-[#202124] dark:text-white tracking-tight mb-3"
+                >
+                  Welcome to your Workspace
+                </motion.h1>
+                <motion.p 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-lg text-[#5f6368] dark:text-gray-300"
+                >
+                  Select a tool below to begin your work today.
+                </motion.p>
+              </div>
+              
+              <motion.div 
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative z-10"
+                onMouseMove={handleGridMouseMove}
+                onMouseLeave={handleGridMouseLeave}
+                initial="hidden"
+                animate="show"
+                variants={{
+                  hidden: { opacity: 0 },
+                  show: {
+                    opacity: 1,
+                    transition: {
+                      staggerChildren: 0.1
+                    }
+                  }
+                }}
+              >
+                {TOOLS.map((tool) => (
+                  <ToolCard 
+                    key={tool.id} 
+                    tool={tool} 
+                    onClick={() => setActiveTab(tool.id)} 
+                  />
+                ))}
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Daily Sales Validator */}
+          {visitedTabs.has("validator") && (
+            <div className={activeTab === "validator" ? "w-full block" : "hidden"}>
+              {!reportData ? (
+                <div className="flex flex-col items-center mt-6">
+                  <h1 className="text-3xl font-normal text-[#202124] dark:text-white mb-2 text-center">
+                    Upload a spreadsheet to begin
+                  </h1>
+                  <p className="text-[#5f6368] dark:text-gray-300 mb-10 text-center max-w-lg">
+                    Drag and drop your daily sales Excel report to instantly calculate DRR, view store metrics, and generate text reports.
+                  </p>
+
+                  <div className="md:hidden w-full max-w-md bg-white dark:bg-slate-800/60 border border-[#dadce0] dark:border-slate-700 rounded-lg p-4 mb-6 shadow-sm flex flex-col gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-[#5f6368] dark:text-gray-300 mb-1">Monthly Target (₹)</label>
+                      <div className="google-input w-full p-2 text-sm bg-gray-50 dark:bg-slate-700">
+                        {monthlyTarget}
                       </div>
-                      
-                      <motion.div 
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 relative z-10"
-                        onMouseMove={handleGridMouseMove}
-                        onMouseLeave={handleGridMouseLeave}
-                        initial="hidden"
-                        animate="show"
-                        variants={{
-                          hidden: { opacity: 0 },
-                          show: {
-                            opacity: 1,
-                            transition: {
-                              staggerChildren: 0.1
-                            }
-                          }
-                        }}
-                      >
-                        {TOOLS.map((tool) => (
-                          <ToolCard 
-                            key={tool.id} 
-                            tool={tool} 
-                            onClick={() => setActiveTab(tool.id)} 
-                          />
-                        ))}
-                      </motion.div>
                     </div>
-                  </motion.div>
-                ) : activeTab === "validator" ? (
-                  <motion.div
-                    key="validator-tab"
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 10 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {!reportData ? (
-                      <div className="flex flex-col items-center mt-6">
-                        <h1 className="text-3xl font-normal text-[#202124] dark:text-white mb-2 text-center">
-                          Upload a spreadsheet to begin
-                        </h1>
-                        <p className="text-[#5f6368] dark:text-gray-300 mb-10 text-center max-w-lg">
-                          Drag and drop your daily sales Excel report to instantly calculate DRR, view store metrics, and generate text reports.
-                        </p>
+                  </div>
 
-                        <div className="md:hidden w-full max-w-md bg-white dark:bg-slate-800/60 border border-[#dadce0] dark:border-slate-700 rounded-lg p-4 mb-6 shadow-sm flex flex-col gap-4">
-                          <div>
-                            <label className="block text-xs font-medium text-[#5f6368] dark:text-gray-300 mb-1">Monthly Target (₹)</label>
-                            <div className="google-input w-full p-2 text-sm bg-gray-50 dark:bg-slate-700">
-                              {monthlyTarget}
-                            </div>
-                          </div>
-                        </div>
+                  <div className="w-full max-w-2xl">
+                    <FileDropZone 
+                      onFileSelect={handleFileSelect} 
+                      error={error} 
+                      validationSuccess={validationSuccess} 
+                    />
+                    <p className="text-center text-sm text-[#5f6368] dark:text-gray-300 mt-4">
+                      <em>Note: The option to upload your Closing Stock file (for Scrap calculations) will appear on the dashboard after you upload this sales report.</em>
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full">
+                  <DashboardView 
+                    reportData={reportData} 
+                    monthlyTarget={monthlyTarget}
+                    monthlyCommitment={monthlyCommitment}
+                    onTargetChange={handleTargetChange}
+                    onReset={handleReset} 
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
-                        <div className="w-full max-w-2xl">
-                          <FileDropZone 
-                            onFileSelect={handleFileSelect} 
-                            error={error} 
-                            validationSuccess={validationSuccess} 
-                          />
-                          <p className="text-center text-sm text-[#5f6368] dark:text-gray-300 mt-4">
-                            <em>Note: The option to upload your Closing Stock file (for Scrap calculations) will appear on the dashboard after you upload this sales report.</em>
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="w-full">
-                        <DashboardView 
-                          reportData={reportData} 
-                          monthlyTarget={monthlyTarget}
-                          monthlyCommitment={monthlyCommitment}
-                          onTargetChange={handleTargetChange}
-                          onReset={handleReset} 
-                        />
-                      </div>
-                    )}
-                  </motion.div>
-                ) : activeTab === "orders" ? (
-                  <motion.div
-                    key="orders-tab"
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <OrderProcessing />
-                  </motion.div>
-                ) : activeTab === "generator" ? (
-                  <motion.div
-                    key="generator-tab"
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <RequirementGenerator />
-                  </motion.div>
-                ) : activeTab === "mrp" ? (
-                  <motion.div
-                    key="mrp-tab"
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <MRPChecker />
-                  </motion.div>
-                ) : activeTab === "quotation" ? (
-                  <motion.div
-                    key="quotation-tab"
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <QuotationGenerator />
-                  </motion.div>
-                ) : activeTab === "stock" ? (
-                  <motion.div
-                    key="stock-tab"
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <StockAnalyzer />
-                  </motion.div>
-                ) : activeTab === "inward-tracker" ? (
-                  <motion.div
-                    key="inward-tracker-tab"
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <InwardTracker />
-                  </motion.div>
-                ) : activeTab === "historical-sales" ? (
-                  <motion.div
-                    key="historical-sales-tab"
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <HistoricalSales />
-                  </motion.div>
-                ) : activeTab === "institutional" ? (
-                  <motion.div
-                    key="institutional-tab"
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <InstitutionalChecker onBack={() => setActiveTab("home")} />
-                  </motion.div>
-                ) : activeTab === "store-cash" ? (
-                  <motion.div
-                    key="store-cash-tab"
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <StoreCashAnalyzer onBack={() => setActiveTab("home")} />
-                  </motion.div>
-                ) : activeTab === "dead-stock" ? (
-                  <motion.div
-                    key="dead-stock-tab"
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <DeadStockAnalyzer onBack={() => setActiveTab("home")} />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="best-sellers-tab"
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <BestSellers />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+          {/* Order Processing */}
+          {visitedTabs.has("orders") && (
+            <div className={activeTab === "orders" ? "w-full block" : "hidden"}>
+              <OrderProcessing />
+            </div>
+          )}
+
+          {/* Requirement Generator */}
+          {visitedTabs.has("generator") && (
+            <div className={activeTab === "generator" ? "w-full block" : "hidden"}>
+              <RequirementGenerator />
+            </div>
+          )}
+
+          {/* MRP & Scheme Checker */}
+          {visitedTabs.has("mrp") && (
+            <div className={activeTab === "mrp" ? "w-full block" : "hidden"}>
+              <MRPChecker />
+            </div>
+          )}
+
+          {/* Quotation Generator */}
+          {visitedTabs.has("quotation") && (
+            <div className={activeTab === "quotation" ? "w-full block" : "hidden"}>
+              <QuotationGenerator />
+            </div>
+          )}
+
+          {/* Stock Analyzer */}
+          {visitedTabs.has("stock") && (
+            <div className={activeTab === "stock" ? "w-full block" : "hidden"}>
+              <StockAnalyzer />
+            </div>
+          )}
+
+          {/* Inward Tracker */}
+          {visitedTabs.has("inward-tracker") && (
+            <div className={activeTab === "inward-tracker" ? "w-full block" : "hidden"}>
+              <InwardTracker />
+            </div>
+          )}
+
+          {/* Historical Sales */}
+          {visitedTabs.has("historical-sales") && (
+            <div className={activeTab === "historical-sales" ? "w-full block" : "hidden"}>
+              <HistoricalSales />
+            </div>
+          )}
+
+          {/* Institutional Checker */}
+          {visitedTabs.has("institutional") && (
+            <div className={activeTab === "institutional" ? "w-full block" : "hidden"}>
+              <InstitutionalChecker onBack={() => setActiveTab("home")} />
+            </div>
+          )}
+
+          {/* Store Cash Analyzer */}
+          {visitedTabs.has("store-cash") && (
+            <div className={activeTab === "store-cash" ? "w-full block" : "hidden"}>
+              <StoreCashAnalyzer onBack={() => setActiveTab("home")} />
+            </div>
+          )}
+
+          {/* Dead Stock Analyzer */}
+          {visitedTabs.has("dead-stock") && (
+            <div className={activeTab === "dead-stock" ? "w-full block" : "hidden"}>
+              <DeadStockAnalyzer onBack={() => setActiveTab("home")} />
+            </div>
+          )}
+
+          {/* Best Sellers */}
+          {visitedTabs.has("best-sellers") && (
+            <div className={activeTab === "best-sellers" ? "w-full block" : "hidden"}>
+              <BestSellers />
+            </div>
+          )}
         </main>
 
         {/* macOS Dock */}
