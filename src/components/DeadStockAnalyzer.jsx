@@ -190,7 +190,7 @@ export default function DeadStockAnalyzer({ onBack }) {
             return;
           }
 
-          await appendHistoricalData(jsonData);
+          await appendHistoricalData(jsonData, file.name);
           const freshData = await loadHistoricalData();
           const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(freshData);
           setSalesDataRaw(salesMap);
@@ -275,7 +275,7 @@ export default function DeadStockAnalyzer({ onBack }) {
 
         // Auto append to local IndexedDB to persist for future sessions
         try {
-          await appendHistoricalData(jsonData);
+          await appendHistoricalData(jsonData, file.name);
           const freshDb = await loadHistoricalData();
           if (freshDb && freshDb.length > 0) {
             setSavedDbCount(freshDb.length);

@@ -350,11 +350,22 @@ export async function loadHistoricalData() {
 /**
  * Append data to IndexedDB
  * @param {Array} newData 
+ * @param {string} [fileName]
  */
-export async function appendHistoricalData(newData) {
+export async function appendHistoricalData(newData, fileName = null) {
   try {
     const existingData = (await loadHistoricalData()) || [];
-    const mergedData = [...existingData, ...newData];
+    const fileId = `file_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const uploadTime = new Date().toISOString();
+
+    const taggedData = newData.map(row => ({
+      ...row,
+      _fileId: row._fileId || fileId,
+      _fileName: row._fileName || fileName || "Uploaded File",
+      _uploadedAt: row._uploadedAt || uploadTime
+    }));
+
+    const mergedData = [...existingData, ...taggedData];
     await saveHistoricalData(mergedData);
     return true;
   } catch (error) {
@@ -445,8 +456,19 @@ export async function syncDailyRowsToHistoricalData(jsonData, worksheet) {
     return !isSameDate;
   });
 
-  // 5. Append new target day rows to filtered DB
-  const updatedDb = [...filteredDb, ...targetDayRows];
+  // 5. Append new target day rows to filtered DB with file tags
+  const dailyFileId = `daily_sync_${targetYear}_${targetMonth + 1}_${targetDay}`;
+  const dailyFileName = `Daily Sync (${todayStr})`;
+  const uploadTime = new Date().toISOString();
+
+  const taggedTargetRows = targetDayRows.map(row => ({
+    ...row,
+    _fileId: row._fileId || dailyFileId,
+    _fileName: row._fileName || dailyFileName,
+    _uploadedAt: row._uploadedAt || uploadTime
+  }));
+
+  const updatedDb = [...filteredDb, ...taggedTargetRows];
   await saveHistoricalData(updatedDb);
 
   return {
