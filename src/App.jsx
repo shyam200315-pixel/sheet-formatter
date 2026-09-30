@@ -32,9 +32,19 @@ import HistoricalSales from "./components/HistoricalSales";
 import DeadStockAnalyzer from "./components/DeadStockAnalyzer";
 import InstitutionalChecker from "./components/InstitutionalChecker";
 import StoreCashAnalyzer from "./components/StoreCashAnalyzer";
-import { Lock, Wallet } from 'lucide-react';
+import WooqerReports from "./components/WooqerReports";
+import { Lock, Wallet, FileCheck } from 'lucide-react';
 
 const TOOLS = [
+  {
+    id: "wooqer-reports",
+    title: "Wooqer Reports",
+    description: "Consolidated Q3 Audit Summary & Master Store Daily Tracker for Opening, Closing & Mon-Fri Checklists.",
+    icon: <FileCheck className="w-8 h-8 text-blue-600" />,
+    color: "bg-blue-100",
+    borderColor: "border-blue-200",
+    hoverBorder: "hover:border-blue-400"
+  },
   {
     id: "store-cash",
     title: "Store Cash & Ledger Analyzer",
@@ -786,6 +796,13 @@ export default function App() {
           {visitedTabs.has("best-sellers") && (
             <div className={activeTab === "best-sellers" ? "w-full block" : "hidden"}>
               <BestSellers />
+            </div>
+          )}
+
+          {/* Wooqer Reports */}
+          {visitedTabs.has("wooqer-reports") && (
+            <div className={activeTab === "wooqer-reports" ? "w-full block" : "hidden"}>
+              <WooqerReports onBack={() => setActiveTab("home")} />
             </div>
           )}
         </main>
