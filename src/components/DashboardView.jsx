@@ -39,30 +39,31 @@ import { MASTER_STORES, normalizeStoreName, getKnownStores, saveKnownStores } fr
 
 export const STORE_TARGETS = {
   // Maharashtra (10 stores)
-  "WMH001 - NED - VAZIRABAD": 350000,
+  "WMH001 - NED - VAZIRABAD": 450000,
   "WMH002 - NED - BHAGYA NAGAR": 450000,
-  "WMH003 - BDE - BEED": 800000,
-  "WMH004 - PBN - PARBHANI": 400000,
-  "WMH005 - YTL - YAVATMAL": 1500000,
-  "WMH006 - BTW - BARSHI": 360000,
-  "WMH007 - PUN - RAVET PUNE": 600000,
-  "WMH007 - PUN -RAVET PUNE": 600000,
-  "WMH007 - PUN - PIMPRI": 600000,
-  "WMH008 - STR - SATARA": 450000,
-  "WMH009 - KOP - KOLHAPUR": 450000,
-  "WMH009 - KOP -  KOLHAPUR": 450000,
-  "WMH011 - BDL - BADLAPUR": 550000,
+  "WMH003 - BDE - BEED": 1000000,
+  "WMH004 - PBN - PARBHANI": 500000,
+  "WMH005 - YTL - YAVATMAL": 2000000,
+  "WMH006 - BTW - BARSHI": 600000,
+  "WMH007 - PUN - RAVET PUNE": 800000,
+  "WMH007 - PUN -RAVET PUNE": 800000,
+  "WMP007 - PUN -RAVET PUNE": 800000,
+  "WMH007 - PUN - PIMPRI": 800000,
+  "WMH008 - STR - SATARA": 700000,
+  "WMH009 - KOP - KOLHAPUR": 600000,
+  "WMH009 - KOP -  KOLHAPUR": 600000,
+  "WMH011 - BDL - BADLAPUR": 800000,
   // Madhya Pradesh (8 stores)
-  "WMP001 - BPL - SEHORE CITY": 430000,
-  "WMP002 - BPL - GULMOHAR COLONY": 430000,
-  "WMP003 - IND - MR 09 ROAD": 465000,
-  "WMP004 - IND - ANNAPURNA RD": 350000,
+  "WMP001 - BPL - SEHORE CITY": 300000,
+  "WMP002 - BPL - GULMOHAR COLONY": 400000,
+  "WMP003 - IND - MR 09 ROAD": 400000,
+  "WMP004 - IND - ANNAPURNA RD": 300000,
   "WMP005 - STA - SATNA": 300000,
   "WMP005 - STN - SATNA": 300000,
-  "WMP006 - BPL - KOLAR ROAD": 400000,
-  "WMP006 - BPL -  KOLAR ROAD": 400000,
-  "WMP007 - REW - REWA": 350000,
-  "WMP008 - SVP - SHIVPURI": 350000
+  "WMP006 - BPL - KOLAR ROAD": 300000,
+  "WMP006 - BPL -  KOLAR ROAD": 300000,
+  "WMP007 - REW - REWA": 600000,
+  "WMP008 - SVP - SHIVPURI": 340000
 };
 
 const getStoreTarget = (storeName) => {
@@ -303,13 +304,12 @@ export default function DashboardView({
   const mpMetrics = useMemo(() => {
     const currentDay = today.getDate();
     const remainingDays = totalDays - currentDay;
-    const mpCommitment = 3115000;
+    // Filter MP Stores (starting with WMP)
+    const mpStores = Array.from(allStores).filter(name => name.toUpperCase().includes("WMP"));
+    const mpCommitment = mpStores.reduce((acc, name) => acc + (getStoreTarget(name) || 0), 0) || 2940000;
     
     let mtdSales = 0;
     let todaySales = 0;
-    
-    // Filter MP Stores (starting with WMP)
-    const mpStores = Array.from(allStores).filter(name => name.toUpperCase().includes("WMP"));
     
     for (const row of jsonData) {
       const billDate = parseBillDate(row["BILL DATE"]);
