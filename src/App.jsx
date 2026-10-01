@@ -37,6 +37,15 @@ import { Lock, Wallet, FileCheck } from 'lucide-react';
 
 const TOOLS = [
   {
+    id: "validator",
+    title: "Daily Sales Validator",
+    description: "Calculate DRR, view store metrics, and generate text reports.",
+    icon: <Calculator className="w-8 h-8 text-blue-600" />,
+    color: "bg-blue-100",
+    borderColor: "border-blue-200",
+    hoverBorder: "hover:border-blue-400"
+  },
+  {
     id: "wooqer-reports",
     title: "Wooqer Reports",
     description: "Consolidated Q3 Audit Summary & Master Store Daily Tracker for Opening, Closing & Mon-Fri Checklists.",
@@ -71,15 +80,6 @@ const TOOLS = [
     color: "bg-rose-100",
     borderColor: "border-rose-200",
     hoverBorder: "hover:border-rose-400"
-  },
-  {
-    id: "validator",
-    title: "Daily Sales Validator",
-    description: "Calculate DRR, view store metrics, and generate text reports.",
-    icon: <Calculator className="w-8 h-8 text-blue-600" />,
-    color: "bg-blue-100",
-    borderColor: "border-blue-200",
-    hoverBorder: "hover:border-blue-400"
   },
   {
     id: "best-sellers",
