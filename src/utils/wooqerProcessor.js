@@ -53,29 +53,67 @@ export function parseExcelDate(val) {
     }
   }
 
-  if (val instanceof Date) return val;
+  if (val instanceof Date) {
+    if (isNaN(val.getTime())) return null;
+    return new Date(Date.UTC(val.getUTCFullYear(), val.getUTCMonth(), val.getUTCDate()));
+  }
 
   const str = String(val).trim();
   if (!str) return null;
 
-  const partsSlash = str.split(/[/.-]/);
+  const dateStrOnly = str.split(/\s+/)[0];
+  const partsSlash = dateStrOnly.split(/[/.-]/);
   if (partsSlash.length === 3) {
     let day, month, year;
     if (partsSlash[0].length === 4) {
       year = parseInt(partsSlash[0], 10);
       month = parseInt(partsSlash[1], 10) - 1;
       day = parseInt(partsSlash[2], 10);
-    } else {
-      day = parseInt(partsSlash[0], 10);
-      month = parseInt(partsSlash[1], 10) - 1;
+    } else if (partsSlash[2].length === 4 || partsSlash[2].length === 2) {
+      const p0 = parseInt(partsSlash[0], 10);
+      const p1 = parseInt(partsSlash[1], 10);
       year = parseInt(partsSlash[2], 10);
+      if (year < 100) year += 2000;
+
+      if (p0 > 12) {
+        day = p0;
+        month = p1 - 1;
+      } else if (p1 > 12) {
+        day = p1;
+        month = p0 - 1;
+      } else {
+        day = p0;
+        month = p1 - 1;
+      }
     }
-    const d = new Date(Date.UTC(year, month, day));
-    if (!isNaN(d.getTime())) return d;
+
+    if (!isNaN(year) && !isNaN(month) && !isNaN(day) && month >= 0 && month <= 11 && day >= 1 && day <= 31) {
+      const d = new Date(Date.UTC(year, month, day));
+      if (!isNaN(d.getTime())) return d;
+    }
   }
 
   const fallback = new Date(str);
   return isNaN(fallback.getTime()) ? null : fallback;
+}
+
+// Flexible row column getter
+function getRowValue(row, possibleKeys) {
+  if (!row) return "";
+  const keys = Object.keys(row);
+  for (const pKey of possibleKeys) {
+    if (row[pKey] !== undefined && row[pKey] !== null && row[pKey] !== "") {
+      return row[pKey];
+    }
+  }
+  for (const pKey of possibleKeys) {
+    const normPKey = pKey.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const matchingKey = keys.find((k) => k.toLowerCase().replace(/[^a-z0-9]/g, "").includes(normPKey));
+    if (matchingKey && row[matchingKey] !== undefined && row[matchingKey] !== null && row[matchingKey] !== "") {
+      return row[matchingKey];
+    }
+  }
+  return "";
 }
 
 // File category detector
@@ -217,27 +255,77 @@ export async function processWooqerFiles(files, customRange = null) {
     }
   });
 
-  let rangeStart = customRange?.startDate
-    ? new Date(customRange.startDate)
-    : new Date(Date.UTC(2026, 6, 1));
-  let rangeEnd = customRange?.endDate
-    ? new Date(customRange.endDate)
-    : new Date(Date.UTC(2026, 8, 30));
+  // Auto-detect Date Range from uploaded files if customRange is not provided
+  let detectedMinDate = null;
+  let detectedMaxDate = null;
+
+  const dateKeys = [
+    "Date (dd/mm/yyyy)",
+    "Submission Date (dd/mm/yyyy)",
+    "Submission Date",
+    "Date",
+    "Audit Date",
+    "Submitted On",
+    "Created Date",
+  ];
+
+  Object.values(dataByType).forEach((rows) => {
+    rows.forEach((row) => {
+      const rawDate = getRowValue(row, dateKeys);
+      const dObj = parseExcelDate(rawDate);
+      if (dObj) {
+        if (!detectedMinDate || dObj < detectedMinDate) detectedMinDate = dObj;
+        if (!detectedMaxDate || dObj > detectedMaxDate) detectedMaxDate = dObj;
+      }
+    });
+  });
+
+  let rangeStart;
+  let rangeEnd;
+
+  if (customRange?.startDate && customRange?.endDate) {
+    rangeStart = new Date(customRange.startDate);
+    rangeEnd = new Date(customRange.endDate);
+  } else if (detectedMinDate && detectedMaxDate) {
+    rangeStart = detectedMinDate;
+    rangeEnd = detectedMaxDate;
+  } else {
+    rangeStart = new Date(Date.UTC(2026, 6, 1));
+    rangeEnd = new Date(Date.UTC(2026, 8, 30));
+  }
 
   const targetMetrics = calculateDynamicTargets(rangeStart, rangeEnd);
 
   const cleanRecord = (row) => {
-    const rawStore = row["Store"] || row["STORE"] || row["Store ID"] || row["STORE ID"] || "";
+    const rawStore = getRowValue(row, [
+      "Store",
+      "STORE",
+      "Store ID",
+      "STORE ID",
+      "Store Code",
+      "Store Code/Name",
+      "Store Name",
+      "Location",
+      "Unit",
+    ]);
     const store = String(rawStore).trim();
     if (!store) return null;
 
-    const rawDate = row["Date (dd/mm/yyyy)"] || row["Submission Date (dd/mm/yyyy)"] || row["Date"] || "";
+    const rawDate = getRowValue(row, dateKeys);
     const dateObj = parseExcelDate(rawDate);
     if (!dateObj) return null;
 
     if (dateObj < rangeStart || dateObj > rangeEnd) return null;
 
-    const rawScore = row["Total Score Obtained"] || row["Total Score"] || row["Score"] || 0;
+    const rawScore = getRowValue(row, [
+      "Total Score Obtained",
+      "Total Score",
+      "Score",
+      "Score Obtained",
+      "Points",
+      "Total Points",
+      "Marks",
+    ]);
     const score = typeof rawScore === "number" ? rawScore : parseFloat(rawScore) || 0;
 
     return {

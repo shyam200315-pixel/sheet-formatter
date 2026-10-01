@@ -27,7 +27,8 @@ import {
   processWooqerFiles, 
   exportQ3SummaryReportExcel, 
   exportMasterStoreTrackerExcel,
-  get3ColorScaleHex
+  get3ColorScaleHex,
+  formatDateDDMMM
 } from "../utils/wooqerProcessor";
 import { 
   BarChart, 
@@ -264,7 +265,11 @@ export default function WooqerReports({ onBack }) {
           <div className="mt-6 pt-4 border-t border-gray-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
             <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
               <ShieldCheck size={16} className="text-blue-500" />
-              Dynamic Range: <strong>01-Jul-2026 to 30-Sep-2026 ({tm?.totalCalendarDays} Days)</strong>
+              Dynamic Range:{" "}
+              <strong>
+                {processedData?.rangeStart ? formatDateDDMMM(processedData.rangeStart) : "N/A"} to{" "}
+                {processedData?.rangeEnd ? formatDateDDMMM(processedData.rangeEnd) : "N/A"} ({tm?.totalCalendarDays} Days)
+              </strong>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -318,7 +323,9 @@ export default function WooqerReports({ onBack }) {
                   Calendar Days & Target Points Mathematical Breakdown
                 </h3>
                 <p className="text-xs text-indigo-200/80">
-                  Target computed dynamically from 92 Calendar Days (July 1 - Sept 30, 2026)
+                  Target computed dynamically from {tm.totalCalendarDays} Calendar Days (
+                  {processedData?.rangeStart ? formatDateDDMMM(processedData.rangeStart) : "N/A"} to{" "}
+                  {processedData?.rangeEnd ? formatDateDDMMM(processedData.rangeEnd) : "N/A"})
                 </p>
               </div>
             </div>
