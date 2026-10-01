@@ -817,7 +817,7 @@ export default function InstitutionalChecker({ onBack }) {
                     </span>
                     <button
                       onClick={() => copyToClipboard(
-                        `Item: ${selectedItem.description}\nHANA Code: ${selectedItem.code}\nQty: ${quantity || 1}\nSlab Landing Rate: ₹${activeSlabInfo.landingPrice}\nTotal Amount: ₹${activeSlabInfo.totalAmount.toLocaleString('en-IN')}`,
+                        `Item: ${selectedItem.description}\nHANA Code: ${selectedItem.code}\nQty: ${quantity || 1}\nMRP: ₹${Math.ceil(selectedItem.mrp || 0).toLocaleString('en-IN')}\nSlab Landing Rate: ₹${activeSlabInfo.landingPrice}`,
                         "Quote Summary"
                       )}
                       className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs rounded-lg transition-all flex items-center gap-1"
@@ -827,6 +827,11 @@ export default function InstitutionalChecker({ onBack }) {
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                    <div className="bg-slate-800/60 rounded-xl p-3 border border-slate-700/60">
+                      <span className="text-[10px] font-normal text-slate-400 block">Unit MRP</span>
+                      <span className="text-lg font-bold text-amber-400">₹{Math.ceil(selectedItem.mrp || 0).toLocaleString('en-IN')}</span>
+                    </div>
+
                     <div className="bg-slate-800/60 rounded-xl p-3 border border-slate-700/60">
                       <span className="text-[10px] font-normal text-slate-400 block">Unit Landing Rate</span>
                       <span className="text-lg font-bold text-blue-400">₹{activeSlabInfo.landingPrice.toLocaleString('en-IN')}</span>
@@ -840,11 +845,6 @@ export default function InstitutionalChecker({ onBack }) {
                     <div className="bg-slate-800/60 rounded-xl p-3 border border-slate-700/60">
                       <span className="text-[10px] font-normal text-slate-400 block">Discount % off MRP</span>
                       <span className="text-lg font-bold text-emerald-400">{activeSlabInfo.discountPct}% OFF</span>
-                    </div>
-
-                    <div className="bg-blue-950/40 rounded-xl p-3 border border-blue-900/40">
-                      <span className="text-[10px] font-normal text-blue-300 block">Total Order Payable</span>
-                      <span className="text-lg font-bold text-white">₹{activeSlabInfo.totalAmount.toLocaleString('en-IN')}</span>
                     </div>
                   </div>
                 </div>
