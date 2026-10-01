@@ -53,6 +53,15 @@ export default function InstitutionalChecker({ onBack }) {
   // Default Password (stored in localStorage or fallback 'bulk')
   const masterPassword = localStorage.getItem("institutional_password") || "bulk";
 
+  const [recentSearches, setRecentSearches] = useState(() => {
+    try {
+      const saved = localStorage.getItem('inst_recent_searches');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
   // Auto-select item when searching if exact match found
   useEffect(() => {
     if (!searchTerm.trim()) {
@@ -65,6 +74,25 @@ export default function InstitutionalChecker({ onBack }) {
       setSelectedItem(exactMatch);
     }
   }, [searchTerm, offersData]);
+
+  // Track recent searches when selectedItem changes
+  useEffect(() => {
+    if (selectedItem && selectedItem.code) {
+      const code = selectedItem.code;
+      const description = selectedItem.description || "";
+      const label = description ? `${code} (${description.length > 20 ? description.slice(0, 20) + '...' : description})` : code;
+
+      setRecentSearches(prev => {
+        if (prev.length > 0 && prev[0].code === code) return prev;
+        const filtered = prev.filter(r => r.code !== code);
+        const updated = [{ code, label }, ...filtered].slice(0, 4);
+        try {
+          localStorage.setItem('inst_recent_searches', JSON.stringify(updated));
+        } catch (e) {}
+        return updated;
+      });
+    }
+  }, [selectedItem]);
 
   // Handle Unlock
   const handleUnlock = (e) => {
@@ -538,18 +566,28 @@ export default function InstitutionalChecker({ onBack }) {
               )}
             </div>
 
-            {/* Quick Demo Code buttons */}
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              <span className="text-[11px] font-medium text-slate-400">Sample Codes:</span>
-              {["19003278", "16000004", "16000019", "16000204"].map(code => (
-                <button
-                  key={code}
-                  onClick={() => setSearchTerm(code)}
-                  className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 hover:text-blue-600 text-slate-600 dark:text-slate-300 text-xs font-mono font-medium rounded-lg border border-slate-200 dark:border-slate-700 transition-all"
-                >
-                  {code}
-                </button>
-              ))}
+            {/* Recent Searches buttons */}
+            <div className="flex flex-wrap items-center gap-2 pt-1 min-h-[28px]">
+              <span className="text-[11px] font-medium text-slate-400">Recent Searches:</span>
+              {recentSearches.length > 0 ? (
+                recentSearches.map((chip, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      setSearchTerm(chip.code);
+                      const matched = offersData.find(o => o.code.toUpperCase() === chip.code.toUpperCase());
+                      if (matched) {
+                        setSelectedItem(matched);
+                      }
+                    }}
+                    className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 hover:text-blue-600 text-slate-600 dark:text-slate-300 text-xs font-mono font-medium rounded-lg border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
+                  >
+                    {chip.label}
+                  </button>
+                ))
+              ) : (
+                <span className="text-[11px] text-slate-400 italic">None</span>
+              )}
             </div>
           </div>
 

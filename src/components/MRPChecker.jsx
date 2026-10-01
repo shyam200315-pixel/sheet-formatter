@@ -216,6 +216,14 @@ export default function MRPChecker() {
   const [sapMapping, setSapMapping] = useState({});
   const [loading, setLoading] = useState(true);
   const [copiedCode, setCopiedCode] = useState(null);
+  const [recentSearches, setRecentSearches] = useState(() => {
+    try {
+      const saved = localStorage.getItem('mrp_recent_searches');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
 
   useEffect(() => {
     Promise.all([
@@ -319,6 +327,25 @@ export default function MRPChecker() {
       : (typeof activeItem.data.old_mrp === 'number' && activeItem.data.old_mrp > 0 ? activeItem.data.old_mrp : null);
   }, [activeItem]);
 
+  // Track recent searches when active item changes
+  useEffect(() => {
+    if (activeItem && activeItem.hanaCode) {
+      const code = activeItem.hanaCode;
+      const name = activeItem.data?.name || activeItem.data?.description || "";
+      const label = name ? `${code} (${name.length > 20 ? name.slice(0, 20) + '...' : name})` : code;
+
+      setRecentSearches(prev => {
+        if (prev.length > 0 && prev[0].code === code) return prev;
+        const filtered = prev.filter(r => r.code !== code);
+        const updated = [{ code, label }, ...filtered].slice(0, 4);
+        try {
+          localStorage.setItem('mrp_recent_searches', JSON.stringify(updated));
+        } catch (e) {}
+        return updated;
+      });
+    }
+  }, [activeItem]);
+
   const handleCopy = (text, type) => {
     navigator.clipboard.writeText(text);
     setCopiedCode(type);
@@ -329,14 +356,6 @@ export default function MRPChecker() {
     setSearchQuery("");
     setSelectedHanaCode(null);
   };
-
-  const sampleChips = [
-    { label: "19000330 (Storm Tawa - 50% Off)", query: "19000330" },
-    { label: "19003040 (Airfryer - ₹3,099)", query: "19003040" },
-    { label: "19003278 (Cooktop - ₹3,089)", query: "19003278" },
-    { label: "16002127 (Trivia Bottle)", query: "16002127" },
-    { label: "16000890 (Cast Iron - Buy 1@30% Buy 2@40%)", query: "16000890" }
-  ];
 
   return (
     <div className="w-full max-w-4xl mx-auto mt-4 px-2 sm:px-4">
@@ -381,21 +400,25 @@ export default function MRPChecker() {
           )}
         </div>
 
-        {/* Quick Suggestion Chips */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-8 max-w-2xl mx-auto">
-          <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">Quick search:</span>
-          {sampleChips.map((chip, idx) => (
-            <button
-              key={idx}
-              onClick={() => {
-                setSearchQuery(chip.query);
-                setSelectedHanaCode(null);
-              }}
-              className="text-xs px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-gray-600 dark:text-gray-300 hover:text-[#1a73e8] dark:hover:text-blue-400 border border-gray-200 dark:border-slate-700 transition-colors"
-            >
-              {chip.label}
-            </button>
-          ))}
+        {/* Recent Searches Chips */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-8 max-w-2xl mx-auto min-h-[32px]">
+          <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">Recent searches:</span>
+          {recentSearches.length > 0 ? (
+            recentSearches.map((chip, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setSearchQuery(chip.code);
+                  setSelectedHanaCode(chip.code);
+                }}
+                className="text-xs px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-gray-600 dark:text-gray-300 hover:text-[#1a73e8] dark:hover:text-blue-400 border border-gray-200 dark:border-slate-700 transition-colors cursor-pointer"
+              >
+                {chip.label}
+              </button>
+            ))
+          ) : (
+            <span className="text-xs text-gray-400 dark:text-gray-500 italic">None</span>
+          )}
         </div>
 
         <AnimatePresence mode="wait">
