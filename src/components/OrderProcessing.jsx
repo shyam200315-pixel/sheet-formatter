@@ -166,7 +166,7 @@ export default function OrderProcessing() {
       const processedOrderData = orderData.map((row) => {
         const itemCodeRaw = getValIgnoreCase(row, ["ITEM CODE", "BARCODE", "POS ITEM CODE", "HANA CODE", "HANACODE"]);
         const storeCodeRaw = getValIgnoreCase(row, ["STORE CODE"]);
-        let status = "processed"; // default if not found or <= 4
+        let status = "processed"; // default if not found or <= 3
         let currentStock = 0; // to track the available stock
 
         if (itemCodeRaw && storeCodeRaw) {
@@ -176,7 +176,7 @@ export default function OrderProcessing() {
           
           if (stockQty !== undefined) {
             currentStock = stockQty;
-            if (stockQty > 4) {
+            if (stockQty > 3) {
               status = "not processed";
             }
           }
