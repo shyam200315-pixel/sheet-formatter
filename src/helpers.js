@@ -297,11 +297,14 @@ export function getTargetDate(worksheet, jsonData) {
 // Local Database implementation using IndexedDB (Replaces Firebase)
 function getDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('DashboardDB', 1);
+    const request = indexedDB.open('DashboardDB', 2);
     request.onupgradeneeded = (e) => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains('historicalData')) {
         db.createObjectStore('historicalData');
+      }
+      if (!db.objectStoreNames.contains('deadStockSalesData')) {
+        db.createObjectStore('deadStockSalesData');
       }
     };
     request.onsuccess = () => resolve(request.result);
@@ -493,6 +496,95 @@ export async function clearHistoricalData() {
     });
   } catch (error) {
     throw new Error(`Local DB Clear Error: ${error.message}`);
+  }
+}
+
+/**
+ * ============================================================================
+ * DEAD STOCK DEDICATED SALES DATABASE (IndexedDB: 'deadStockSalesData' store)
+ * Completely separated and independent from Historical Sales Database!
+ * ============================================================================
+ */
+
+/**
+ * Save Dead Stock sales data to IndexedDB
+ * @param {Array} data 
+ */
+export async function saveDeadStockSalesData(data) {
+  try {
+    const db = await getDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('deadStockSalesData', 'readwrite');
+      const store = tx.objectStore('deadStockSalesData');
+      const req = store.put(data, 'main_chunk');
+      req.onsuccess = () => resolve(true);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (error) {
+    throw new Error(`Dead Stock DB Save Error: ${error.message}`);
+  }
+}
+
+/**
+ * Load Dead Stock sales data from IndexedDB
+ */
+export async function loadDeadStockSalesData() {
+  try {
+    const db = await getDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('deadStockSalesData', 'readonly');
+      const store = tx.objectStore('deadStockSalesData');
+      const req = store.get('main_chunk');
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (error) {
+    console.error("Dead Stock DB Load Error:", error);
+    return null;
+  }
+}
+
+/**
+ * Append data to Dead Stock IndexedDB
+ * @param {Array} newData 
+ * @param {string} [fileName]
+ */
+export async function appendDeadStockSalesData(newData, fileName = null) {
+  try {
+    const existingData = (await loadDeadStockSalesData()) || [];
+    const fileId = `deadstock_file_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const uploadTime = new Date().toISOString();
+
+    const taggedData = newData.map(row => ({
+      ...row,
+      _fileId: row._fileId || fileId,
+      _fileName: row._fileName || fileName || "Uploaded Sales File",
+      _uploadedAt: row._uploadedAt || uploadTime
+    }));
+
+    const mergedData = [...existingData, ...taggedData];
+    await saveDeadStockSalesData(mergedData);
+    return true;
+  } catch (error) {
+    throw new Error(`Dead Stock DB Append Error: ${error.message}`);
+  }
+}
+
+/**
+ * Clear data from Dead Stock IndexedDB
+ */
+export async function clearDeadStockSalesData() {
+  try {
+    const db = await getDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('deadStockSalesData', 'readwrite');
+      const store = tx.objectStore('deadStockSalesData');
+      const req = store.clear();
+      req.onsuccess = () => resolve(true);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (error) {
+    throw new Error(`Dead Stock DB Clear Error: ${error.message}`);
   }
 }
 

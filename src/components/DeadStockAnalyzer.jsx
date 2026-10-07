@@ -30,10 +30,10 @@ import * as XLSX from "xlsx";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { 
-  loadHistoricalData, 
-  appendHistoricalData, 
-  saveHistoricalData, 
-  clearHistoricalData,
+  loadDeadStockSalesData, 
+  appendDeadStockSalesData, 
+  saveDeadStockSalesData, 
+  clearDeadStockSalesData,
   processSalesRowsToMap, 
   findHeaderRowIndex,
   normalizeItemCode,
@@ -123,7 +123,7 @@ export default function DeadStockAnalyzer({ onBack }) {
   useEffect(() => {
     const initDb = async () => {
       try {
-        let dbRows = await loadHistoricalData();
+        let dbRows = await loadDeadStockSalesData();
 
         if (dbRows && dbRows.length > 0) {
           const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(dbRows);
@@ -146,10 +146,10 @@ export default function DeadStockAnalyzer({ onBack }) {
   const handleLoadSavedSalesDB = async () => {
     setIsLoadingDb(true);
     try {
-      let dbRows = await loadHistoricalData();
+      let dbRows = await loadDeadStockSalesData();
 
       if (!dbRows || dbRows.length === 0) {
-        toast.error("No historical sales data found. Please upload a sales file first.");
+        toast.error("No saved sales data found for Dead Stock. Please upload a sales file first.");
         setIsLoadingDb(false);
         return;
       }
@@ -190,8 +190,8 @@ export default function DeadStockAnalyzer({ onBack }) {
             return;
           }
 
-          await appendHistoricalData(jsonData, file.name);
-          const freshData = await loadHistoricalData();
+          await appendDeadStockSalesData(jsonData, file.name);
+          const freshData = await loadDeadStockSalesData();
           const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(freshData);
           setSalesDataRaw(salesMap);
           setSalesPeriodInfo(periodInfo);
@@ -212,9 +212,9 @@ export default function DeadStockAnalyzer({ onBack }) {
 
   // Clear Saved Sales DB from IndexedDB and state
   const handleClearSalesDB = async () => {
-    if (window.confirm("Are you sure you want to clear all saved sales data from the database?")) {
+    if (window.confirm("Are you sure you want to clear all saved sales data for Dead Stock from the database?")) {
       try {
-        await clearHistoricalData();
+        await clearDeadStockSalesData();
         setSalesDataRaw(null);
         setSalesFileName("");
         setUseSavedSalesDB(false);
@@ -224,7 +224,7 @@ export default function DeadStockAnalyzer({ onBack }) {
           periodMonths: 3.0,
           labelText: "No Sales Data"
         });
-        toast.success("Saved Sales Database cleared successfully! Upload a fresh sales file.");
+        toast.success("Dead Stock Saved Sales Database cleared successfully! Upload a fresh sales file.");
       } catch (err) {
         toast.error(`Clear failed: ${err.message}`);
       }
@@ -275,8 +275,8 @@ export default function DeadStockAnalyzer({ onBack }) {
 
         // Auto append to local IndexedDB to persist for future sessions
         try {
-          await appendHistoricalData(jsonData, file.name);
-          const freshDb = await loadHistoricalData();
+          await appendDeadStockSalesData(jsonData, file.name);
+          const freshDb = await loadDeadStockSalesData();
           if (freshDb && freshDb.length > 0) {
             setSavedDbCount(freshDb.length);
             setUseSavedSalesDB(true);
