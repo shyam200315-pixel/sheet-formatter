@@ -19,6 +19,7 @@ export default function HistoricalSales() {
   const [isManageFilesModalOpen, setIsManageFilesModalOpen] = useState(false);
   const [fileSearchQuery, setFileSearchQuery] = useState("");
   const [deletingFileId, setDeletingFileId] = useState(null);
+  const [showAllFiles, setShowAllFiles] = useState(false);
 
   // Query state
   const [stores, setStores] = useState([]);
@@ -327,6 +328,11 @@ export default function HistoricalSales() {
       const g = groupsMap[fId];
       g.rowCount += 1;
 
+      // Keep latest uploadedAt if records have different timestamps
+      if (uploadedAt && (!g.uploadedAt || new Date(uploadedAt) > new Date(g.uploadedAt))) {
+        g.uploadedAt = uploadedAt;
+      }
+
       const sName = getStoreNameVal(row);
       if (sName) g.stores.add(sName);
 
@@ -342,7 +348,19 @@ export default function HistoricalSales() {
     return Object.values(groupsMap).map(g => ({
       ...g,
       storesList: Array.from(g.stores).sort()
-    }));
+    })).sort((a, b) => {
+      // 1. Sort by upload timestamp (most recent first)
+      const timeA = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0;
+      const timeB = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0;
+      if (timeA !== timeB) return timeB - timeA;
+
+      // 2. Sort by latest transaction date in file
+      const dateA = a.maxDate ? a.maxDate.getTime() : 0;
+      const dateB = b.maxDate ? b.maxDate.getTime() : 0;
+      if (dateA !== dateB) return dateB - dateA;
+
+      return b.fileName.localeCompare(a.fileName);
+    });
   }, [dbData]);
 
   const filteredFileGroups = useMemo(() => {
@@ -353,6 +371,15 @@ export default function HistoricalSales() {
       g.storesList.some(s => s.toLowerCase().includes(query))
     );
   }, [fileGroups, fileSearchQuery]);
+
+  const displayedFileGroups = useMemo(() => {
+    // When searching, show all matched files so user can find any file
+    if (fileSearchQuery.trim()) return filteredFileGroups;
+    // When user chooses to show all
+    if (showAllFiles) return filteredFileGroups;
+    // Default limit to 50 most recent files
+    return filteredFileGroups.slice(0, 50);
+  }, [filteredFileGroups, fileSearchQuery, showAllFiles]);
 
   const handleDeleteFileGroup = async (group) => {
     if (!window.confirm(`Are you sure you want to delete file "${group.fileName}" (${group.rowCount.toLocaleString()} records)? This cannot be undone.`)) {
@@ -778,7 +805,10 @@ export default function HistoricalSales() {
           
           {dbData && dbData.length > 0 && (
             <button
-              onClick={() => setIsManageFilesModalOpen(true)}
+              onClick={() => {
+                setShowAllFiles(false);
+                setIsManageFilesModalOpen(true);
+              }}
               className="flex items-center px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 rounded-xl font-medium transition-colors border border-indigo-200 dark:border-indigo-800 shadow-sm"
               title="View and delete specific uploaded files"
             >
@@ -1044,7 +1074,10 @@ export default function HistoricalSales() {
               className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-2xl max-w-3xl w-full max-h-[85vh] flex flex-col border border-gray-200 dark:border-gray-800 relative"
             >
               <button 
-                onClick={() => setIsManageFilesModalOpen(false)}
+                onClick={() => {
+                  setShowAllFiles(false);
+                  setIsManageFilesModalOpen(false);
+                }}
                 className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
               >
                 <X className="w-5 h-5" />
@@ -1073,74 +1106,124 @@ export default function HistoricalSales() {
                   />
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 font-medium self-end sm:self-center">
-                  Total Files: <span className="font-semibold text-gray-700 dark:text-gray-200">{fileGroups.length}</span> | Total Records: <span className="font-semibold text-gray-700 dark:text-gray-200">{dbData ? dbData.length.toLocaleString() : 0}</span>
+                  {fileSearchQuery.trim() ? (
+                    <span>Matches: <span className="font-semibold text-gray-700 dark:text-gray-200">{filteredFileGroups.length}</span> files</span>
+                  ) : (
+                    <span>
+                      {fileGroups.length > 50 && !showAllFiles ? (
+                        <>Showing Recent: <span className="font-semibold text-indigo-600 dark:text-indigo-400">{displayedFileGroups.length}</span> of </>
+                      ) : (
+                        <>Total: </>
+                      )}
+                      <span className="font-semibold text-gray-700 dark:text-gray-200">{fileGroups.length}</span> files
+                    </span>
+                  )} | Total Records: <span className="font-semibold text-gray-700 dark:text-gray-200">{dbData ? dbData.length.toLocaleString() : 0}</span>
                 </div>
               </div>
 
+              {/* Limit 50 notice banner */}
+              {fileGroups.length > 50 && !fileSearchQuery.trim() && (
+                <div className="flex items-center justify-between px-4 py-2.5 mb-3 bg-indigo-50/80 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800/50 rounded-2xl text-xs text-indigo-700 dark:text-indigo-300">
+                  <div className="flex items-center space-x-2">
+                    <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                    <span>
+                      {showAllFiles
+                        ? `Showing all ${fileGroups.length} files.`
+                        : `Showing recent 50 files. Older data is securely saved in the database.`}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setShowAllFiles(!showAllFiles)}
+                    className="underline hover:text-indigo-900 dark:hover:text-white font-semibold ml-2 cursor-pointer transition-colors"
+                  >
+                    {showAllFiles ? "Show Recent 50 Only" : `Show All ${fileGroups.length} Files`}
+                  </button>
+                </div>
+              )}
+
               {/* Files List */}
               <div className="flex-1 overflow-y-auto pr-1 space-y-3 custom-scrollbar min-h-[250px]">
-                {filteredFileGroups.length === 0 ? (
+                {displayedFileGroups.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-2xl">
                     <FileText className="w-10 h-10 text-gray-400 mb-2 opacity-60" />
                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">No files found</p>
                     <p className="text-xs text-gray-400 mt-1">Try searching with a different keyword or upload a file.</p>
                   </div>
                 ) : (
-                  filteredFileGroups.map((group) => (
-                    <div 
-                      key={group.fileId} 
-                      className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 dark:bg-slate-800/50 hover:bg-indigo-50/40 dark:hover:bg-indigo-900/20 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 transition-all gap-4"
-                    >
-                      <div className="space-y-1.5 flex-1 min-w-0">
-                        <div className="flex items-center space-x-2">
-                          <FileSpreadsheet className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                          <span className="font-semibold text-gray-900 dark:text-white text-sm truncate" title={group.fileName}>
-                            {group.fileName}
-                          </span>
-                          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/50">
-                            {group.rowCount.toLocaleString()} records
-                          </span>
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-gray-500 dark:text-gray-400">
-                          {group.minDate && group.maxDate && (
-                            <div className="flex items-center space-x-1">
-                              <Calendar className="w-3.5 h-3.5 text-blue-500" />
-                              <span>{formatDateShort(group.minDate)} - {formatDateFull(group.maxDate)}</span>
-                            </div>
-                          )}
-                          {group.uploadedAt && (
-                            <div className="flex items-center space-x-1">
-                              <Clock className="w-3.5 h-3.5 text-gray-400" />
-                              <span>Uploaded: {new Date(group.uploadedAt).toLocaleDateString()} {new Date(group.uploadedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                            </div>
-                          )}
-                          {group.storesList.length > 0 && (
-                            <div className="flex items-center space-x-1 truncate max-w-xs">
-                              <Store className="w-3.5 h-3.5 text-amber-500" />
-                              <span className="truncate">{group.storesList.join(", ")}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => handleDeleteFileGroup(group)}
-                        disabled={deletingFileId === group.fileId}
-                        className="flex items-center justify-center px-3.5 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-xl text-xs font-semibold transition-colors border border-red-200 dark:border-red-800 shrink-0 self-end sm:self-center"
-                        title={`Delete ${group.fileName}`}
+                  <>
+                    {displayedFileGroups.map((group) => (
+                      <div 
+                        key={group.fileId} 
+                        className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 dark:bg-slate-800/50 hover:bg-indigo-50/40 dark:hover:bg-indigo-900/20 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 transition-all gap-4"
                       >
-                        <Trash2 className="w-3.5 h-3.5 mr-1.5" />
-                        {deletingFileId === group.fileId ? "Deleting..." : "Delete File"}
-                      </button>
-                    </div>
-                  ))
+                        <div className="space-y-1.5 flex-1 min-w-0">
+                          <div className="flex items-center space-x-2">
+                            <FileSpreadsheet className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                            <span className="font-semibold text-gray-900 dark:text-white text-sm truncate" title={group.fileName}>
+                              {group.fileName}
+                            </span>
+                            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/50">
+                              {group.rowCount.toLocaleString()} records
+                            </span>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-gray-500 dark:text-gray-400">
+                            {group.minDate && group.maxDate && (
+                              <div className="flex items-center space-x-1">
+                                <Calendar className="w-3.5 h-3.5 text-blue-500" />
+                                <span>{formatDateShort(group.minDate)} - {formatDateFull(group.maxDate)}</span>
+                              </div>
+                            )}
+                            {group.uploadedAt && (
+                              <div className="flex items-center space-x-1">
+                                <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                <span>Uploaded: {new Date(group.uploadedAt).toLocaleDateString()} {new Date(group.uploadedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                              </div>
+                            )}
+                            {group.storesList.length > 0 && (
+                              <div className="flex items-center space-x-1 truncate max-w-xs">
+                                <Store className="w-3.5 h-3.5 text-amber-500" />
+                                <span className="truncate">{group.storesList.join(", ")}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => handleDeleteFileGroup(group)}
+                          disabled={deletingFileId === group.fileId}
+                          className="flex items-center justify-center px-3.5 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-xl text-xs font-semibold transition-colors border border-red-200 dark:border-red-800 shrink-0 self-end sm:self-center"
+                          title={`Delete ${group.fileName}`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                          {deletingFileId === group.fileId ? "Deleting..." : "Delete File"}
+                        </button>
+                      </div>
+                    ))}
+
+                    {!showAllFiles && !fileSearchQuery.trim() && filteredFileGroups.length > 50 && (
+                      <div className="p-3.5 text-center bg-gray-50/80 dark:bg-slate-800/40 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 mt-2">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                          +{filteredFileGroups.length - 50} older files are securely saved in the database.
+                        </p>
+                        <button
+                          onClick={() => setShowAllFiles(true)}
+                          className="px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/40 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 text-xs font-semibold rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800"
+                        >
+                          Show All {filteredFileGroups.length} Files
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 
               <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800 flex justify-end">
                 <button
-                  onClick={() => setIsManageFilesModalOpen(false)}
+                  onClick={() => {
+                    setShowAllFiles(false);
+                    setIsManageFilesModalOpen(false);
+                  }}
                   className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium transition-colors"
                 >
                   Close
