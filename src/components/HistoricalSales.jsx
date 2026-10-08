@@ -444,8 +444,9 @@ export default function HistoricalSales() {
 
     try {
       // OPTIMIZATION: Fast delete using targeted backend route instead of full DB upload
-      const success = await deleteFileFromCloud(group.fileId);
-      if (!success) throw new Error("Failed to delete file from cloud.");
+      const result = await deleteFileFromCloud(group.fileId);
+      if (!result || !result.success) throw new Error("Failed to delete file from cloud.");
+      if (result.deletedCount === 0) throw new Error("File not found in cloud database. It may have already been deleted.");
 
       const freshData = await loadHistoricalData();
       processAndIndexData(freshData);

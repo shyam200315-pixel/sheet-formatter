@@ -174,10 +174,10 @@ export async function deleteFileFromCloud(fileId) {
     }
     const result = await response.json();
     console.log(`[deleteFileFromCloud] fileId=${fileId}, deletedCount=${result.deletedCount}`);
-    return true;
+    return result;
   } catch (e) {
     console.warn("API Delete File Warning:", e.message);
-    return false;
+    return { success: false, deletedCount: 0, error: e.message };
   }
 }
 

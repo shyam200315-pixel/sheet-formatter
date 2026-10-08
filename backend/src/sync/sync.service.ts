@@ -162,6 +162,7 @@ export class SyncService {
     if (fileId === 'legacy_default') {
       result = await this.syncRepository.createQueryBuilder()
         .delete()
+        .from(SalesRecord)
         .where('syncGroup = :id', { id })
         .andWhere('(fileId IS NULL OR fileId = "" OR fileId = :legacy)', { legacy: 'legacy_default' })
         .execute();
