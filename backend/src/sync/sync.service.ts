@@ -158,20 +158,25 @@ export class SyncService {
   }
 
   async deleteFile(id: string, fileId: string) {
-    let result;
-    if (fileId === 'legacy_default') {
-      result = await this.syncRepository.createQueryBuilder()
-        .delete()
-        .from(SalesRecord)
-        .where('syncGroup = :id', { id })
-        .andWhere('(fileId IS NULL OR fileId = "" OR fileId = :legacy)', { legacy: 'legacy_default' })
-        .execute();
-    } else {
-      result = await this.syncRepository.delete({ syncGroup: id, fileId: fileId });
+    try {
+      let result;
+      if (fileId === 'legacy_default') {
+        result = await this.syncRepository.createQueryBuilder()
+          .delete()
+          .from(SalesRecord)
+          .where('syncGroup = :id', { id })
+          .andWhere("(fileId IS NULL OR fileId = '' OR fileId = :legacy)", { legacy: 'legacy_default' })
+          .execute();
+      } else {
+        result = await this.syncRepository.delete({ syncGroup: id, fileId: fileId });
+      }
+      console.log(`[DELETE FILE] syncGroup=${id}, fileId=${fileId}, affected=${result.affected}`);
+      await this.cacheManager.del(`sync_${id}`);
+      return { success: true, deletedCount: result.affected || 0 };
+    } catch (err: any) {
+      console.error("[DELETE FILE ERROR]", err);
+      return { success: false, deletedCount: 0, error: err.message, stack: err.stack };
     }
-    console.log(`[DELETE FILE] syncGroup=${id}, fileId=${fileId}, affected=${result.affected}`);
-    await this.cacheManager.del(`sync_${id}`);
-    return { success: true, deletedCount: result.affected || 0 };
   }
 
   async deleteByDate(id: string, date: string) {
