@@ -160,7 +160,11 @@ export class SyncService {
   async deleteFile(id: string, fileId: string) {
     let result;
     if (fileId === 'legacy_default') {
-      result = await this.syncRepository.delete({ syncGroup: id, fileId: IsNull() });
+      result = await this.syncRepository.createQueryBuilder()
+        .delete()
+        .where('syncGroup = :id', { id })
+        .andWhere('(fileId IS NULL OR fileId = "" OR fileId = :legacy)', { legacy: 'legacy_default' })
+        .execute();
     } else {
       result = await this.syncRepository.delete({ syncGroup: id, fileId: fileId });
     }
