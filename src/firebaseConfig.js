@@ -36,12 +36,12 @@ export function getSyncStatus() {
   return currentSyncState;
 }
 
-export async function saveToCloud(data, onProgress = null) {
+export async function saveToCloud(data, onProgress = null, appendMode = false) {
   updateSyncStatus({ status: "syncing", errorMsg: null });
 
   try {
     if (!data || !Array.isArray(data) || data.length === 0) {
-      await clearFromCloud();
+      if (!appendMode) await clearFromCloud();
       return true;
     }
 
@@ -61,10 +61,8 @@ export async function saveToCloud(data, onProgress = null) {
         });
       }
 
-      // We append or merge on the backend by passing the chunk
-      // However, the current backend endpoint `/upload` completely overwrites the row.
-      // To properly batch, we should send an `isAppend` flag.
-      const isAppend = i > 0;
+      // If appendMode is true, ALWAYS append. Otherwise, only append after the first batch.
+      const isAppend = appendMode ? true : (i > 0);
 
       const response = await fetch(`${API_BASE}/upload`, {
         method: 'POST',
@@ -163,6 +161,26 @@ export async function clearFromCloud() {
     return false;
   } catch (e) {
     console.warn("API Clear Warning:", e.message);
+    return false;
+  }
+}
+
+export async function deleteFileFromCloud(fileId) {
+  try {
+    const response = await fetch(`${API_BASE}/file/${fileId}`, { method: 'DELETE' });
+    return response.ok;
+  } catch (e) {
+    console.warn("API Delete File Warning:", e.message);
+    return false;
+  }
+}
+
+export async function deleteDateFromCloud(dateStr) {
+  try {
+    const response = await fetch(`${API_BASE}/date/${dateStr}`, { method: 'DELETE' });
+    return response.ok;
+  } catch (e) {
+    console.warn("API Delete Date Warning:", e.message);
     return false;
   }
 }

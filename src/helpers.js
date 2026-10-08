@@ -321,16 +321,18 @@ function getDB() {
   });
 }
 
-import { saveToCloud, loadFromCloud, clearFromCloud, getCloudMetadata } from "./firebaseConfig";
+import { saveToCloud, loadFromCloud, clearFromCloud, getCloudMetadata, deleteFileFromCloud, deleteDateFromCloud } from "./firebaseConfig";
+export { deleteFileFromCloud, deleteDateFromCloud };
 
 /**
  * Save data to IndexedDB and sync to Firebase Cloud in background
  * @param {Array} data 
  * @param {Function} [onProgress]
+ * @param {boolean} [appendMode]
  */
-export async function saveHistoricalData(data, onProgress = null) {
+export async function saveHistoricalData(data, onProgress = null, appendMode = false) {
   try {
-    await saveToCloud(data, onProgress);
+    await saveToCloud(data, onProgress, appendMode);
     return true;
   } catch (error) {
     console.error("Error saving historical data:", error);
@@ -377,7 +379,6 @@ export async function uploadLocalDbToCloud(onProgress = null) {
  */
 export async function appendHistoricalData(newData, fileName = null, onProgress = null) {
   try {
-    const existingData = (await loadHistoricalData()) || [];
     const fileId = `file_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const uploadTime = new Date().toISOString();
 
@@ -388,8 +389,8 @@ export async function appendHistoricalData(newData, fileName = null, onProgress 
       _uploadedAt: row._uploadedAt || uploadTime
     }));
 
-    const mergedData = [...existingData, ...taggedData];
-    await saveHistoricalData(mergedData, onProgress);
+    // OPTIMIZATION: Append directly to cloud without downloading the entire DB first!
+    await saveHistoricalData(taggedData, onProgress, true);
     return true;
   } catch (error) {
     throw new Error(`DB Append Error: ${error.message}`);
@@ -452,34 +453,12 @@ export async function syncDailyRowsToHistoricalData(jsonData, worksheet) {
     return { targetDateStr: todayStr, syncedCount: 0, totalDbRows: 0 };
   }
 
-  // 3. Load existing Historical DB
-  const existingDb = (await loadHistoricalData()) || [];
+  // 3. Delete any existing rows for this specific target date from the Cloud (to prevent duplicates)
+  // Format target date as YYYY-MM-DD for the backend
+  const targetDateFormatted = `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}-${String(targetDay).padStart(2, '0')}`;
+  await deleteDateFromCloud(targetDateFormatted);
 
-  // 4. Remove any previous entries from Historical DB that match Target Date (to allow clean re-upload on same day without duplicate)
-  const filteredDb = existingDb.filter(row => {
-    let dVal = row["BILL DATE"] || row["DATE"] || row["BILLDATE"] || row["INVOICE DATE"] || row["TRANSACTION DATE"];
-    if (!dVal) {
-      for (const k in row) {
-        if (k.trim().toUpperCase().includes("DATE")) {
-          dVal = row[k];
-          break;
-        }
-      }
-    }
-    if (!dVal) return true; // keep if no date
-    const parsed = parseBillDate(dVal);
-    if (!parsed || isNaN(parsed.getTime())) return true;
-
-    // Remove if it matches target date
-    const isSameDate = (
-      parsed.getDate() === targetDay &&
-      parsed.getMonth() === targetMonth &&
-      parsed.getFullYear() === targetYear
-    );
-    return !isSameDate;
-  });
-
-  // 5. Append new target day rows to filtered DB with file tags
+  // 4. Append new target day rows directly to the Cloud (No need to download entire DB!)
   const dailyFileId = `daily_sync_${targetYear}_${targetMonth + 1}_${targetDay}`;
   const dailyFileName = `Daily Sync (${todayStr})`;
   const uploadTime = new Date().toISOString();
@@ -491,13 +470,12 @@ export async function syncDailyRowsToHistoricalData(jsonData, worksheet) {
     _uploadedAt: row._uploadedAt || uploadTime
   }));
 
-  const updatedDb = [...filteredDb, ...taggedTargetRows];
-  await saveHistoricalData(updatedDb);
+  await saveHistoricalData(taggedTargetRows, null, true); // Append mode
 
   return {
     targetDateStr: todayStr,
     syncedCount: targetDayRows.length,
-    totalDbRows: updatedDb.length
+    totalDbRows: -1 // We don't know the total without fetching, which saves time
   };
 }
 

@@ -111,9 +111,9 @@ export class SyncService {
       });
     });
 
-    // Bulk insert in chunks of 500
-    for (let i = 0; i < records.length; i += 500) {
-      await this.syncRepository.save(records.slice(i, i + 500));
+    // Bulk insert in chunks of 2000
+    for (let i = 0; i < records.length; i += 2000) {
+      await this.syncRepository.createQueryBuilder().insert().into(SalesRecord).values(records.slice(i, i + 2000)).execute();
     }
 
     await this.cacheManager.del(`sync_${id}`);
@@ -121,7 +121,10 @@ export class SyncService {
   }
 
   async getData(id: string) {
-    const records = await this.syncRepository.find({ where: { syncGroup: id } });
+    const records = await this.syncRepository.createQueryBuilder('sr')
+      .where('sr.syncGroup = :id', { id })
+      .select(['sr.store as store', 'sr.date as date', 'sr.qty as qty', 'sr.amount as amount', 'sr.bill as bill', 'sr.fileName as fileName', 'sr.fileId as fileId', 'sr.createdAt as createdAt'])
+      .getRawMany();
     
     // Map it back to the exact format expected by frontend
     const data = records.map(r => ({
@@ -150,6 +153,18 @@ export class SyncService {
 
   async clearData(id: string) {
     await this.syncRepository.delete({ syncGroup: id });
+    await this.cacheManager.del(`sync_${id}`);
+    return { success: true };
+  }
+
+  async deleteFile(id: string, fileId: string) {
+    await this.syncRepository.delete({ syncGroup: id, fileId: fileId });
+    await this.cacheManager.del(`sync_${id}`);
+    return { success: true };
+  }
+
+  async deleteByDate(id: string, date: string) {
+    await this.syncRepository.delete({ syncGroup: id, date: date });
     await this.cacheManager.del(`sync_${id}`);
     return { success: true };
   }

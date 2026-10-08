@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import * as XLSX from "xlsx";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import { appendHistoricalData, loadHistoricalData, saveHistoricalData, clearHistoricalData, parseBillDate, findHeaderRowIndex, normalizeStoreName } from "../helpers";
+import { appendHistoricalData, loadHistoricalData, saveHistoricalData, clearHistoricalData, parseBillDate, findHeaderRowIndex, normalizeStoreName, deleteFileFromCloud } from "../helpers";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock, Upload, Database, FileSpreadsheet, Search, Trash2, Calendar, Store, X, TrendingUp, DollarSign, Package, Receipt, FileText, Clock, Cloud, RefreshCw, UploadCloud, Settings } from "lucide-react";
 import toast from "react-hot-toast";
@@ -442,8 +442,9 @@ export default function HistoricalSales() {
     const toastId = toast.loading(`Deleting ${group.fileName}...`);
 
     try {
-      const updatedDb = dbData ? dbData.filter(row => getRowFileId(row) !== group.fileId) : [];
-      await saveHistoricalData(updatedDb.length > 0 ? updatedDb : null);
+      // OPTIMIZATION: Fast delete using targeted backend route instead of full DB upload
+      const success = await deleteFileFromCloud(group.fileId);
+      if (!success) throw new Error("Failed to delete file from cloud.");
 
       const freshData = await loadHistoricalData();
       processAndIndexData(freshData);

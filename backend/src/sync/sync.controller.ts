@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Delete, Body, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Body, Param, UseInterceptors } from '@nestjs/common';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { SyncService } from './sync.service.js';
 
@@ -27,5 +27,15 @@ export class SyncController {
   @Delete('clear')
   async clearData() {
     return this.syncService.clearData('historicalData');
+  }
+
+  @Delete('file/:fileId')
+  async deleteFile(@Body() body: any, @Param('fileId') fileId: string) {
+    return this.syncService.deleteFile('historicalData', fileId);
+  }
+
+  @Delete('date/:date')
+  async deleteByDate(@Body() body: any, @Param('date') date: string) {
+    return this.syncService.deleteByDate('historicalData', date);
   }
 }
