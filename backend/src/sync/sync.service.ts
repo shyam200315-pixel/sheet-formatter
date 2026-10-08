@@ -167,8 +167,21 @@ export class SyncService {
           .where('syncGroup = :id', { id })
           .andWhere("(fileId IS NULL OR fileId = '' OR fileId = :legacy)", { legacy: 'legacy_default' })
           .execute();
+      } else if (fileId.startsWith('file_name_')) {
+        const actualFileName = fileId.replace('file_name_', '');
+        result = await this.syncRepository.createQueryBuilder()
+          .delete()
+          .from(SalesRecord)
+          .where('syncGroup = :id', { id })
+          .andWhere('fileName = :fileName', { fileName: actualFileName })
+          .execute();
       } else {
-        result = await this.syncRepository.delete({ syncGroup: id, fileId: fileId });
+        result = await this.syncRepository.createQueryBuilder()
+          .delete()
+          .from(SalesRecord)
+          .where('syncGroup = :id', { id })
+          .andWhere('fileId = :fileId', { fileId })
+          .execute();
       }
       console.log(`[DELETE FILE] syncGroup=${id}, fileId=${fileId}, affected=${result.affected}`);
       await this.cacheManager.del(`sync_${id}`);
@@ -180,7 +193,12 @@ export class SyncService {
   }
 
   async deleteByDate(id: string, date: string) {
-    const result = await this.syncRepository.delete({ syncGroup: id, date: date });
+    const result = await this.syncRepository.createQueryBuilder()
+      .delete()
+      .from(SalesRecord)
+      .where('syncGroup = :id', { id })
+      .andWhere('date = :date', { date })
+      .execute();
     console.log(`[DELETE DATE] syncGroup=${id}, date=${date}, affected=${result.affected}`);
     await this.cacheManager.del(`sync_${id}`);
     return { success: true, deletedCount: result.affected || 0 };
