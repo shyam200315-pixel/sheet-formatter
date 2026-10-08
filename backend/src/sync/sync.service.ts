@@ -133,9 +133,9 @@ export class SyncService {
       "SOLD QTY": r.qty,
       "NET AMOUNT": r.amount,
       "BILL NO": r.bill,
-      "_fileName": r.fileName,
-      "_fileId": r.fileId,
-      "_uploadedAt": r.createdAt
+      "_fileName": r.fileName || r.filename,
+      "_fileId": r.fileId || r.fileid,
+      "_uploadedAt": r.createdAt || r.createdat
     }));
 
     const result = {
