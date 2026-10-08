@@ -321,8 +321,8 @@ function getDB() {
   });
 }
 
-import { saveToCloud, loadFromCloud, clearFromCloud, getCloudMetadata, deleteFileFromCloud, deleteDateFromCloud } from "./firebaseConfig";
-export { deleteFileFromCloud, deleteDateFromCloud };
+import { saveToCloud, loadFromCloud, clearFromCloud, getCloudMetadata, deleteFileFromCloud, deleteDateFromCloud, subscribeToCloudUpdates } from "./firebaseConfig";
+export { deleteFileFromCloud, deleteDateFromCloud, subscribeToCloudUpdates };
 
 /**
  * Save data to IndexedDB and sync to Firebase Cloud in background

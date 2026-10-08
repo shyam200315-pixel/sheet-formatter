@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import * as XLSX from "xlsx";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import { appendHistoricalData, loadHistoricalData, saveHistoricalData, clearHistoricalData, parseBillDate, findHeaderRowIndex, normalizeStoreName, deleteFileFromCloud } from "../helpers";
+import { appendHistoricalData, loadHistoricalData, saveHistoricalData, clearHistoricalData, parseBillDate, findHeaderRowIndex, normalizeStoreName, deleteFileFromCloud, subscribeToCloudUpdates } from "../helpers";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock, Upload, Database, FileSpreadsheet, Search, Trash2, Calendar, Store, X, TrendingUp, DollarSign, Package, Receipt, FileText, Clock, Cloud, RefreshCw, UploadCloud, Settings } from "lucide-react";
 import toast from "react-hot-toast";
@@ -56,10 +56,15 @@ export default function HistoricalSales() {
     return `${day} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
   };
 
-  // Check if data exists on mount
+  // Check if data exists on mount and subscribe to real-time updates
   useEffect(() => {
     if (isAuthenticated) {
       fetchData();
+      const unsubscribe = subscribeToCloudUpdates(() => {
+        toast("Data updated remotely. Refreshing...", { icon: '🔄', id: 'realtime-update' });
+        fetchData();
+      });
+      return unsubscribe;
     }
   }, [isAuthenticated]);
 

@@ -4,6 +4,7 @@ import { Repository, IsNull } from 'typeorm';
 import { SalesRecord } from './entities/sync.entity.js';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
+import { Subject } from 'rxjs';
 
 const STORE_KEYS = ["STORE NAME", "BRANCH NAME", "FROM BRANCH NAME", "TO STORE", "BRANCH", "STORE"];
 const QTY_KEYS = ["SOLD QTY", "QTY", "QUANTITY", "NET QTY", "TOTAL QTY", "SOLD QUANTITY"];
@@ -24,6 +25,8 @@ export class SyncService {
     private syncRepository: Repository<SalesRecord>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
+
+  public updates$ = new Subject<void>();
 
   private findColumnKey(sampleRow: any, candidateKeys: string[]) {
     if (!sampleRow || typeof sampleRow !== "object") return null;
@@ -117,6 +120,7 @@ export class SyncService {
     }
 
     await this.cacheManager.del(`sync_${id}`);
+    this.updates$.next();
     return { success: true, updatedAt: new Date() };
   }
 
@@ -154,6 +158,7 @@ export class SyncService {
   async clearData(id: string) {
     await this.syncRepository.delete({ syncGroup: id });
     await this.cacheManager.del(`sync_${id}`);
+    this.updates$.next();
     return { success: true };
   }
 
@@ -185,6 +190,7 @@ export class SyncService {
       }
       console.log(`[DELETE FILE] syncGroup=${id}, fileId=${fileId}, affected=${result.affected}`);
       await this.cacheManager.del(`sync_${id}`);
+      this.updates$.next();
       return { success: true, deletedCount: result.affected || 0 };
     } catch (err: any) {
       console.error("[DELETE FILE ERROR]", err);
@@ -201,6 +207,7 @@ export class SyncService {
       .execute();
     console.log(`[DELETE DATE] syncGroup=${id}, date=${date}, affected=${result.affected}`);
     await this.cacheManager.del(`sync_${id}`);
+    this.updates$.next();
     return { success: true, deletedCount: result.affected || 0 };
   }
 }

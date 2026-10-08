@@ -36,6 +36,26 @@ export function getSyncStatus() {
   return currentSyncState;
 }
 
+export function subscribeToCloudUpdates(onUpdate) {
+  const eventSource = new EventSource(`${API_BASE}/updates`);
+  eventSource.onmessage = (event) => {
+    try {
+      const parsedData = JSON.parse(event.data);
+      if (parsedData.type === 'update') {
+        onUpdate();
+      }
+    } catch (e) {
+      console.warn("SSE Parse Error:", e);
+    }
+  };
+  eventSource.onerror = (e) => {
+    console.warn("SSE Error", e);
+  };
+  return () => {
+    eventSource.close();
+  };
+}
+
 export async function saveToCloud(data, onProgress = null, appendMode = false) {
   updateSyncStatus({ status: "syncing", errorMsg: null });
 
