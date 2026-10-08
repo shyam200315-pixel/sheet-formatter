@@ -1,6 +1,6 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
 import { SalesRecord } from './entities/sync.entity.js';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
@@ -158,7 +158,12 @@ export class SyncService {
   }
 
   async deleteFile(id: string, fileId: string) {
-    const result = await this.syncRepository.delete({ syncGroup: id, fileId: fileId });
+    let result;
+    if (fileId === 'legacy_default') {
+      result = await this.syncRepository.delete({ syncGroup: id, fileId: IsNull() });
+    } else {
+      result = await this.syncRepository.delete({ syncGroup: id, fileId: fileId });
+    }
     console.log(`[DELETE FILE] syncGroup=${id}, fileId=${fileId}, affected=${result.affected}`);
     await this.cacheManager.del(`sync_${id}`);
     return { success: true, deletedCount: result.affected || 0 };
