@@ -15,6 +15,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import SpaceBackground from "./components/SpaceBackground";
 import { Sun, Moon, Settings } from "lucide-react";
 import { Toaster, toast } from 'react-hot-toast';
+import { renderProgressToast } from "./components/ProgressToast";
 import { 
   Calculator, 
   ShoppingCart, 
@@ -450,13 +451,22 @@ export default function App() {
 
         // Auto-sync Target Date sales (e.g. 16th Sept) into Historical Database (ignoring older MTD dates 1-15 Sept)
         try {
-          const syncResult = await syncDailyRowsToHistoricalData(jsonData, worksheet);
+          const toastId = toast.custom((t) => renderProgressToast(t, "Auto-syncing to Historical DB...", 0), { duration: 999999 });
+
+          const syncResult = await syncDailyRowsToHistoricalData(jsonData, worksheet, (progress) => {
+            const percent = Math.round((progress.uploadedRows / progress.totalRows) * 100);
+            toast.custom((t) => renderProgressToast(t, `Auto-syncing daily sales...`, percent), { id: toastId, duration: 999999 });
+          });
+          
           if (syncResult.syncedCount > 0) {
+            toast.dismiss(toastId);
             const ignoreMsg = today.getDate() > 1 ? ` (Previous MTD dates 1-${today.getDate() - 1} ignored)` : "";
             toast.success(
               `⚡ Auto-synced ${syncResult.syncedCount.toLocaleString()} sales records for ${syncResult.targetDateStr} into Historical DB!${ignoreMsg}`,
               { duration: 6000, icon: '⚡' }
             );
+          } else {
+            toast.dismiss(toastId);
           }
         } catch (syncErr) {
           console.warn("Auto-syncing daily sales to Historical DB warning:", syncErr);

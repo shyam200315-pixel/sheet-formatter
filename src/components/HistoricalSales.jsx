@@ -6,6 +6,7 @@ import { appendHistoricalData, loadHistoricalData, saveHistoricalData, clearHist
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock, Upload, Database, FileSpreadsheet, Search, Trash2, Calendar, Store, X, TrendingUp, DollarSign, Package, Receipt, FileText, Clock, Cloud, RefreshCw, UploadCloud, Settings } from "lucide-react";
 import toast from "react-hot-toast";
+import { renderProgressToast } from "./ProgressToast";
 
 export default function HistoricalSales() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -367,7 +368,7 @@ export default function HistoricalSales() {
     const file = e.target.files[0];
     if (!file) return;
 
-    const toastId = toast.loading("Saving data to database...");
+    const toastId = toast.custom((t) => renderProgressToast(t, "Preparing file...", 0), { duration: 999999 });
 
     const reader = new FileReader();
     reader.onload = async (evt) => {
@@ -387,7 +388,7 @@ export default function HistoricalSales() {
 
         await appendHistoricalData(jsonData, file.name, (progress) => {
           const percent = Math.round((progress.uploadedRows / progress.totalRows) * 100);
-          toast.loading(`Uploading to database... ${percent}%`, { id: toastId });
+          toast.custom((t) => renderProgressToast(t, `Uploading ${file.name}...`, percent), { id: toastId, duration: 999999 });
         });
         
         // Refresh local state with merged data

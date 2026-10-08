@@ -407,7 +407,7 @@ export async function appendHistoricalData(newData, fileName = null, onProgress 
  * @param {Object} worksheet 
  * @returns {Promise<{ targetDateStr: string, syncedCount: number, totalDbRows: number }>}
  */
-export async function syncDailyRowsToHistoricalData(jsonData, worksheet) {
+export async function syncDailyRowsToHistoricalData(jsonData, worksheet, onProgress = null) {
   if (!jsonData || !Array.isArray(jsonData) || jsonData.length === 0) {
     return { targetDateStr: "", syncedCount: 0, totalDbRows: 0 };
   }
@@ -470,7 +470,7 @@ export async function syncDailyRowsToHistoricalData(jsonData, worksheet) {
     _uploadedAt: row._uploadedAt || uploadTime
   }));
 
-  await saveHistoricalData(taggedTargetRows, null, true); // Append mode
+  await saveHistoricalData(taggedTargetRows, onProgress, true); // Append mode
 
   return {
     targetDateStr: todayStr,
