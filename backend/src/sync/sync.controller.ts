@@ -30,12 +30,12 @@ export class SyncController {
   }
 
   @Delete('file/:fileId')
-  async deleteFile(@Body() body: any, @Param('fileId') fileId: string) {
-    return this.syncService.deleteFile('historicalData', fileId);
+  async deleteFile(@Param('fileId') fileId: string) {
+    return this.syncService.deleteFile('historicalData', decodeURIComponent(fileId));
   }
 
   @Delete('date/:date')
-  async deleteByDate(@Body() body: any, @Param('date') date: string) {
+  async deleteByDate(@Param('date') date: string) {
     return this.syncService.deleteByDate('historicalData', date);
   }
 }

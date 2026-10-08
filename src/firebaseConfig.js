@@ -167,8 +167,14 @@ export async function clearFromCloud() {
 
 export async function deleteFileFromCloud(fileId) {
   try {
-    const response = await fetch(`${API_BASE}/file/${fileId}`, { method: 'DELETE' });
-    return response.ok;
+    const response = await fetch(`${API_BASE}/file/${encodeURIComponent(fileId)}`, { method: 'DELETE' });
+    if (!response.ok) {
+      console.warn("Delete file failed:", response.status, await response.text());
+      return false;
+    }
+    const result = await response.json();
+    console.log(`[deleteFileFromCloud] fileId=${fileId}, deletedCount=${result.deletedCount}`);
+    return true;
   } catch (e) {
     console.warn("API Delete File Warning:", e.message);
     return false;

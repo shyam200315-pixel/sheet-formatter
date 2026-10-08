@@ -158,14 +158,16 @@ export class SyncService {
   }
 
   async deleteFile(id: string, fileId: string) {
-    await this.syncRepository.delete({ syncGroup: id, fileId: fileId });
+    const result = await this.syncRepository.delete({ syncGroup: id, fileId: fileId });
+    console.log(`[DELETE FILE] syncGroup=${id}, fileId=${fileId}, affected=${result.affected}`);
     await this.cacheManager.del(`sync_${id}`);
-    return { success: true };
+    return { success: true, deletedCount: result.affected || 0 };
   }
 
   async deleteByDate(id: string, date: string) {
-    await this.syncRepository.delete({ syncGroup: id, date: date });
+    const result = await this.syncRepository.delete({ syncGroup: id, date: date });
+    console.log(`[DELETE DATE] syncGroup=${id}, date=${date}, affected=${result.affected}`);
     await this.cacheManager.del(`sync_${id}`);
-    return { success: true };
+    return { success: true, deletedCount: result.affected || 0 };
   }
 }
