@@ -173,7 +173,7 @@ export default function DeadStockAnalyzer({ onBack }) {
   const handleAppendSalesToDB = async (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
-    const toastId = toast.loading("Appending new month sales file to local database...");
+    const toastId = toast.loading("Appending new month sales file to database...");
     try {
       const reader = new FileReader();
       reader.onload = async (evt) => {
@@ -1138,7 +1138,7 @@ export default function DeadStockAnalyzer({ onBack }) {
                 {/* Clear Saved DB Button */}
                 <button
                   onClick={handleClearSalesDB}
-                  title="Clear all saved sales history data from local database"
+                  title="Clear all saved sales history data from database"
                   className="px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700 text-xs font-medium rounded-xl transition-all shadow-sm flex items-center gap-1.5"
                 >
                   <Trash2 className="w-3.5 h-3.5 text-rose-500" />
@@ -1220,7 +1220,7 @@ export default function DeadStockAnalyzer({ onBack }) {
 
                 <button
                   onClick={handleClearSalesDB}
-                  title="Clear all saved sales history data from local database"
+                  title="Clear all saved sales history data from database"
                   className="px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700 text-xs font-medium rounded-xl transition-all shadow-sm flex items-center gap-1.5"
                 >
                   <Trash2 className="w-3.5 h-3.5 text-rose-500" />

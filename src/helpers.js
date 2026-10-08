@@ -326,10 +326,11 @@ import { saveToCloud, loadFromCloud, clearFromCloud, getCloudMetadata } from "./
 /**
  * Save data to IndexedDB and sync to Firebase Cloud in background
  * @param {Array} data 
+ * @param {Function} [onProgress]
  */
-export async function saveHistoricalData(data) {
+export async function saveHistoricalData(data, onProgress = null) {
   try {
-    await saveToCloud(data);
+    await saveToCloud(data, onProgress);
     return true;
   } catch (error) {
     console.error("Error saving historical data:", error);
@@ -372,8 +373,9 @@ export async function uploadLocalDbToCloud(onProgress = null) {
  * Append data to IndexedDB
  * @param {Array} newData 
  * @param {string} [fileName]
+ * @param {Function} [onProgress]
  */
-export async function appendHistoricalData(newData, fileName = null) {
+export async function appendHistoricalData(newData, fileName = null, onProgress = null) {
   try {
     const existingData = (await loadHistoricalData()) || [];
     const fileId = `file_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
@@ -387,10 +389,10 @@ export async function appendHistoricalData(newData, fileName = null) {
     }));
 
     const mergedData = [...existingData, ...taggedData];
-    await saveHistoricalData(mergedData);
+    await saveHistoricalData(mergedData, onProgress);
     return true;
   } catch (error) {
-    throw new Error(`Local DB Append Error: ${error.message}`);
+    throw new Error(`DB Append Error: ${error.message}`);
   }
 }
 

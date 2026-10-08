@@ -367,7 +367,7 @@ export default function HistoricalSales() {
     const file = e.target.files[0];
     if (!file) return;
 
-    const toastId = toast.loading("Saving data to local database...");
+    const toastId = toast.loading("Saving data to database...");
 
     const reader = new FileReader();
     reader.onload = async (evt) => {
@@ -385,7 +385,10 @@ export default function HistoricalSales() {
           return;
         }
 
-        await appendHistoricalData(jsonData, file.name);
+        await appendHistoricalData(jsonData, file.name, (progress) => {
+          const percent = Math.round((progress.uploadedRows / progress.totalRows) * 100);
+          toast.loading(`Uploading to database... ${percent}%`, { id: toastId });
+        });
         
         // Refresh local state with merged data
         const freshData = await loadHistoricalData();
