@@ -7,6 +7,7 @@ import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { SyncModule } from './sync/sync.module.js';
 import { SalesRecord } from './sync/entities/sync.entity.js';
+import { TargetSetting } from './sync/entities/target.entity.js';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { SalesRecord } from './sync/entities/sync.entity.js';
             username: configService.get<string>('DB_USERNAME', 'postgres'),
             password: configService.get<string>('DB_PASSWORD', 'password'),
             database: configService.get<string>('DB_NAME', 'sheet_formatter'),
-            entities: [SalesRecord],
+            entities: [SalesRecord, TargetSetting],
             synchronize: true,
           } as unknown as TypeOrmModuleOptions;
         }
@@ -39,7 +40,7 @@ import { SalesRecord } from './sync/entities/sync.entity.js';
         return {
           type: 'better-sqlite3',
           database: 'local-db.sqlite',
-          entities: [SalesRecord],
+          entities: [SalesRecord, TargetSetting],
           synchronize: true,
         } as unknown as TypeOrmModuleOptions;
       },

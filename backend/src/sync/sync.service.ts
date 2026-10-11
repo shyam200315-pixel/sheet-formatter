@@ -2,6 +2,7 @@ import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import { SalesRecord } from './entities/sync.entity.js';
+import { TargetSetting } from './entities/target.entity.js';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { Subject } from 'rxjs';
@@ -23,10 +24,12 @@ export class SyncService {
   constructor(
     @InjectRepository(SalesRecord)
     private syncRepository: Repository<SalesRecord>,
+    @InjectRepository(TargetSetting)
+    private targetRepository: Repository<TargetSetting>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
-  public updates$ = new Subject<void>();
+  public updates$ = new Subject<any>();
 
   private findColumnKey(sampleRow: any, candidateKeys: string[]) {
     if (!sampleRow || typeof sampleRow !== "object") return null;
@@ -120,7 +123,7 @@ export class SyncService {
     }
 
     await this.cacheManager.del(`sync_${id}`);
-    this.updates$.next();
+    this.updates$.next({ type: 'update' });
     return { success: true, updatedAt: new Date() };
   }
 
@@ -158,7 +161,7 @@ export class SyncService {
   async clearData(id: string) {
     await this.syncRepository.delete({ syncGroup: id });
     await this.cacheManager.del(`sync_${id}`);
-    this.updates$.next();
+    this.updates$.next({ type: 'update' });
     return { success: true };
   }
 
@@ -190,7 +193,7 @@ export class SyncService {
       }
       console.log(`[DELETE FILE] syncGroup=${id}, fileId=${fileId}, affected=${result.affected}`);
       await this.cacheManager.del(`sync_${id}`);
-      this.updates$.next();
+      this.updates$.next({ type: 'update' });
       return { success: true, deletedCount: result.affected || 0 };
     } catch (err: any) {
       console.error("[DELETE FILE ERROR]", err);
@@ -207,7 +210,38 @@ export class SyncService {
       .execute();
     console.log(`[DELETE DATE] syncGroup=${id}, date=${date}, affected=${result.affected}`);
     await this.cacheManager.del(`sync_${id}`);
-    this.updates$.next();
+    this.updates$.next({ type: 'update' });
     return { success: true, deletedCount: result.affected || 0 };
+  }
+
+  async getTargets() {
+    try {
+      const record = await this.targetRepository.findOneBy({ key: 'monthly_targets' });
+      if (!record || !record.value) {
+        return null;
+      }
+      return JSON.parse(record.value);
+    } catch (err: any) {
+      console.error("[GET TARGETS ERROR]", err);
+      return null;
+    }
+  }
+
+  async saveTargets(targetsData: any) {
+    try {
+      const payloadString = JSON.stringify(targetsData);
+      const saved = await this.targetRepository.save({
+        key: 'monthly_targets',
+        value: payloadString,
+      });
+
+      console.log(`[SAVE TARGETS] Targets updated at ${saved.updatedAt}`);
+      // Broadcast target update to all connected clients via SSE
+      this.updates$.next({ type: 'target_update', data: targetsData });
+      return { success: true, data: targetsData, updatedAt: saved.updatedAt };
+    } catch (err: any) {
+      console.error("[SAVE TARGETS ERROR]", err);
+      throw err;
+    }
   }
 }

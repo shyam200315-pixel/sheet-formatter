@@ -34,7 +34,10 @@ import DeadStockAnalyzer from "./components/DeadStockAnalyzer";
 import InstitutionalChecker from "./components/InstitutionalChecker";
 import StoreCashAnalyzer from "./components/StoreCashAnalyzer";
 import WooqerReports from "./components/WooqerReports";
-import { Lock, Wallet, FileCheck } from 'lucide-react';
+import TargetUpdateModal from "./components/TargetUpdateModal";
+import { getLocalStoreTargets, calculateGrandTotalTarget, saveLocalStoreTargets } from "./targetManager";
+import { loadTargetsFromCloud, subscribeToTargetUpdates } from "./firebaseConfig";
+import { Lock, Wallet, FileCheck, Sliders } from 'lucide-react';
 
 const TOOLS = [
   {
@@ -350,8 +353,38 @@ export default function App() {
   const [reportData, setReportData] = useState(null);
   const [error, setError] = useState("");
   const [validationSuccess, setValidationSuccess] = useState(false);
-  const [monthlyTarget, setMonthlyTarget] = useState(10840000);
-  const [monthlyCommitment, setMonthlyCommitment] = useState(10840000);
+  const [storeTargetsMap, setStoreTargetsMap] = useState(() => getLocalStoreTargets());
+  const [monthlyTarget, setMonthlyTarget] = useState(() => calculateGrandTotalTarget(getLocalStoreTargets()));
+  const [monthlyCommitment, setMonthlyCommitment] = useState(() => calculateGrandTotalTarget(getLocalStoreTargets()));
+  const [isTargetModalOpen, setIsTargetModalOpen] = useState(false);
+
+  // Sync targets with backend cloud & listen for multi-device SSE updates
+  useEffect(() => {
+    loadTargetsFromCloud().then((cloudData) => {
+      if (cloudData && cloudData.storeTargets) {
+        setStoreTargetsMap(cloudData.storeTargets);
+        saveLocalStoreTargets(cloudData.storeTargets);
+        const total = calculateGrandTotalTarget(cloudData.storeTargets);
+        setMonthlyTarget(total);
+        setMonthlyCommitment(total);
+      }
+    }).catch(err => console.warn("Could not load targets from cloud:", err));
+
+    const unsubscribe = subscribeToTargetUpdates((cloudData) => {
+      if (cloudData && cloudData.storeTargets) {
+        setStoreTargetsMap(cloudData.storeTargets);
+        saveLocalStoreTargets(cloudData.storeTargets);
+        const total = calculateGrandTotalTarget(cloudData.storeTargets);
+        setMonthlyTarget(total);
+        setMonthlyCommitment(total);
+        toast("Monthly targets updated from another device!", { icon: "🎯" });
+      }
+    });
+
+    return () => {
+      if (typeof unsubscribe === "function") unsubscribe();
+    };
+  }, []);
 
   const handleFileSelect = (file) => {
     setError("");
@@ -501,6 +534,12 @@ export default function App() {
     setMonthlyCommitment(commitment);
   };
 
+  const handleTargetsUpdated = (newTargetsMap, newGrandTotal, newMPCommitment) => {
+    setStoreTargetsMap(newTargetsMap);
+    setMonthlyTarget(newGrandTotal);
+    setMonthlyCommitment(newGrandTotal);
+  };
+
   const handleReset = () => {
     setReportData(null);
     setValidationSuccess(false);
@@ -628,8 +667,17 @@ export default function App() {
             <div className="hidden md:flex items-center gap-6">
               <div className="flex flex-col">
                 <label className="text-[11px] font-medium text-[#5f6368] dark:text-gray-300 uppercase tracking-wider mb-0.5">Target</label>
-                <div className="flex items-center gap-1 text-[#1a73e8] font-medium text-sm">
-                  <span>₹ {monthlyTarget}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[#1a73e8] font-semibold text-sm">₹ {monthlyTarget.toLocaleString("en-IN")}</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsTargetModalOpen(true)}
+                    title="Update Target (Password Protected with Multi-Device Sync)"
+                    className="px-2 py-0.5 rounded-md bg-blue-50 hover:bg-blue-100 dark:bg-slate-700 dark:hover:bg-slate-600 text-blue-600 dark:text-blue-400 text-xs font-medium flex items-center gap-1 transition-all border border-blue-200/60 dark:border-slate-600"
+                  >
+                    <Sliders size={12} />
+                    <span>Update</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -699,11 +747,20 @@ export default function App() {
                   </p>
 
                   <div className="md:hidden w-full max-w-md bg-white dark:bg-slate-800/60 border border-[#dadce0] dark:border-slate-700 rounded-lg p-4 mb-6 shadow-sm flex flex-col gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-[#5f6368] dark:text-gray-300 mb-1">Monthly Target (₹)</label>
-                      <div className="google-input w-full p-2 text-sm bg-gray-50 dark:bg-slate-700">
-                        {monthlyTarget}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <label className="block text-xs font-medium text-[#5f6368] dark:text-gray-300 mb-1">Monthly Target (₹)</label>
+                        <div className="text-base font-semibold text-slate-800 dark:text-white">
+                          ₹ {monthlyTarget.toLocaleString("en-IN")}
+                        </div>
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsTargetModalOpen(true)}
+                        className="px-3 py-1.5 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium rounded-lg flex items-center gap-1.5 border border-blue-200 dark:border-blue-800"
+                      >
+                        <Sliders size={13} /> Update Target
+                      </button>
                     </div>
                   </div>
 
@@ -725,6 +782,8 @@ export default function App() {
                     monthlyTarget={monthlyTarget}
                     monthlyCommitment={monthlyCommitment}
                     onTargetChange={handleTargetChange}
+                    storeTargetsMap={storeTargetsMap}
+                    onOpenTargetModal={() => setIsTargetModalOpen(true)}
                     onReset={handleReset} 
                   />
                 </div>
@@ -825,6 +884,14 @@ export default function App() {
         {/* Spacing for Dock */}
         <div className="h-20 sm:h-24"></div>
       </div>
+
+      {/* Target Manager Modal (Password Protected & Real-time Sync) */}
+      <TargetUpdateModal
+        isOpen={isTargetModalOpen}
+        onClose={() => setIsTargetModalOpen(false)}
+        currentTargetsMap={storeTargetsMap}
+        onTargetsUpdated={handleTargetsUpdated}
+      />
     </>
   );
 }

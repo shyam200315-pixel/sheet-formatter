@@ -36,12 +36,25 @@ export function getSyncStatus() {
   return currentSyncState;
 }
 
+let targetListeners = [];
+
+export function subscribeToTargetUpdates(listener) {
+  targetListeners.push(listener);
+  return () => {
+    targetListeners = targetListeners.filter(l => l !== listener);
+  };
+}
+
 export function subscribeToCloudUpdates(onUpdate) {
   const eventSource = new EventSource(`${API_BASE}/updates`);
   eventSource.onmessage = (event) => {
     try {
       const parsedData = JSON.parse(event.data);
-      if (parsedData.type === 'update') {
+      if (parsedData.type === 'target_update') {
+        targetListeners.forEach(listener => {
+          try { listener(parsedData.data); } catch (err) { console.warn("Target listener error:", err); }
+        });
+      } else if (parsedData.type === 'update') {
         onUpdate();
       }
     } catch (e) {
@@ -54,6 +67,45 @@ export function subscribeToCloudUpdates(onUpdate) {
   return () => {
     eventSource.close();
   };
+}
+
+export async function saveTargetsToCloud(targets) {
+  try {
+    const response = await fetch(`${API_BASE}/targets`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ targets }),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to save targets: ${await response.text()}`);
+    }
+    return await response.json();
+  } catch (err) {
+    console.warn("API Save Targets Warning:", err.message);
+    throw err;
+  }
+}
+
+export async function loadTargetsFromCloud() {
+  try {
+    const response = await fetch(`${API_BASE}/targets`, {
+      method: 'GET',
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+      }
+    });
+    if (response.ok) {
+      return await response.json();
+    }
+    return null;
+  } catch (err) {
+    console.warn("API Load Targets Warning:", err.message);
+    return null;
+  }
 }
 
 export async function saveToCloud(data, onProgress = null, appendMode = false) {

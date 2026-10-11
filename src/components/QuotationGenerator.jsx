@@ -17,7 +17,7 @@ export default function QuotationGenerator() {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (password === "150603") {
+    if (password.trim().toLowerCase() === "150603") {
       setIsAuthenticated(true);
       toast.success("Access Granted");
     } else {
@@ -639,7 +639,7 @@ export default function QuotationGenerator() {
                 onChange={(e) => {
                   const val = e.target.value;
                   setPassword(val);
-                  if (val === "150603") {
+                  if (val.trim().toLowerCase() === "150603") {
                     setIsAuthenticated(true);
                     toast.success("Access Granted");
                   }

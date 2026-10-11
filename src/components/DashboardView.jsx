@@ -37,6 +37,8 @@ import {
 } from "recharts";
 import { MASTER_STORES, normalizeStoreName, getKnownStores, saveKnownStores } from "../helpers";
 
+import { getStoreTargetValue } from "../targetManager";
+
 export const STORE_TARGETS = {
   // Maharashtra (10 stores)
   "WMH001 - NED - VAZIRABAD": 450000,
@@ -66,8 +68,12 @@ export const STORE_TARGETS = {
   "WMP008 - SVP - SHIVPURI": 340000
 };
 
-const getStoreTarget = (storeName) => {
+const getStoreTarget = (storeName, targetsMap = null) => {
   if (!storeName) return null;
+  if (targetsMap) {
+    const val = getStoreTargetValue(storeName, targetsMap);
+    if (val !== null && val !== undefined) return val;
+  }
   const canonical = normalizeStoreName(storeName);
   if (STORE_TARGETS[canonical]) return STORE_TARGETS[canonical];
   if (STORE_TARGETS[storeName]) return STORE_TARGETS[storeName];
@@ -97,7 +103,9 @@ export default function DashboardView({
   monthlyTarget, 
   monthlyCommitment, 
   onTargetChange, 
-  onReset 
+  onReset,
+  storeTargetsMap,
+  onOpenTargetModal
 }) {
   const [activeTab, setActiveTab] = useState("all-stores");
   const [storeSearch, setStoreSearch] = useState("");
@@ -306,7 +314,7 @@ export default function DashboardView({
     const remainingDays = totalDays - currentDay;
     // Filter MP Stores (starting with WMP)
     const mpStores = Array.from(allStores).filter(name => name.toUpperCase().includes("WMP"));
-    const mpCommitment = mpStores.reduce((acc, name) => acc + (getStoreTarget(name) || 0), 0) || 2940000;
+    const mpCommitment = mpStores.reduce((acc, name) => acc + (getStoreTarget(name, storeTargetsMap) || 0), 0) || 2940000;
     
     let mtdSales = 0;
     let todaySales = 0;
@@ -358,7 +366,7 @@ export default function DashboardView({
       below5k,
       mpCommitment,
     };
-  }, [jsonData, allStores, today, todayStr, totalDays, computedMetrics.storeSalesToday, parseBillDate]);
+  }, [jsonData, allStores, today, todayStr, totalDays, computedMetrics.storeSalesToday, parseBillDate, storeTargetsMap]);
 
   // Detailed Analytics Metrics
   const detailedMetrics = useMemo(() => {
@@ -807,7 +815,7 @@ export default function DashboardView({
     const stores = Array.from(allStores)
       .map(storeName => {
         const mtdSales = computedMetrics.storeSalesMTD[storeName] || 0;
-        const target = getStoreTarget(storeName);
+        const target = getStoreTarget(storeName, storeTargetsMap);
         let achievedPercent = null;
         if (target && target > 0) {
           achievedPercent = (mtdSales / target) * 100;
@@ -847,7 +855,7 @@ export default function DashboardView({
       }
       return a.name.localeCompare(b.name);
     });
-  }, [allStores, computedMetrics.storeSalesToday, computedMetrics.storeSalesMTD, storeSearch]);
+  }, [allStores, computedMetrics.storeSalesToday, computedMetrics.storeSalesMTD, storeSearch, storeTargetsMap]);
 
   const filteredBelow5k = useMemo(() => {
     return computedMetrics.below5k.filter(store => 
@@ -890,7 +898,7 @@ export default function DashboardView({
 
         <div className="flex flex-wrap gap-3 items-center w-full md:w-auto">
           <button
-            onClick={() => setShowTargetSettings(!showTargetSettings)}
+            onClick={onOpenTargetModal || (() => setShowTargetSettings(!showTargetSettings))}
             className="flex items-center gap-2 btn-secondary px-4 py-2 text-sm"
           >
             <Settings size={18} />

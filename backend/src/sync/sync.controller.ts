@@ -41,10 +41,23 @@ export class SyncController {
     return this.syncService.deleteByDate('historicalData', date);
   }
 
+  @Get('targets')
+  async getTargets() {
+    return this.syncService.getTargets();
+  }
+
+  @Post('targets')
+  async saveTargets(@Body() body: { targets: any }) {
+    if (!body || !body.targets) {
+      throw new Error("Invalid payload: 'targets' property is required.");
+    }
+    return this.syncService.saveTargets(body.targets);
+  }
+
   @Sse('updates')
   streamUpdates(): Observable<MessageEvent> {
     return this.syncService.updates$.asObservable().pipe(
-      map(() => ({ data: { type: 'update' } } as MessageEvent))
+      map((payload) => ({ data: payload || { type: 'update' } } as MessageEvent))
     );
   }
 }

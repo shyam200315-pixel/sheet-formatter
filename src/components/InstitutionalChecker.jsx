@@ -97,7 +97,7 @@ export default function InstitutionalChecker({ onBack }) {
   // Handle Unlock
   const handleUnlock = (e) => {
     e?.preventDefault();
-    if (passwordInput === masterPassword) {
+    if (passwordInput.trim().toLowerCase() === masterPassword.trim().toLowerCase()) {
       setIsUnlocked(true);
       sessionStorage.setItem("institutional_unlocked", "true");
       setPasswordError("");
