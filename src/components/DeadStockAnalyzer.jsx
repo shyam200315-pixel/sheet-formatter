@@ -319,9 +319,17 @@ export default function DeadStockAnalyzer({ onBack }) {
     e.target.value = null;
   };
 
-  // Clear Saved Sales DB from IndexedDB and state
+  // Clear Saved Sales DB from IndexedDB and state (Protected with password 'shyam')
   const handleClearSalesDB = async () => {
-    if (window.confirm("Are you sure you want to clear all saved sales data for Dead Stock from the database?")) {
+    const inputPassword = window.prompt("🔒 Enter password to clear saved sales database:");
+    if (inputPassword === null) return; // User cancelled
+
+    if (inputPassword.trim().toLowerCase() !== "shyam") {
+      toast.error("❌ Incorrect password! Database not cleared.");
+      return;
+    }
+
+    if (window.confirm("Are you sure you want to permanently clear all saved sales data for Dead Stock across all devices?")) {
       try {
         await clearDeadStockSalesData();
         setSalesDataRaw(null);
