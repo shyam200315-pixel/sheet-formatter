@@ -30,13 +30,18 @@ import * as XLSX from "xlsx";
 import institutionalData from "../institutionalOffers.json";
 
 export default function InstitutionalChecker({ onBack }) {
-  // Password Protection State
-  const [isUnlocked, setIsUnlocked] = useState(() => {
-    return sessionStorage.getItem("institutional_unlocked") === "true";
-  });
+  // Password Protection State - Always require password on page refresh / load
+  const [isUnlocked, setIsUnlocked] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+
+  // Clean up any lingering session storage on mount so refresh ALWAYS asks for password
+  useEffect(() => {
+    try {
+      sessionStorage.removeItem("institutional_unlocked");
+    } catch (e) {}
+  }, []);
 
   // Master Data & Search State
   const [offersData] = useState(institutionalData || []);
@@ -99,7 +104,9 @@ export default function InstitutionalChecker({ onBack }) {
     e?.preventDefault();
     if (passwordInput.trim().toLowerCase() === masterPassword.trim().toLowerCase()) {
       setIsUnlocked(true);
-      sessionStorage.setItem("institutional_unlocked", "true");
+      try {
+        sessionStorage.removeItem("institutional_unlocked");
+      } catch (e) {}
       setPasswordError("");
       toast.success("Access Granted to Institutional Pricing");
     } else {
@@ -110,7 +117,9 @@ export default function InstitutionalChecker({ onBack }) {
 
   const handleLock = () => {
     setIsUnlocked(false);
-    sessionStorage.removeItem("institutional_unlocked");
+    try {
+      sessionStorage.removeItem("institutional_unlocked");
+    } catch (e) {}
     setPasswordInput("");
     toast.success("Locked Institutional Offers");
   };
@@ -486,10 +495,20 @@ export default function InstitutionalChecker({ onBack }) {
 
             <button
               type="submit"
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <ShieldCheck className="w-5 h-5" /> Unlock Portal
             </button>
+
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                ← Back to Home
+              </button>
+            )}
           </form>
         </motion.div>
       </div>
@@ -527,10 +546,23 @@ export default function InstitutionalChecker({ onBack }) {
             <FileSpreadsheet className="w-4 h-4" /> Bulk Rates Excel Generator
           </button>
 
+          {/* Back Button */}
+          {onBack && (
+            <button
+              onClick={() => {
+                handleLock();
+                onBack();
+              }}
+              className="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              ← Back to Home
+            </button>
+          )}
+
           {/* Lock Button */}
           <button
             onClick={handleLock}
-            className="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 hover:text-rose-600 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium text-xs rounded-xl transition-all flex items-center gap-1.5"
+            className="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 hover:text-rose-600 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-medium text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <Lock className="w-4 h-4" /> Lock Portal
           </button>
