@@ -718,9 +718,20 @@ export function normalizeItemCode(code) {
  * Transforms array of sales row objects from IndexedDB or JSON into a sales map indexed by `${storeCode}::${itemCode}`
  * Uses single-discovery schema keys and tight loops for 1000x faster execution (~20ms for 50,000+ rows).
  */
-export function processSalesRowsToMap(salesRows) {
+export function processSalesRowsToMap(salesRows, limitMonths = null) {
   if (!salesRows || !Array.isArray(salesRows) || salesRows.length === 0) {
-    return { salesMap: {}, periodInfo: { periodDays: 90, periodMonths: 3.0, labelText: "No Sales Data" }, totalRows: 0 };
+    return { 
+      salesMap: {}, 
+      periodInfo: { 
+        periodDays: 90, 
+        periodMonths: 3.0, 
+        monthCount: 3, 
+        totalAvailableMonths: 3,
+        isFiltered: false,
+        labelText: "No Sales Data" 
+      }, 
+      totalRows: 0 
+    };
   }
 
   const STORE_KEYS = ["BRANCH NAME", "FROM BRANCH NAME", "STORE NAME", "BRANCH", "STORE", "LOCATION", "OUTLET"];
@@ -766,7 +777,46 @@ export function processSalesRowsToMap(salesRows) {
   const amtKey = resolveKey(AMOUNT_KEYS);
   const dateKey = resolveKey(DATE_KEYS);
 
+  // Pass 1: Parse and memoize dates to discover global date boundaries
+  const parsedDates = new Array(salesRows.length);
+  let globalMaxDate = null;
+  let globalMinDate = null;
+  const allUniqueMonths = new Set();
+
+  if (dateKey) {
+    for (let i = 0; i < salesRows.length; i++) {
+      const row = salesRows[i];
+      if (!row || typeof row !== "object") continue;
+      const billDateStr = row[dateKey] ? String(row[dateKey]).trim() : "";
+      if (billDateStr) {
+        const dObj = parseBillDate(billDateStr);
+        if (dObj) {
+          parsedDates[i] = dObj;
+          if (!globalMinDate || dObj < globalMinDate) globalMinDate = dObj;
+          if (!globalMaxDate || dObj > globalMaxDate) globalMaxDate = dObj;
+          allUniqueMonths.add(`${dObj.getFullYear()}-${dObj.getMonth() + 1}`);
+        }
+      }
+    }
+  }
+
+  // Calculate total available months in entire dataset
+  let totalAvailableMonths = allUniqueMonths.size > 0 ? allUniqueMonths.size : 3;
+  if (globalMinDate && globalMaxDate) {
+    const totalSpan = (globalMaxDate.getFullYear() - globalMinDate.getFullYear()) * 12 + (globalMaxDate.getMonth() - globalMinDate.getMonth()) + 1;
+    totalAvailableMonths = Math.max(allUniqueMonths.size, totalSpan);
+  }
+
+  // Calculate cutoff date if limitMonths is specified (e.g. limit to last 3 or 6 months)
+  let cutoffDate = null;
+  let isFiltered = false;
+  if (limitMonths && globalMaxDate && limitMonths < totalAvailableMonths) {
+    isFiltered = true;
+    cutoffDate = new Date(globalMaxDate.getFullYear(), globalMaxDate.getMonth() - (limitMonths - 1), 1, 0, 0, 0, 0);
+  }
+
   const salesMap = {};
+  const activeUniqueMonths = new Set();
   let minDate = null;
   let maxDate = null;
   let validRowsCount = 0;
@@ -783,21 +833,24 @@ export function processSalesRowsToMap(salesRows) {
     const itemCode = normalizeItemCode(rawItem || rawAddl);
     if (!itemCode) continue;
 
+    const dObj = parsedDates[i];
+    // Slicing: If cutoffDate is set and row billDate is before cutoff, skip this row!
+    if (cutoffDate && dObj && dObj < cutoffDate) {
+      continue;
+    }
+
+    if (dObj) {
+      if (!minDate || dObj < minDate) minDate = dObj;
+      if (!maxDate || dObj > maxDate) maxDate = dObj;
+      activeUniqueMonths.add(`${dObj.getFullYear()}-${dObj.getMonth() + 1}`);
+    }
+
     const storeCode = extractStoreCode(rawBranch);
     const desc = descKey && row[descKey] ? String(row[descKey]).trim() : "";
     const brand = brandKey && row[brandKey] ? String(row[brandKey]).trim() : "";
     const category = catKey && row[catKey] ? String(row[catKey]).trim() : "";
     const qty = qtyKey && row[qtyKey] !== undefined ? (+row[qtyKey] || 0) : 0;
     const amount = amtKey && row[amtKey] !== undefined ? (+row[amtKey] || 0) : 0;
-    const billDateStr = dateKey && row[dateKey] ? String(row[dateKey]).trim() : "";
-
-    if (billDateStr) {
-      const dObj = parseBillDate(billDateStr);
-      if (dObj) {
-        if (!minDate || dObj < minDate) minDate = dObj;
-        if (!maxDate || dObj > maxDate) maxDate = dObj;
-      }
-    }
 
     const key = `${storeCode}::${itemCode}`;
     let itemEntry = salesMap[key];
@@ -821,19 +874,41 @@ export function processSalesRowsToMap(salesRows) {
   }
 
   let periodDays = 90;
+  let monthCount = limitMonths || (activeUniqueMonths.size > 0 ? activeUniqueMonths.size : 3);
+
   if (minDate && maxDate) {
     periodDays = Math.max(1, Math.round((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+    if (!limitMonths) {
+      const spanMonths = (maxDate.getFullYear() - minDate.getFullYear()) * 12 + (maxDate.getMonth() - minDate.getMonth()) + 1;
+      const daysMonths = Math.round(periodDays / 30.4375);
+      monthCount = activeUniqueMonths.size > 0 
+        ? Math.max(activeUniqueMonths.size, Math.min(spanMonths, daysMonths)) 
+        : Math.max(1, daysMonths);
+    }
   }
-  const periodMonths = Math.max(0.5, periodDays / 30);
 
-  let dateLabel = `${periodDays} Days (~${periodMonths.toFixed(1)} Months)`;
+  const periodMonths = monthCount;
+
+  let dateLabel = `${periodDays} Days (~${monthCount} Months)`;
   if (minDate && maxDate) {
     dateLabel += ` (${minDate.toLocaleDateString('en-IN')} to ${maxDate.toLocaleDateString('en-IN')})`;
+  }
+  if (isFiltered && totalAvailableMonths > monthCount) {
+    dateLabel += ` [Filtered ${monthCount}M from ${totalAvailableMonths}M Data]`;
   }
 
   return {
     salesMap,
-    periodInfo: { periodDays, periodMonths, labelText: dateLabel, minDate, maxDate },
+    periodInfo: { 
+      periodDays, 
+      periodMonths, 
+      monthCount, 
+      totalAvailableMonths,
+      isFiltered,
+      labelText: dateLabel, 
+      minDate, 
+      maxDate 
+    },
     totalRows: validRowsCount
   };
 }

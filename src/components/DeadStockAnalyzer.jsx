@@ -82,6 +82,7 @@ const parseAnyDate = (dateVal) => {
 
 export default function DeadStockAnalyzer({ onBack }) {
   // Raw Data
+  const [rawSalesRows, setRawSalesRows] = useState(null);
   const [salesDataRaw, setSalesDataRaw] = useState(null);
   const [stockDataRaw, setStockDataRaw] = useState(null);
   const [orderDataRaw, setOrderDataRaw] = useState(null);
@@ -106,8 +107,49 @@ export default function DeadStockAnalyzer({ onBack }) {
   const [salesPeriodInfo, setSalesPeriodInfo] = useState({
     periodDays: 90,
     periodMonths: 3.0,
+    monthCount: 3,
+    totalAvailableMonths: 3,
+    isFiltered: false,
     labelText: "Sales Period"
   });
+
+  // Dynamic Sales Reference Months (e.g. L3M, L6M, L12M)
+  const [customMonthCount, setCustomMonthCount] = useState(null);
+  const [orderDetectedMonths, setOrderDetectedMonths] = useState(null);
+
+  const activeMonthCount = useMemo(() => {
+    if (customMonthCount) return customMonthCount;
+    if (orderDetectedMonths) return orderDetectedMonths;
+    if (salesPeriodInfo?.monthCount) return salesPeriodInfo.monthCount;
+    if (salesPeriodInfo?.periodMonths) return Math.max(1, Math.round(salesPeriodInfo.periodMonths));
+    return 3;
+  }, [customMonthCount, orderDetectedMonths, salesPeriodInfo]);
+
+  const salesHeaderLabel = `L${activeMonthCount}M`;
+
+  // Function to switch and recalculate sales reference period on the fly
+  const handleSelectMonthPeriod = (numMonths) => {
+    setCustomMonthCount(numMonths);
+    if (rawSalesRows && rawSalesRows.length > 0) {
+      const { salesMap, periodInfo } = processSalesRowsToMap(rawSalesRows, numMonths);
+      setSalesDataRaw(salesMap);
+      setSalesPeriodInfo(periodInfo);
+      toast.success(`Calculated sales for ${numMonths} Months (L${numMonths}M)!`);
+    } else {
+      toast.success(`Selected Reference Period: L${numMonths}M`);
+    }
+  };
+
+  const handleResetMonthPeriod = () => {
+    setCustomMonthCount(null);
+    if (rawSalesRows && rawSalesRows.length > 0) {
+      const fallbackMonths = orderDetectedMonths || null;
+      const { salesMap, periodInfo } = processSalesRowsToMap(rawSalesRows, fallbackMonths);
+      setSalesDataRaw(salesMap);
+      setSalesPeriodInfo(periodInfo);
+      toast.success("Reset sales period to auto-detected!");
+    }
+  };
 
   // Settings
   const [strictSameState, setStrictSameState] = useState(true);
@@ -138,8 +180,9 @@ export default function DeadStockAnalyzer({ onBack }) {
         let loadedCount = 0;
 
         if (dbRows && dbRows.length > 0) {
-          const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(dbRows);
+          const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(dbRows, customMonthCount);
           if (isMounted) {
+            setRawSalesRows(dbRows);
             setSalesDataRaw(salesMap);
             setSalesPeriodInfo(periodInfo);
             setSalesFileName(`Saved DB (${totalRows.toLocaleString()} lines - ${periodInfo.labelText})`);
@@ -159,7 +202,8 @@ export default function DeadStockAnalyzer({ onBack }) {
               if (loadedCount === 0 || loadedCount !== cloudMeta.totalRecords) {
                 const cloudRows = await syncDeadStockFromCloud();
                 if (cloudRows && cloudRows.length > 0 && isMounted) {
-                  const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(cloudRows);
+                  const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(cloudRows, customMonthCount);
+                  setRawSalesRows(cloudRows);
                   setSalesDataRaw(salesMap);
                   setSalesPeriodInfo(periodInfo);
                   setSalesFileName(`Cloud DB (${totalRows.toLocaleString()} lines - ${periodInfo.labelText})`);
@@ -171,6 +215,7 @@ export default function DeadStockAnalyzer({ onBack }) {
               // Cloud was cleared, sync local clear
               await clearDeadStockSalesData();
               if (isMounted) {
+                setRawSalesRows(null);
                 setSalesDataRaw(null);
                 setSalesFileName("");
                 setUseSavedSalesDB(false);
@@ -193,7 +238,8 @@ export default function DeadStockAnalyzer({ onBack }) {
       try {
         const cloudRows = await syncDeadStockFromCloud();
         if (cloudRows && cloudRows.length > 0 && isMounted) {
-          const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(cloudRows);
+          const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(cloudRows, customMonthCount);
+          setRawSalesRows(cloudRows);
           setSalesDataRaw(salesMap);
           setSalesPeriodInfo(periodInfo);
           setSalesFileName(`Cloud DB (${totalRows.toLocaleString()} lines - ${periodInfo.labelText})`);
@@ -202,6 +248,7 @@ export default function DeadStockAnalyzer({ onBack }) {
           toast.success(`⚡ Synced ${totalRows.toLocaleString()} records from Cloud!`, { id: "cloud-sync-toast" });
         } else if ((!cloudRows || cloudRows.length === 0) && isMounted) {
           // Cloud was cleared on another device
+          setRawSalesRows(null);
           setSalesDataRaw(null);
           setSalesFileName("");
           setUseSavedSalesDB(false);
@@ -239,7 +286,8 @@ export default function DeadStockAnalyzer({ onBack }) {
         return;
       }
 
-      const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(dbRows);
+      const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(dbRows, customMonthCount);
+      setRawSalesRows(dbRows);
       setSalesDataRaw(salesMap);
       setSalesPeriodInfo(periodInfo);
       setSalesFileName(`Saved DB (${totalRows.toLocaleString()} lines - ${periodInfo.labelText})`);
@@ -264,7 +312,8 @@ export default function DeadStockAnalyzer({ onBack }) {
         toast("No sales data found on Cloud yet. Upload sales to sync across devices.", { id: toastId, icon: "ℹ️" });
         return;
       }
-      const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(cloudRows);
+      const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(cloudRows, customMonthCount);
+      setRawSalesRows(cloudRows);
       setSalesDataRaw(salesMap);
       setSalesPeriodInfo(periodInfo);
       setSalesFileName(`Cloud DB (${totalRows.toLocaleString()} lines - ${periodInfo.labelText})`);
@@ -301,7 +350,8 @@ export default function DeadStockAnalyzer({ onBack }) {
 
           await appendDeadStockSalesData(jsonData, file.name);
           const freshData = await loadDeadStockSalesData();
-          const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(freshData);
+          const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(freshData, customMonthCount);
+          setRawSalesRows(freshData);
           setSalesDataRaw(salesMap);
           setSalesPeriodInfo(periodInfo);
           setSalesFileName(`Saved DB (${totalRows.toLocaleString()} lines - ${periodInfo.labelText})`);
@@ -333,14 +383,20 @@ export default function DeadStockAnalyzer({ onBack }) {
       try {
         await clearDeadStockSalesData();
         setSalesDataRaw(null);
+        setRawSalesRows(null);
         setSalesFileName("");
         setUseSavedSalesDB(false);
         setSavedDbCount(0);
         setSalesPeriodInfo({
           periodDays: 90,
           periodMonths: 3.0,
+          monthCount: 3,
+          totalAvailableMonths: 3,
+          isFiltered: false,
           labelText: "No Sales Data"
         });
+        setCustomMonthCount(null);
+        setOrderDetectedMonths(null);
         toast.success("Dead Stock Saved Sales Database cleared successfully! Upload a fresh sales file.");
       } catch (err) {
         toast.error(`Clear failed: ${err.message}`);
@@ -351,12 +407,15 @@ export default function DeadStockAnalyzer({ onBack }) {
   // Reset files
   const handleResetFiles = () => {
     setSalesDataRaw(null);
+    setRawSalesRows(null);
     setStockDataRaw(null);
     setOrderDataRaw(null);
     setSalesFileName("");
     setStockFileName("");
     setOrderFileName("");
     setUseSavedSalesDB(false);
+    setCustomMonthCount(null);
+    setOrderDetectedMonths(null);
   };
 
   // Parse Sales File
@@ -381,12 +440,13 @@ export default function DeadStockAnalyzer({ onBack }) {
           throw new Error("Sales file is empty or header row could not be identified.");
         }
 
-        const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(jsonData);
+        const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(jsonData, customMonthCount);
 
         if (totalRows === 0 || Object.keys(salesMap).length === 0) {
           throw new Error("No valid sales records found. Please check column headers (Branch Name, Item Code, Net Qty).");
         }
 
+        setRawSalesRows(jsonData);
         setSalesPeriodInfo(periodInfo);
         setSalesDataRaw(salesMap);
 
@@ -565,6 +625,51 @@ export default function DeadStockAnalyzer({ onBack }) {
           (h.includes("AVAIL") || h.includes("STORE STOCK") || h.includes("STOCK AT STORE") || h.includes("CLOSING STOCK") || h.includes("ON HAND") || (h.includes("STOCK") && !h.includes("REQ"))) && !h.includes("REQ QTY")
         );
 
+        // Detect sales column and period indicators in Order Sheet (e.g. L3M, L6M, L6M SALE, 6M SALE, LAST 6 MONTHS)
+        let detectedOrderMonths = null;
+        let orderSalesCol = -1;
+
+        for (let col = 0; col < headers.length; col++) {
+          const h = headers[col];
+          const m = h.match(/\bL\s*(\d+)\s*M\b/i) || 
+                    h.match(/\bLAST\s*(\d+)\s*MONTH/i) || 
+                    h.match(/\b(\d+)\s*M\s*SALE/i) ||
+                    h.match(/\b(\d+)\s*MONTH\s*SALE/i);
+          if (m) {
+            detectedOrderMonths = parseInt(m[1], 10);
+            if (orderSalesCol === -1) {
+              orderSalesCol = col;
+            }
+          }
+        }
+
+        if (orderSalesCol === -1) {
+          orderSalesCol = headers.findIndex(h => {
+            const upper = h.toUpperCase();
+            return (
+              (upper.includes("SALE") || upper.includes("SALES")) &&
+              !upper.includes("WHOLESALE") &&
+              !upper.includes("SALESMAN") &&
+              !upper.includes("SALE AMOUNT") &&
+              !upper.includes("NET AMOUNT") &&
+              !upper.includes("RATE") &&
+              !upper.includes("PRICE")
+            );
+          });
+        }
+
+        // Check file name for month hints (e.g. Order_L6M.xlsx)
+        if (!detectedOrderMonths && file.name) {
+          const fm = file.name.match(/\bL\s*(\d+)\s*M\b/i) || file.name.match(/\b(\d+)\s*M\b/i);
+          if (fm) {
+            detectedOrderMonths = parseInt(fm[1], 10);
+          }
+        }
+
+        if (detectedOrderMonths) {
+          setOrderDetectedMonths(detectedOrderMonths);
+        }
+
         const orderLines = [];
         for (let i = headerIdx + 1; i < jsonData.length; i++) {
           const row = jsonData[i];
@@ -581,6 +686,9 @@ export default function DeadStockAnalyzer({ onBack }) {
           const category = catCol !== -1 && row[catCol] ? String(row[catCol]).trim() : "";
           const reqQty = reqQtyCol !== -1 ? parseFloat(row[reqQtyCol]) || 0 : 0;
           const availStock = availStockCol !== -1 && row[availStockCol] !== undefined ? parseFloat(row[availStockCol]) || 0 : 0;
+          const sheetSales = orderSalesCol !== -1 && row[orderSalesCol] !== undefined && row[orderSalesCol] !== "" 
+            ? (parseFloat(row[orderSalesCol]) || 0) 
+            : null;
 
           if (!itemCode || reqQty <= 0) continue;
 
@@ -594,13 +702,14 @@ export default function DeadStockAnalyzer({ onBack }) {
             description: desc,
             category,
             reqQty,
-            availStock
+            availStock,
+            sheetSales
           });
         }
 
         setOrderDataRaw(orderLines);
         setActiveTab("order-audit");
-        toast.success(`Order File Loaded (${orderLines.length} order lines)`);
+        toast.success(`Order File Loaded (${orderLines.length} order lines${detectedOrderMonths ? ` • Reference: L${detectedOrderMonths}M` : ''})`);
       } catch (err) {
         console.error(err);
         toast.error(`Error parsing Order File: ${err.message}`);
@@ -775,12 +884,14 @@ export default function DeadStockAnalyzer({ onBack }) {
       const sCode = extractStoreCode(ord.storeCode);
       const iCode = normalizeItemCode(ord.itemCode);
       const key = `${sCode}::${iCode}`;
-      const sales = salesMap[key] || { l3mQty: 0 };
-      const periodSales = sales.l3mQty;
+      const sales = salesMap[key];
+      const periodSales = (sales && sales.l3mQty !== undefined)
+        ? sales.l3mQty
+        : (ord.sheetSales !== null && ord.sheetSales !== undefined ? ord.sheetSales : 0);
       const stockAtStore = ord.availStock !== undefined ? parseFloat(ord.availStock) || 0 : 0;
       const rawReqQty = ord.reqQty !== undefined ? parseFloat(ord.reqQty) || 0 : 0;
 
-      // Hardcoded Rule: If L3M sale is 0, cap required quantity at 3 items (do not send >3 regardless of store demand)
+      // Hardcoded Rule: If reference period sale is 0, cap required quantity at 3 items (do not send >3 regardless of store demand)
       const effectiveReqQty = periodSales === 0 ? Math.min(rawReqQty, 3) : rawReqQty;
 
       const surplusList = itemSurplusStoreMap[iCode] || [];
@@ -797,9 +908,9 @@ export default function DeadStockAnalyzer({ onBack }) {
 
       let reason = "";
       if (isHighRisk) {
-        reason = `Rejected: Store already has ${stockAtStore} unit(s) in hand but 0 sales in reference period.`;
+        reason = `Rejected: Store already has ${stockAtStore} unit(s) in hand but 0 sales in ${salesHeaderLabel}.`;
       } else if (periodSales > 0) {
-        reason = `Approved: Active seller at ${sCode} (${periodSales} units sold in reference period).`;
+        reason = `Approved: Active seller at ${sCode} (${periodSales} units sold in ${salesHeaderLabel}).`;
       } else {
         reason = `Approved: Zero stock in hand at ${sCode} (restocking approved for minimum store stock, max 3 units).`;
       }
@@ -843,7 +954,7 @@ export default function DeadStockAnalyzer({ onBack }) {
       if (auditFilter === "REJECTED") return ord.statusTag === "REJECTED";
       return true;
     });
-  }, [orderDataRaw, stockDataRaw, mergedAnalysis, salesDataRaw, strictSameState, auditFilter, selectedStore, searchTerm]);
+  }, [orderDataRaw, stockDataRaw, mergedAnalysis, salesDataRaw, strictSameState, auditFilter, selectedStore, searchTerm, salesHeaderLabel]);
 
   // Summary Metrics for Order Requirement Audit Dashboard
   const orderMetrics = useMemo(() => {
@@ -853,7 +964,8 @@ export default function DeadStockAnalyzer({ onBack }) {
       storeState: s.storeState,
       itemCode: s.itemCode,
       reqQty: s.closingStock,
-      availStock: s.closingStock
+      availStock: s.closingStock,
+      sheetSales: null
     })) : []);
 
     let totalLines = baseSource.length;
@@ -867,7 +979,10 @@ export default function DeadStockAnalyzer({ onBack }) {
       const iCode = normalizeItemCode(ord.itemCode);
       if (sCode) storeSet.add(sCode);
       const key = `${sCode}::${iCode}`;
-      const periodSales = (salesMap[key] || {}).l3mQty || 0;
+      const sales = salesMap[key];
+      const periodSales = (sales && sales.l3mQty !== undefined)
+        ? sales.l3mQty
+        : (ord.sheetSales !== null && ord.sheetSales !== undefined ? ord.sheetSales : 0);
       const rawReqQty = ord.reqQty !== undefined ? parseFloat(ord.reqQty) || 0 : 0;
       const effectiveReqQty = periodSales === 0 ? Math.min(rawReqQty, 3) : rawReqQty;
 
@@ -1005,7 +1120,7 @@ export default function DeadStockAnalyzer({ onBack }) {
     }
 
     const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet("Order Requirement Audit");
+    const sheet = workbook.addWorksheet(`Order Requirement Audit (${salesHeaderLabel})`);
 
     sheet.columns = [
       { header: "Date", key: "date", width: 14 },
@@ -1017,7 +1132,7 @@ export default function DeadStockAnalyzer({ onBack }) {
       { header: "Category", key: "category", width: 18 },
       { header: "Req Qty", key: "reqQty", width: 12 },
       { header: "Available Stock", key: "availStock", width: 16 },
-      { header: "L3M Sale", key: "periodSales", width: 14 },
+      { header: `${salesHeaderLabel} Sale`, key: "periodSales", width: 14 },
       { header: "Recommendation", key: "recommendation", width: 20 }
     ];
 
@@ -1097,8 +1212,8 @@ export default function DeadStockAnalyzer({ onBack }) {
     });
 
     workbook.xlsx.writeBuffer().then(b => {
-      saveAs(new Blob([b]), `Order_Requirement_Audit_Results_${new Date().toISOString().slice(0, 10)}.xlsx`);
-      toast.success("Order Audit Excel Exported!");
+      saveAs(new Blob([b]), `Order_Requirement_Audit_${salesHeaderLabel}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      toast.success(`Order Audit Excel Exported with ${salesHeaderLabel} Sales Column!`);
     });
   };
 
@@ -1171,6 +1286,39 @@ export default function DeadStockAnalyzer({ onBack }) {
               <PlusCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               <span>Add Month Sales</span>
             </button>
+
+            {/* Sales Reference Period Selector */}
+            <div className="flex items-center gap-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-xl shadow-sm">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-cyan-500" /> Sales Period:
+              </span>
+              <select
+                value={activeMonthCount}
+                onChange={(e) => handleSelectMonthPeriod(parseInt(e.target.value, 10))}
+                className="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg px-2 py-0.5 text-xs font-black text-cyan-600 dark:text-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-500 cursor-pointer"
+                title="Change Sales Calculation Reference Period"
+              >
+                <option value={1}>L1M (1 Month)</option>
+                <option value={2}>L2M (2 Months)</option>
+                <option value={3}>L3M (3 Months)</option>
+                <option value={4}>L4M (4 Months)</option>
+                <option value={5}>L5M (5 Months)</option>
+                <option value={6}>L6M (6 Months)</option>
+                <option value={7}>L7M (7 Months)</option>
+                <option value={8}>L8M (8 Months)</option>
+                <option value={9}>L9M (9 Months)</option>
+                <option value={12}>L12M (12 Months / 1 Year)</option>
+              </select>
+              {salesPeriodInfo?.isFiltered ? (
+                <span className="text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-800">
+                  ⚡ {activeMonthCount}M of {salesPeriodInfo.totalAvailableMonths}M
+                </span>
+              ) : (
+                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                  ✓ Full ({activeMonthCount}M)
+                </span>
+              )}
+            </div>
 
             <button
               onClick={handleResetFiles}
@@ -1593,16 +1741,64 @@ export default function DeadStockAnalyzer({ onBack }) {
                       Sales-Based Order Processing & Audit Results ({auditedOrders.length} lines)
                     </h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                      {orderFileName ? `File: ${orderFileName}` : `Auditing store stock lines against Sales History DB (${salesPeriodInfo.labelText})`}
+                      {orderFileName ? `File: ${orderFileName} • Reference: ${salesHeaderLabel} (${salesPeriodInfo.labelText})` : `Auditing store stock lines against Sales History DB (${salesPeriodInfo.labelText})`}
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {/* Period Selector & Indicator */}
+                    <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                      <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">Sales Period:</span>
+                      <select
+                        value={activeMonthCount}
+                        onChange={(e) => handleSelectMonthPeriod(parseInt(e.target.value, 10))}
+                        className="bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-2 py-0.5 text-xs font-black text-cyan-600 dark:text-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-500 cursor-pointer"
+                        title="Change sales reference month duration"
+                      >
+                        <option value={1}>L1M (1 Month)</option>
+                        <option value={2}>L2M (2 Months)</option>
+                        <option value={3}>L3M (3 Months)</option>
+                        <option value={4}>L4M (4 Months)</option>
+                        <option value={5}>L5M (5 Months)</option>
+                        <option value={6}>L6M (6 Months)</option>
+                        <option value={7}>L7M (7 Months)</option>
+                        <option value={8}>L8M (8 Months)</option>
+                        <option value={9}>L9M (9 Months)</option>
+                        <option value={12}>L12M (12 Months / 1 Year)</option>
+                      </select>
+                      {salesPeriodInfo?.isFiltered ? (
+                        <div className="flex items-center gap-1">
+                          <span className="text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-800">
+                            ⚡ {activeMonthCount}M of {salesPeriodInfo.totalAvailableMonths}M
+                          </span>
+                          <button
+                            onClick={handleResetMonthPeriod}
+                            title="Reset to Full Available Period"
+                            className="text-[10px] text-rose-500 hover:text-rose-600 font-bold px-1 underline"
+                          >
+                            Reset
+                          </button>
+                        </div>
+                      ) : customMonthCount ? (
+                        <button
+                          onClick={handleResetMonthPeriod}
+                          title="Reset to Auto-Detected"
+                          className="text-[10px] text-rose-500 hover:text-rose-600 font-bold px-1 underline"
+                        >
+                          Reset Auto
+                        </button>
+                      ) : (
+                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold px-1">
+                          ✓ Auto ({salesHeaderLabel})
+                        </span>
+                      )}
+                    </div>
+
                     <button
                       onClick={exportOrderAuditExcel}
                       className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center gap-1.5"
                     >
-                      <Download className="w-3.5 h-3.5" /> Export Audit Sheet (Excel)
+                      <Download className="w-3.5 h-3.5" /> Export Audit Sheet ({salesHeaderLabel} Excel)
                     </button>
                   </div>
                 </div>
@@ -1617,7 +1813,7 @@ export default function DeadStockAnalyzer({ onBack }) {
                         <th className="p-3 text-center">Category</th>
                         <th className="p-3 text-center">Req Qty</th>
                         <th className="p-3 text-center">Stock at Store</th>
-                        <th className="p-3 text-center">Store Sales L3M</th>
+                        <th className="p-3 text-center">Store Sales {salesHeaderLabel}</th>
                         <th className="p-3 text-center">Recommendation</th>
                       </tr>
                     </thead>
