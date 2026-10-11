@@ -154,16 +154,27 @@ export default function DeadStockAnalyzer({ onBack }) {
         // 2. Background check: Sync from Cloud Table 2 if out of sync or fresh device
         try {
           const cloudMeta = await getDeadStockCloudMetadata();
-          if (cloudMeta && cloudMeta.totalRecords > 0) {
-            if (loadedCount === 0 || loadedCount !== cloudMeta.totalRecords) {
-              const cloudRows = await syncDeadStockFromCloud();
-              if (cloudRows && cloudRows.length > 0 && isMounted) {
-                const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(cloudRows);
-                setSalesDataRaw(salesMap);
-                setSalesPeriodInfo(periodInfo);
-                setSalesFileName(`Cloud DB (${totalRows.toLocaleString()} lines - ${periodInfo.labelText})`);
-                setUseSavedSalesDB(true);
-                setSavedDbCount(totalRows);
+          if (cloudMeta) {
+            if (cloudMeta.totalRecords > 0) {
+              if (loadedCount === 0 || loadedCount !== cloudMeta.totalRecords) {
+                const cloudRows = await syncDeadStockFromCloud();
+                if (cloudRows && cloudRows.length > 0 && isMounted) {
+                  const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(cloudRows);
+                  setSalesDataRaw(salesMap);
+                  setSalesPeriodInfo(periodInfo);
+                  setSalesFileName(`Cloud DB (${totalRows.toLocaleString()} lines - ${periodInfo.labelText})`);
+                  setUseSavedSalesDB(true);
+                  setSavedDbCount(totalRows);
+                }
+              }
+            } else if (cloudMeta.totalRecords === 0 && loadedCount > 0) {
+              // Cloud was cleared, sync local clear
+              await clearDeadStockSalesData();
+              if (isMounted) {
+                setSalesDataRaw(null);
+                setSalesFileName("");
+                setUseSavedSalesDB(false);
+                setSavedDbCount(0);
               }
             }
           }
@@ -189,6 +200,13 @@ export default function DeadStockAnalyzer({ onBack }) {
           setUseSavedSalesDB(true);
           setSavedDbCount(totalRows);
           toast.success(`⚡ Synced ${totalRows.toLocaleString()} records from Cloud!`, { id: "cloud-sync-toast" });
+        } else if ((!cloudRows || cloudRows.length === 0) && isMounted) {
+          // Cloud was cleared on another device
+          setSalesDataRaw(null);
+          setSalesFileName("");
+          setUseSavedSalesDB(false);
+          setSavedDbCount(0);
+          toast("Sales Database cleared from another device", { icon: "🗑️", id: "cloud-sync-toast" });
         }
       } catch (syncErr) {
         console.warn("Real-time cloud sync warning:", syncErr);
