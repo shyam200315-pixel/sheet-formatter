@@ -36,8 +36,18 @@ function getComputedOffer(item) {
     let scheme = o.scheme || "Offer Scheme";
     let discPct = null;
 
-    // 1. Direct Fixed Flat Rate (e.g. ₹3099, ₹3089, ₹99)
-    if (o.effectiveAug31 && typeof o.effectiveAug31 === 'number' && o.effectiveAug31 >= 10) {
+    // 1. Direct Fixed Flat Rate (e.g. ₹703, ₹1001, ₹1210, ₹199)
+    if (o.discType === 'Flat Rate' && typeof o.discRate === 'number' && o.discRate >= 10) {
+      p = o.discRate;
+      label = `Flat Rate: ₹${p.toLocaleString('en-IN')}`;
+      scheme = `Flat Rate Special Price (₹${p.toLocaleString('en-IN')})`;
+      if (rawMrp && rawMrp > p) discPct = Math.round(((rawMrp - p) / rawMrp) * 100);
+    } else if (o.effectiveOct26 && typeof o.effectiveOct26 === 'number' && o.effectiveOct26 >= 10) {
+      p = o.effectiveOct26;
+      label = `Flat Rate: ₹${p.toLocaleString('en-IN')}`;
+      scheme = `Flat Rate Scheme (₹${p.toLocaleString('en-IN')})`;
+      if (rawMrp && rawMrp > p) discPct = Math.round(((rawMrp - p) / rawMrp) * 100);
+    } else if (o.effectiveAug31 && typeof o.effectiveAug31 === 'number' && o.effectiveAug31 >= 10) {
       p = o.effectiveAug31;
       label = `Flat Rate: ₹${p.toLocaleString('en-IN')}`;
       scheme = `Flat Rate Scheme (₹${p.toLocaleString('en-IN')})`;
@@ -47,38 +57,39 @@ function getComputedOffer(item) {
       label = `Offer Rate: ₹${p.toLocaleString('en-IN')}`;
       scheme = `New Offer (₹${p.toLocaleString('en-IN')})`;
       if (rawMrp && rawMrp > p) discPct = Math.round(((rawMrp - p) / rawMrp) * 100);
-    } else if (o.discRate && typeof o.discRate === 'number' && o.discRate >= 10 && o.discType === 'Flat Rate') {
-      p = o.discRate;
-      label = `Flat Rate: ₹${p.toLocaleString('en-IN')}`;
-      scheme = `Flat Rate (₹${p.toLocaleString('en-IN')})`;
-      if (rawMrp && rawMrp > p) discPct = Math.round(((rawMrp - p) / rawMrp) * 100);
     } 
-    // 2. Percentage Discounts: 0.5 (50%), 0.4 (40%), 0.35 (35%), 0.3 (30%), 0.7 (70%)
+    // 2. Percentage Discounts: 0.6 (60%), 0.5 (50%), 0.4 (40%), 0.35 (35%), 0.3 (30%)
     else if (rawMrp) {
       let pct = null;
-      if (typeof o.effectiveAug31 === 'number' && o.effectiveAug31 < 1 && o.effectiveAug31 > 0) {
-        pct = o.effectiveAug31;
-      } else if (typeof o.newOffer === 'number' && o.newOffer < 1 && o.newOffer > 0) {
-        pct = o.newOffer;
-      } else if (typeof o.discRate === 'number' && o.discRate < 1 && o.discRate > 0) {
+      if (typeof o.discRate === 'number' && o.discRate < 1 && o.discRate > 0) {
         pct = o.discRate;
       } else if (typeof o.discRate === 'number' && o.discRate >= 1 && o.discRate <= 90 && o.discType === 'Flat Discount') {
         pct = o.discRate / 100;
+      } else if (typeof o.effectiveOct26 === 'number' && o.effectiveOct26 < 1 && o.effectiveOct26 > 0) {
+        pct = o.effectiveOct26;
+      } else if (typeof o.effectiveAug31 === 'number' && o.effectiveAug31 < 1 && o.effectiveAug31 > 0) {
+        pct = o.effectiveAug31;
+      } else if (typeof o.newOffer === 'number' && o.newOffer < 1 && o.newOffer > 0) {
+        pct = o.newOffer;
+      } else if (o.scheme === 'Flat 60% Off' || (o.description && o.description.includes('60%'))) {
+        pct = 0.60;
       } else if (o.scheme === 'Flat 50% Off' || (o.description && o.description.includes('50%'))) {
         pct = 0.50;
+      } else if (o.scheme && o.scheme.includes('40%') && (o.scheme.includes('Hob') || o.scheme.includes('Chimney'))) {
+        pct = 0.40;
       } else if (o.scheme && o.scheme.includes('30%') && o.scheme.includes('40%')) {
-        pct = 0.30; // user requested: "aagar buy 1 30 buy 2 40 he to 30 ke hisab se calculate krdo"
+        pct = 0.30;
       }
 
       if (pct !== null) {
         p = Math.round(rawMrp * (1 - pct));
         discPct = Math.round(pct * 100);
         label = `Flat ${discPct}% Off: ₹${p.toLocaleString('en-IN')}`;
-        scheme = o.scheme && o.scheme.includes('30%') ? "Buy 1 @ 30% Off Scheme" : `Flat ${discPct}% Discount`;
+        scheme = o.scheme && o.scheme.includes('30%') ? "Buy 1 @ 30% Off Scheme" : (o.scheme || `Flat ${discPct}% Discount`);
       }
     }
 
-    // 3. Buy 2 schemes
+    // 3. Buy 2 combos
     if (!p) {
       if (o.scheme === 'Buy 2 @ ₹999/-') {
         p = 500;
@@ -119,12 +130,15 @@ function getComputedOffer(item) {
 // Render individual scheme offer pill details
 function renderSchemeRateDetail(offer, rawMrp) {
   // Flat fixed rate
-  if (offer.effectiveAug31 && typeof offer.effectiveAug31 === 'number' && offer.effectiveAug31 >= 10) {
+  if ((offer.discType === 'Flat Rate' && typeof offer.discRate === 'number') || 
+      (typeof offer.effectiveOct26 === 'number' && offer.effectiveOct26 >= 10) ||
+      (typeof offer.effectiveAug31 === 'number' && offer.effectiveAug31 >= 10)) {
+    const rate = offer.discRate || offer.effectiveOct26 || offer.effectiveAug31;
     return (
       <div className="flex items-center justify-between text-xs mt-2 pt-2 border-t border-orange-200/50 dark:border-slate-700">
         <span className="text-gray-500 dark:text-gray-400">Fixed Scheme Rate:</span>
         <span className="font-bold text-orange-600 dark:text-orange-400 text-sm">
-          ₹{offer.effectiveAug31.toLocaleString('en-IN')}
+          ₹{rate.toLocaleString('en-IN')}
         </span>
       </div>
     );
@@ -135,32 +149,6 @@ function renderSchemeRateDetail(offer, rawMrp) {
         <span className="text-gray-500 dark:text-gray-400">Offer Price:</span>
         <span className="font-bold text-orange-600 dark:text-orange-400 text-sm">
           ₹{offer.newOffer.toLocaleString('en-IN')}
-        </span>
-      </div>
-    );
-  }
-
-  // Percentage discount calculation (50%, 40%, 35%, 30%)
-  let pct = null;
-  if (typeof offer.effectiveAug31 === 'number' && offer.effectiveAug31 < 1 && offer.effectiveAug31 > 0) {
-    pct = offer.effectiveAug31;
-  } else if (typeof offer.newOffer === 'number' && offer.newOffer < 1 && offer.newOffer > 0) {
-    pct = offer.newOffer;
-  } else if (typeof offer.discRate === 'number' && offer.discRate < 1 && offer.discRate > 0) {
-    pct = offer.discRate;
-  } else if (typeof offer.discRate === 'number' && offer.discRate >= 1 && offer.discRate <= 90 && offer.discType === 'Flat Discount') {
-    pct = offer.discRate / 100;
-  } else if (offer.scheme === 'Flat 50% Off' || (offer.description && offer.description.includes('50%'))) {
-    pct = 0.50;
-  }
-
-  if (pct !== null && rawMrp) {
-    const calcRate = Math.round(rawMrp * (1 - pct));
-    return (
-      <div className="flex items-center justify-between text-xs mt-2 pt-2 border-t border-orange-200/50 dark:border-slate-700">
-        <span className="text-gray-500 dark:text-gray-400">Calculated Rate ({(pct * 100).toFixed(0)}% Off MRP):</span>
-        <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">
-          ₹{calcRate.toLocaleString('en-IN')}
         </span>
       </div>
     );
@@ -180,6 +168,38 @@ function renderSchemeRateDetail(offer, rawMrp) {
           <span className="text-gray-500 dark:text-gray-400">Buy 2+ Rate (40% Off):</span>
           <span className="font-bold text-emerald-700 dark:text-emerald-300">₹{buy2Rate.toLocaleString('en-IN')} / pc</span>
         </div>
+      </div>
+    );
+  }
+
+  // Percentage discount calculation (60%, 50%, 40%, 30%)
+  let pct = null;
+  if (typeof offer.discRate === 'number' && offer.discRate < 1 && offer.discRate > 0) {
+    pct = offer.discRate;
+  } else if (typeof offer.discRate === 'number' && offer.discRate >= 1 && offer.discRate <= 90 && offer.discType === 'Flat Discount') {
+    pct = offer.discRate / 100;
+  } else if (typeof offer.effectiveOct26 === 'number' && offer.effectiveOct26 < 1 && offer.effectiveOct26 > 0) {
+    pct = offer.effectiveOct26;
+  } else if (typeof offer.effectiveAug31 === 'number' && offer.effectiveAug31 < 1 && offer.effectiveAug31 > 0) {
+    pct = offer.effectiveAug31;
+  } else if (typeof offer.newOffer === 'number' && offer.newOffer < 1 && offer.newOffer > 0) {
+    pct = offer.newOffer;
+  } else if (offer.scheme === 'Flat 60% Off' || (offer.description && offer.description.includes('60%'))) {
+    pct = 0.60;
+  } else if (offer.scheme === 'Flat 50% Off' || (offer.description && offer.description.includes('50%'))) {
+    pct = 0.50;
+  } else if (offer.scheme && offer.scheme.includes('40%') && (offer.scheme.includes('Hob') || offer.scheme.includes('Chimney'))) {
+    pct = 0.40;
+  }
+
+  if (pct !== null && rawMrp) {
+    const calcRate = Math.round(rawMrp * (1 - pct));
+    return (
+      <div className="flex items-center justify-between text-xs mt-2 pt-2 border-t border-orange-200/50 dark:border-slate-700">
+        <span className="text-gray-500 dark:text-gray-400">Calculated Rate ({(pct * 100).toFixed(0)}% Off MRP):</span>
+        <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">
+          ₹{calcRate.toLocaleString('en-IN')}
+        </span>
       </div>
     );
   }
@@ -367,10 +387,10 @@ export default function MRPChecker() {
             <Tag size={32} className="stroke-[2.5]" />
           </div>
           <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-            MRP & Scheme Offer Checker
+            MRP & October Scheme Offer Checker
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Search by Item Code, SAP Code, or Name to view MRP, Flat 50%/40%/30% discount rates, and active schemes
+            Search by Item Code, SAP Code, Barcode, or Name to view MRP, October 2026 scheme rates, and festival discounts
           </p>
         </div>
         
@@ -673,7 +693,7 @@ export default function MRPChecker() {
                 <div className="bg-white/90 dark:bg-slate-800/90 rounded-2xl p-5 border border-gray-200 dark:border-slate-700 shadow-sm space-y-3">
                   <div className="flex items-center gap-2 text-gray-900 dark:text-white font-bold text-base">
                     <Gift className="text-orange-500" size={20} />
-                    <span>Applicable August / September Schemes & Discounts ({activeItem.data.offers.length})</span>
+                    <span>Applicable October 2026 Schemes & Discounts ({activeItem.data.offers.length})</span>
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -705,12 +725,36 @@ export default function MRPChecker() {
                 </div>
               )}
 
+              {/* October Festival Net Bill Slab & Exchange Benefits Banner */}
+              <div className="bg-gradient-to-r from-amber-50 via-orange-50 to-rose-50 dark:from-amber-950/20 dark:via-orange-950/20 dark:to-rose-950/20 rounded-2xl p-4 border border-amber-200/80 dark:border-amber-800/40 text-xs space-y-2">
+                <div className="flex items-center gap-2 font-bold text-amber-900 dark:text-amber-200 text-sm">
+                  <Sparkles size={16} className="text-amber-500" />
+                  <span>October 2026 Additional Festival Slabs & Exchange Scheme</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-gray-700 dark:text-gray-300">
+                  <div className="bg-white/80 dark:bg-slate-800/80 p-3 rounded-xl border border-amber-100 dark:border-slate-700">
+                    <span className="font-bold text-amber-800 dark:text-amber-300 block mb-1">💳 Additional Net Bill Slabs:</span>
+                    <ul className="space-y-1 text-[11px] text-gray-600 dark:text-gray-400">
+                      <li>• ₹3,999 – ₹6,999: <strong className="text-emerald-600 dark:text-emerald-400 font-bold">Extra 5% OFF</strong></li>
+                      <li>• ₹7,000 – ₹9,999: <strong className="text-emerald-600 dark:text-emerald-400 font-bold">Extra 10% OFF</strong></li>
+                      <li>• ₹10,000 & above: <strong className="text-emerald-600 dark:text-emerald-400 font-bold">Extra 15% OFF</strong></li>
+                    </ul>
+                  </div>
+                  <div className="bg-white/80 dark:bg-slate-800/80 p-3 rounded-xl border border-amber-100 dark:border-slate-700">
+                    <span className="font-bold text-amber-800 dark:text-amber-300 block mb-1">🔄 Old Exchange Offer (POS 'EX'):</span>
+                    <p className="text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed">
+                      <strong className="text-emerald-600 dark:text-emerald-400 font-bold">Flat 45% OFF</strong> on Same-Category Exchange (Old Cookware for Cookware/Cooker; Old Cooktop for Hob/Chimney).
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               {/* Source Info Badges */}
-              {activeItem.data.source === "file2" && (
+              {activeItem.data.source && (
                 <div className="flex items-start gap-3 text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/30 p-4 rounded-2xl text-xs border border-amber-200 dark:border-amber-800">
                   <Info size={18} className="mt-0.5 flex-shrink-0" />
                   <div>
-                    <strong>Note:</strong> Pricing information is synced from the Master File catalogue.
+                    <strong>Note:</strong> Pricing and scheme discounts are synced with October 2026 Master Catalogue.
                   </div>
                 </div>
               )}
@@ -729,7 +773,7 @@ export default function MRPChecker() {
               <Search className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
               <p className="text-lg font-bold text-gray-900 dark:text-white">Code Not Found</p>
               <p className="text-sm mt-1 max-w-sm mx-auto">
-                Could not find '{searchQuery}' in the Master Database, 26-27 MRP list, or August/September Offer catalogue.
+                Could not find '{searchQuery}' in the Master Database, 26-27 MRP list, or October 2026 Offer catalogue.
               </p>
             </motion.div>
           )}
