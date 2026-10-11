@@ -54,6 +54,35 @@ export class SyncController {
     return this.syncService.saveTargets(body.targets);
   }
 
+  // Dead Stock Table 2 Endpoints
+  @Post('deadstock/upload')
+  async uploadDeadStockData(@Body() body: { data: any[], isAppend?: boolean }) {
+    if (!body || !body.data) {
+      throw new Error("Invalid payload: 'data' property is required.");
+    }
+    return this.syncService.saveDeadStockData(body.data, body.isAppend);
+  }
+
+  @Get('deadstock/download')
+  async downloadDeadStockData() {
+    return this.syncService.getDeadStockData();
+  }
+
+  @Get('deadstock/metadata')
+  async getDeadStockMetadata() {
+    return this.syncService.getDeadStockMetadata();
+  }
+
+  @Delete('deadstock/clear')
+  async clearDeadStockData() {
+    return this.syncService.clearDeadStockData();
+  }
+
+  @Delete('deadstock/file/:fileId')
+  async deleteDeadStockFile(@Param('fileId') fileId: string) {
+    return this.syncService.deleteDeadStockFile(decodeURIComponent(fileId));
+  }
+
   @Sse('updates')
   streamUpdates(): Observable<MessageEvent> {
     return this.syncService.updates$.asObservable().pipe(

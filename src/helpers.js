@@ -321,8 +321,32 @@ function getDB() {
   });
 }
 
-import { saveToCloud, loadFromCloud, clearFromCloud, getCloudMetadata, deleteFileFromCloud, deleteDateFromCloud, subscribeToCloudUpdates } from "./firebaseConfig";
-export { deleteFileFromCloud, deleteDateFromCloud, subscribeToCloudUpdates };
+import { 
+  saveToCloud, 
+  loadFromCloud, 
+  clearFromCloud, 
+  getCloudMetadata, 
+  deleteFileFromCloud, 
+  deleteDateFromCloud, 
+  subscribeToCloudUpdates,
+  saveDeadStockToCloud,
+  loadDeadStockFromCloud,
+  getDeadStockCloudMetadata,
+  clearDeadStockFromCloud,
+  deleteDeadStockFileFromCloud,
+  subscribeToDeadStockUpdates
+} from "./firebaseConfig";
+export { 
+  deleteFileFromCloud, 
+  deleteDateFromCloud, 
+  subscribeToCloudUpdates,
+  saveDeadStockToCloud,
+  loadDeadStockFromCloud,
+  getDeadStockCloudMetadata,
+  clearDeadStockFromCloud,
+  deleteDeadStockFileFromCloud,
+  subscribeToDeadStockUpdates
+};
 
 /**
  * Save data to IndexedDB and sync to Firebase Cloud in background
@@ -500,49 +524,89 @@ export async function clearHistoricalData() {
  */
 
 /**
- * Save Dead Stock sales data to IndexedDB
+ * Save Dead Stock sales data to IndexedDB and sync to Cloud Database
  * @param {Array} data 
+ * @param {boolean} [syncToCloud=true]
  */
-export async function saveDeadStockSalesData(data) {
+export async function saveDeadStockSalesData(data, syncToCloud = true) {
   try {
     const db = await getDB();
-    return new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       const tx = db.transaction('deadStockSalesData', 'readwrite');
       const store = tx.objectStore('deadStockSalesData');
       const req = store.put(data, 'main_chunk');
       req.onsuccess = () => resolve(true);
       req.onerror = () => reject(req.error);
     });
+
+    if (syncToCloud && data && data.length > 0) {
+      saveDeadStockToCloud(data).catch(err => console.warn("Background deadstock cloud sync warning:", err));
+    }
+    return true;
   } catch (error) {
     throw new Error(`Dead Stock DB Save Error: ${error.message}`);
   }
 }
 
 /**
- * Load Dead Stock sales data from IndexedDB
+ * Load Dead Stock sales data (Local-First: instant 0ms IndexedDB read with Cloud fallback)
  */
 export async function loadDeadStockSalesData() {
   try {
     const db = await getDB();
-    return new Promise((resolve, reject) => {
+    const localData = await new Promise((resolve, reject) => {
       const tx = db.transaction('deadStockSalesData', 'readonly');
       const store = tx.objectStore('deadStockSalesData');
       const req = store.get('main_chunk');
       req.onsuccess = () => resolve(req.result || null);
       req.onerror = () => reject(req.error);
     });
+
+    if (localData && Array.isArray(localData) && localData.length > 0) {
+      return localData;
+    }
+
+    // Fallback: If local IndexedDB is empty on this device, fetch from Cloud Table 2 and cache locally
+    const cloudData = await loadDeadStockFromCloud();
+    if (cloudData && Array.isArray(cloudData) && cloudData.length > 0) {
+      await saveDeadStockSalesData(cloudData, false);
+      return cloudData;
+    }
+    return null;
   } catch (error) {
     console.error("Dead Stock DB Load Error:", error);
+    try {
+      return await loadDeadStockFromCloud();
+    } catch (e) {
+      return null;
+    }
+  }
+}
+
+/**
+ * Force pull latest Dead Stock data from Cloud Database and update local IndexedDB cache
+ */
+export async function syncDeadStockFromCloud() {
+  try {
+    const cloudData = await loadDeadStockFromCloud();
+    if (cloudData && Array.isArray(cloudData)) {
+      await saveDeadStockSalesData(cloudData, false);
+      return cloudData;
+    }
+    return null;
+  } catch (err) {
+    console.warn("syncDeadStockFromCloud warning:", err);
     return null;
   }
 }
 
 /**
- * Append data to Dead Stock IndexedDB
+ * Append data to Dead Stock IndexedDB and sync to Cloud Table 2
  * @param {Array} newData 
  * @param {string} [fileName]
+ * @param {Function} [onProgress]
  */
-export async function appendDeadStockSalesData(newData, fileName = null) {
+export async function appendDeadStockSalesData(newData, fileName = null, onProgress = null) {
   try {
     const existingData = (await loadDeadStockSalesData()) || [];
     const fileId = `deadstock_file_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
@@ -556,7 +620,16 @@ export async function appendDeadStockSalesData(newData, fileName = null) {
     }));
 
     const mergedData = [...existingData, ...taggedData];
-    await saveDeadStockSalesData(mergedData);
+    // 1. Instant local IndexedDB save (0ms speed)
+    await saveDeadStockSalesData(mergedData, false);
+
+    // 2. Sync appended chunk to Cloud Table 2 for all devices
+    try {
+      await saveDeadStockToCloud(taggedData, onProgress, true);
+    } catch (cloudErr) {
+      console.warn("DeadStock cloud append warning (persisted locally):", cloudErr);
+    }
+
     return true;
   } catch (error) {
     throw new Error(`Dead Stock DB Append Error: ${error.message}`);
@@ -564,18 +637,25 @@ export async function appendDeadStockSalesData(newData, fileName = null) {
 }
 
 /**
- * Clear data from Dead Stock IndexedDB
+ * Clear data from Dead Stock IndexedDB and Cloud Database
  */
 export async function clearDeadStockSalesData() {
   try {
     const db = await getDB();
-    return new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       const tx = db.transaction('deadStockSalesData', 'readwrite');
       const store = tx.objectStore('deadStockSalesData');
       const req = store.clear();
       req.onsuccess = () => resolve(true);
       req.onerror = () => reject(req.error);
     });
+
+    try {
+      await clearDeadStockFromCloud();
+    } catch (cloudErr) {
+      console.warn("DeadStock cloud clear warning:", cloudErr);
+    }
+    return true;
   } catch (error) {
     throw new Error(`Dead Stock DB Clear Error: ${error.message}`);
   }

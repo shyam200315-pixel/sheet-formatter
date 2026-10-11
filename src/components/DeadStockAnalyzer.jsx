@@ -24,7 +24,9 @@ import {
   PlusCircle,
   DatabaseZap,
   Check,
-  Trash2
+  Trash2,
+  Cloud,
+  CloudDownload
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import ExcelJS from "exceljs";
@@ -34,12 +36,17 @@ import {
   appendDeadStockSalesData, 
   saveDeadStockSalesData, 
   clearDeadStockSalesData,
+  syncDeadStockFromCloud,
   processSalesRowsToMap, 
   findHeaderRowIndex,
   normalizeItemCode,
   extractStoreCode as extractStoreCodeHelper,
   getStateFromStore as getStateFromStoreHelper
 } from "../helpers";
+import { 
+  subscribeToDeadStockUpdates,
+  getDeadStockCloudMetadata
+} from "../firebaseConfig";
 
 // Store Code extraction (e.g. 'WMH001 - NED - VAZIRABAD' -> 'WMH001')
 const extractStoreCode = (branchStr) => {
@@ -88,6 +95,7 @@ export default function DeadStockAnalyzer({ onBack }) {
   const [useSavedSalesDB, setUseSavedSalesDB] = useState(false);
   const [savedDbCount, setSavedDbCount] = useState(null);
   const [isLoadingDb, setIsLoadingDb] = useState(false);
+  const [isSyncingCloud, setIsSyncingCloud] = useState(false);
 
   // Loading flags
   const [isParsingSales, setIsParsingSales] = useState(false);
@@ -119,27 +127,78 @@ export default function DeadStockAnalyzer({ onBack }) {
   const orderInputRef = useRef(null);
   const appendSalesInputRef = useRef(null);
 
-  // Check and auto-load saved sales DB on mount
+  // Check and auto-load saved sales DB on mount (Instant Local-First 0ms + Cloud Background Sync)
   useEffect(() => {
+    let isMounted = true;
+
     const initDb = async () => {
       try {
+        // 1. Instant 0ms load from local IndexedDB cache
         let dbRows = await loadDeadStockSalesData();
+        let loadedCount = 0;
 
         if (dbRows && dbRows.length > 0) {
           const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(dbRows);
-          setSalesDataRaw(salesMap);
-          setSalesPeriodInfo(periodInfo);
-          setSalesFileName(`Saved DB (${totalRows.toLocaleString()} lines - ${periodInfo.labelText})`);
-          setUseSavedSalesDB(true);
-          setSavedDbCount(totalRows);
+          if (isMounted) {
+            setSalesDataRaw(salesMap);
+            setSalesPeriodInfo(periodInfo);
+            setSalesFileName(`Saved DB (${totalRows.toLocaleString()} lines - ${periodInfo.labelText})`);
+            setUseSavedSalesDB(true);
+            setSavedDbCount(totalRows);
+          }
+          loadedCount = totalRows;
         } else {
-          setSavedDbCount(0);
+          if (isMounted) setSavedDbCount(0);
+        }
+
+        // 2. Background check: Sync from Cloud Table 2 if out of sync or fresh device
+        try {
+          const cloudMeta = await getDeadStockCloudMetadata();
+          if (cloudMeta && cloudMeta.totalRecords > 0) {
+            if (loadedCount === 0 || loadedCount !== cloudMeta.totalRecords) {
+              const cloudRows = await syncDeadStockFromCloud();
+              if (cloudRows && cloudRows.length > 0 && isMounted) {
+                const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(cloudRows);
+                setSalesDataRaw(salesMap);
+                setSalesPeriodInfo(periodInfo);
+                setSalesFileName(`Cloud DB (${totalRows.toLocaleString()} lines - ${periodInfo.labelText})`);
+                setUseSavedSalesDB(true);
+                setSavedDbCount(totalRows);
+              }
+            }
+          }
+        } catch (metaErr) {
+          console.warn("Background cloud metadata check warning:", metaErr);
         }
       } catch (e) {
-        console.error(e);
+        console.error("DeadStock DB Init error:", e);
       }
     };
+
     initDb();
+
+    // 3. Real-time Multi-Device Sync: Listen to SSE cloud updates
+    const unsubscribe = subscribeToDeadStockUpdates(async () => {
+      try {
+        const cloudRows = await syncDeadStockFromCloud();
+        if (cloudRows && cloudRows.length > 0 && isMounted) {
+          const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(cloudRows);
+          setSalesDataRaw(salesMap);
+          setSalesPeriodInfo(periodInfo);
+          setSalesFileName(`Cloud DB (${totalRows.toLocaleString()} lines - ${periodInfo.labelText})`);
+          setUseSavedSalesDB(true);
+          setSavedDbCount(totalRows);
+          toast.success(`⚡ Synced ${totalRows.toLocaleString()} records from Cloud!`, { id: "cloud-sync-toast" });
+        }
+      } catch (syncErr) {
+        console.warn("Real-time cloud sync warning:", syncErr);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      if (typeof unsubscribe === "function") unsubscribe();
+    };
   }, []);
 
   // Load Saved Sales DB
@@ -148,8 +207,16 @@ export default function DeadStockAnalyzer({ onBack }) {
     try {
       let dbRows = await loadDeadStockSalesData();
 
+      // If local is empty, try syncing from cloud
       if (!dbRows || dbRows.length === 0) {
-        toast.error("No saved sales data found for Dead Stock. Please upload a sales file first.");
+        const cloudData = await syncDeadStockFromCloud();
+        if (cloudData && cloudData.length > 0) {
+          dbRows = cloudData;
+        }
+      }
+
+      if (!dbRows || dbRows.length === 0) {
+        toast.error("No saved sales data found in Local or Cloud Database. Please upload a sales file first.");
         setIsLoadingDb(false);
         return;
       }
@@ -160,12 +227,36 @@ export default function DeadStockAnalyzer({ onBack }) {
       setSalesFileName(`Saved DB (${totalRows.toLocaleString()} lines - ${periodInfo.labelText})`);
       setUseSavedSalesDB(true);
       setSavedDbCount(totalRows);
-      toast.success(`⚡ Loaded ${totalRows.toLocaleString()} sales records from Saved Database!`);
+      toast.success(`⚡ Loaded ${totalRows.toLocaleString()} sales records from Database!`);
     } catch (err) {
       console.error(err);
       toast.error(`Failed to load saved sales DB: ${err.message}`);
     } finally {
       setIsLoadingDb(false);
+    }
+  };
+
+  // Force Manual Cloud Sync across devices
+  const handleSyncFromCloud = async () => {
+    setIsSyncingCloud(true);
+    const toastId = toast.loading("Checking Cloud Database across devices...");
+    try {
+      const cloudRows = await syncDeadStockFromCloud();
+      if (!cloudRows || cloudRows.length === 0) {
+        toast("No sales data found on Cloud yet. Upload sales to sync across devices.", { id: toastId, icon: "ℹ️" });
+        return;
+      }
+      const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(cloudRows);
+      setSalesDataRaw(salesMap);
+      setSalesPeriodInfo(periodInfo);
+      setSalesFileName(`Cloud DB (${totalRows.toLocaleString()} lines - ${periodInfo.labelText})`);
+      setUseSavedSalesDB(true);
+      setSavedDbCount(totalRows);
+      toast.success(`⚡ Successfully synced ${totalRows.toLocaleString()} records from Cloud!`, { id: toastId });
+    } catch (err) {
+      toast.error(`Cloud Sync failed: ${err.message}`, { id: toastId });
+    } finally {
+      setIsSyncingCloud(false);
     }
   };
 
@@ -1036,8 +1127,18 @@ export default function DeadStockAnalyzer({ onBack }) {
             </button>
 
             <button
+              onClick={handleSyncFromCloud}
+              disabled={isSyncingCloud}
+              title="Sync latest sales database from Cloud across all devices"
+              className="px-3 py-2 bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/50 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800/50 font-bold text-xs rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-sky-500 ${isSyncingCloud ? 'animate-spin' : ''}`} />
+              <span>{isSyncingCloud ? 'Syncing...' : 'Sync Cloud'}</span>
+            </button>
+
+            <button
               onClick={() => appendSalesInputRef.current?.click()}
-              title="Append new month sales file into DB"
+              title="Append new month sales file into DB & Cloud"
               className="px-3 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition-all shadow-sm flex items-center gap-1.5"
             >
               <input ref={appendSalesInputRef} type="file" accept=".xlsx,.xls" onChange={handleAppendSalesToDB} className="hidden" />
@@ -1111,7 +1212,7 @@ export default function DeadStockAnalyzer({ onBack }) {
                 {salesDataRaw && useSavedSalesDB ? (
                   <div className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-xs font-medium rounded-xl flex items-center gap-1.5">
                     <DatabaseZap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                    <span>✓ Sales History Saved ({savedDbCount ? savedDbCount.toLocaleString() : 'Active'} Rows)</span>
+                    <span>✓ Sales History (Cloud Synced: {savedDbCount ? savedDbCount.toLocaleString() : 'Active'} Rows)</span>
                   </div>
                 ) : (
                   <button
@@ -1123,6 +1224,17 @@ export default function DeadStockAnalyzer({ onBack }) {
                     {isLoadingDb ? "Loading DB..." : "⚡ Load Saved Sales DB"}
                   </button>
                 )}
+
+                {/* Force Cloud Sync Button */}
+                <button
+                  onClick={handleSyncFromCloud}
+                  disabled={isSyncingCloud}
+                  title="Sync latest sales data from Cloud across all devices"
+                  className="px-3 py-1.5 bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/50 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800/50 text-xs font-semibold rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 text-sky-500 ${isSyncingCloud ? 'animate-spin' : ''}`} />
+                  <span>{isSyncingCloud ? 'Syncing...' : 'Cloud Sync'}</span>
+                </button>
 
                 {/* Append New Month Sales Data Button */}
                 <button
@@ -1205,7 +1317,7 @@ export default function DeadStockAnalyzer({ onBack }) {
                 {salesDataRaw && useSavedSalesDB ? (
                   <div className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-xs font-medium rounded-xl flex items-center gap-1.5">
                     <DatabaseZap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                    <span>✓ Sales History Saved ({savedDbCount ? savedDbCount.toLocaleString() : 'Active'} Rows)</span>
+                    <span>✓ Sales History (Cloud Synced: {savedDbCount ? savedDbCount.toLocaleString() : 'Active'} Rows)</span>
                   </div>
                 ) : (
                   <button
@@ -1217,6 +1329,17 @@ export default function DeadStockAnalyzer({ onBack }) {
                     {isLoadingDb ? "Loading DB..." : "⚡ Load Saved Sales DB"}
                   </button>
                 )}
+
+                {/* Force Cloud Sync Button */}
+                <button
+                  onClick={handleSyncFromCloud}
+                  disabled={isSyncingCloud}
+                  title="Sync latest sales data from Cloud across all devices"
+                  className="px-3 py-1.5 bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/50 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800/50 text-xs font-semibold rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 text-sky-500 ${isSyncingCloud ? 'animate-spin' : ''}`} />
+                  <span>{isSyncingCloud ? 'Syncing...' : 'Cloud Sync'}</span>
+                </button>
 
                 <button
                   onClick={handleClearSalesDB}

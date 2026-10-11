@@ -8,6 +8,7 @@ import { AppService } from './app.service.js';
 import { SyncModule } from './sync/sync.module.js';
 import { SalesRecord } from './sync/entities/sync.entity.js';
 import { TargetSetting } from './sync/entities/target.entity.js';
+import { DeadStockRecord } from './sync/entities/deadstock.entity.js';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { TargetSetting } from './sync/entities/target.entity.js';
             username: configService.get<string>('DB_USERNAME', 'postgres'),
             password: configService.get<string>('DB_PASSWORD', 'password'),
             database: configService.get<string>('DB_NAME', 'sheet_formatter'),
-            entities: [SalesRecord, TargetSetting],
+            entities: [SalesRecord, TargetSetting, DeadStockRecord],
             synchronize: true,
           } as unknown as TypeOrmModuleOptions;
         }
@@ -40,7 +41,7 @@ import { TargetSetting } from './sync/entities/target.entity.js';
         return {
           type: 'better-sqlite3',
           database: 'local-db.sqlite',
-          entities: [SalesRecord, TargetSetting],
+          entities: [SalesRecord, TargetSetting, DeadStockRecord],
           synchronize: true,
         } as unknown as TypeOrmModuleOptions;
       },

@@ -37,11 +37,19 @@ export function getSyncStatus() {
 }
 
 let targetListeners = [];
+let deadStockListeners = [];
 
 export function subscribeToTargetUpdates(listener) {
   targetListeners.push(listener);
   return () => {
     targetListeners = targetListeners.filter(l => l !== listener);
+  };
+}
+
+export function subscribeToDeadStockUpdates(listener) {
+  deadStockListeners.push(listener);
+  return () => {
+    deadStockListeners = deadStockListeners.filter(l => l !== listener);
   };
 }
 
@@ -53,6 +61,10 @@ export function subscribeToCloudUpdates(onUpdate) {
       if (parsedData.type === 'target_update') {
         targetListeners.forEach(listener => {
           try { listener(parsedData.data); } catch (err) { console.warn("Target listener error:", err); }
+        });
+      } else if (parsedData.type === 'deadstock_update') {
+        deadStockListeners.forEach(listener => {
+          try { listener(parsedData.data); } catch (err) { console.warn("DeadStock listener error:", err); }
         });
       } else if (parsedData.type === 'update') {
         onUpdate();
@@ -260,6 +272,109 @@ export async function deleteDateFromCloud(dateStr) {
   } catch (e) {
     console.warn("API Delete Date Warning:", e.message);
     return false;
+  }
+}
+
+// =========================================================================
+// TABLE 2: DEAD STOCK SALES RECORD CLOUD API
+// =========================================================================
+
+export async function saveDeadStockToCloud(data, onProgress = null, appendMode = false) {
+  try {
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      if (!appendMode) await clearDeadStockFromCloud();
+      return true;
+    }
+
+    const batchSize = 10000;
+    const totalBatches = Math.ceil(data.length / batchSize);
+
+    for (let i = 0; i < totalBatches; i++) {
+      const batchData = data.slice(i * batchSize, (i + 1) * batchSize);
+      if (onProgress) {
+        onProgress({
+          uploadedChunks: i + 1,
+          totalChunks: totalBatches,
+          uploadedRows: Math.min((i + 1) * batchSize, data.length),
+          totalRows: data.length
+        });
+      }
+
+      const isAppend = appendMode ? true : (i > 0);
+      const response = await fetch(`${API_BASE}/deadstock/upload`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: batchData, isAppend })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}: ${await response.text()}`);
+      }
+    }
+
+    return true;
+  } catch (err) {
+    console.warn("DeadStock Save Cloud Warning:", err.message);
+    throw err;
+  }
+}
+
+export async function loadDeadStockFromCloud() {
+  try {
+    const response = await fetch(`${API_BASE}/deadstock/download`, {
+      method: 'GET',
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+      }
+    });
+
+    if (response.status === 404) return null;
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (e) {
+    console.warn("DeadStock Cloud Load Warning:", e.message);
+    return null;
+  }
+}
+
+export async function getDeadStockCloudMetadata() {
+  try {
+    const response = await fetch(`${API_BASE}/deadstock/metadata`, {
+      method: 'GET',
+      cache: 'no-store'
+    });
+    if (response.ok) return await response.json();
+    return null;
+  } catch (e) {
+    console.warn("DeadStock Cloud Metadata Warning:", e.message);
+    return null;
+  }
+}
+
+export async function clearDeadStockFromCloud() {
+  try {
+    const response = await fetch(`${API_BASE}/deadstock/clear`, {
+      method: 'DELETE'
+    });
+    return response.ok;
+  } catch (e) {
+    console.warn("DeadStock Cloud Clear Warning:", e.message);
+    return false;
+  }
+}
+
+export async function deleteDeadStockFileFromCloud(fileId) {
+  try {
+    const response = await fetch(`${API_BASE}/deadstock/file/${encodeURIComponent(fileId)}`, {
+      method: 'DELETE'
+    });
+    if (!response.ok) return false;
+    return await response.json();
+  } catch (e) {
+    console.warn("DeadStock Cloud Delete File Warning:", e.message);
+    return { success: false, deletedCount: 0 };
   }
 }
 

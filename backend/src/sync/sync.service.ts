@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import { SalesRecord } from './entities/sync.entity.js';
 import { TargetSetting } from './entities/target.entity.js';
+import { DeadStockRecord } from './entities/deadstock.entity.js';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { Subject } from 'rxjs';
@@ -19,6 +20,14 @@ const BILL_KEYS = [
 ];
 const DATE_KEYS = ["BILL DATE", "DATE", "BILLDATE", "INVOICE DATE", "TRANSACTION DATE"];
 
+const DS_STORE_KEYS = ["BRANCH NAME", "FROM BRANCH NAME", "STORE NAME", "BRANCH", "STORE", "LOCATION", "OUTLET"];
+const DS_ITEM_KEYS = ["ITEM CODE", "BARCODE", "POS ITEM CODE", "HANA CODE", "ITEM NO", "PRODUCT CODE", "SKU", "ARTICLE CODE", "ITEM", "CODE"];
+const DS_DESC_KEYS = ["ITEM DESCRIPTION", "DESCRIPTION", "MODEL NAME", "ITEM NAME", "PRODUCT NAME"];
+const DS_CAT_KEYS = ["CATEGORY", "MAIN PRODUCT", "GROUP NAME", "GROUP"];
+const DS_QTY_KEYS = ["NET QTY", "TOTAL QTY", "QTY", "SOLD QTY", "QUANTITY", "BILLED QTY", "NO OF QTY"];
+const DS_AMOUNT_KEYS = ["NET SALE AMOUNT", "GROSS SALE AMOUNT", "AMOUNT", "NET AMOUNT", "SALES AMOUNT", "TOTAL AMOUNT"];
+const DS_DATE_KEYS = ["BILL DATE", "DATE", "VOUCHER DATE", "INVOICE DATE", "DOC DATE"];
+
 @Injectable()
 export class SyncService {
   constructor(
@@ -26,6 +35,8 @@ export class SyncService {
     private syncRepository: Repository<SalesRecord>,
     @InjectRepository(TargetSetting)
     private targetRepository: Repository<TargetSetting>,
+    @InjectRepository(DeadStockRecord)
+    private deadStockRepository: Repository<DeadStockRecord>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
@@ -243,5 +254,153 @@ export class SyncService {
       console.error("[SAVE TARGETS ERROR]", err);
       throw err;
     }
+  }
+
+  // =========================================================================
+  // TABLE 2: DEAD STOCK SALES RECORD DEDICATED SYNC
+  // =========================================================================
+
+  async saveDeadStockData(data: any[], isAppend: boolean = false) {
+    if (!isAppend) {
+      await this.deadStockRepository.clear();
+    }
+
+    if (!data || data.length === 0) {
+      await this.cacheManager.del('deadstock_data');
+      this.updates$.next({ type: 'deadstock_update' });
+      return { success: true, count: 0, updatedAt: new Date() };
+    }
+
+    const schemaMap: Record<string, any> = {};
+
+    const records = data.map(row => {
+      const fileId = row._fileId || "legacy_default";
+      if (!schemaMap[fileId]) {
+        schemaMap[fileId] = {
+          storeKey: this.findColumnKey(row, DS_STORE_KEYS),
+          itemKey: this.findColumnKey(row, DS_ITEM_KEYS),
+          descKey: this.findColumnKey(row, DS_DESC_KEYS),
+          catKey: this.findColumnKey(row, DS_CAT_KEYS),
+          qtyKey: this.findColumnKey(row, DS_QTY_KEYS),
+          amountKey: this.findColumnKey(row, DS_AMOUNT_KEYS),
+          dateKey: this.findColumnKey(row, DS_DATE_KEYS)
+        };
+      }
+      const { storeKey, itemKey, descKey, catKey, qtyKey, amountKey, dateKey } = schemaMap[fileId];
+
+      let rawDate = dateKey ? row[dateKey] : null;
+      let formattedDate = null;
+      if (rawDate !== null && rawDate !== undefined && rawDate !== "") {
+        if (typeof rawDate === 'number') {
+          const d = new Date(Math.round((rawDate - 25569) * 86400 * 1000));
+          if (!isNaN(d.getTime())) formattedDate = d.toISOString().split('T')[0];
+        } else {
+          const dateStr = String(rawDate).trim();
+          const matchDmy = dateStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+.*)?$/);
+          if (matchDmy) {
+            formattedDate = `${matchDmy[3]}-${matchDmy[2].padStart(2,'0')}-${matchDmy[1].padStart(2,'0')}`;
+          } else {
+            const matchYmd = dateStr.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})(?:\s+.*)?$/);
+            if (matchYmd) {
+              formattedDate = `${matchYmd[1]}-${matchYmd[2].padStart(2,'0')}-${matchYmd[3].padStart(2,'0')}`;
+            } else {
+              const d = new Date(dateStr);
+              if (!isNaN(d.getTime())) formattedDate = d.toISOString().split('T')[0];
+            }
+          }
+        }
+      }
+
+      let itemCode = itemKey ? String(row[itemKey] || "").trim() : "";
+      if (itemCode.endsWith(".0")) itemCode = itemCode.slice(0, -2);
+
+      return this.deadStockRepository.create({
+        store: storeKey ? String(row[storeKey] || "").trim() : "",
+        itemCode: itemCode,
+        itemDesc: descKey ? String(row[descKey] || "").trim() : "",
+        category: catKey ? String(row[catKey] || "").trim() : "",
+        qty: qtyKey && !isNaN(Number(row[qtyKey])) ? Math.round(Number(row[qtyKey])) : 0,
+        amount: amountKey && !isNaN(Number(row[amountKey])) ? Number(row[amountKey]) : 0,
+        date: formattedDate,
+        fileName: row._fileName || "Uploaded File",
+        fileId: fileId,
+      });
+    });
+
+    // Chunked insert in batches of 2000 for maximum performance
+    for (let i = 0; i < records.length; i += 2000) {
+      await this.deadStockRepository.createQueryBuilder().insert().into(DeadStockRecord).values(records.slice(i, i + 2000)).execute();
+    }
+
+    await this.cacheManager.del('deadstock_data');
+    this.updates$.next({ type: 'deadstock_update' });
+    return { success: true, count: records.length, updatedAt: new Date() };
+  }
+
+  async getDeadStockData() {
+    const cached = await this.cacheManager.get('deadstock_data');
+    if (cached) return cached;
+
+    const records = await this.deadStockRepository.createQueryBuilder('ds')
+      .orderBy('ds.date', 'ASC')
+      .addOrderBy('ds.createdAt', 'ASC')
+      .getMany();
+
+    if (!records || records.length === 0) return [];
+
+    const mapped = records.map(r => ({
+      "BRANCH NAME": r.store,
+      "ITEM CODE": r.itemCode,
+      "ITEM DESCRIPTION": r.itemDesc,
+      "CATEGORY": r.category,
+      "NET QTY": r.qty,
+      "NET SALE AMOUNT": r.amount ? Number(r.amount) : 0,
+      "BILL DATE": r.date,
+      "_fileName": r.fileName,
+      "_fileId": r.fileId,
+      "_uploadedAt": r.createdAt
+    }));
+
+    await this.cacheManager.set('deadstock_data', mapped, 0);
+    return mapped;
+  }
+
+  async getDeadStockMetadata() {
+    const count = await this.deadStockRepository.count();
+    const files = await this.deadStockRepository.createQueryBuilder('ds')
+      .select('ds.fileId', 'fileId')
+      .addSelect('ds.fileName', 'fileName')
+      .addSelect('COUNT(*)', 'count')
+      .groupBy('ds.fileId')
+      .addGroupBy('ds.fileName')
+      .getRawMany();
+
+    const latest = await this.deadStockRepository.createQueryBuilder('ds')
+      .orderBy('ds.createdAt', 'DESC')
+      .getOne();
+
+    return {
+      totalRows: count,
+      files: files.map(f => ({ fileId: f.fileId, fileName: f.fileName, count: Number(f.count) })),
+      updatedAt: latest ? latest.createdAt : null,
+    };
+  }
+
+  async clearDeadStockData() {
+    await this.deadStockRepository.clear();
+    await this.cacheManager.del('deadstock_data');
+    this.updates$.next({ type: 'deadstock_update' });
+    return { success: true };
+  }
+
+  async deleteDeadStockFile(fileId: string) {
+    const result = await this.deadStockRepository.createQueryBuilder()
+      .delete()
+      .from(DeadStockRecord)
+      .where('fileId = :fileId', { fileId })
+      .execute();
+    await this.cacheManager.del('deadstock_data');
+    this.updates$.next({ type: 'deadstock_update' });
+    return { success: true, deletedCount: result.affected || 0 };
   }
 }
