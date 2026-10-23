@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import { SalesRecord } from './entities/sync.entity.js';
@@ -29,7 +29,7 @@ const DS_AMOUNT_KEYS = ["NET SALE AMOUNT", "GROSS SALE AMOUNT", "AMOUNT", "NET A
 const DS_DATE_KEYS = ["BILL DATE", "DATE", "VOUCHER DATE", "INVOICE DATE", "DOC DATE"];
 
 @Injectable()
-export class SyncService {
+export class SyncService implements OnApplicationBootstrap {
   constructor(
     @InjectRepository(SalesRecord)
     private syncRepository: Repository<SalesRecord>,
@@ -41,6 +41,94 @@ export class SyncService {
   ) {}
 
   public updates$ = new Subject<any>();
+
+  async onApplicationBootstrap() {
+    await this.runStartupMigration();
+  }
+
+  private async runStartupMigration() {
+    try {
+      const currentCount = await this.syncRepository.count();
+      if (currentCount > 0) {
+        console.log(`[Startup Migration] Database already populated (${currentCount} sales records). Skipping auto-migration.`);
+        return;
+      }
+
+      const oldDbUrl = process.env.OLD_DATABASE_URL;
+      if (!oldDbUrl) {
+        console.log('[Startup Migration] New DB is empty, but no OLD_DATABASE_URL defined. Skipping auto-migration.');
+        return;
+      }
+
+      console.log(`[Startup Migration] Empty database detected. Connecting to OLD_DATABASE_URL to migrate data...`);
+      const { Client } = await import('pg');
+      const oldClient = new Client({
+        connectionString: oldDbUrl,
+        ssl: { rejectUnauthorized: false },
+      });
+
+      await oldClient.connect();
+      console.log('[Startup Migration] Connected to OLD_DATABASE_URL.');
+
+      const salesRes = await oldClient.query('SELECT * FROM sales_record ORDER BY "createdAt" ASC');
+      console.log(`[Startup Migration] Found ${salesRes.rows.length} rows in old database.`);
+
+      if (salesRes.rows.length > 0) {
+        const BATCH_SIZE = 1000;
+        let inserted = 0;
+        for (let i = 0; i < salesRes.rows.length; i += BATCH_SIZE) {
+          const batch = salesRes.rows.slice(i, i + BATCH_SIZE);
+          await this.syncRepository
+            .createQueryBuilder()
+            .insert()
+            .into(SalesRecord)
+            .values(batch)
+            .orIgnore()
+            .execute();
+          inserted += batch.length;
+          console.log(`[Startup Migration] Migrated ${inserted} / ${salesRes.rows.length} records...`);
+        }
+        console.log(`[Startup Migration] Successfully migrated ${inserted} sales records!`);
+      }
+
+      try {
+        const targetRes = await oldClient.query('SELECT * FROM target_setting');
+        if (targetRes.rows.length > 0) {
+          for (const row of targetRes.rows) {
+            await this.targetRepository.save(row);
+          }
+          console.log(`[Startup Migration] Migrated ${targetRes.rows.length} target settings!`);
+        }
+      } catch {
+        // Table might not exist in old db
+      }
+
+      try {
+        const dsRes = await oldClient.query('SELECT * FROM dead_stock_record');
+        if (dsRes.rows.length > 0) {
+          const BATCH_SIZE = 1000;
+          for (let i = 0; i < dsRes.rows.length; i += BATCH_SIZE) {
+            const batch = dsRes.rows.slice(i, i + BATCH_SIZE);
+            await this.deadStockRepository
+              .createQueryBuilder()
+              .insert()
+              .into(DeadStockRecord)
+              .values(batch)
+              .orIgnore()
+              .execute();
+          }
+          console.log(`[Startup Migration] Migrated ${dsRes.rows.length} dead stock records!`);
+        }
+      } catch {
+        // Table might not exist in old db
+      }
+
+      await oldClient.end();
+      console.log('[Startup Migration] Migration finished cleanly.');
+    } catch (err: any) {
+      console.error('[Startup Migration Error]', err.message);
+    }
+  }
 
   private findColumnKey(sampleRow: any, candidateKeys: string[]) {
     if (!sampleRow || typeof sampleRow !== "object") return null;
