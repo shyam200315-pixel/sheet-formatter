@@ -22,9 +22,21 @@ import { DeadStockRecord } from './sync/entities/deadstock.entity.js';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService): TypeOrmModuleOptions => {
-        const dbType = configService.get<string>('DB_TYPE', 'sqlite');
+        const databaseUrl = configService.get<string>('DATABASE_URL');
+        const dbType = configService.get<string>('DB_TYPE', databaseUrl ? 'postgres' : 'sqlite');
+        const isSsl = configService.get<string>('DB_SSL') === 'true' || !!databaseUrl;
         
-        if (dbType === 'postgres') {
+        if (dbType === 'postgres' || databaseUrl) {
+          if (databaseUrl) {
+            return {
+              type: 'postgres',
+              url: databaseUrl,
+              ssl: isSsl ? { rejectUnauthorized: false } : false,
+              entities: [SalesRecord, TargetSetting, DeadStockRecord],
+              synchronize: true,
+            } as unknown as TypeOrmModuleOptions;
+          }
+
           return {
             type: 'postgres',
             host: configService.get<string>('DB_HOST', 'localhost'),
@@ -32,6 +44,7 @@ import { DeadStockRecord } from './sync/entities/deadstock.entity.js';
             username: configService.get<string>('DB_USERNAME', 'postgres'),
             password: configService.get<string>('DB_PASSWORD', 'password'),
             database: configService.get<string>('DB_NAME', 'sheet_formatter'),
+            ssl: isSsl ? { rejectUnauthorized: false } : false,
             entities: [SalesRecord, TargetSetting, DeadStockRecord],
             synchronize: true,
           } as unknown as TypeOrmModuleOptions;

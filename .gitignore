@@ -35,3 +35,4 @@ dist-ssr
 # Temporary files
 output.json
 test_*.cjs
+.neon
