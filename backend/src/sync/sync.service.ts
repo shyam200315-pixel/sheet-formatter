@@ -26,7 +26,7 @@ const DS_DESC_KEYS = ["ITEM DESCRIPTION", "DESCRIPTION", "MODEL NAME", "ITEM NAM
 const DS_CAT_KEYS = ["CATEGORY", "MAIN PRODUCT", "GROUP NAME", "GROUP"];
 const DS_QTY_KEYS = ["NET QTY", "TOTAL QTY", "QTY", "SOLD QTY", "QUANTITY", "BILLED QTY", "NO OF QTY"];
 const DS_AMOUNT_KEYS = ["NET SALE AMOUNT", "GROSS SALE AMOUNT", "AMOUNT", "NET AMOUNT", "SALES AMOUNT", "TOTAL AMOUNT"];
-const DS_DATE_KEYS = ["BILL DATE", "DATE", "VOUCHER DATE", "INVOICE DATE", "DOC DATE"];
+const DS_DATE_KEYS = ["BILL DATE", "DATE", "BILLDATE", "BILL_DATE", "VOUCHER DATE", "INVOICE DATE", "DOC DATE", "TRANSACTION DATE", "TRANS DATE", "POSTING DATE"];
 
 @Injectable()
 export class SyncService implements OnApplicationBootstrap {
@@ -467,8 +467,17 @@ export class SyncService implements OnApplicationBootstrap {
       .orderBy('ds.createdAt', 'DESC')
       .getOne();
 
+    const dateRange = await this.deadStockRepository.createQueryBuilder('ds')
+      .select('MIN(ds.date)', 'minDate')
+      .addSelect('MAX(ds.date)', 'maxDate')
+      .where('ds.date IS NOT NULL')
+      .getRawOne();
+
     return {
       totalRows: count,
+      totalRecords: count,
+      minDate: dateRange?.minDate || null,
+      maxDate: dateRange?.maxDate || null,
       files: files.map(f => ({ fileId: f.fileId, fileName: f.fileName, count: Number(f.count) })),
       updatedAt: latest ? latest.createdAt : null,
     };

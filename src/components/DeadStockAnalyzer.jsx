@@ -26,7 +26,9 @@ import {
   Check,
   Trash2,
   Cloud,
-  CloudDownload
+  CloudDownload,
+  ArrowRight,
+  Clock
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import ExcelJS from "exceljs";
@@ -41,7 +43,11 @@ import {
   findHeaderRowIndex,
   normalizeItemCode,
   extractStoreCode as extractStoreCodeHelper,
-  getStateFromStore as getStateFromStoreHelper
+  getStateFromStore as getStateFromStoreHelper,
+  formatDateDisplay,
+  formatDateDmy,
+  getNextDate,
+  parseBillDate
 } from "../helpers";
 import { 
   subscribeToDeadStockUpdates,
@@ -58,26 +64,8 @@ const getStateFromStore = (storeStr) => {
   return getStateFromStoreHelper(storeStr);
 };
 
-// Date parser
 const parseAnyDate = (dateVal) => {
-  if (!dateVal) return null;
-  if (typeof dateVal === "number") {
-    return new Date(Math.round((dateVal - (25567 + 2)) * 86400 * 1000));
-  }
-  const str = String(dateVal).trim();
-  if (str.includes("/")) {
-    const parts = str.split("/");
-    if (parts.length === 3) {
-      const day = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1;
-      const year = parseInt(parts[2], 10);
-      if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
-        return new Date(year, month, day);
-      }
-    }
-  }
-  const parsed = new Date(str);
-  return isNaN(parsed.getTime()) ? null : parsed;
+  return parseBillDate(dateVal);
 };
 
 export default function DeadStockAnalyzer({ onBack }) {
@@ -110,7 +98,15 @@ export default function DeadStockAnalyzer({ onBack }) {
     monthCount: 3,
     totalAvailableMonths: 3,
     isFiltered: false,
-    labelText: "Sales Period"
+    labelText: "Loading Sales History...",
+    lastDate: null,
+    lastDateFormatted: null,
+    lastDateDmy: null,
+    nextDate: null,
+    nextDateFormatted: null,
+    nextDateDmy: null,
+    minDate: null,
+    maxDate: null
   });
 
   // Dynamic Sales Reference Months (e.g. L3M, L6M, L12M)
@@ -198,8 +194,31 @@ export default function DeadStockAnalyzer({ onBack }) {
         try {
           const cloudMeta = await getDeadStockCloudMetadata();
           if (cloudMeta) {
-            if (cloudMeta.totalRecords > 0) {
-              if (loadedCount === 0 || loadedCount !== cloudMeta.totalRecords) {
+            const cloudTotal = cloudMeta.totalRecords || cloudMeta.totalRows || 0;
+
+            // If local data hasn't loaded yet, preview dates from cloud metadata immediately
+            if (cloudMeta.maxDate && loadedCount === 0) {
+              const cMax = parseBillDate(cloudMeta.maxDate);
+              const cMin = parseBillDate(cloudMeta.minDate);
+              const cNext = cMax ? getNextDate(cMax) : null;
+              if (isMounted) {
+                setSalesPeriodInfo(prev => ({
+                  ...prev,
+                  lastDate: cMax,
+                  lastDateFormatted: cMax ? formatDateDisplay(cMax) : null,
+                  lastDateDmy: cMax ? formatDateDmy(cMax) : null,
+                  nextDate: cNext,
+                  nextDateFormatted: cNext ? formatDateDisplay(cNext) : null,
+                  nextDateDmy: cNext ? formatDateDmy(cNext) : null,
+                  minDate: cMin,
+                  maxDate: cMax,
+                  labelText: cMax ? `${formatDateDisplay(cMin)} to ${formatDateDisplay(cMax)}` : prev.labelText
+                }));
+              }
+            }
+
+            if (cloudTotal > 0) {
+              if (loadedCount === 0 || loadedCount !== cloudTotal) {
                 const cloudRows = await syncDeadStockFromCloud();
                 if (cloudRows && cloudRows.length > 0 && isMounted) {
                   const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(cloudRows, customMonthCount);
@@ -211,7 +230,7 @@ export default function DeadStockAnalyzer({ onBack }) {
                   setSavedDbCount(totalRows);
                 }
               }
-            } else if (cloudMeta.totalRecords === 0 && loadedCount > 0) {
+            } else if (cloudTotal === 0 && loadedCount > 0) {
               // Cloud was cleared, sync local clear
               await clearDeadStockSalesData();
               if (isMounted) {
@@ -220,6 +239,22 @@ export default function DeadStockAnalyzer({ onBack }) {
                 setSalesFileName("");
                 setUseSavedSalesDB(false);
                 setSavedDbCount(0);
+                setSalesPeriodInfo({
+                  periodDays: 90,
+                  periodMonths: 3.0,
+                  monthCount: 3,
+                  totalAvailableMonths: 3,
+                  isFiltered: false,
+                  labelText: "No Sales Data",
+                  lastDate: null,
+                  lastDateFormatted: null,
+                  lastDateDmy: null,
+                  nextDate: null,
+                  nextDateFormatted: null,
+                  nextDateDmy: null,
+                  minDate: null,
+                  maxDate: null
+                });
               }
             }
           }
@@ -331,7 +366,7 @@ export default function DeadStockAnalyzer({ onBack }) {
   const handleAppendSalesToDB = async (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
-    const toastId = toast.loading("Appending new month sales file to database...");
+    const toastId = toast.loading("Checking and appending sales file to database...");
     try {
       const reader = new FileReader();
       reader.onload = async (evt) => {
@@ -348,6 +383,29 @@ export default function DeadStockAnalyzer({ onBack }) {
             return;
           }
 
+          // Discover date boundaries in this uploaded batch
+          let fileMinDate = null;
+          let fileMaxDate = null;
+          const sampleRow = jsonData.find(r => r && typeof r === "object") || {};
+          const rKeys = Object.keys(sampleRow);
+          const dateCol = rKeys.find(k => {
+            const up = k.trim().toUpperCase();
+            return up === "BILL DATE" || up === "DATE" || up === "BILLDATE" || up.includes("DATE");
+          });
+
+          if (dateCol) {
+            for (let i = 0; i < jsonData.length; i++) {
+              const rawD = jsonData[i][dateCol];
+              if (rawD) {
+                const pd = parseBillDate(rawD);
+                if (pd && !isNaN(pd.getTime())) {
+                  if (!fileMinDate || pd < fileMinDate) fileMinDate = pd;
+                  if (!fileMaxDate || pd > fileMaxDate) fileMaxDate = pd;
+                }
+              }
+            }
+          }
+
           await appendDeadStockSalesData(jsonData, file.name);
           const freshData = await loadDeadStockSalesData();
           const { salesMap, periodInfo, totalRows } = processSalesRowsToMap(freshData, customMonthCount);
@@ -357,7 +415,18 @@ export default function DeadStockAnalyzer({ onBack }) {
           setSalesFileName(`Saved DB (${totalRows.toLocaleString()} lines - ${periodInfo.labelText})`);
           setSavedDbCount(totalRows);
           setUseSavedSalesDB(true);
-          toast.success(`Successfully added new month sales! Total in DB: ${totalRows.toLocaleString()} lines`, { id: toastId });
+
+          const fileDateMsg = (fileMinDate && fileMaxDate)
+            ? ` (${formatDateDisplay(fileMinDate)} to ${formatDateDisplay(fileMaxDate)})`
+            : "";
+          const nextPromptMsg = periodInfo.nextDateFormatted
+            ? ` 👉 Aage data ab ${periodInfo.nextDateFormatted} (${periodInfo.nextDateDmy}) se daalein.`
+            : "";
+
+          toast.success(
+            `✓ Successfully added ${jsonData.length.toLocaleString()} lines${fileDateMsg}! Total in DB: ${totalRows.toLocaleString()} lines. Data till: ${periodInfo.lastDateFormatted || "latest"}.${nextPromptMsg}`,
+            { id: toastId, duration: 6000 }
+          );
         } catch (err) {
           toast.error(`Append failed: ${err.message}`, { id: toastId });
         }
@@ -393,7 +462,15 @@ export default function DeadStockAnalyzer({ onBack }) {
           monthCount: 3,
           totalAvailableMonths: 3,
           isFiltered: false,
-          labelText: "No Sales Data"
+          labelText: "No Sales Data",
+          lastDate: null,
+          lastDateFormatted: null,
+          lastDateDmy: null,
+          nextDate: null,
+          nextDateFormatted: null,
+          nextDateDmy: null,
+          minDate: null,
+          maxDate: null
         });
         setCustomMonthCount(null);
         setOrderDetectedMonths(null);
@@ -1320,6 +1397,23 @@ export default function DeadStockAnalyzer({ onBack }) {
               )}
             </div>
 
+            {/* Sales Data Last Date & Next Date Indicator Badge */}
+            {salesPeriodInfo?.lastDateFormatted && (
+              <div 
+                title={`Database contains sales up to ${salesPeriodInfo.lastDateFormatted}. Next upload should start from ${salesPeriodInfo.nextDateFormatted}.`}
+                className="hidden md:flex items-center gap-1.5 bg-gradient-to-r from-rose-50 to-emerald-50 dark:from-rose-950/40 dark:to-emerald-950/40 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-xl shadow-sm text-xs"
+              >
+                <Calendar className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                <span className="text-slate-600 dark:text-slate-300 font-medium whitespace-nowrap">
+                  Last Data: <strong className="text-rose-600 dark:text-rose-400 font-black">{salesPeriodInfo.lastDateFormatted}</strong>
+                </span>
+                <span className="text-slate-300 dark:text-slate-600 font-bold">|</span>
+                <span className="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1 whitespace-nowrap">
+                  Next: <strong className="font-black underline">{salesPeriodInfo.nextDateFormatted}</strong>
+                </span>
+              </div>
+            )}
+
             <button
               onClick={handleResetFiles}
               className="px-3 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5"
@@ -1354,6 +1448,147 @@ export default function DeadStockAnalyzer({ onBack }) {
         <div className="max-w-4xl mx-auto space-y-7 my-6">
 
           {/* ========================================================================= */}
+          {/* SALES DATA COVERAGE & TIMELINE STATUS CARD */}
+          {/* ========================================================================= */}
+          <div className="bg-gradient-to-br from-white via-slate-50 to-rose-50/40 dark:from-slate-900 dark:via-slate-900 dark:to-rose-950/20 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 md:p-6 shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500 pointer-events-none" />
+
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="p-1.5 bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400 rounded-lg">
+                    <Calendar className="w-4 h-4" />
+                  </span>
+                  <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                    Sales History & Data Timeline Tracker
+                  </h3>
+                  {useSavedSalesDB && (
+                    <span className="px-2.5 py-0.5 text-[11px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 rounded-full border border-emerald-300 dark:border-emerald-800 flex items-center gap-1">
+                      <Check className="w-3 h-3" /> Database Active
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Dead Stock analysis aur Order Processing ke liye saved sales data ka exact date status yahan check karein.
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={() => appendSalesInputRef.current?.click()}
+                  title="Upload next sales sheet to add into saved sales DB"
+                  className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span>Add Next Month/Day Sales</span>
+                </button>
+
+                <button
+                  onClick={handleSyncFromCloud}
+                  disabled={isSyncingCloud}
+                  title="Sync latest sales data from Cloud across all devices"
+                  className="px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-xs rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 text-sky-500 ${isSyncingCloud ? 'animate-spin' : ''}`} />
+                  <span>{isSyncingCloud ? 'Syncing...' : 'Cloud Sync'}</span>
+                </button>
+
+                <button
+                  onClick={handleClearSalesDB}
+                  title="Clear all saved sales history data from database"
+                  className="px-2.5 py-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 text-xs font-semibold transition-colors flex items-center gap-1"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Reset DB</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Visual Date Indicator Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800/80">
+              
+              {/* Block 1: Last Data Uploaded Till (Rose Accent) */}
+              <div className="bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/90 dark:border-rose-900/50 rounded-xl p-3.5 flex items-start gap-3">
+                <div className="p-2.5 bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 rounded-lg shrink-0 mt-0.5">
+                  <Calendar className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-400">
+                    Last Data Uploaded Till (अंतिम बिक्री तारीख)
+                  </div>
+                  <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-0.5">
+                    {salesPeriodInfo?.lastDateFormatted ? (
+                      <>
+                        {salesPeriodInfo.lastDateFormatted}{" "}
+                        <span className="text-xs font-bold text-rose-600 dark:text-rose-400">
+                          ({salesPeriodInfo.lastDateDmy})
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-xs font-medium text-slate-400">No Sales Data Found</span>
+                    )}
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                    {salesPeriodInfo?.lastDate ? "Database me is date tak ka sales data maujood hai." : "Sales Excel upload karke start karein."}
+                  </div>
+                </div>
+              </div>
+
+              {/* Block 2: Next Data Needed (Emerald Glowing Accent) */}
+              <div className="bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-300/80 dark:border-emerald-800/60 rounded-xl p-3.5 flex items-start gap-3 relative shadow-[0_0_15px_rgba(16,185,129,0.08)]">
+                <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 rounded-lg shrink-0 mt-0.5">
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400 flex items-center gap-1.5">
+                    <span>Next Data To Enter (आगे इस तारीख से डालें)</span>
+                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                  </div>
+                  <div className="text-base sm:text-lg font-black text-emerald-700 dark:text-emerald-300 mt-0.5">
+                    {salesPeriodInfo?.nextDateFormatted ? (
+                      <>
+                        From {salesPeriodInfo.nextDateFormatted}{" "}
+                        <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                          ({salesPeriodInfo.nextDateDmy})
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-xs font-medium text-slate-400">From Initial Period</span>
+                    )}
+                  </div>
+                  <div className="text-[11px] text-emerald-700/80 dark:text-emerald-400/80 mt-0.5 font-medium">
+                    {salesPeriodInfo?.nextDateFormatted ? "Agla sales file is date se aage ka upload karein." : "Upload full sales history."}
+                  </div>
+                </div>
+              </div>
+
+              {/* Block 3: Total Coverage & Rows */}
+              <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/70 rounded-xl p-3.5 flex items-start gap-3 sm:col-span-2 lg:col-span-1">
+                <div className="p-2.5 bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg shrink-0 mt-0.5">
+                  <DatabaseZap className="w-5 h-5 text-indigo-500" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Coverage & Database Volume
+                  </div>
+                  <div className="text-base font-black text-slate-900 dark:text-white mt-0.5">
+                    {savedDbCount ? `${savedDbCount.toLocaleString()} Records` : "0 Records"}
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate font-medium">
+                    {salesPeriodInfo?.minDate && salesPeriodInfo?.lastDate ? (
+                      `Range: ${formatDateDisplay(salesPeriodInfo.minDate)} to ${salesPeriodInfo.lastDateFormatted} (~${salesPeriodInfo.monthCount}M)`
+                    ) : (
+                      "Sales history not calculated yet"
+                    )}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          {/* ========================================================================= */}
           {/* TOP PART: DEAD STOCK ANALYZER */}
           {/* ========================================================================= */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 md:p-7 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden space-y-5">
@@ -1384,9 +1619,9 @@ export default function DeadStockAnalyzer({ onBack }) {
               <div className="flex items-center gap-2 flex-wrap">
                 {/* Saved Sales DB Status Badge */}
                 {salesDataRaw && useSavedSalesDB ? (
-                  <div className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-xs font-medium rounded-xl flex items-center gap-1.5">
+                  <div className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-xs font-semibold rounded-xl flex items-center gap-1.5">
                     <DatabaseZap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                    <span>✓ Sales History (Cloud Synced: {savedDbCount ? savedDbCount.toLocaleString() : 'Active'} Rows)</span>
+                    <span>✓ Sales DB: {savedDbCount ? savedDbCount.toLocaleString() : 'Active'} Rows {salesPeriodInfo?.lastDateFormatted ? `(Till: ${salesPeriodInfo.lastDateFormatted})` : ''}</span>
                   </div>
                 ) : (
                   <button
@@ -1489,9 +1724,9 @@ export default function DeadStockAnalyzer({ onBack }) {
               {/* Saved Sales DB Status Badge & Clear Option */}
               <div className="flex items-center gap-2 flex-wrap">
                 {salesDataRaw && useSavedSalesDB ? (
-                  <div className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-xs font-medium rounded-xl flex items-center gap-1.5">
+                  <div className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-xs font-semibold rounded-xl flex items-center gap-1.5">
                     <DatabaseZap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                    <span>✓ Sales History (Cloud Synced: {savedDbCount ? savedDbCount.toLocaleString() : 'Active'} Rows)</span>
+                    <span>✓ Sales DB: {savedDbCount ? savedDbCount.toLocaleString() : 'Active'} Rows {salesPeriodInfo?.lastDateFormatted ? `(Till: ${salesPeriodInfo.lastDateFormatted})` : ''}</span>
                   </div>
                 ) : (
                   <button
@@ -1742,6 +1977,7 @@ export default function DeadStockAnalyzer({ onBack }) {
                     </h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
                       {orderFileName ? `File: ${orderFileName} • Reference: ${salesHeaderLabel} (${salesPeriodInfo.labelText})` : `Auditing store stock lines against Sales History DB (${salesPeriodInfo.labelText})`}
+                      {salesPeriodInfo?.lastDateFormatted ? ` • Sales Data Till: ${salesPeriodInfo.lastDateFormatted} (Next: ${salesPeriodInfo.nextDateFormatted})` : ""}
                     </p>
                   </div>
 
@@ -2004,8 +2240,13 @@ export default function DeadStockAnalyzer({ onBack }) {
                   </button>
                 </div>
 
-                <div className="text-xs text-slate-500 dark:text-slate-400 font-bold">
-                  Showing <span className="text-slate-900 dark:text-white font-extrabold">{filteredItems.length}</span> items
+                <div className="text-xs text-slate-500 dark:text-slate-400 font-bold flex items-center gap-2 flex-wrap">
+                  <span>Showing <span className="text-slate-900 dark:text-white font-extrabold">{filteredItems.length}</span> items</span>
+                  {salesPeriodInfo?.lastDateFormatted && (
+                    <span className="text-[11px] font-medium text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                      Sales Data Till: <strong className="text-rose-600 dark:text-rose-400 font-bold">{salesPeriodInfo.lastDateFormatted}</strong> (Next: <strong className="text-emerald-600 dark:text-emerald-400 font-bold">{salesPeriodInfo.nextDateFormatted}</strong>)
+                    </span>
+                  )}
                 </div>
               </div>
 

@@ -197,6 +197,16 @@ export function parseBillDate(dateVal) {
   if (cached !== undefined) return cached;
 
   let parsed = null;
+  // Match stringified Excel serial number (e.g. "45580" or "45580.0")
+  if (/^\d{5}(?:\.\d+)?$/.test(dateStr)) {
+    const num = Number(dateStr);
+    if (num > 30000 && num < 70000) {
+      parsed = new Date(Math.round((num - 25569) * 86400 * 1000));
+      billDateCache.set(dateStr, parsed);
+      return parsed;
+    }
+  }
+
   // Match DD/MM/YYYY or DD-MM-YYYY or D/M/YYYY or D-M-YYYY, ignoring anything after a space (like time)
   const matchDmy = dateStr.match(/^(\d{1,2})[/\-](\d{1,2})[/\-](\d{4})(?:\s+.*)?$/);
   if (matchDmy) {
@@ -742,7 +752,7 @@ export function processSalesRowsToMap(salesRows, limitMonths = null) {
   const CAT_KEYS = ["CATEGORY", "MAIN PRODUCT", "GROUP NAME", "GROUP"];
   const QTY_KEYS = ["NET QTY", "TOTAL QTY", "QTY", "SOLD QTY", "QUANTITY", "BILLED QTY", "NO OF QTY"];
   const AMOUNT_KEYS = ["NET SALE AMOUNT", "GROSS SALE AMOUNT", "AMOUNT", "NET AMOUNT", "SALES AMOUNT", "TOTAL AMOUNT"];
-  const DATE_KEYS = ["BILL DATE", "DATE", "VOUCHER DATE", "INVOICE DATE", "DOC DATE"];
+  const DATE_KEYS = ["BILL DATE", "DATE", "BILLDATE", "BILL_DATE", "VOUCHER DATE", "INVOICE DATE", "DOC DATE", "TRANSACTION DATE", "TRANS DATE", "POSTING DATE"];
 
   // Pre-resolve schema keys once from first valid row (O(1) execution for all rows)
   const sample = salesRows.find(r => r && typeof r === "object") || {};
@@ -775,7 +785,10 @@ export function processSalesRowsToMap(salesRows, limitMonths = null) {
   const catKey = resolveKey(CAT_KEYS);
   const qtyKey = resolveKey(QTY_KEYS);
   const amtKey = resolveKey(AMOUNT_KEYS);
-  const dateKey = resolveKey(DATE_KEYS);
+  let dateKey = resolveKey(DATE_KEYS);
+  if (!dateKey) {
+    dateKey = rowKeys.find(rk => rk.trim().toUpperCase().includes("DATE")) || null;
+  }
 
   // Pass 1: Parse and memoize dates to discover global date boundaries
   const parsedDates = new Array(salesRows.length);
@@ -790,7 +803,7 @@ export function processSalesRowsToMap(salesRows, limitMonths = null) {
       const billDateStr = row[dateKey] ? String(row[dateKey]).trim() : "";
       if (billDateStr) {
         const dObj = parseBillDate(billDateStr);
-        if (dObj) {
+        if (dObj && !isNaN(dObj.getTime())) {
           parsedDates[i] = dObj;
           if (!globalMinDate || dObj < globalMinDate) globalMinDate = dObj;
           if (!globalMaxDate || dObj > globalMaxDate) globalMaxDate = dObj;
@@ -897,6 +910,10 @@ export function processSalesRowsToMap(salesRows, limitMonths = null) {
     dateLabel += ` [Filtered ${monthCount}M from ${totalAvailableMonths}M Data]`;
   }
 
+  const effectiveMaxDate = globalMaxDate || maxDate || null;
+  const effectiveMinDate = globalMinDate || minDate || null;
+  const nextDate = effectiveMaxDate ? getNextDate(effectiveMaxDate) : null;
+
   return {
     salesMap,
     periodInfo: { 
@@ -906,11 +923,59 @@ export function processSalesRowsToMap(salesRows, limitMonths = null) {
       totalAvailableMonths,
       isFiltered,
       labelText: dateLabel, 
-      minDate, 
-      maxDate 
+      minDate: effectiveMinDate, 
+      maxDate: effectiveMaxDate,
+      activeMinDate: minDate,
+      activeMaxDate: maxDate,
+      globalMinDate,
+      globalMaxDate,
+      lastDate: effectiveMaxDate,
+      lastDateFormatted: effectiveMaxDate ? formatDateDisplay(effectiveMaxDate) : null,
+      lastDateDmy: effectiveMaxDate ? formatDateDmy(effectiveMaxDate) : null,
+      nextDate: nextDate,
+      nextDateFormatted: nextDate ? formatDateDisplay(nextDate) : null,
+      nextDateDmy: nextDate ? formatDateDmy(nextDate) : null
     },
     totalRows: validRowsCount
   };
+}
+
+/**
+ * Formats a Date object to readable display string: "15 Oct 2026"
+ */
+export function formatDateDisplay(dateObj) {
+  if (!dateObj) return "";
+  const d = dateObj instanceof Date ? dateObj : new Date(dateObj);
+  if (isNaN(d.getTime())) return "";
+  const day = String(d.getDate()).padStart(2, "0");
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const mName = monthNames[d.getMonth()];
+  const year = d.getFullYear();
+  return `${day} ${mName} ${year}`;
+}
+
+/**
+ * Formats a Date object to standard DD/MM/YYYY: "15/10/2026"
+ */
+export function formatDateDmy(dateObj) {
+  if (!dateObj) return "";
+  const d = dateObj instanceof Date ? dateObj : new Date(dateObj);
+  if (isNaN(d.getTime())) return "";
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+/**
+ * Returns Date of the next day (e.g. 15 Oct 2026 -> 16 Oct 2026)
+ */
+export function getNextDate(dateObj) {
+  if (!dateObj) return null;
+  const d = dateObj instanceof Date ? new Date(dateObj.getTime()) : new Date(dateObj);
+  if (isNaN(d.getTime())) return null;
+  d.setDate(d.getDate() + 1);
+  return d;
 }
 
 
