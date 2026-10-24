@@ -420,11 +420,11 @@ export default function DeadStockAnalyzer({ onBack }) {
             ? ` (${formatDateDisplay(fileMinDate)} to ${formatDateDisplay(fileMaxDate)})`
             : "";
           const nextPromptMsg = periodInfo.nextDateFormatted
-            ? ` 👉 Aage data ab ${periodInfo.nextDateFormatted} (${periodInfo.nextDateDmy}) se daalein.`
+            ? ` 👉 Next required upload starts from ${periodInfo.nextDateFormatted} (${periodInfo.nextDateDmy}).`
             : "";
 
           toast.success(
-            `✓ Successfully added ${jsonData.length.toLocaleString()} lines${fileDateMsg}! Total in DB: ${totalRows.toLocaleString()} lines. Data till: ${periodInfo.lastDateFormatted || "latest"}.${nextPromptMsg}`,
+            `✓ Successfully added ${jsonData.length.toLocaleString()} lines${fileDateMsg}! Total in DB: ${totalRows.toLocaleString()} lines. Data available till: ${periodInfo.lastDateFormatted || "latest"}.${nextPromptMsg}`,
             { id: toastId, duration: 6000 }
           );
         } catch (err) {
@@ -1469,7 +1469,7 @@ export default function DeadStockAnalyzer({ onBack }) {
                   )}
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Dead Stock analysis aur Order Processing ke liye saved sales data ka exact date status yahan check karein.
+                  Real-time date coverage and status of saved sales history for Dead Stock & Order Processing.
                 </p>
               </div>
 
@@ -1515,7 +1515,7 @@ export default function DeadStockAnalyzer({ onBack }) {
                 </div>
                 <div className="min-w-0">
                   <div className="text-[11px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-400">
-                    Last Data Uploaded Till (अंतिम बिक्री तारीख)
+                    Last Data Uploaded Till
                   </div>
                   <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-0.5">
                     {salesPeriodInfo?.lastDateFormatted ? (
@@ -1530,7 +1530,7 @@ export default function DeadStockAnalyzer({ onBack }) {
                     )}
                   </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
-                    {salesPeriodInfo?.lastDate ? "Database me is date tak ka sales data maujood hai." : "Sales Excel upload karke start karein."}
+                    {salesPeriodInfo?.lastDate ? "Sales database contains records up to this date." : "Upload sales history spreadsheet to get started."}
                   </div>
                 </div>
               </div>
@@ -1542,7 +1542,7 @@ export default function DeadStockAnalyzer({ onBack }) {
                 </div>
                 <div className="min-w-0">
                   <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400 flex items-center gap-1.5">
-                    <span>Next Data To Enter (आगे इस तारीख से डालें)</span>
+                    <span>Next Data Required From</span>
                     <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
                   </div>
                   <div className="text-base sm:text-lg font-black text-emerald-700 dark:text-emerald-300 mt-0.5">
@@ -1558,7 +1558,7 @@ export default function DeadStockAnalyzer({ onBack }) {
                     )}
                   </div>
                   <div className="text-[11px] text-emerald-700/80 dark:text-emerald-400/80 mt-0.5 font-medium">
-                    {salesPeriodInfo?.nextDateFormatted ? "Agla sales file is date se aage ka upload karein." : "Upload full sales history."}
+                    {salesPeriodInfo?.nextDateFormatted ? "Upload next sales file starting from this date onwards." : "Upload full sales history spreadsheet."}
                   </div>
                 </div>
               </div>
