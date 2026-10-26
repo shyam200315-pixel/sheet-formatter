@@ -334,7 +334,7 @@ export default function QuotationGenerator() {
     const toastId = toast.loading("Generating PDF...");
     try {
       const doc = generatePDFDocument();
-      doc.save(`Quotation_${formData.clientName || "Draft"}.pdf`);
+      doc.save(`Proforma_Invoice_${formData.clientName || "Draft"}.pdf`);
       toast.success("PDF downloaded successfully!", { id: toastId });
     } catch (error) {
       console.error("Failed to generate PDF", error);
@@ -503,7 +503,7 @@ export default function QuotationGenerator() {
       });
 
       const blob = await Packer.toBlob(doc);
-      saveAs(blob, `Quotation_${formData.clientName || "Draft"}.docx`);
+      saveAs(blob, `Proforma_Invoice_${formData.clientName || "Draft"}.docx`);
       toast.success("Word document downloaded successfully!", { id: toastId });
     } catch (error) {
       console.error("Failed to generate word document", error);
@@ -609,9 +609,9 @@ export default function QuotationGenerator() {
   let displaySubject = toTitleCase(formData.subject);
   if (!displaySubject) {
     if (formData.items.length === 1 && formData.items[0].productName) {
-      displaySubject = `Performa Invoice For ${toTitleCase(formData.items[0].productName)} (${formData.items[0].quantity} Qty)`;
+      displaySubject = `Proforma Invoice For ${toTitleCase(formData.items[0].productName)} (${formData.items[0].quantity} Qty)`;
     } else if (formData.items.length > 1) {
-      displaySubject = "Performa Invoice For Assorted Items";
+      displaySubject = "Proforma Invoice For Assorted Items";
     }
   }
 
@@ -629,7 +629,7 @@ export default function QuotationGenerator() {
             </div>
           </div>
           <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-2">Restricted Access</h2>
-          <p className="text-gray-500 dark:text-gray-400 text-center mb-8">Please enter the master password to access the quotation generator.</p>
+          <p className="text-gray-500 dark:text-gray-400 text-center mb-8">Please enter the master password to access the Proforma Invoice generator.</p>
           
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
@@ -667,7 +667,7 @@ export default function QuotationGenerator() {
       {/* LEFT SIDE: Form */}
       <div className="w-full lg:w-1/3 flex flex-col gap-6">
         <div>
-          <h1 className="text-2xl font-normal text-[#202124] dark:text-white mb-2">Quotation Details</h1>
+          <h1 className="text-2xl font-normal text-[#202124] dark:text-white mb-2">Proforma Invoice Details</h1>
           <p className="text-[#5f6368] dark:text-gray-300 text-sm">
             Fill in the details below. The preview on the right will update in real-time.
           </p>

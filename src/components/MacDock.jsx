@@ -28,7 +28,7 @@ const DOCK_ITEMS = [
   { id: 'stock', label: 'Stock', icon: BarChart2, color: 'text-violet-500' },
   { id: 'inward-tracker', label: 'Inward', icon: PackageCheck, color: 'text-cyan-500' },
   { id: 'mrp', label: 'MRP', icon: Tags, color: 'text-amber-500' },
-  { id: 'quotation', label: 'Quotation', icon: FileText, color: 'text-rose-500' }
+  { id: 'quotation', label: 'Proforma Invoice', icon: FileText, color: 'text-rose-500' }
 ];
 
 export default function MacDock({ activeTab, setActiveTab }) {

@@ -141,8 +141,8 @@ const TOOLS = [
   },
   {
     id: "quotation",
-    title: "Quotation Generator",
-    description: "Quickly generate professional PDF quotations for customers.",
+    title: "Proforma Invoice",
+    description: "Quickly generate professional PDF & Word proforma invoices for customers.",
     icon: <FileText className="w-8 h-8 text-rose-600" />,
     color: "bg-rose-100",
     borderColor: "border-rose-200",
@@ -232,7 +232,7 @@ export default function App() {
       'stock': 'Stock & Scrap Analyzer',
       'inward-tracker': 'Inward Tracker',
       'mrp': 'MRP & Scheme Checker',
-      'quotation': 'Quotation Generator'
+      'quotation': 'Proforma Invoice'
     };
 
     const handleKeyDown = (e) => {
@@ -812,7 +812,7 @@ export default function App() {
             </div>
           )}
 
-          {/* Quotation Generator */}
+          {/* Proforma Invoice */}
           {visitedTabs.has("quotation") && (
             <div className={activeTab === "quotation" ? "w-full block" : "hidden"}>
               <QuotationGenerator />
