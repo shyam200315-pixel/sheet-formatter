@@ -864,7 +864,7 @@ export default function App() {
           {/* Best Sellers */}
           {visitedTabs.has("best-sellers") && (
             <div className={activeTab === "best-sellers" ? "w-full block" : "hidden"}>
-              <BestSellers />
+              <BestSellers onBack={() => setActiveTab("home")} />
             </div>
           )}
 

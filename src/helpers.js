@@ -606,7 +606,7 @@ export async function syncDeadStockFromCloud() {
     return null;
   } catch (err) {
     console.warn("syncDeadStockFromCloud warning:", err);
-    return null;
+    throw err;
   }
 }
 

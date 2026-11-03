@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
+    "server": "cd backend && node dist/main.js",
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview"

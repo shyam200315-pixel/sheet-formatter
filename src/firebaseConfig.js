@@ -335,6 +335,9 @@ export async function loadDeadStockFromCloud() {
     return await response.json();
   } catch (e) {
     console.warn("DeadStock Cloud Load Warning:", e.message);
+    if (e.name === 'TypeError' || (e.message && e.message.toLowerCase().includes('fetch'))) {
+      throw new Error(`Cannot reach Cloud Backend (${API_BASE}). Please verify the backend server is running.`);
+    }
     return null;
   }
 }
@@ -349,6 +352,9 @@ export async function getDeadStockCloudMetadata() {
     return null;
   } catch (e) {
     console.warn("DeadStock Cloud Metadata Warning:", e.message);
+    if (e.name === 'TypeError' || (e.message && e.message.toLowerCase().includes('fetch'))) {
+      throw new Error(`Cannot reach Cloud Backend (${API_BASE}). Please verify the backend server is running.`);
+    }
     return null;
   }
 }
