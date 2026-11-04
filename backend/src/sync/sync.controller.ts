@@ -83,6 +83,11 @@ export class SyncController {
     return this.syncService.deleteDeadStockFile(decodeURIComponent(fileId));
   }
 
+  @Delete('deadstock/date/:date')
+  async deleteDeadStockByDate(@Param('date') date: string) {
+    return this.syncService.deleteDeadStockByDate(date);
+  }
+
   @Sse('updates')
   streamUpdates(): Observable<MessageEvent> {
     return this.syncService.updates$.asObservable().pipe(

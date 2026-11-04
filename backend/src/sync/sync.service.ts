@@ -402,13 +402,23 @@ export class SyncService implements OnApplicationBootstrap {
       let itemCode = itemKey ? String(row[itemKey] || "").trim() : "";
       if (itemCode.endsWith(".0")) itemCode = itemCode.slice(0, -2);
 
+      let rowAmount = 0;
+      if (amountKey && !isNaN(Number(row[amountKey])) && Number(row[amountKey]) !== 0) {
+        rowAmount = Number(row[amountKey]);
+      } else {
+        const altKey = this.findColumnKey(row, ["AMOUNT BEFORE TAX", "GROSS SALE AMOUNT", "SELLING RATE", "GROSS SALE", "TOTAL AMOUNT"]);
+        if (altKey && !isNaN(Number(row[altKey]))) {
+          rowAmount = Number(row[altKey]);
+        }
+      }
+
       return this.deadStockRepository.create({
         store: storeKey ? String(row[storeKey] || "").trim() : "",
         itemCode: itemCode,
         itemDesc: descKey ? String(row[descKey] || "").trim() : "",
         category: catKey ? String(row[catKey] || "").trim() : "",
         qty: qtyKey && !isNaN(Number(row[qtyKey])) ? Math.round(Number(row[qtyKey])) : 0,
-        amount: amountKey && !isNaN(Number(row[amountKey])) ? Number(row[amountKey]) : 0,
+        amount: rowAmount,
         date: formattedDate,
         fileName: row._fileName || "Uploaded File",
         fileId: fileId,
@@ -496,6 +506,18 @@ export class SyncService implements OnApplicationBootstrap {
       .from(DeadStockRecord)
       .where('fileId = :fileId', { fileId })
       .execute();
+    await this.cacheManager.del('deadstock_data');
+    this.updates$.next({ type: 'deadstock_update' });
+    return { success: true, deletedCount: result.affected || 0 };
+  }
+
+  async deleteDeadStockByDate(date: string) {
+    const result = await this.deadStockRepository.createQueryBuilder()
+      .delete()
+      .from(DeadStockRecord)
+      .where('date = :date', { date })
+      .execute();
+    console.log(`[DELETE DEADSTOCK DATE] date=${date}, affected=${result.affected}`);
     await this.cacheManager.del('deadstock_data');
     this.updates$.next({ type: 'deadstock_update' });
     return { success: true, deletedCount: result.affected || 0 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as XLSX from "xlsx";
-import { findHeaderRowIndex, getTargetDate, parseBillDate, appendHistoricalData, syncDailyRowsToHistoricalData, loadHistoricalData, MASTER_STORES, normalizeStoreName, getKnownStores, saveKnownStores } from "./helpers";
+import { findHeaderRowIndex, getTargetDate, parseBillDate, appendHistoricalData, syncDailyRowsToHistoricalData, syncDailyRowsToDeadStockData, loadHistoricalData, MASTER_STORES, normalizeStoreName, getKnownStores, saveKnownStores } from "./helpers";
 import FileDropZone from "./components/FileDropZone";
 import DashboardView from "./components/DashboardView";
 import OrderProcessing from "./components/OrderProcessing";
@@ -482,27 +482,46 @@ export default function App() {
           throw new Error("No branches found in the spreadsheet branch list.");
         }
 
-        // Auto-sync Target Date sales (e.g. 16th Sept) into Historical Database (ignoring older MTD dates 1-15 Sept)
+        // Auto-sync Target Date sales into Historical Database AND Dead Stock / Best Sellers Database
         try {
-          const toastId = toast.custom((t) => renderProgressToast(t, "Auto-syncing to Historical DB...", 0), { duration: 999999 });
+          const toastId = toast.custom((t) => renderProgressToast(t, "Auto-syncing to Cloud Databases...", 0), { duration: 999999 });
 
-          const syncResult = await syncDailyRowsToHistoricalData(jsonData, worksheet, (progress) => {
-            const percent = Math.round((progress.uploadedRows / progress.totalRows) * 100);
-            toast.custom((t) => renderProgressToast(t, `Auto-syncing daily sales...`, percent), { id: toastId, duration: 999999 });
+          // 1. Sync to Historical Database (revenue & bill totals)
+          const histResult = await syncDailyRowsToHistoricalData(jsonData, worksheet, (progress) => {
+            const percent = Math.round((progress.uploadedRows / progress.totalRows) * 50);
+            toast.custom((t) => renderProgressToast(t, `Syncing Historical DB...`, percent), { id: toastId, duration: 999999 });
           });
-          
-          if (syncResult.syncedCount > 0) {
-            toast.dismiss(toastId);
-            const ignoreMsg = today.getDate() > 1 ? ` (Previous MTD dates 1-${today.getDate() - 1} ignored)` : "";
+
+          // 2. Sync to Dead Stock & Best Sellers Database (per-item sales & quantities)
+          let dsResult = { syncedCount: 0, isItemWise: false };
+          try {
+            dsResult = await syncDailyRowsToDeadStockData(jsonData, worksheet, (progress) => {
+              const percent = 50 + Math.round((progress.uploadedRows / progress.totalRows) * 50);
+              toast.custom((t) => renderProgressToast(t, `Syncing Dead Stock & Best Sellers...`, percent), { id: toastId, duration: 999999 });
+            });
+          } catch (dsErr) {
+            console.warn("DeadStock auto-sync error:", dsErr);
+          }
+
+          toast.dismiss(toastId);
+
+          const syncedMessages = [];
+          if (histResult && histResult.syncedCount > 0) {
+            syncedMessages.push(`📊 ${histResult.syncedCount.toLocaleString()} rows to Historical DB`);
+          }
+          if (dsResult && dsResult.syncedCount > 0) {
+            syncedMessages.push(`📦 ${dsResult.syncedCount.toLocaleString()} items to Dead Stock & Best Sellers`);
+          }
+
+          if (syncedMessages.length > 0) {
+            const ignoreMsg = today.getDate() > 1 ? ` (Older MTD dates 1-${today.getDate() - 1} preserved/skipped)` : "";
             toast.success(
-              `⚡ Auto-synced ${syncResult.syncedCount.toLocaleString()} sales records for ${syncResult.targetDateStr} into Historical DB!${ignoreMsg}`,
-              { duration: 6000, icon: '⚡' }
+              `⚡ Synced for ${todayStr}:${ignoreMsg}\n` + syncedMessages.join("\n"),
+              { duration: 7000, icon: '⚡' }
             );
-          } else {
-            toast.dismiss(toastId);
           }
         } catch (syncErr) {
-          console.warn("Auto-syncing daily sales to Historical DB warning:", syncErr);
+          console.warn("Auto-syncing daily sales warning:", syncErr);
         }
 
         setValidationSuccess(true);

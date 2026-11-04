@@ -344,6 +344,7 @@ import {
   getDeadStockCloudMetadata,
   clearDeadStockFromCloud,
   deleteDeadStockFileFromCloud,
+  deleteDeadStockDateFromCloud,
   subscribeToDeadStockUpdates
 } from "./firebaseConfig";
 export { 
@@ -355,6 +356,7 @@ export {
   getDeadStockCloudMetadata,
   clearDeadStockFromCloud,
   deleteDeadStockFileFromCloud,
+  deleteDeadStockDateFromCloud,
   subscribeToDeadStockUpdates
 };
 
@@ -516,6 +518,92 @@ export async function syncDailyRowsToHistoricalData(jsonData, worksheet, onProgr
 /**
  * Clear data from IndexedDB and Firebase Cloud
  */
+/**
+ * Synchronizes daily item-level rows into Dead Stock & Best Sellers Cloud & IndexedDB database.
+ * Only triggers if the uploaded sheet contains item-level headers (Item Code, Description, Barcode, etc.).
+ * Automatically deletes existing records for target date from cloud & local cache first to ensure zero duplicates!
+ * 
+ * @param {Array} jsonData 
+ * @param {Object} worksheet 
+ * @param {Function} [onProgress]
+ * @returns {Promise<{ targetDateStr: string, syncedCount: number, isItemWise: boolean }>}
+ */
+export async function syncDailyRowsToDeadStockData(jsonData, worksheet, onProgress = null) {
+  if (!jsonData || !Array.isArray(jsonData) || jsonData.length === 0) {
+    return { targetDateStr: "", syncedCount: 0, isItemWise: false };
+  }
+
+  // 1. Detect if this sheet contains Item-level columns
+  const sample = jsonData.find(r => r && typeof r === "object") || {};
+  const sampleKeys = Object.keys(sample).map(k => k.trim().toUpperCase());
+  const isItemWise = sampleKeys.some(k => 
+    k.includes("ITEM CODE") || 
+    k.includes("ITEM DESCRIPTION") || 
+    k.includes("BARCODE") || 
+    k.includes("HANA CODE") ||
+    k === "CODE"
+  );
+
+  if (!isItemWise) {
+    // Regular bill-wise file — do not touch Dead Stock / Best Sellers item database
+    return { targetDateStr: "", syncedCount: 0, isItemWise: false };
+  }
+
+  // 2. Establish the latest target date (e.g. 03/11/2026)
+  const { today, todayStr } = getTargetDate(worksheet, jsonData);
+  if (!today || isNaN(today.getTime())) {
+    return { targetDateStr: "", syncedCount: 0, isItemWise: true };
+  }
+
+  const targetDay = today.getDate();
+  const targetMonth = today.getMonth();
+  const targetYear = today.getFullYear();
+
+  // 3. Filter rows matching ONLY the target date
+  const targetDayRows = jsonData.filter(row => {
+    if (!row || typeof row !== "object") return false;
+    let dVal = row["BILL DATE"] || row["DATE"] || row["BILLDATE"] || row["INVOICE DATE"] || row["TRANSACTION DATE"];
+    if (!dVal) {
+      for (const k in row) {
+        if (k.trim().toUpperCase().includes("DATE")) {
+          dVal = row[k];
+          break;
+        }
+      }
+    }
+    if (!dVal) return false;
+    const parsed = parseBillDate(dVal);
+    if (!parsed || isNaN(parsed.getTime())) return false;
+    return (
+      parsed.getDate() === targetDay &&
+      parsed.getMonth() === targetMonth &&
+      parsed.getFullYear() === targetYear
+    );
+  });
+
+  if (targetDayRows.length === 0) {
+    return { targetDateStr: todayStr, syncedCount: 0, isItemWise: true };
+  }
+
+  // 4. Delete existing rows for this target date from Cloud Dead Stock Table
+  const targetDateFormatted = `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}-${String(targetDay).padStart(2, '0')}`;
+  try {
+    await deleteDeadStockDateFromCloud(targetDateFormatted);
+  } catch (delErr) {
+    console.warn("DeadStock cloud date delete warning:", delErr);
+  }
+
+  // 5. Append new target day item rows to Cloud and local IndexedDB (with local deduplication)
+  const dailyFileName = `Daily Item Sync (${todayStr})`;
+  await appendDeadStockSalesData(targetDayRows, dailyFileName, onProgress, targetDateFormatted);
+
+  return {
+    targetDateStr: todayStr,
+    syncedCount: targetDayRows.length,
+    isItemWise: true
+  };
+}
+
 export async function clearHistoricalData() {
   try {
     await clearFromCloud();
@@ -616,9 +704,9 @@ export async function syncDeadStockFromCloud() {
  * @param {string} [fileName]
  * @param {Function} [onProgress]
  */
-export async function appendDeadStockSalesData(newData, fileName = null, onProgress = null) {
+export async function appendDeadStockSalesData(newData, fileName = null, onProgress = null, replaceDateStr = null) {
   try {
-    const existingData = (await loadDeadStockSalesData()) || [];
+    let existingData = (await loadDeadStockSalesData()) || [];
     const fileId = `deadstock_file_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const uploadTime = new Date().toISOString();
 
@@ -628,6 +716,19 @@ export async function appendDeadStockSalesData(newData, fileName = null, onProgr
       _fileName: row._fileName || fileName || "Uploaded Sales File",
       _uploadedAt: row._uploadedAt || uploadTime
     }));
+
+    // If replaceDateStr (e.g. '2026-11-03') is provided, remove that date's old records from local IndexedDB first
+    if (replaceDateStr && existingData.length > 0) {
+      existingData = existingData.filter(row => {
+        if (!row || typeof row !== 'object') return true;
+        let dVal = row["BILL DATE"] || row["DATE"] || row["BILLDATE"] || row["INVOICE DATE"];
+        if (!dVal) return true;
+        const parsed = parseBillDate(dVal);
+        if (!parsed || isNaN(parsed.getTime())) return true;
+        const dStr = `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${String(parsed.getDate()).padStart(2, '0')}`;
+        return dStr !== replaceDateStr;
+      });
+    }
 
     const mergedData = [...existingData, ...taggedData];
     // 1. Instant local IndexedDB save (0ms speed)

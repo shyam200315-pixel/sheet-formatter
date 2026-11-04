@@ -384,6 +384,19 @@ export async function deleteDeadStockFileFromCloud(fileId) {
   }
 }
 
+export async function deleteDeadStockDateFromCloud(dateStr) {
+  try {
+    const response = await fetch(`${API_BASE}/deadstock/date/${encodeURIComponent(dateStr)}`, {
+      method: 'DELETE'
+    });
+    if (!response.ok) return false;
+    return await response.json();
+  } catch (e) {
+    console.warn("DeadStock Cloud Delete Date Warning:", e.message);
+    return { success: false, deletedCount: 0 };
+  }
+}
+
 // Dummy exports to prevent crashes if other files imported Firebase specific stuff
 export const db = null;
 export function getFirebaseConfig() { return null; }

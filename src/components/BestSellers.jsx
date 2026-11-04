@@ -19,7 +19,9 @@ import {
   UploadCloud,
   CheckCircle2,
   Lock,
-  Unlock
+  Unlock,
+  X,
+  Clock
 } from 'lucide-react';
 import * as XLSX from "xlsx";
 import toast from "react-hot-toast";
@@ -60,6 +62,20 @@ export default function BestSellers({ onBack }) {
   const [selectedStore, setSelectedStore] = useState("All");
   const [selectedStateFilter, setSelectedStateFilter] = useState("All States");
   const [expandedCategories, setExpandedCategories] = useState({});
+
+  // Time Frame Filters (Start Date to End Date)
+  const [startDate, setStartDate] = useState(""); // 'YYYY-MM-DD'
+  const [endDate, setEndDate] = useState("");     // 'YYYY-MM-DD'
+  const [datePreset, setDatePreset] = useState("all"); // 'all' | 'latest' | 'last7' | 'thisMonth' | 'lastMonth' | 'custom'
+
+  // Helper to format Date to YYYY-MM-DD for HTML date inputs
+  const toDateInputVal = (d) => {
+    if (!d || isNaN(d.getTime())) return "";
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   // Helper to extract values by candidate keys (case-insensitive / alias match)
   const getRowVal = (row, candidates) => {
@@ -179,6 +195,88 @@ export default function BestSellers({ onBack }) {
     };
   }, [isAuthenticated]);
 
+  // Discover Global Date Boundaries across entire dataset
+  const globalDateBounds = useMemo(() => {
+    if (!jsonData || !Array.isArray(jsonData) || jsonData.length === 0) {
+      return { minDate: null, maxDate: null, minStr: "", maxStr: "", latestDmy: "" };
+    }
+    let minD = null;
+    let maxD = null;
+    for (let i = 0; i < jsonData.length; i++) {
+      const row = jsonData[i];
+      if (!row || typeof row !== "object") continue;
+      const rawDate = getRowVal(row, ["BILL DATE", "DATE", "BILLDATE", "BILL_DATE", "INVOICE DATE", "TRANSACTION DATE"]);
+      if (rawDate) {
+        const d = parseBillDate(rawDate);
+        if (d && !isNaN(d.getTime())) {
+          if (!minD || d < minD) minD = d;
+          if (!maxD || d > maxD) maxD = d;
+        }
+      }
+    }
+    return {
+      minDate: minD,
+      maxDate: maxD,
+      minStr: minD ? toDateInputVal(minD) : "",
+      maxStr: maxD ? toDateInputVal(maxD) : "",
+      latestDmy: maxD ? formatDateDisplay(maxD) : ""
+    };
+  }, [jsonData]);
+
+  // Normalized Filter Date Boundaries
+  const startFilterDate = useMemo(() => {
+    if (!startDate) return null;
+    const parts = startDate.split('-');
+    if (parts.length !== 3) return null;
+    return new Date(+parts[0], +parts[1] - 1, +parts[2], 0, 0, 0, 0);
+  }, [startDate]);
+
+  const endFilterDate = useMemo(() => {
+    if (!endDate) return null;
+    const parts = endDate.split('-');
+    if (parts.length !== 3) return null;
+    return new Date(+parts[0], +parts[1] - 1, +parts[2], 23, 59, 59, 999);
+  }, [endDate]);
+
+  // Handle Quick Date Presets
+  const handlePresetChange = (preset) => {
+    setDatePreset(preset);
+    if (!globalDateBounds.maxDate) {
+      setStartDate("");
+      setEndDate("");
+      return;
+    }
+    const maxD = globalDateBounds.maxDate;
+
+    if (preset === "all") {
+      setStartDate("");
+      setEndDate("");
+    } else if (preset === "latest") {
+      const str = toDateInputVal(maxD);
+      setStartDate(str);
+      setEndDate(str);
+    } else if (preset === "last7") {
+      const start7 = new Date(maxD.getTime() - 6 * 24 * 60 * 60 * 1000);
+      setStartDate(toDateInputVal(start7));
+      setEndDate(toDateInputVal(maxD));
+    } else if (preset === "thisMonth") {
+      const startM = new Date(maxD.getFullYear(), maxD.getMonth(), 1);
+      setStartDate(toDateInputVal(startM));
+      setEndDate(toDateInputVal(maxD));
+    } else if (preset === "lastMonth") {
+      const startLastM = new Date(maxD.getFullYear(), maxD.getMonth() - 1, 1);
+      const endLastM = new Date(maxD.getFullYear(), maxD.getMonth(), 0);
+      setStartDate(toDateInputVal(startLastM));
+      setEndDate(toDateInputVal(endLastM));
+    }
+  };
+
+  const handleResetDates = () => {
+    setDatePreset("all");
+    setStartDate("");
+    setEndDate("");
+  };
+
   // Force manual refresh from cloud
   const handleForceRefresh = async () => {
     setIsSyncing(true);
@@ -279,7 +377,7 @@ export default function BestSellers({ onBack }) {
     setExpandedCategories({});
   };
 
-  // Compute Best Sellers analytics from the shared database
+  // Compute Best Sellers analytics dynamically filtered by Date Range & State
   const insights = useMemo(() => {
     if (!jsonData || !Array.isArray(jsonData) || jsonData.length === 0) return null;
 
@@ -287,11 +385,15 @@ export default function BestSellers({ onBack }) {
     const stores = new Set();
     const overallItems = {};
     const overallCategories = {};
+    const itemCategoryMap = {};
+    const storeTotalSales = {};
     const storeCategorySales = {}; // store -> { category -> qty }
     const storeCategoryItemSales = {}; // store -> { category -> { item -> qty } }
 
     let minDate = null;
     let maxDate = null;
+    let totalFilteredRows = 0;
+    let totalFilteredUnits = 0;
 
     jsonData.forEach(row => {
       if (!row || typeof row !== "object") return;
@@ -303,13 +405,24 @@ export default function BestSellers({ onBack }) {
       const qtyRaw = getRowVal(row, ["NET QTY", "TOTAL QTY", "QTY", "SOLD QTY", "QUANTITY", "BILLED QTY", "NO OF QTY"]);
       const qty = Number(qtyRaw) || 0;
 
-      // Extract date for period info if available
+      // Extract and check bill date
+      let rowDate = null;
       const rawDate = getRowVal(row, ["BILL DATE", "DATE", "BILLDATE", "BILL_DATE", "INVOICE DATE", "TRANSACTION DATE"]);
       if (rawDate) {
-        const d = parseBillDate(rawDate);
-        if (d && !isNaN(d.getTime())) {
-          if (!minDate || d < minDate) minDate = d;
-          if (!maxDate || d > maxDate) maxDate = d;
+        rowDate = parseBillDate(rawDate);
+      }
+
+      // Filter by Date Range (From Date to To Date)
+      if (startFilterDate || endFilterDate) {
+        if (!rowDate || isNaN(rowDate.getTime())) return;
+        const rowTime = new Date(rowDate.getFullYear(), rowDate.getMonth(), rowDate.getDate()).getTime();
+        if (startFilterDate) {
+          const startTime = new Date(startFilterDate.getFullYear(), startFilterDate.getMonth(), startFilterDate.getDate()).getTime();
+          if (rowTime < startTime) return;
+        }
+        if (endFilterDate) {
+          const endTime = new Date(endFilterDate.getFullYear(), endFilterDate.getMonth(), endFilterDate.getDate()).getTime();
+          if (rowTime > endTime) return;
         }
       }
 
@@ -321,7 +434,15 @@ export default function BestSellers({ onBack }) {
       // Ignore EXCHANGE category as per standard rule
       if (category && category.toUpperCase() === 'EXCHANGE') return;
 
+      if (rowDate && !isNaN(rowDate.getTime())) {
+        if (!minDate || rowDate < minDate) minDate = rowDate;
+        if (!maxDate || rowDate > maxDate) maxDate = rowDate;
+      }
+
+      totalFilteredRows++;
+      totalFilteredUnits += qty;
       stores.add(store);
+      storeTotalSales[store] = (storeTotalSales[store] || 0) + qty;
 
       if (category) {
         categories.add(category);
@@ -343,6 +464,9 @@ export default function BestSellers({ onBack }) {
 
       if (item) {
         overallItems[item] = (overallItems[item] || 0) + qty;
+        if (category && !itemCategoryMap[item]) {
+          itemCategoryMap[item] = category;
+        }
       }
     });
 
@@ -360,6 +484,25 @@ export default function BestSellers({ onBack }) {
 
     const overallTopItem = getTop(overallItems);
     const overallTopCategory = getTop(overallCategories);
+
+    // Top 20 Best Selling Items in selected time frame
+    const topSellingItems = Object.entries(overallItems)
+      .map(([name, qty]) => ({
+        name,
+        qty,
+        category: itemCategoryMap[name] || "General"
+      }))
+      .sort((a, b) => b.qty - a.qty)
+      .slice(0, 20);
+
+    // Top Stores by Total Volume in selected time frame
+    const topStoresList = Object.entries(storeTotalSales)
+      .map(([storeName, qty]) => ({
+        store: storeName,
+        qty
+      }))
+      .sort((a, b) => b.qty - a.qty)
+      .slice(0, 20);
 
     // Breakdown for selected Category
     const storeBreakdown = [];
@@ -384,23 +527,30 @@ export default function BestSellers({ onBack }) {
       categoryBreakdown.sort((a, b) => b.qty - a.qty);
     }
 
-    let dateRangeText = null;
+    let activeDateRangeText = null;
     if (minDate && maxDate) {
-      dateRangeText = `${formatDateDisplay(minDate)} to ${formatDateDisplay(maxDate)}`;
+      activeDateRangeText = `${formatDateDisplay(minDate)} to ${formatDateDisplay(maxDate)}`;
     }
+
+    const isFilteredByDate = Boolean(startDate || endDate);
 
     return {
       categories: Array.from(categories).sort(),
       stores: Array.from(stores).sort(),
       overallTopItem,
       overallTopCategory,
+      topSellingItems,
+      topStoresList,
       storeBreakdown,
       categoryBreakdown,
       storeCategoryItemSales,
-      dateRangeText,
-      totalRows: jsonData.length
+      dateRangeText: activeDateRangeText,
+      totalRows: totalFilteredRows,
+      totalFilteredUnits,
+      isFilteredByDate,
+      totalAllDbRows: jsonData.length
     };
-  }, [jsonData, selectedCategory, selectedStore, selectedStateFilter]);
+  }, [jsonData, selectedCategory, selectedStore, selectedStateFilter, startFilterDate, endFilterDate]);
 
   // -------------------------------------------------------------
   // Password Lock Screen (Password: 'shyam')
@@ -524,6 +674,67 @@ export default function BestSellers({ onBack }) {
     );
   }
 
+  // Reusable Time Frame Selector UI Component
+  const renderTimeFrameControls = () => (
+    <div className="flex flex-wrap items-center gap-2 bg-white/80 dark:bg-slate-800/80 p-1.5 sm:p-2 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm">
+      <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider pl-1">
+        <Clock size={14} className="text-indigo-600 dark:text-indigo-400" />
+        <span className="hidden sm:inline">Time Frame:</span>
+      </div>
+
+      <select
+        value={datePreset}
+        onChange={(e) => handlePresetChange(e.target.value)}
+        className="bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 text-gray-800 dark:text-gray-200 text-xs rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-indigo-500 font-medium cursor-pointer"
+      >
+        <option value="all">All Dates</option>
+        <option value="latest">Latest Day ({globalDateBounds.latestDmy || "Today"})</option>
+        <option value="last7">Last 7 Days</option>
+        <option value="thisMonth">This Month</option>
+        <option value="lastMonth">Last Month</option>
+        <option value="custom">Custom Range</option>
+      </select>
+
+      <div className="flex items-center gap-1">
+        <input
+          type="date"
+          value={startDate}
+          min={globalDateBounds.minStr || undefined}
+          max={globalDateBounds.maxStr || undefined}
+          onChange={(e) => {
+            setStartDate(e.target.value);
+            setDatePreset("custom");
+          }}
+          className="bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 text-gray-800 dark:text-gray-200 text-xs rounded-lg px-2 py-1 focus:ring-2 focus:ring-indigo-500"
+          title="From Date"
+        />
+        <span className="text-xs text-gray-400 font-medium">to</span>
+        <input
+          type="date"
+          value={endDate}
+          min={globalDateBounds.minStr || undefined}
+          max={globalDateBounds.maxStr || undefined}
+          onChange={(e) => {
+            setEndDate(e.target.value);
+            setDatePreset("custom");
+          }}
+          className="bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 text-gray-800 dark:text-gray-200 text-xs rounded-lg px-2 py-1 focus:ring-2 focus:ring-indigo-500"
+          title="To Date"
+        />
+      </div>
+
+      {(startDate || endDate) && (
+        <button
+          onClick={handleResetDates}
+          className="p-1 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-400 hover:text-red-500 rounded-md transition-colors cursor-pointer"
+          title="Reset time frame to all dates"
+        >
+          <X size={14} />
+        </button>
+      )}
+    </div>
+  );
+
   return (
     <div className="w-full pb-16">
       {/* Top Header & Cloud Status */}
@@ -555,17 +766,22 @@ export default function BestSellers({ onBack }) {
               {insights.dateRangeText && (
                 <>
                   <span>•</span>
-                  <span className="inline-flex items-center gap-1">
+                  <span className="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-medium">
                     <Calendar size={12} />
                     {insights.dateRangeText}
                   </span>
                 </>
               )}
+              {insights.isFilteredByDate && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.2 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 font-semibold text-[10px]">
+                  Filtered Time Frame
+                </span>
+              )}
             </div>
           </div>
         </div>
         
-        {/* Actions & Filters */}
+        {/* Actions & State Filter */}
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <button
             onClick={handleForceRefresh}
@@ -611,7 +827,7 @@ export default function BestSellers({ onBack }) {
         </div>
       </div>
 
-      {/* Top Insights Cards */}
+      {/* Top Insights Cards (Filtered to selected Time Frame) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="google-card p-6 bg-gradient-to-br from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 border border-blue-100 dark:border-blue-900/50 relative overflow-hidden rounded-2xl shadow-sm">
           <div className="absolute top-0 right-0 p-4 opacity-10">
@@ -622,7 +838,14 @@ export default function BestSellers({ onBack }) {
               <Package size={24} />
             </div>
             <div>
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">Best Seller</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">Best Seller</h2>
+                {insights.isFilteredByDate && (
+                  <span className="text-[10px] bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium">
+                    In Selected Period
+                  </span>
+                )}
+              </div>
               <p className="text-base font-medium text-gray-800 dark:text-gray-200">Overall Best Selling Item</p>
             </div>
           </div>
@@ -645,7 +868,14 @@ export default function BestSellers({ onBack }) {
               <TrendingUp size={24} />
             </div>
             <div>
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-purple-600 dark:text-purple-400">Category Leader</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-purple-600 dark:text-purple-400">Category Leader</h2>
+                {insights.isFilteredByDate && (
+                  <span className="text-[10px] bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full font-medium">
+                    In Selected Period
+                  </span>
+                )}
+              </div>
               <p className="text-base font-medium text-gray-800 dark:text-gray-200">Overall Best Category</p>
             </div>
           </div>
@@ -660,7 +890,7 @@ export default function BestSellers({ onBack }) {
         </div>
       </div>
 
-      {/* Analysis Section */}
+      {/* Analysis Section with Integrated Time Frame Controls */}
       <div className="google-card overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm">
         
         {/* Toggle Headers */}
@@ -695,33 +925,47 @@ export default function BestSellers({ onBack }) {
         <div className="p-6">
           {viewMode === "category" && (
             <div>
-              <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+              <div className="flex flex-col xl:flex-row xl:items-center justify-between mb-8 gap-4">
                 <div>
                   <h2 className="text-xl font-medium text-gray-800 dark:text-gray-200">Analyze a Category</h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">See exactly how many units each store sold of a specific category.</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    See exactly how many units each store sold of a specific category in the selected time frame.
+                  </p>
                 </div>
-                <div className="w-full md:w-72 shrink-0">
-                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Select Category</label>
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => {
-                      setSelectedCategory(e.target.value);
-                      setExpandedCategories({});
-                    }}
-                    className="w-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 shadow-sm cursor-pointer"
-                  >
-                    <option value="All">-- Select a Category --</option>
-                    {insights.categories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
+
+                {/* Time Frame & Category Select Controls side-by-side */}
+                <div className="flex flex-wrap items-center gap-3">
+                  {renderTimeFrameControls()}
+
+                  <div className="w-full sm:w-64">
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => {
+                        setSelectedCategory(e.target.value);
+                        setExpandedCategories({});
+                      }}
+                      className="w-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-2 focus:ring-indigo-500 block p-2.5 shadow-sm cursor-pointer"
+                    >
+                      <option value="All">-- Select a Category --</option>
+                      {insights.categories.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
 
               {selectedCategory !== 'All' ? (
                 <div>
-                  <div className="bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-900/50 rounded-xl p-4 mb-6 flex justify-between items-center">
-                    <span className="font-semibold text-indigo-900 dark:text-indigo-300">Total {selectedCategory} Sold:</span>
+                  <div className="bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-900/50 rounded-xl p-4 mb-6 flex flex-wrap justify-between items-center gap-2">
+                    <div>
+                      <span className="font-semibold text-indigo-900 dark:text-indigo-300">Total {selectedCategory} Sold:</span>
+                      {insights.isFilteredByDate && (
+                        <span className="text-xs text-indigo-600 dark:text-indigo-400 ml-2 font-medium">
+                          ({insights.dateRangeText || `${startDate} to ${endDate}`})
+                        </span>
+                      )}
+                    </div>
                     <span className="text-xl font-bold text-indigo-700 dark:text-indigo-400">
                       {insights.storeBreakdown.reduce((sum, item) => sum + item.qty, 0).toLocaleString()} Units
                     </span>
@@ -801,7 +1045,7 @@ export default function BestSellers({ onBack }) {
                         {insights.storeBreakdown.length === 0 && (
                           <tr>
                             <td colSpan="3" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                              No sales found for this category.
+                              No sales found for this category in the selected time frame.
                             </td>
                           </tr>
                         )}
@@ -810,12 +1054,79 @@ export default function BestSellers({ onBack }) {
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-12 bg-gray-50 dark:bg-slate-800/50 rounded-xl border border-gray-200 dark:border-slate-700 border-dashed">
-                  <div className="icon-filter inline-block">
-                    <Filter size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+                <div className="space-y-4">
+                  <div className="bg-white/80 dark:bg-slate-800/80 rounded-2xl border border-gray-200 dark:border-slate-700 p-5 shadow-sm">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+                      <div>
+                        <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                          <Trophy className="text-amber-500" size={18} />
+                          Top Best Selling Products {insights.isFilteredByDate ? `(${insights.dateRangeText || `${startDate} to ${endDate}`})` : "(All Time)"}
+                        </h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          Top products ranked by units sold in the selected period. Select a category above to view branch-wise distribution.
+                        </p>
+                      </div>
+                      <span className="text-xs font-semibold px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 rounded-full border border-indigo-200 dark:border-indigo-800">
+                        {insights.totalFilteredUnits.toLocaleString()} Total Units Sold
+                      </span>
+                    </div>
+
+                    <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-slate-700">
+                      <table className="w-full text-sm text-left">
+                        <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase bg-gray-50 dark:bg-slate-800/50 border-b border-gray-200 dark:border-slate-700">
+                          <tr>
+                            <th className="px-4 py-3 font-medium w-16">Rank</th>
+                            <th className="px-4 py-3 font-medium">Item Description</th>
+                            <th className="px-4 py-3 font-medium">Category</th>
+                            <th className="px-4 py-3 font-medium text-right">Units Sold</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
+                          {insights.topSellingItems.map((prod, idx) => (
+                            <tr
+                              key={prod.name}
+                              onClick={() => {
+                                if (prod.category && insights.categories.includes(prod.category)) {
+                                  setSelectedCategory(prod.category);
+                                }
+                              }}
+                              className="hover:bg-indigo-50/50 dark:hover:bg-slate-800/60 transition-colors cursor-pointer group"
+                              title={`Click to view all store sales for category ${prod.category}`}
+                            >
+                              <td className="px-4 py-3 font-semibold">
+                                <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
+                                  idx === 0 ? 'bg-amber-100 text-amber-800 border border-amber-300' :
+                                  idx === 1 ? 'bg-slate-200 text-slate-800 border border-slate-300' :
+                                  idx === 2 ? 'bg-orange-100 text-orange-800 border border-orange-300' :
+                                  'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400'
+                                }`}>
+                                  {idx + 1}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                {prod.name}
+                              </td>
+                              <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
+                                <span className="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-slate-700 font-medium">
+                                  {prod.category}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-right font-bold text-indigo-600 dark:text-indigo-400">
+                                {prod.qty.toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                          {insights.topSellingItems.length === 0 && (
+                            <tr>
+                              <td colSpan="4" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                                No items found in the selected time frame.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                  <p className="text-gray-600 dark:text-gray-300 font-medium">Select a category from the dropdown</p>
-                  <p className="text-gray-400 dark:text-gray-400 text-sm mt-1">to view a detailed breakdown of sales across all stores.</p>
                 </div>
               )}
             </div>
@@ -823,30 +1134,44 @@ export default function BestSellers({ onBack }) {
 
           {viewMode === "store" && (
             <div>
-              <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+              <div className="flex flex-col xl:flex-row xl:items-center justify-between mb-8 gap-4">
                 <div>
                   <h2 className="text-xl font-medium text-gray-800 dark:text-gray-200">Analyze a Store</h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">See all categories sold by a specific store. Click on a category to see specific items.</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    See all categories sold by a specific store in the selected time frame.
+                  </p>
                 </div>
-                <div className="w-full md:w-80 shrink-0">
-                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Select Store</label>
-                  <select
-                    value={selectedStore}
-                    onChange={handleStoreSelect}
-                    className="w-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] backdrop-saturate-[120%] border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block p-2.5 shadow-sm cursor-pointer"
-                  >
-                    <option value="All">-- Select a Store --</option>
-                    {insights.stores.map(store => (
-                      <option key={store} value={store}>{store}</option>
-                    ))}
-                  </select>
+
+                {/* Time Frame & Store Select Controls side-by-side */}
+                <div className="flex flex-wrap items-center gap-3">
+                  {renderTimeFrameControls()}
+
+                  <div className="w-full sm:w-80">
+                    <select
+                      value={selectedStore}
+                      onChange={handleStoreSelect}
+                      className="w-full bg-white/60 dark:bg-slate-800/60 backdrop-blur-[28px] border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-2 focus:ring-emerald-500 block p-2.5 shadow-sm cursor-pointer"
+                    >
+                      <option value="All">-- Select a Store --</option>
+                      {insights.stores.map(store => (
+                        <option key={store} value={store}>{store}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
 
               {selectedStore !== 'All' ? (
                 <div>
-                  <div className="bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100 dark:border-emerald-900/50 rounded-xl p-4 mb-6 flex justify-between items-center">
-                    <span className="font-semibold text-emerald-900 dark:text-emerald-300">Total Units Sold by {selectedStore}:</span>
+                  <div className="bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100 dark:border-emerald-900/50 rounded-xl p-4 mb-6 flex flex-wrap justify-between items-center gap-2">
+                    <div>
+                      <span className="font-semibold text-emerald-900 dark:text-emerald-300">Total Units Sold by {selectedStore}:</span>
+                      {insights.isFilteredByDate && (
+                        <span className="text-xs text-emerald-600 dark:text-emerald-400 ml-2 font-medium">
+                          ({insights.dateRangeText || `${startDate} to ${endDate}`})
+                        </span>
+                      )}
+                    </div>
                     <span className="text-xl font-bold text-emerald-700 dark:text-emerald-400">
                       {insights.categoryBreakdown.reduce((sum, item) => sum + item.qty, 0).toLocaleString()} Units
                     </span>
@@ -926,7 +1251,7 @@ export default function BestSellers({ onBack }) {
                         {insights.categoryBreakdown.length === 0 && (
                           <tr>
                             <td colSpan="3" className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                              No sales found for this store.
+                              No sales found for this store in the selected time frame.
                             </td>
                           </tr>
                         )}
@@ -935,12 +1260,62 @@ export default function BestSellers({ onBack }) {
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-12 bg-gray-50 dark:bg-slate-800/50 rounded-xl border border-gray-200 dark:border-slate-700 border-dashed">
-                  <div className="icon-store inline-block">
-                    <Store size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+                <div className="space-y-4">
+                  <div className="bg-white/80 dark:bg-slate-800/80 rounded-2xl border border-gray-200 dark:border-slate-700 p-5 shadow-sm">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+                      <div>
+                        <h3 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                          <Store className="text-emerald-600" size={18} />
+                          Top Performing Stores {insights.isFilteredByDate ? `(${insights.dateRangeText || `${startDate} to ${endDate}`})` : "(All Time)"}
+                        </h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          Click on any store to view its category and item sales breakdown in the selected period.
+                        </p>
+                      </div>
+                      <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 rounded-full border border-emerald-200 dark:border-emerald-800">
+                        {insights.stores.length} Active Stores
+                      </span>
+                    </div>
+
+                    <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-slate-700">
+                      <table className="w-full text-sm text-left">
+                        <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase bg-gray-50 dark:bg-slate-800/50 border-b border-gray-200 dark:border-slate-700">
+                          <tr>
+                            <th className="px-4 py-3 font-medium w-16">Rank</th>
+                            <th className="px-4 py-3 font-medium">Store Name</th>
+                            <th className="px-4 py-3 font-medium text-right">Total Units Sold</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
+                          {insights.topStoresList.map((st, idx) => (
+                            <tr
+                              key={st.store}
+                              onClick={() => setSelectedStore(st.store)}
+                              className="hover:bg-emerald-50/50 dark:hover:bg-slate-800/60 transition-colors cursor-pointer group"
+                              title={`Click to view category breakdown for ${st.store}`}
+                            >
+                              <td className="px-4 py-3 font-semibold">
+                                <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
+                                  idx === 0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
+                                  idx === 1 ? 'bg-slate-200 text-slate-800 border border-slate-300' :
+                                  idx === 2 ? 'bg-teal-100 text-teal-800 border border-teal-300' :
+                                  'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400'
+                                }`}>
+                                  {idx + 1}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 font-medium text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                {st.store}
+                              </td>
+                              <td className="px-4 py-3 text-right font-bold text-emerald-600 dark:text-emerald-400">
+                                {st.qty.toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                  <p className="text-gray-600 dark:text-gray-300 font-medium">Select a store from the dropdown</p>
-                  <p className="text-gray-400 dark:text-gray-400 text-sm mt-1">to view a detailed breakdown of all categories sold by them.</p>
                 </div>
               )}
             </div>
