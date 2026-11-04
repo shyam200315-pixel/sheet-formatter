@@ -38,14 +38,8 @@ import {
 } from "../helpers";
 
 export default function BestSellers({ onBack }) {
-  // Password Protection ('shyam')
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    try {
-      return sessionStorage.getItem("bs_auth") === "true";
-    } catch (_) {
-      return false;
-    }
-  });
+  // Password Protection ('shyam') - Always locked on page refresh
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
 
   const [jsonData, setJsonData] = useState(null);
@@ -115,9 +109,7 @@ export default function BestSellers({ onBack }) {
     if (e) e.preventDefault();
     if (password.trim().toLowerCase() === "shyam") {
       setIsAuthenticated(true);
-      try {
-        sessionStorage.setItem("bs_auth", "true");
-      } catch (_) {}
+      
       toast.success("Access Granted");
     } else {
       toast.error("Incorrect Password");
@@ -132,6 +124,13 @@ export default function BestSellers({ onBack }) {
     } catch (_) {}
     toast("Logged out of Best Sellers", { icon: "🔒" });
   };
+
+  // Always ensure session storage is cleared so page refresh locks Best Sellers
+  useEffect(() => {
+    try {
+      sessionStorage.removeItem("bs_auth");
+    } catch (_) {}
+  }, []);
 
   // 1. Initial Load: Local-First (0ms IndexedDB) + Cloud Verification (Only after Authentication)
   useEffect(() => {
@@ -592,9 +591,7 @@ export default function BestSellers({ onBack }) {
                   setPassword(val);
                   if (val.trim().toLowerCase() === "shyam") {
                     setIsAuthenticated(true);
-                    try {
-                      sessionStorage.setItem("bs_auth", "true");
-                    } catch (_) {}
+                    
                     toast.success("Access Granted");
                   }
                 }}
