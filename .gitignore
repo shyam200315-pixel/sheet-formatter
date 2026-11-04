@@ -36,3 +36,4 @@ dist-ssr
 output.json
 test_*.cjs
 .neon
+scratch/
