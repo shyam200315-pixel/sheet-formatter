@@ -345,7 +345,8 @@ import {
   clearDeadStockFromCloud,
   deleteDeadStockFileFromCloud,
   deleteDeadStockDateFromCloud,
-  subscribeToDeadStockUpdates
+  subscribeToDeadStockUpdates,
+  getCloudStorageStats
 } from "./firebaseConfig";
 export { 
   deleteFileFromCloud, 
@@ -357,7 +358,8 @@ export {
   clearDeadStockFromCloud,
   deleteDeadStockFileFromCloud,
   deleteDeadStockDateFromCloud,
-  subscribeToDeadStockUpdates
+  subscribeToDeadStockUpdates,
+  getCloudStorageStats
 };
 
 /**

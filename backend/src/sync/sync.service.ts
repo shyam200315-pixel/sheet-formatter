@@ -522,4 +522,152 @@ export class SyncService implements OnApplicationBootstrap {
     this.updates$.next({ type: 'deadstock_update' });
     return { success: true, deletedCount: result.affected || 0 };
   }
+
+  async getStorageStats() {
+    let totalBytes = 0;
+    let totalPretty = '0 MB';
+    const tableMap: Record<string, { bytes: number; pretty: string; rowCount: number }> = {};
+
+    try {
+      const dbSizeRes = await this.syncRepository.query(
+        'SELECT pg_database_size(current_database()) as bytes, pg_size_pretty(pg_database_size(current_database())) as pretty'
+      );
+      if (dbSizeRes && dbSizeRes[0]) {
+        totalBytes = Number(dbSizeRes[0].bytes || 0);
+        totalPretty = String(dbSizeRes[0].pretty || '0 MB');
+      }
+
+      const tableSizeRes = await this.syncRepository.query(`
+        SELECT 
+          relname as table_name,
+          n_live_tup as row_count,
+          pg_total_relation_size(relid) as bytes,
+          pg_size_pretty(pg_total_relation_size(relid)) as pretty_size
+        FROM pg_stat_user_tables
+        ORDER BY pg_total_relation_size(relid) DESC;
+      `);
+
+      if (Array.isArray(tableSizeRes)) {
+        for (const t of tableSizeRes) {
+          tableMap[t.table_name] = {
+            bytes: Number(t.bytes || 0),
+            pretty: String(t.pretty_size || '0 KB'),
+            rowCount: Number(t.row_count || 0)
+          };
+        }
+      }
+    } catch (e: any) {
+      console.warn('Storage size query error:', e?.message);
+    }
+
+    const quotaBytes = 512 * 1024 * 1024; // 512 MB Free Tier limit
+    const freeBytes = Math.max(0, quotaBytes - totalBytes);
+    const freePretty = `${(freeBytes / (1024 * 1024)).toFixed(1)} MB`;
+    const usedPercent = Number(((totalBytes / quotaBytes) * 100).toFixed(2));
+
+    // Get files for Historical Sales
+    const salesCount = await this.syncRepository.count({ where: { syncGroup: 'historicalData' } });
+    const salesFilesRaw = await this.syncRepository.createQueryBuilder('sr')
+      .where('sr.syncGroup = :id', { id: 'historicalData' })
+      .select('sr.fileId', 'fileId')
+      .addSelect('sr.fileName', 'fileName')
+      .addSelect('COUNT(*)', 'count')
+      .addSelect('MIN(sr.date)', 'minDate')
+      .addSelect('MAX(sr.date)', 'maxDate')
+      .addSelect('MAX(sr.createdAt)', 'uploadedAt')
+      .groupBy('sr.fileId')
+      .addGroupBy('sr.fileName')
+      .orderBy('MAX(sr.createdAt)', 'DESC')
+      .getRawMany();
+
+    // Get files for Dead Stock
+    const deadStockCount = await this.deadStockRepository.count();
+    const deadStockFilesRaw = await this.deadStockRepository.createQueryBuilder('ds')
+      .select('ds.fileId', 'fileId')
+      .addSelect('ds.fileName', 'fileName')
+      .addSelect('COUNT(*)', 'count')
+      .addSelect('MIN(ds.date)', 'minDate')
+      .addSelect('MAX(ds.date)', 'maxDate')
+      .addSelect('MAX(ds.createdAt)', 'uploadedAt')
+      .groupBy('ds.fileId')
+      .addGroupBy('ds.fileName')
+      .orderBy('MAX(ds.createdAt)', 'DESC')
+      .getRawMany();
+
+    // Targets count
+    const targetCount = await this.targetRepository.count();
+
+    const histBytes = tableMap['sales_record']?.bytes || (salesCount * 250);
+    const dsBytes = tableMap['dead_stock_record']?.bytes || (deadStockCount * 300);
+    const targetBytes = tableMap['target_settings']?.bytes || (targetCount * 1024);
+    const systemBytes = Math.max(0, totalBytes - (histBytes + dsBytes + targetBytes));
+
+    return {
+      success: true,
+      provider: 'Neon PostgreSQL Serverless',
+      quotaBytes,
+      quotaPretty: '512 MB',
+      usedBytes: totalBytes,
+      usedPretty: totalPretty,
+      freeBytes,
+      freePretty,
+      usedPercent,
+      systemOverhead: {
+        bytes: systemBytes,
+        pretty: `${(systemBytes / (1024 * 1024)).toFixed(1)} MB`,
+        description: 'PostgreSQL Catalog, Indexes & System Schema Overhead'
+      },
+      features: [
+        {
+          id: 'historical-sales',
+          title: 'Historical Sales Database',
+          description: 'Bill-wise sales records for Dashboard analytics and Daily Sales Validator',
+          table: 'sales_record',
+          bytes: histBytes,
+          pretty: tableMap['sales_record']?.pretty || `${(histBytes / (1024 * 1024)).toFixed(1)} MB`,
+          rowCount: salesCount,
+          percent: totalBytes > 0 ? Number(((histBytes / totalBytes) * 100).toFixed(1)) : 0,
+          color: '#3b82f6', // Blue
+          files: salesFilesRaw.map(f => ({
+            fileId: f.fileId,
+            fileName: f.fileName || 'Uploaded Sales File',
+            count: Number(f.count || 0),
+            minDate: f.minDate,
+            maxDate: f.maxDate,
+            uploadedAt: f.uploadedAt
+          }))
+        },
+        {
+          id: 'dead-stock-bestsellers',
+          title: 'Dead Stock & Best Sellers Database',
+          description: 'Item-wise sales data for Best Sellers ranking & Dead Stock Analyzer audits',
+          table: 'dead_stock_record',
+          bytes: dsBytes,
+          pretty: tableMap['dead_stock_record']?.pretty || `${(dsBytes / (1024 * 1024)).toFixed(1)} MB`,
+          rowCount: deadStockCount,
+          percent: totalBytes > 0 ? Number(((dsBytes / totalBytes) * 100).toFixed(1)) : 0,
+          color: '#a855f7', // Purple
+          files: deadStockFilesRaw.map(f => ({
+            fileId: f.fileId,
+            fileName: f.fileName || 'Uploaded Item File',
+            count: Number(f.count || 0),
+            minDate: f.minDate,
+            maxDate: f.maxDate,
+            uploadedAt: f.uploadedAt
+          }))
+        },
+        {
+          id: 'store-targets',
+          title: 'Store Commitments & Targets',
+          description: 'Monthly store targets and commitments for MTD achievement tracking',
+          table: 'target_settings',
+          bytes: targetBytes,
+          pretty: tableMap['target_settings']?.pretty || `${(targetBytes / 1024).toFixed(0)} KB`,
+          rowCount: targetCount,
+          percent: totalBytes > 0 ? Number(((targetBytes / totalBytes) * 100).toFixed(1)) : 0,
+          color: '#f59e0b' // Amber
+        }
+      ]
+    };
+  }
 }

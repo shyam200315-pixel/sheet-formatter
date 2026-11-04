@@ -10,6 +10,7 @@ import QuotationGenerator from "./components/QuotationGenerator";
 import StockAnalyzer from "./components/StockAnalyzer";
 import InwardTracker from "./components/InwardTracker";
 import BestSellers from "./components/BestSellers";
+import StorageManager from "./components/StorageManager";
 import MacDock from "./components/MacDock";
 import { motion, AnimatePresence } from "framer-motion";
 import SpaceBackground from "./components/SpaceBackground";
@@ -84,6 +85,15 @@ const TOOLS = [
     color: "bg-rose-100",
     borderColor: "border-rose-200",
     hoverBorder: "hover:border-rose-400"
+  },
+  {
+    id: "storage-manager",
+    title: "Cloud Storage Manager",
+    description: "Live Neon database telemetry, table size metrics, and space cleanup center.",
+    icon: <Database className="w-8 h-8 text-indigo-600" />,
+    color: "bg-indigo-100",
+    borderColor: "border-indigo-200",
+    hoverBorder: "hover:border-indigo-400"
   },
   {
     id: "best-sellers",
@@ -226,6 +236,7 @@ export default function App() {
       'institutional': 'Institutional Checker',
       'validator': 'Daily Sales Report',
       'dead-stock': 'Dead Stock Analyzer',
+      'storage-manager': 'Cloud Storage Manager',
       'best-sellers': 'Best Sellers Analyzer',
       'orders': 'Order Processing',
       'generator': 'Requirement Generator',
@@ -248,7 +259,7 @@ export default function App() {
 
         const dockIds = [
           'home', 'store-cash', 'institutional', 'validator', 
-          'dead-stock', 'best-sellers', 'orders', 'generator', 
+          'dead-stock', 'storage-manager', 'best-sellers', 'orders', 'generator', 
           'stock', 'inward-tracker', 'mrp', 'quotation'
         ];
 
@@ -682,6 +693,18 @@ export default function App() {
             )}
           </div>
         
+            {/* Cloud Storage Quick Button */}
+            <div className="flex items-center ml-auto mr-2">
+              <button
+                onClick={() => setActiveTab("storage-manager")}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded-xl text-xs font-semibold border border-indigo-200/80 dark:border-indigo-800 transition-all cursor-pointer shadow-sm"
+                title="Open Cloud Storage Manager"
+              >
+                <Database size={13} />
+                <span className="hidden sm:inline">Storage Manager</span>
+              </button>
+            </div>
+
           {activeTab === "validator" && !reportData && (
             <div className="hidden md:flex items-center gap-6">
               <div className="flex flex-col">
@@ -884,6 +907,13 @@ export default function App() {
           {visitedTabs.has("best-sellers") && (
             <div className={activeTab === "best-sellers" ? "w-full block" : "hidden"}>
               <BestSellers onBack={() => setActiveTab("home")} />
+            </div>
+          )}
+
+          {/* Cloud Storage Manager */}
+          {visitedTabs.has("storage-manager") && (
+            <div className={activeTab === "storage-manager" ? "w-full block" : "hidden"}>
+              <StorageManager onBack={() => setActiveTab("home")} />
             </div>
           )}
 

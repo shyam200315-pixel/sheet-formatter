@@ -12,12 +12,14 @@ import {
   AlertTriangle,
   Lock,
   Wallet,
-  FileCheck
+  FileCheck,
+  Database
 } from 'lucide-react';
 
 const DOCK_ITEMS = [
   { id: 'home', label: 'Home', icon: Home, color: 'text-blue-500' },
   { id: 'validator', label: 'Daily Sales', icon: Calculator, color: 'text-sky-500' },
+  { id: 'storage-manager', label: 'Cloud Storage', icon: Database, color: 'text-indigo-600' },
   { id: 'wooqer-reports', label: 'Wooqer Reports', icon: FileCheck, color: 'text-blue-600' },
   { id: 'store-cash', label: 'Store Cash', icon: Wallet, color: 'text-emerald-500' },
   { id: 'institutional', label: 'Institutional', icon: Lock, color: 'text-amber-500' },

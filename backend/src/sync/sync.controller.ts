@@ -88,6 +88,12 @@ export class SyncController {
     return this.syncService.deleteDeadStockByDate(date);
   }
 
+  
+  @Get('storage')
+  async getStorageStats() {
+    return this.syncService.getStorageStats();
+  }
+
   @Sse('updates')
   streamUpdates(): Observable<MessageEvent> {
     return this.syncService.updates$.asObservable().pipe(

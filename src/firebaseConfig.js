@@ -397,6 +397,19 @@ export async function deleteDeadStockDateFromCloud(dateStr) {
   }
 }
 
+export async function getCloudStorageStats() {
+  try {
+    const response = await fetch(`${API_BASE}/storage`);
+    if (!response.ok) {
+      throw new Error(`Storage API error: HTTP ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Storage Stats Fetch Error:", error);
+    throw error;
+  }
+}
+
 // Dummy exports to prevent crashes if other files imported Firebase specific stuff
 export const db = null;
 export function getFirebaseConfig() { return null; }
