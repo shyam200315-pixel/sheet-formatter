@@ -16,7 +16,8 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
-  Sparkles
+  Sparkles,
+  Lock
 } from "lucide-react";
 import toast from "react-hot-toast";
 import {
@@ -32,6 +33,10 @@ import {
 } from "../helpers";
 
 export default function StorageManager({ onBack }) {
+  // Password Protection ('shyam') - Always locked on page refresh
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState("");
+
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -69,9 +74,27 @@ export default function StorageManager({ onBack }) {
     }
   };
 
+  const handleLogin = (e) => {
+    if (e) e.preventDefault();
+    if (password.trim().toLowerCase() === "shyam") {
+      setIsAuthenticated(true);
+      toast.success("Storage Manager Unlocked");
+    } else {
+      toast.error("Incorrect Password");
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setPassword("");
+    toast("Storage Manager Locked", { icon: "🔒" });
+  };
+
   useEffect(() => {
-    fetchStats();
-  }, []);
+    if (isAuthenticated) {
+      fetchStats();
+    }
+  }, [isAuthenticated]);
 
   const handleOpenDeleteModal = (config) => {
     setConfirmModal({
@@ -143,6 +166,66 @@ export default function StorageManager({ onBack }) {
     return formatDateDisplay(d);
   };
 
+  // -------------------------------------------------------------
+  // Password Lock Screen (Password: 'shyam')
+  // -------------------------------------------------------------
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh] px-4">
+        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl p-8 rounded-3xl border border-white/80 dark:border-slate-800 shadow-2xl max-w-md w-full relative">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="absolute top-6 left-6 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 transition-colors cursor-pointer"
+              title="Go Back"
+            >
+              <ArrowLeft size={20} />
+            </button>
+          )}
+
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-950/80 dark:to-purple-950/80 rounded-2xl flex items-center justify-center shadow-inner border border-indigo-200 dark:border-indigo-800">
+              <Lock className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+            </div>
+          </div>
+
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-2">
+            Restricted Access
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-8">
+            Please enter the password to view and manage <strong>Cloud Storage</strong>.
+          </p>
+
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setPassword(val);
+                  if (val.trim().toLowerCase() === "shyam") {
+                    setIsAuthenticated(true);
+                    toast.success("Storage Manager Unlocked");
+                  }
+                }}
+                placeholder="Enter password..."
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/60 dark:bg-slate-800/60 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-white shadow-sm"
+                autoFocus
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-semibold shadow-lg shadow-indigo-500/25 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+            >
+              Unlock Storage Manager
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading && !stats) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] py-16">
@@ -211,6 +294,14 @@ export default function StorageManager({ onBack }) {
           >
             <RefreshCw size={14} className={isRefreshing ? "animate-spin text-indigo-600" : "text-gray-500"} />
             <span>{isRefreshing ? "Updating Stats..." : "Refresh Live Stats"}</span>
+          </button>
+
+          <button
+            onClick={handleLogout}
+            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Lock Storage Manager"
+          >
+            <Lock size={15} />
           </button>
         </div>
       </div>
