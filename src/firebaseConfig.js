@@ -75,6 +75,7 @@ export function subscribeToCloudUpdates(onUpdate) {
           try { listener(parsedData.data); } catch (err) { console.warn("DeadStock listener error:", err); }
         });
       } else if (parsedData.type === 'loyalty_update') {
+        cachedLoyaltyData = null;
         loyaltyListeners.forEach(listener => {
           try { listener(parsedData.data); } catch (err) { console.warn("Loyalty listener error:", err); }
         });
@@ -410,10 +411,17 @@ export async function deleteDeadStockDateFromCloud(dateStr) {
 }
 
 // =========================================================================
-// TABLE 3: LOYALTY & CUSTOMER AUDIT CLOUD API
+// TABLE 3: LOYALTY & CUSTOMER AUDIT CLOUD API (WITH IN-MEMORY CACHE)
 // =========================================================================
 
+let cachedLoyaltyData = null;
+
+export function invalidateLoyaltyCache() {
+  cachedLoyaltyData = null;
+}
+
 export async function saveLoyaltyToCloud(data, onProgress = null, appendMode = false) {
+  cachedLoyaltyData = null;
   try {
     if (!data || data.length === 0) {
       if (!appendMode) await clearLoyaltyFromCloud();
@@ -453,7 +461,11 @@ export async function saveLoyaltyToCloud(data, onProgress = null, appendMode = f
   }
 }
 
-export async function loadLoyaltyFromCloud() {
+export async function loadLoyaltyFromCloud(forceRefresh = false) {
+  if (!forceRefresh && cachedLoyaltyData && cachedLoyaltyData.length > 0) {
+    return cachedLoyaltyData;
+  }
+
   try {
     const response = await fetch(`${API_BASE}/loyalty/download`, {
       method: 'GET',
@@ -466,10 +478,12 @@ export async function loadLoyaltyFromCloud() {
 
     if (response.status === 404) return [];
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.json();
+    const data = await response.json();
+    cachedLoyaltyData = data;
+    return data;
   } catch (e) {
     console.warn("Loyalty Cloud Load Warning:", e.message);
-    return [];
+    return cachedLoyaltyData || [];
   }
 }
 
@@ -488,6 +502,7 @@ export async function getLoyaltyCloudMetadata() {
 }
 
 export async function clearLoyaltyFromCloud() {
+  cachedLoyaltyData = null;
   try {
     const response = await fetch(`${API_BASE}/loyalty/clear`, {
       method: 'DELETE'
@@ -500,6 +515,7 @@ export async function clearLoyaltyFromCloud() {
 }
 
 export async function deleteLoyaltyFileFromCloud(fileId) {
+  cachedLoyaltyData = null;
   try {
     const response = await fetch(`${API_BASE}/loyalty/file/${encodeURIComponent(fileId)}`, {
       method: 'DELETE'
@@ -513,6 +529,7 @@ export async function deleteLoyaltyFileFromCloud(fileId) {
 }
 
 export async function deleteLoyaltyDateFromCloud(dateStr) {
+  cachedLoyaltyData = null;
   try {
     const response = await fetch(`${API_BASE}/loyalty/date/${encodeURIComponent(dateStr)}`, {
       method: 'DELETE'

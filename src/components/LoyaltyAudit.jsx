@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useDeferredValue } from "react";
 import {
   ShieldAlert,
   Search,
@@ -66,12 +66,15 @@ export default function LoyaltyAudit({ onBack = null }) {
 
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
+  const deferredSearch = useDeferredValue(searchQuery);
   const [selectedState, setSelectedState] = useState("ALL");
   const [selectedStore, setSelectedStore] = useState("ALL");
   const [selectedSalesman, setSelectedSalesman] = useState("ALL");
-  const [riskFilter, setRiskFilter] = useState("ALL"); // 'ALL' | 'HIGH' | 'WATCHLIST' | 'REDEEMED' | 'NORMAL'
+  const [riskFilter, setRiskFilter] = useState("REPEAT"); // Default 'REPEAT' (2+ bills or points) for lightning fast 0ms render!
   const [sortBy, setSortBy] = useState("billCount"); // 'billCount' | 'totalAmount' | 'pointsRedeemed' | 'recent'
 
+  // Pagination for leaderboard view (50 items per page prevents browser lag)
+  const [leaderboardPage, setLeaderboardPage] = useState(1);
   // Pagination for all-bills view
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 50;
@@ -84,14 +87,14 @@ export default function LoyaltyAudit({ onBack = null }) {
   const [resetPassword, setResetPassword] = useState("");
   const [isResetting, setIsResetting] = useState(false);
 
-  // 1. Fetch data from Cloud
+  // 1. Fetch data from Cloud (Uses in-memory cache on subsequent tab switches)
   const fetchData = async (isManual = false) => {
     if (isManual) setIsRefreshing(true);
     else setIsLoading(true);
 
     try {
       const [records, meta] = await Promise.all([
-        loadLoyaltyFromCloud(),
+        loadLoyaltyFromCloud(isManual),
         getLoyaltyCloudMetadata()
       ]);
       setBills(records || []);
@@ -135,9 +138,9 @@ export default function LoyaltyAudit({ onBack = null }) {
     };
   }, [bills]);
 
-  // 3. Filter raw bills based on search & filter criteria
+  // 3. Filter raw bills based on search & filter criteria (Uses deferredSearch for 120fps input response)
   const filteredBills = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+    const q = deferredSearch.trim().toLowerCase();
 
     return bills.filter((bill) => {
       // State filter (MH vs MP from store code prefix)
@@ -173,7 +176,7 @@ export default function LoyaltyAudit({ onBack = null }) {
 
       return true;
     });
-  }, [bills, searchQuery, selectedState, selectedStore, selectedSalesman]);
+  }, [bills, deferredSearch, selectedState, selectedStore, selectedSalesman]);
 
   // 4. Aggregate bills by Customer (Leaderboard view & Fraud Analysis)
   const customerLeaderboard = useMemo(() => {
@@ -240,7 +243,9 @@ export default function LoyaltyAudit({ onBack = null }) {
 
     // Apply Risk Filter
     let filteredList = list;
-    if (riskFilter === "HIGH") {
+    if (riskFilter === "REPEAT") {
+      filteredList = list.filter((c) => c.billCount >= 2 || c.isDummy || c.pointsRedeemed > 0);
+    } else if (riskFilter === "HIGH") {
       filteredList = list.filter((c) => c.riskLevel === "HIGH");
     } else if (riskFilter === "WATCHLIST") {
       filteredList = list.filter((c) => c.riskLevel === "WATCHLIST");
@@ -261,6 +266,14 @@ export default function LoyaltyAudit({ onBack = null }) {
 
     return filteredList;
   }, [filteredBills, riskFilter, sortBy]);
+
+  // Paginated Leaderboard Slice (Limits DOM to 50 items for smooth 60fps rendering)
+  const paginatedLeaderboard = useMemo(() => {
+    const start = (leaderboardPage - 1) * pageSize;
+    return customerLeaderboard.slice(start, start + pageSize);
+  }, [customerLeaderboard, leaderboardPage, pageSize]);
+
+  const totalLeaderboardPages = Math.ceil(customerLeaderboard.length / pageSize) || 1;
 
   // 5. Global Metrics & Suspicion Telemetry
   const metrics = useMemo(() => {
@@ -641,12 +654,20 @@ export default function LoyaltyAudit({ onBack = null }) {
               type="text"
               placeholder="Search Mobile, Customer, Bill No, Salesman..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setLeaderboardPage(1);
+                setCurrentPage(1);
+              }}
               className="w-full pl-9 pr-3 py-2 text-xs bg-gray-50 dark:bg-slate-800/80 border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 dark:text-white"
             />
             {searchQuery && (
               <button
-                onClick={() => setSearchQuery("")}
+                onClick={() => {
+                  setSearchQuery("");
+                  setLeaderboardPage(1);
+                  setCurrentPage(1);
+                }}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
                 <X size={13} />
@@ -658,7 +679,11 @@ export default function LoyaltyAudit({ onBack = null }) {
           <div>
             <select
               value={selectedState}
-              onChange={(e) => setSelectedState(e.target.value)}
+              onChange={(e) => {
+                setSelectedState(e.target.value);
+                setLeaderboardPage(1);
+                setCurrentPage(1);
+              }}
               className="w-full px-2.5 py-2 text-xs bg-gray-50 dark:bg-slate-800/80 border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 dark:text-white font-medium"
             >
               <option value="ALL">All States (MH & MP)</option>
@@ -671,7 +696,11 @@ export default function LoyaltyAudit({ onBack = null }) {
           <div>
             <select
               value={selectedStore}
-              onChange={(e) => setSelectedStore(e.target.value)}
+              onChange={(e) => {
+                setSelectedStore(e.target.value);
+                setLeaderboardPage(1);
+                setCurrentPage(1);
+              }}
               className="w-full px-2.5 py-2 text-xs bg-gray-50 dark:bg-slate-800/80 border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 dark:text-white font-medium truncate"
             >
               <option value="ALL">All Stores ({storeOptions.length})</option>
@@ -687,7 +716,11 @@ export default function LoyaltyAudit({ onBack = null }) {
           <div>
             <select
               value={selectedSalesman}
-              onChange={(e) => setSelectedSalesman(e.target.value)}
+              onChange={(e) => {
+                setSelectedSalesman(e.target.value);
+                setLeaderboardPage(1);
+                setCurrentPage(1);
+              }}
               className="w-full px-2.5 py-2 text-xs bg-gray-50 dark:bg-slate-800/80 border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 dark:text-white font-medium truncate"
             >
               <option value="ALL">All Salesmen ({salesmanOptions.length})</option>
@@ -703,14 +736,17 @@ export default function LoyaltyAudit({ onBack = null }) {
           <div>
             <select
               value={riskFilter}
-              onChange={(e) => setRiskFilter(e.target.value)}
+              onChange={(e) => {
+                setRiskFilter(e.target.value);
+                setLeaderboardPage(1);
+              }}
               className="w-full px-2.5 py-2 text-xs bg-gray-50 dark:bg-slate-800/80 border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 dark:text-white font-semibold"
             >
-              <option value="ALL">All Risk Levels</option>
+              <option value="REPEAT">⚡ Repeat & Suspicious (2+ Bills / Points)</option>
               <option value="HIGH">🚨 High Risk (5+ Bills / Dummy)</option>
               <option value="WATCHLIST">⚠️ Watchlist (3-4 Bills)</option>
               <option value="REDEEMED">🎁 Points Redeemed Only</option>
-              <option value="NORMAL">Normal Customers (1-2 Bills)</option>
+              <option value="ALL">All Customers (7,500+ Total)</option>
             </select>
           </div>
         </div>
@@ -772,7 +808,7 @@ export default function LoyaltyAudit({ onBack = null }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
-                {customerLeaderboard.map((cust) => {
+                {paginatedLeaderboard.map((cust) => {
                   const isHigh = cust.riskLevel === "HIGH";
                   const isWatch = cust.riskLevel === "WATCHLIST";
 
@@ -925,6 +961,34 @@ export default function LoyaltyAudit({ onBack = null }) {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Bar for Leaderboard */}
+          {totalLeaderboardPages > 1 && (
+            <div className="p-4 border-t border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
+              <div>
+                Showing {(leaderboardPage - 1) * pageSize + 1} to {Math.min(leaderboardPage * pageSize, customerLeaderboard.length)} of {customerLeaderboard.length.toLocaleString()} customers (Page {leaderboardPage} of {totalLeaderboardPages})
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setLeaderboardPage((p) => Math.max(1, p - 1))}
+                  disabled={leaderboardPage === 1}
+                  className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-700 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer font-medium"
+                >
+                  Previous
+                </button>
+                <span className="px-2 text-gray-700 dark:text-gray-300 font-bold">
+                  {leaderboardPage} / {totalLeaderboardPages}
+                </span>
+                <button
+                  onClick={() => setLeaderboardPage((p) => Math.min(totalLeaderboardPages, p + 1))}
+                  disabled={leaderboardPage === totalLeaderboardPages}
+                  className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-700 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer font-medium"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         /* ========================================================================= */
