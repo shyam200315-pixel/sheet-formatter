@@ -307,6 +307,32 @@ export default function LoyaltyAudit({ onBack = null }) {
 
   const totalLeaderboardPages = Math.ceil(customerLeaderboard.length / pageSize) || 1;
 
+  // Compute Active Date Range (Uses bills array directly so it NEVER vanishes even if metadata is slow)
+  const dateRangeDisplay = useMemo(() => {
+    let minD = null;
+    let maxD = null;
+
+    if (bills && bills.length > 0) {
+      for (let i = 0; i < bills.length; i++) {
+        const d = bills[i].billDate;
+        if (d) {
+          if (!minD || d < minD) minD = d;
+          if (!maxD || d > maxD) maxD = d;
+        }
+      }
+    }
+
+    if (!minD && metadata?.minDate) minD = metadata.minDate;
+    if (!maxD && metadata?.maxDate) maxD = metadata.maxDate;
+
+    if (minD && maxD) {
+      return `(${formatDateDisplay(minD)} to ${formatDateDisplay(maxD)})`;
+    } else if (minD) {
+      return `(${formatDateDisplay(minD)})`;
+    }
+    return null;
+  }, [bills, metadata]);
+
   // 5. Global Metrics & Suspicion Telemetry
   const metrics = useMemo(() => {
     let totalBillsCount = filteredBills.length;
@@ -665,9 +691,9 @@ export default function LoyaltyAudit({ onBack = null }) {
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span>
               Cloud Database Active: <strong>{bills.length.toLocaleString()}</strong> bills recorded
-              {metadata?.minDate && metadata?.maxDate && (
-                <span className="ml-1 text-gray-400">
-                  ({formatDateDisplay(metadata.minDate)} to {formatDateDisplay(metadata.maxDate)})
+              {dateRangeDisplay && (
+                <span className="ml-1 text-gray-400 font-medium">
+                  {dateRangeDisplay}
                 </span>
               )}
             </span>
