@@ -743,14 +743,19 @@ export async function appendDeadStockSalesData(newData, fileName = null, onProgr
     }
 
     const mergedData = [...existingData, ...taggedData];
-    // 1. Instant local IndexedDB save (0ms speed)
-    await saveDeadStockSalesData(mergedData, false);
 
-    // 2. Sync appended chunk to Cloud Table 2 for all devices
+    // 1. Sync appended chunk to Cloud Table 2 (Source of Truth for all devices)
     try {
       await saveDeadStockToCloud(taggedData, onProgress, true);
     } catch (cloudErr) {
-      console.warn("DeadStock cloud append warning (persisted locally):", cloudErr);
+      console.warn("DeadStock cloud append warning:", cloudErr);
+    }
+
+    // 2. Instant local IndexedDB save (0ms speed local cache)
+    try {
+      await saveDeadStockSalesData(mergedData, false);
+    } catch (localDbErr) {
+      console.warn("DeadStock local cache save warning:", localDbErr);
     }
 
     return true;
