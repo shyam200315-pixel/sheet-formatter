@@ -436,9 +436,6 @@ export class SyncService implements OnApplicationBootstrap {
   }
 
   async getDeadStockData() {
-    const cached = await this.cacheManager.get('deadstock_data');
-    if (cached) return cached;
-
     const records = await this.deadStockRepository.createQueryBuilder('ds')
       .orderBy('ds.date', 'ASC')
       .addOrderBy('ds.createdAt', 'ASC')
@@ -459,7 +456,6 @@ export class SyncService implements OnApplicationBootstrap {
       "_uploadedAt": r.createdAt
     }));
 
-    await this.cacheManager.set('deadstock_data', mapped, 0);
     return mapped;
   }
 
