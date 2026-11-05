@@ -241,9 +241,13 @@ export default function LoyaltyAudit({ onBack = null }) {
       };
     });
 
-    // Apply Risk Filter
+    // Apply Risk / Amount Filter
     let filteredList = list;
-    if (riskFilter === "REPEAT") {
+    if (riskFilter === "HIGH_AMOUNT") {
+      filteredList = list.filter((c) => c.totalAmount >= 50000);
+    } else if (riskFilter === "HIGH_AMOUNT_20K") {
+      filteredList = list.filter((c) => c.totalAmount >= 20000);
+    } else if (riskFilter === "REPEAT") {
       filteredList = list.filter((c) => c.billCount >= 2 || c.isDummy || c.pointsRedeemed > 0);
     } else if (riskFilter === "HIGH") {
       filteredList = list.filter((c) => c.riskLevel === "HIGH");
@@ -257,8 +261,8 @@ export default function LoyaltyAudit({ onBack = null }) {
 
     // Sort
     filteredList.sort((a, b) => {
-      if (sortBy === "billCount") return b.billCount - a.billCount;
       if (sortBy === "totalAmount") return b.totalAmount - a.totalAmount;
+      if (sortBy === "billCount") return b.billCount - a.billCount;
       if (sortBy === "pointsRedeemed") return b.pointsRedeemed - a.pointsRedeemed;
       if (sortBy === "recent") return (b.maxDate || "").localeCompare(a.maxDate || "");
       return 0;
@@ -458,13 +462,26 @@ export default function LoyaltyAudit({ onBack = null }) {
     }).format(amount || 0);
   };
 
+  // Sliced & sorted bills for All-Bills view
+  const sortedBills = useMemo(() => {
+    const list = [...filteredBills];
+    if (sortBy === "totalAmount") {
+      list.sort((a, b) => Number(b.billAmount || 0) - Number(a.billAmount || 0));
+    } else if (sortBy === "pointsRedeemed") {
+      list.sort((a, b) => Number(b.pointsRedeemed || 0) - Number(a.pointsRedeemed || 0));
+    } else {
+      list.sort((a, b) => (b.billDate || "").localeCompare(a.billDate || ""));
+    }
+    return list;
+  }, [filteredBills, sortBy]);
+
   // Pagination slice for All-Bills view
   const paginatedBills = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
-    return filteredBills.slice(start, start + pageSize);
-  }, [filteredBills, currentPage]);
+    return sortedBills.slice(start, start + pageSize);
+  }, [sortedBills, currentPage]);
 
-  const totalPages = Math.ceil(filteredBills.length / pageSize) || 1;
+  const totalPages = Math.ceil(sortedBills.length / pageSize) || 1;
 
   return (
     <div className="w-full space-y-6 pb-20">
@@ -640,13 +657,48 @@ export default function LoyaltyAudit({ onBack = null }) {
             </button>
           </div>
 
+          {/* Quick Sort Pills */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[11px] font-bold text-gray-400 dark:text-gray-500 mr-1">Sort:</span>
+            <button
+              onClick={() => { setSortBy("totalAmount"); setLeaderboardPage(1); }}
+              className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1 ${
+                sortBy === "totalAmount"
+                  ? "bg-pink-600 text-white shadow-md shadow-pink-600/25 ring-2 ring-pink-400"
+                  : "bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700"
+              }`}
+            >
+              <span>💰 Highest Amount</span>
+            </button>
+            <button
+              onClick={() => { setSortBy("billCount"); setLeaderboardPage(1); }}
+              className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1 ${
+                sortBy === "billCount"
+                  ? "bg-pink-600 text-white shadow-md shadow-pink-600/25 ring-2 ring-pink-400"
+                  : "bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700"
+              }`}
+            >
+              <span>🧾 Most Bills</span>
+            </button>
+            <button
+              onClick={() => { setSortBy("pointsRedeemed"); setLeaderboardPage(1); }}
+              className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1 ${
+                sortBy === "pointsRedeemed"
+                  ? "bg-pink-600 text-white shadow-md shadow-pink-600/25 ring-2 ring-pink-400"
+                  : "bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700"
+              }`}
+            >
+              <span>🎁 Points</span>
+            </button>
+          </div>
+
           <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
             Showing {viewTab === "leaderboard" ? `${customerLeaderboard.length} customers` : `${filteredBills.length} bills`}
           </div>
         </div>
 
         {/* Filter Controls Bar */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2.5">
           {/* Search Input */}
           <div className="lg:col-span-2 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
@@ -732,21 +784,44 @@ export default function LoyaltyAudit({ onBack = null }) {
             </select>
           </div>
 
-          {/* Risk Filter (for Leaderboard) */}
+          {/* Risk & Amount Filter (for Leaderboard) */}
           <div>
             <select
               value={riskFilter}
               onChange={(e) => {
-                setRiskFilter(e.target.value);
+                const val = e.target.value;
+                setRiskFilter(val);
+                if (val === "HIGH_AMOUNT" || val === "HIGH_AMOUNT_20K") {
+                  setSortBy("totalAmount");
+                }
                 setLeaderboardPage(1);
               }}
               className="w-full px-2.5 py-2 text-xs bg-gray-50 dark:bg-slate-800/80 border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 dark:text-white font-semibold"
             >
               <option value="REPEAT">⚡ Repeat & Suspicious (2+ Bills / Points)</option>
+              <option value="HIGH_AMOUNT">💰 Highest Spend (₹50,000+ Total)</option>
+              <option value="HIGH_AMOUNT_20K">💵 High Spend (₹20,000+ Total)</option>
               <option value="HIGH">🚨 High Risk (5+ Bills / Dummy)</option>
               <option value="WATCHLIST">⚠️ Watchlist (3-4 Bills)</option>
               <option value="REDEEMED">🎁 Points Redeemed Only</option>
               <option value="ALL">All Customers (7,500+ Total)</option>
+            </select>
+          </div>
+
+          {/* Dedicated Sort Order Dropdown */}
+          <div>
+            <select
+              value={sortBy}
+              onChange={(e) => {
+                setSortBy(e.target.value);
+                setLeaderboardPage(1);
+              }}
+              className="w-full px-2.5 py-2 text-xs bg-pink-50 dark:bg-pink-950/40 border border-pink-300 dark:border-pink-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 text-pink-700 dark:text-pink-300 font-bold"
+            >
+              <option value="totalAmount">💰 Sort: Highest Amount (₹)</option>
+              <option value="billCount">🧾 Sort: Most Bills Count</option>
+              <option value="pointsRedeemed">🎁 Sort: Points Redeemed</option>
+              <option value="recent">📅 Sort: Most Recent Date</option>
             </select>
           </div>
         </div>
@@ -784,22 +859,37 @@ export default function LoyaltyAudit({ onBack = null }) {
                 <tr>
                   <th className="px-4 py-3.5">Customer Mobile & Name</th>
                   <th className="px-4 py-3.5">Risk Level</th>
-                  <th className="px-4 py-3.5 text-center cursor-pointer hover:text-pink-600" onClick={() => setSortBy("billCount")}>
+                  <th 
+                    className={`px-4 py-3.5 text-center cursor-pointer transition-colors ${
+                      sortBy === "billCount" ? "text-pink-600 dark:text-pink-400 bg-pink-100/80 dark:bg-pink-950/40 font-black" : "hover:text-pink-600"
+                    }`} 
+                    onClick={() => { setSortBy("billCount"); setLeaderboardPage(1); }}
+                  >
                     <div className="flex items-center justify-center gap-1">
                       <span>Total Bills</span>
-                      <ArrowUpDown size={12} />
+                      <ArrowUpDown size={12} className={sortBy === "billCount" ? "text-pink-600" : ""} />
                     </div>
                   </th>
-                  <th className="px-4 py-3.5 text-right cursor-pointer hover:text-pink-600" onClick={() => setSortBy("totalAmount")}>
+                  <th 
+                    className={`px-4 py-3.5 text-right cursor-pointer transition-colors ${
+                      sortBy === "totalAmount" ? "text-pink-600 dark:text-pink-400 bg-pink-100/80 dark:bg-pink-950/40 font-black" : "hover:text-pink-600"
+                    }`} 
+                    onClick={() => { setSortBy("totalAmount"); setLeaderboardPage(1); }}
+                  >
                     <div className="flex items-center justify-end gap-1">
                       <span>Total Purchase (₹)</span>
-                      <ArrowUpDown size={12} />
+                      <ArrowUpDown size={12} className={sortBy === "totalAmount" ? "text-pink-600" : ""} />
                     </div>
                   </th>
-                  <th className="px-4 py-3.5 text-right cursor-pointer hover:text-pink-600" onClick={() => setSortBy("pointsRedeemed")}>
+                  <th 
+                    className={`px-4 py-3.5 text-right cursor-pointer transition-colors ${
+                      sortBy === "pointsRedeemed" ? "text-pink-600 dark:text-pink-400 bg-pink-100/80 dark:bg-pink-950/40 font-black" : "hover:text-pink-600"
+                    }`} 
+                    onClick={() => { setSortBy("pointsRedeemed"); setLeaderboardPage(1); }}
+                  >
                     <div className="flex items-center justify-end gap-1">
                       <span>Points Redeemed</span>
-                      <ArrowUpDown size={12} />
+                      <ArrowUpDown size={12} className={sortBy === "pointsRedeemed" ? "text-pink-600" : ""} />
                     </div>
                   </th>
                   <th className="px-4 py-3.5">Stores Visited</th>
