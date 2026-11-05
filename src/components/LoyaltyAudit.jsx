@@ -22,7 +22,8 @@ import {
   UserCheck,
   Eye,
   FileSpreadsheet,
-  AlertCircle
+  AlertCircle,
+  Ticket
 } from "lucide-react";
 import toast from "react-hot-toast";
 import ExcelJS from "exceljs";
@@ -194,6 +195,7 @@ export default function LoyaltyAudit({ onBack = null }) {
           billCount: 0,
           totalAmount: 0,
           pointsRedeemed: 0,
+          giftVoucherAmount: 0,
           itemsCount: 0,
           stores: new Set(),
           salesmen: new Set(),
@@ -209,6 +211,7 @@ export default function LoyaltyAudit({ onBack = null }) {
       entry.billCount += 1;
       entry.totalAmount += Number(b.billAmount || 0);
       entry.pointsRedeemed += Math.abs(Number(b.pointsRedeemed || 0));
+      entry.giftVoucherAmount += Math.abs(Number(b.giftVoucherAmount || 0));
       entry.itemsCount += Number(b.itemsCount || 1);
       if (b.store) entry.stores.add(b.store);
       if (b.salesman) entry.salesmen.add(b.salesman);
@@ -241,14 +244,16 @@ export default function LoyaltyAudit({ onBack = null }) {
       };
     });
 
-    // Apply Risk / Amount Filter
+    // Apply Risk / Amount / Voucher Filter
     let filteredList = list;
-    if (riskFilter === "HIGH_AMOUNT") {
+    if (riskFilter === "GIFT_VOUCHER") {
+      filteredList = list.filter((c) => c.giftVoucherAmount > 0);
+    } else if (riskFilter === "HIGH_AMOUNT") {
       filteredList = list.filter((c) => c.totalAmount >= 50000);
     } else if (riskFilter === "HIGH_AMOUNT_20K") {
       filteredList = list.filter((c) => c.totalAmount >= 20000);
     } else if (riskFilter === "REPEAT") {
-      filteredList = list.filter((c) => c.billCount >= 2 || c.isDummy || c.pointsRedeemed > 0);
+      filteredList = list.filter((c) => c.billCount >= 2 || c.isDummy || c.pointsRedeemed > 0 || c.giftVoucherAmount > 0);
     } else if (riskFilter === "HIGH") {
       filteredList = list.filter((c) => c.riskLevel === "HIGH");
     } else if (riskFilter === "WATCHLIST") {
@@ -262,6 +267,7 @@ export default function LoyaltyAudit({ onBack = null }) {
     // Sort
     filteredList.sort((a, b) => {
       if (sortBy === "totalAmount") return b.totalAmount - a.totalAmount;
+      if (sortBy === "giftVoucherAmount") return b.giftVoucherAmount - a.giftVoucherAmount;
       if (sortBy === "billCount") return b.billCount - a.billCount;
       if (sortBy === "pointsRedeemed") return b.pointsRedeemed - a.pointsRedeemed;
       if (sortBy === "recent") return (b.maxDate || "").localeCompare(a.maxDate || "");
@@ -289,6 +295,8 @@ export default function LoyaltyAudit({ onBack = null }) {
     let highRiskCount = 0;
     let highRiskAmount = 0;
     let totalPoints = 0;
+    let totalGiftVoucherAmount = 0;
+    let giftVoucherUsersCount = 0;
     let multiStoreCount = 0;
 
     customerLeaderboard.forEach((c) => {
@@ -297,6 +305,10 @@ export default function LoyaltyAudit({ onBack = null }) {
         highRiskAmount += c.totalAmount;
       }
       totalPoints += c.pointsRedeemed;
+      if (c.giftVoucherAmount > 0) {
+        giftVoucherUsersCount += 1;
+        totalGiftVoucherAmount += c.giftVoucherAmount;
+      }
       if (c.isMultiStore) multiStoreCount += 1;
     });
 
@@ -306,6 +318,8 @@ export default function LoyaltyAudit({ onBack = null }) {
       highRiskCount,
       highRiskAmount,
       totalPoints,
+      totalGiftVoucherAmount,
+      giftVoucherUsersCount,
       multiStoreCount
     };
   }, [filteredBills, customerLeaderboard]);
@@ -358,6 +372,7 @@ export default function LoyaltyAudit({ onBack = null }) {
         { header: "Bill Count", key: "bills", width: 12 },
         { header: "Total Value (₹)", key: "amount", width: 16 },
         { header: "Points Redeemed", key: "points", width: 16 },
+        { header: "Gift Voucher (₹)", key: "giftVoucher", width: 16 },
         { header: "Multi-Store?", key: "multiStore", width: 14 },
         { header: "Stores Visited", key: "stores", width: 30 },
         { header: "Salesmen Involved", key: "salesmen", width: 30 },
@@ -382,6 +397,7 @@ export default function LoyaltyAudit({ onBack = null }) {
           bills: c.billCount,
           amount: Math.round(c.totalAmount * 100) / 100,
           points: Math.round(c.pointsRedeemed * 100) / 100,
+          giftVoucher: Math.round((c.giftVoucherAmount || 0) * 100) / 100,
           multiStore: c.isMultiStore ? "YES" : "NO",
           stores: c.storesList.join(", "),
           salesmen: c.salesmenList.join(", "),
@@ -414,6 +430,7 @@ export default function LoyaltyAudit({ onBack = null }) {
         { header: "Customer Name", key: "customerName", width: 22 },
         { header: "Bill Amount (₹)", key: "billAmount", width: 16 },
         { header: "Points Redeemed", key: "pointsRedeemed", width: 16 },
+        { header: "Gift Voucher (₹)", key: "giftVoucher", width: 16 },
         { header: "Items Count", key: "itemsCount", width: 12 },
         { header: "Source File", key: "fileName", width: 25 }
       ];
@@ -437,6 +454,7 @@ export default function LoyaltyAudit({ onBack = null }) {
           customerName: b.customerName || "N/A",
           billAmount: Number(b.billAmount || 0),
           pointsRedeemed: Number(b.pointsRedeemed || 0),
+          giftVoucher: Number(b.giftVoucherAmount || 0),
           itemsCount: Number(b.itemsCount || 1),
           fileName: b.fileName || ""
         });
@@ -467,6 +485,8 @@ export default function LoyaltyAudit({ onBack = null }) {
     const list = [...filteredBills];
     if (sortBy === "totalAmount") {
       list.sort((a, b) => Number(b.billAmount || 0) - Number(a.billAmount || 0));
+    } else if (sortBy === "giftVoucherAmount") {
+      list.sort((a, b) => Number(b.giftVoucherAmount || 0) - Number(a.giftVoucherAmount || 0));
     } else if (sortBy === "pointsRedeemed") {
       list.sort((a, b) => Number(b.pointsRedeemed || 0) - Number(a.pointsRedeemed || 0));
     } else {
@@ -568,7 +588,7 @@ export default function LoyaltyAudit({ onBack = null }) {
       </div>
 
       {/* KPI Metrics Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {/* Card 1: Total Bills */}
         <div className="bg-white/80 dark:bg-slate-900/80 p-4 rounded-2xl border border-gray-200/80 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between text-gray-500 dark:text-gray-400 mb-1.5">
@@ -618,7 +638,7 @@ export default function LoyaltyAudit({ onBack = null }) {
         </div>
 
         {/* Card 5: Points Redeemed */}
-        <div className="bg-pink-50/70 dark:bg-pink-950/20 p-4 rounded-2xl border border-pink-200 dark:border-pink-900/40 shadow-sm col-span-2 sm:col-span-1">
+        <div className="bg-pink-50/70 dark:bg-pink-950/20 p-4 rounded-2xl border border-pink-200 dark:border-pink-900/40 shadow-sm">
           <div className="flex items-center justify-between text-pink-700 dark:text-pink-400 mb-1.5">
             <span className="text-xs font-bold">Points Redeemed</span>
             <Gift size={16} className="text-pink-600" />
@@ -626,7 +646,19 @@ export default function LoyaltyAudit({ onBack = null }) {
           <div className="text-2xl font-black text-pink-600 dark:text-pink-400">
             {Math.round(metrics.totalPoints).toLocaleString()} pts
           </div>
-          <div className="text-[11px] text-pink-500 mt-1 font-medium">Loyalty value claimed</div>
+          <div className="text-[11px] text-pink-500 mt-1 font-medium">Loyalty points claimed</div>
+        </div>
+
+        {/* Card 6: Gift Vouchers */}
+        <div className="bg-purple-50/70 dark:bg-purple-950/20 p-4 rounded-2xl border border-purple-200 dark:border-purple-900/40 shadow-sm">
+          <div className="flex items-center justify-between text-purple-700 dark:text-purple-400 mb-1.5">
+            <span className="text-xs font-bold">Gift Vouchers</span>
+            <Ticket size={16} className="text-purple-600" />
+          </div>
+          <div className="text-2xl font-black text-purple-600 dark:text-purple-400">
+            {formatCurrency(metrics.totalGiftVoucherAmount)}
+          </div>
+          <div className="text-[11px] text-purple-500 mt-1 font-medium">{metrics.giftVoucherUsersCount} customers used GV</div>
         </div>
       </div>
 
@@ -669,6 +701,16 @@ export default function LoyaltyAudit({ onBack = null }) {
               }`}
             >
               <span>💰 Highest Amount</span>
+            </button>
+            <button
+              onClick={() => { setSortBy("giftVoucherAmount"); setLeaderboardPage(1); }}
+              className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1 ${
+                sortBy === "giftVoucherAmount"
+                  ? "bg-purple-600 text-white shadow-md shadow-purple-600/25 ring-2 ring-purple-400"
+                  : "bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700"
+              }`}
+            >
+              <span>🎟️ Gift Voucher</span>
             </button>
             <button
               onClick={() => { setSortBy("billCount"); setLeaderboardPage(1); }}
@@ -793,12 +835,15 @@ export default function LoyaltyAudit({ onBack = null }) {
                 setRiskFilter(val);
                 if (val === "HIGH_AMOUNT" || val === "HIGH_AMOUNT_20K") {
                   setSortBy("totalAmount");
+                } else if (val === "GIFT_VOUCHER") {
+                  setSortBy("giftVoucherAmount");
                 }
                 setLeaderboardPage(1);
               }}
               className="w-full px-2.5 py-2 text-xs bg-gray-50 dark:bg-slate-800/80 border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 dark:text-white font-semibold"
             >
               <option value="REPEAT">⚡ Repeat & Suspicious (2+ Bills / Points)</option>
+              <option value="GIFT_VOUCHER">🎟️ Gift Voucher Used (GV &gt; 0)</option>
               <option value="HIGH_AMOUNT">💰 Highest Spend (₹50,000+ Total)</option>
               <option value="HIGH_AMOUNT_20K">💵 High Spend (₹20,000+ Total)</option>
               <option value="HIGH">🚨 High Risk (5+ Bills / Dummy)</option>
@@ -819,6 +864,7 @@ export default function LoyaltyAudit({ onBack = null }) {
               className="w-full px-2.5 py-2 text-xs bg-pink-50 dark:bg-pink-950/40 border border-pink-300 dark:border-pink-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 text-pink-700 dark:text-pink-300 font-bold"
             >
               <option value="totalAmount">💰 Sort: Highest Amount (₹)</option>
+              <option value="giftVoucherAmount">🎟️ Sort: Most Gift Voucher (₹)</option>
               <option value="billCount">🧾 Sort: Most Bills Count</option>
               <option value="pointsRedeemed">🎁 Sort: Points Redeemed</option>
               <option value="recent">📅 Sort: Most Recent Date</option>
@@ -890,6 +936,17 @@ export default function LoyaltyAudit({ onBack = null }) {
                     <div className="flex items-center justify-end gap-1">
                       <span>Points Redeemed</span>
                       <ArrowUpDown size={12} className={sortBy === "pointsRedeemed" ? "text-pink-600" : ""} />
+                    </div>
+                  </th>
+                  <th 
+                    className={`px-4 py-3.5 text-right cursor-pointer transition-colors ${
+                      sortBy === "giftVoucherAmount" ? "text-purple-600 dark:text-purple-400 bg-purple-100/80 dark:bg-purple-950/40 font-black" : "hover:text-purple-600"
+                    }`} 
+                    onClick={() => { setSortBy("giftVoucherAmount"); setLeaderboardPage(1); }}
+                  >
+                    <div className="flex items-center justify-end gap-1">
+                      <span>Gift Voucher (₹)</span>
+                      <ArrowUpDown size={12} className={sortBy === "giftVoucherAmount" ? "text-purple-600" : ""} />
                     </div>
                   </th>
                   <th className="px-4 py-3.5">Stores Visited</th>
@@ -984,6 +1041,18 @@ export default function LoyaltyAudit({ onBack = null }) {
                         )}
                       </td>
 
+                      {/* Gift Voucher */}
+                      <td className="px-4 py-3 text-right">
+                        {cust.giftVoucherAmount > 0 ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-black bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200">
+                            <Ticket size={11} />
+                            {formatCurrency(cust.giftVoucherAmount)}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 font-medium">-</span>
+                        )}
+                      </td>
+
                       {/* Stores */}
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1 max-w-xs">
@@ -1043,7 +1112,7 @@ export default function LoyaltyAudit({ onBack = null }) {
 
                 {customerLeaderboard.length === 0 && (
                   <tr>
-                    <td colSpan="8" className="px-4 py-12 text-center text-gray-400">
+                    <td colSpan="9" className="px-4 py-12 text-center text-gray-400">
                       No matching records found. Try adjusting your filters.
                     </td>
                   </tr>
@@ -1096,6 +1165,7 @@ export default function LoyaltyAudit({ onBack = null }) {
                   <th className="px-4 py-3.5">Customer Mobile & Name</th>
                   <th className="px-4 py-3.5 text-right">Amount (₹)</th>
                   <th className="px-4 py-3.5 text-right">Points Redeemed</th>
+                  <th className="px-4 py-3.5 text-right">Gift Voucher (₹)</th>
                   <th className="px-4 py-3.5 text-center">Items</th>
                 </tr>
               </thead>
@@ -1136,6 +1206,15 @@ export default function LoyaltyAudit({ onBack = null }) {
                         <span className="text-gray-400">-</span>
                       )}
                     </td>
+                    <td className="px-4 py-3 text-right">
+                      {Number(b.giftVoucherAmount || 0) > 0 ? (
+                        <span className="font-bold text-purple-600 dark:text-purple-400">
+                          {formatCurrency(b.giftVoucherAmount)}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-300">
                       {b.itemsCount || 1}
                     </td>
@@ -1144,7 +1223,7 @@ export default function LoyaltyAudit({ onBack = null }) {
 
                 {paginatedBills.length === 0 && (
                   <tr>
-                    <td colSpan="8" className="px-4 py-12 text-center text-gray-400">
+                    <td colSpan="9" className="px-4 py-12 text-center text-gray-400">
                       No bills match current filters.
                     </td>
                   </tr>
@@ -1225,11 +1304,17 @@ export default function LoyaltyAudit({ onBack = null }) {
             </div>
 
             {/* Quick Summary Stats for Customer */}
-            <div className="grid grid-cols-4 gap-3 p-4 bg-gray-50/60 dark:bg-slate-800/40 border-b border-gray-100 dark:border-slate-800 text-center text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 p-4 bg-gray-50/60 dark:bg-slate-800/40 border-b border-gray-100 dark:border-slate-800 text-center text-xs">
               <div>
                 <span className="text-gray-400">Total Spend</span>
                 <div className="text-sm font-bold text-gray-900 dark:text-white mt-0.5">
                   {formatCurrency(selectedCustomer.totalAmount)}
+                </div>
+              </div>
+              <div>
+                <span className="text-gray-400">Gift Voucher</span>
+                <div className="text-sm font-bold text-purple-600 dark:text-purple-400 mt-0.5">
+                  {selectedCustomer.giftVoucherAmount > 0 ? formatCurrency(selectedCustomer.giftVoucherAmount) : "₹0"}
                 </div>
               </div>
               <div>
@@ -1267,6 +1352,9 @@ export default function LoyaltyAudit({ onBack = null }) {
                   {selectedCustomer.pointsRedeemed > 0 && (
                     <span> <strong>{Math.round(selectedCustomer.pointsRedeemed)} loyalty points</strong> were redeemed on these bills.</span>
                   )}
+                  {selectedCustomer.giftVoucherAmount > 0 && (
+                    <span> <strong>{formatCurrency(selectedCustomer.giftVoucherAmount)} in Gift Vouchers</strong> were redeemed on these bills.</span>
+                  )}
                   <div className="mt-1 text-[11px] text-red-700 dark:text-red-400 font-medium">
                     Recommended Action: Verify physical bill copies and confirm customer identity with store manager.
                   </div>
@@ -1290,6 +1378,7 @@ export default function LoyaltyAudit({ onBack = null }) {
                       <th className="px-3 py-2.5">Cashier</th>
                       <th className="px-3 py-2.5 text-right">Amount (₹)</th>
                       <th className="px-3 py-2.5 text-right">Points</th>
+                      <th className="px-3 py-2.5 text-right">Gift Voucher (₹)</th>
                       <th className="px-3 py-2.5 text-center">Items</th>
                     </tr>
                   </thead>
@@ -1318,6 +1407,13 @@ export default function LoyaltyAudit({ onBack = null }) {
                           {b.pointsRedeemed > 0 ? (
                             <span className="font-bold text-pink-600 dark:text-pink-400">
                               {Math.round(b.pointsRedeemed)}
+                            </span>
+                          ) : "-"}
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          {Number(b.giftVoucherAmount || 0) > 0 ? (
+                            <span className="font-bold text-purple-600 dark:text-purple-400">
+                              {formatCurrency(b.giftVoucherAmount)}
                             </span>
                           ) : "-"}
                         </td>

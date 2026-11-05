@@ -19,10 +19,11 @@ async function run() {
   const amountCol = headers.indexOf('NET SALE AMOUNT');
   const pointsCol = headers.indexOf('POINTS REDEEMED');
   const pointsCol2 = headers.indexOf('POINT REEDEEMED/DISCOUNT COUPON RS');
+  const gvCol = headers.indexOf('GIFT VOUCHER AMOUNT');
   const nameCol = headers.indexOf('RETAIL CUSTOMER FIRST NAME');
   const mobileCol = headers.indexOf('RETAIL CUSTOMER MOBILE NO.');
 
-  console.log('Columns resolved. Total rows in matrix:', matrix.length);
+  console.log('Columns resolved (GV Col index:', gvCol, '). Total rows in matrix:', matrix.length);
 
   const billsMap = new Map();
   const fileId = 'historical_init_01apr_to_05nov_2026';
@@ -61,6 +62,8 @@ async function run() {
     const netAmount = Number(row[amountCol]) || 0;
     const rawPoints = Number(row[pointsCol]) || Number(row[pointsCol2]) || 0;
     const pointsRedeemed = Math.abs(rawPoints);
+    const rawGV = gvCol !== -1 ? Number(row[gvCol]) || 0 : 0;
+    const giftVoucherAmount = Math.abs(rawGV);
 
     const billKey = `${store}___${billNo}`;
 
@@ -76,6 +79,7 @@ async function run() {
         customerName: customerName || null,
         billAmount: netAmount,
         pointsRedeemed: pointsRedeemed,
+        giftVoucherAmount: giftVoucherAmount,
         itemsCount: 1,
         _fileId: fileId,
         _fileName: fileName
@@ -84,6 +88,7 @@ async function run() {
       const existing = billsMap.get(billKey);
       existing.billAmount = Math.round((existing.billAmount + netAmount) * 100) / 100;
       existing.pointsRedeemed = Math.round((existing.pointsRedeemed + pointsRedeemed) * 100) / 100;
+      existing.giftVoucherAmount = Math.round(((existing.giftVoucherAmount || 0) + giftVoucherAmount) * 100) / 100;
       existing.itemsCount += 1;
       if (!existing.customerMobile && rawMobile) existing.customerMobile = rawMobile;
       if (!existing.customerName && customerName) existing.customerName = customerName;

@@ -577,6 +577,7 @@ export class SyncService implements OnApplicationBootstrap {
       const billTime = String(row.billTime || row["BILL TIME"] || "").trim();
       const billAmount = Number(row.billAmount || row["NET SALE AMOUNT"] || row.amount || 0) || 0;
       const pointsRedeemed = Number(row.pointsRedeemed || row["POINTS REDEEMED"] || 0) || 0;
+      const giftVoucherAmount = Math.abs(Number(row.giftVoucherAmount || row["GIFT VOUCHER AMOUNT"] || row["GIFT VOUCHER"] || 0)) || 0;
       const itemsCount = Number(row.itemsCount || row.items || 1) || 1;
 
       return this.loyaltyRepository.create({
@@ -590,6 +591,7 @@ export class SyncService implements OnApplicationBootstrap {
         customerName: custName || null,
         billAmount,
         pointsRedeemed,
+        giftVoucherAmount,
         itemsCount,
         fileName: row._fileName || "Daily Sales File",
         fileId: fileId,

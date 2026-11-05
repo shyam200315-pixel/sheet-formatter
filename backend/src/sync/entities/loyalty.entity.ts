@@ -40,6 +40,9 @@ export class LoyaltyAuditRecord {
   @Column({ type: 'numeric', precision: 10, scale: 2, default: 0 })
   pointsRedeemed: number;
 
+  @Column({ type: 'numeric', precision: 12, scale: 2, default: 0 })
+  giftVoucherAmount: number;
+
   @Column({ type: 'int', default: 1 })
   itemsCount: number;
 

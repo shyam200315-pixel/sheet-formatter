@@ -803,6 +803,15 @@ export async function syncDailyRowsToLoyaltyAudit(jsonData, worksheet, onProgres
       }
     }
 
+    let giftVoucherAmount = 0;
+    for (const k in row) {
+      const uk = k.trim().toUpperCase();
+      if (uk.includes("GIFT VOUCHER") || uk.includes("GV AMOUNT") || uk === "GIFT VOUCHER AMOUNT") {
+        giftVoucherAmount = Math.abs(Number(row[k]) || 0);
+        break;
+      }
+    }
+
     // Unique bill key (composite to ensure distinct bills across stores)
     const billKey = billNo ? `${store}___${billNo}` : `${store}___${cleanedMobile || 'UNKNOWN'}___${idx}`;
 
@@ -818,6 +827,7 @@ export async function syncDailyRowsToLoyaltyAudit(jsonData, worksheet, onProgres
         customerName: customerName || null,
         billAmount: netAmount,
         pointsRedeemed: pointsRedeemed,
+        giftVoucherAmount: giftVoucherAmount,
         itemsCount: 1,
         _fileId: dailyFileId,
         _fileName: dailyFileName,
@@ -826,6 +836,7 @@ export async function syncDailyRowsToLoyaltyAudit(jsonData, worksheet, onProgres
       const existing = billsMap.get(billKey);
       existing.billAmount = Math.round((existing.billAmount + netAmount) * 100) / 100;
       existing.pointsRedeemed = Math.round((existing.pointsRedeemed + pointsRedeemed) * 100) / 100;
+      existing.giftVoucherAmount = Math.round(((existing.giftVoucherAmount || 0) + giftVoucherAmount) * 100) / 100;
       existing.itemsCount += 1;
       if (!existing.customerMobile && cleanedMobile) existing.customerMobile = cleanedMobile;
       if (!existing.customerName && customerName) existing.customerName = customerName;
