@@ -53,3 +53,4 @@ export class LoyaltyAuditRecord {
   @CreateDateColumn()
   createdAt: Date;
 }
+

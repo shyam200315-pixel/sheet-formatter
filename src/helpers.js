@@ -798,7 +798,7 @@ export async function syncDailyRowsToLoyaltyAudit(jsonData, worksheet, onProgres
     for (const k in row) {
       const uk = k.trim().toUpperCase();
       if (uk.includes("POINTS REDEEMED") || uk.includes("POINTS")) {
-        pointsRedeemed = Number(row[k]) || 0;
+        pointsRedeemed = Math.abs(Number(row[k]) || 0);
         break;
       }
     }

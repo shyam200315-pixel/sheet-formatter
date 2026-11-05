@@ -205,7 +205,7 @@ export default function LoyaltyAudit({ onBack = null }) {
       const entry = map.get(key);
       entry.billCount += 1;
       entry.totalAmount += Number(b.billAmount || 0);
-      entry.pointsRedeemed += Number(b.pointsRedeemed || 0);
+      entry.pointsRedeemed += Math.abs(Number(b.pointsRedeemed || 0));
       entry.itemsCount += Number(b.itemsCount || 1);
       if (b.store) entry.stores.add(b.store);
       if (b.salesman) entry.salesmen.add(b.salesman);
@@ -1257,3 +1257,4 @@ export default function LoyaltyAudit({ onBack = null }) {
     </div>
   );
 }
+
