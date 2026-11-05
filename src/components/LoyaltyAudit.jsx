@@ -23,7 +23,8 @@ import {
   Eye,
   FileSpreadsheet,
   AlertCircle,
-  Ticket
+  Ticket,
+  ArrowLeft
 } from "lucide-react";
 import toast from "react-hot-toast";
 import ExcelJS from "exceljs";
@@ -57,6 +58,10 @@ const DUMMY_MOBILE_PATTERNS = [
 ];
 
 export default function LoyaltyAudit({ onBack = null }) {
+  // Password Protection ('shyam') - Always locked on page refresh
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState("");
+
   const [bills, setBills] = useState([]);
   const [metadata, setMetadata] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -110,7 +115,24 @@ export default function LoyaltyAudit({ onBack = null }) {
     }
   };
 
+  const handleLogin = (e) => {
+    if (e) e.preventDefault();
+    if (password.trim().toLowerCase() === "shyam") {
+      setIsAuthenticated(true);
+      toast.success("Loyalty Audit Unlocked");
+    } else {
+      toast.error("Incorrect Password");
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setPassword("");
+    toast("Loyalty Audit Locked", { icon: "🔒" });
+  };
+
   useEffect(() => {
+    if (!isAuthenticated) return;
     fetchData();
 
     // Subscribe to real-time Cloud SSE updates
@@ -121,7 +143,7 @@ export default function LoyaltyAudit({ onBack = null }) {
     return () => {
       if (unsubscribe) unsubscribe();
     };
-  }, []);
+  }, [isAuthenticated]);
 
   // 2. Extract unique Stores and Salesmen for filter dropdowns
   const { storeOptions, salesmanOptions } = useMemo(() => {
@@ -503,6 +525,66 @@ export default function LoyaltyAudit({ onBack = null }) {
 
   const totalPages = Math.ceil(sortedBills.length / pageSize) || 1;
 
+  // -------------------------------------------------------------
+  // Password Lock Screen (Password: 'shyam')
+  // -------------------------------------------------------------
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh] px-4">
+        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl p-8 rounded-3xl border border-white/80 dark:border-slate-800 shadow-2xl max-w-md w-full relative">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="absolute top-6 left-6 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 transition-colors cursor-pointer"
+              title="Go Back"
+            >
+              <ArrowLeft size={20} />
+            </button>
+          )}
+
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-950/80 dark:to-rose-950/80 rounded-2xl flex items-center justify-center shadow-inner border border-pink-200 dark:border-pink-800">
+              <ShieldAlert className="w-8 h-8 text-pink-600 dark:text-pink-400" />
+            </div>
+          </div>
+
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-2">
+            Restricted Audit Access
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-8">
+            Please enter the password to view <strong>Loyalty & Customer Audit</strong>.
+          </p>
+
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setPassword(val);
+                  if (val.trim().toLowerCase() === "shyam") {
+                    setIsAuthenticated(true);
+                    toast.success("Loyalty Audit Unlocked");
+                  }
+                }}
+                placeholder="Enter password..."
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/60 dark:bg-slate-800/60 focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-white shadow-sm"
+                autoFocus
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full py-3 px-4 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white rounded-xl font-semibold shadow-lg shadow-pink-500/25 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+            >
+              Unlock Loyalty Audit
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full space-y-6 pb-20">
       {/* Top Header Card */}
@@ -564,6 +646,15 @@ export default function LoyaltyAudit({ onBack = null }) {
             >
               <Trash2 size={13} />
               <span>Reset DB</span>
+            </button>
+
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-all border border-gray-200 dark:border-slate-700 cursor-pointer"
+              title="Lock Loyalty Audit"
+            >
+              <Lock size={13} />
+              <span>Lock</span>
             </button>
           </div>
         </div>
