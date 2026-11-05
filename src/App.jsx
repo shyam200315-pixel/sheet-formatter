@@ -693,17 +693,7 @@ export default function App() {
             )}
           </div>
         
-            {/* Cloud Storage Quick Button */}
-            <div className="flex items-center ml-auto mr-2">
-              <button
-                onClick={() => setActiveTab("storage-manager")}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded-xl text-xs font-semibold border border-indigo-200/80 dark:border-indigo-800 transition-all cursor-pointer shadow-sm"
-                title="Open Cloud Storage Manager"
-              >
-                <Database size={13} />
-                <span className="hidden sm:inline">Storage Manager</span>
-              </button>
-            </div>
+            {/* Navigation / Header Actions */}
 
           {activeTab === "validator" && !reportData && (
             <div className="hidden md:flex items-center gap-6">
