@@ -1311,12 +1311,35 @@ export function processSalesRowsToMap(salesRows, limitMonths = null) {
 }
 
 /**
- * Formats a Date object to readable display string: "15 Oct 2026"
+ * Formats a Date object or string to readable display string: "15 Oct 2026"
  */
 export function formatDateDisplay(dateObj) {
   if (!dateObj) return "";
+  if (typeof dateObj === "string") {
+    const s = dateObj.trim();
+    const matchYmd = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+    if (matchYmd) {
+      const year = matchYmd[1];
+      const mIdx = parseInt(matchYmd[2], 10) - 1;
+      const day = String(matchYmd[3]).padStart(2, "0");
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      if (mIdx >= 0 && mIdx < 12) {
+        return `${day} ${monthNames[mIdx]} ${year}`;
+      }
+    }
+    const matchDmy = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+    if (matchDmy) {
+      const day = String(matchDmy[1]).padStart(2, "0");
+      const mIdx = parseInt(matchDmy[2], 10) - 1;
+      const year = matchDmy[3];
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      if (mIdx >= 0 && mIdx < 12) {
+        return `${day} ${monthNames[mIdx]} ${year}`;
+      }
+    }
+  }
   const d = dateObj instanceof Date ? dateObj : new Date(dateObj);
-  if (isNaN(d.getTime())) return "";
+  if (isNaN(d.getTime())) return String(dateObj);
   const day = String(d.getDate()).padStart(2, "0");
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const mName = monthNames[d.getMonth()];
@@ -1325,12 +1348,23 @@ export function formatDateDisplay(dateObj) {
 }
 
 /**
- * Formats a Date object to standard DD/MM/YYYY: "15/10/2026"
+ * Formats a Date object or string to standard DD/MM/YYYY: "15/10/2026"
  */
 export function formatDateDmy(dateObj) {
   if (!dateObj) return "";
+  if (typeof dateObj === "string") {
+    const s = dateObj.trim();
+    const matchYmd = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+    if (matchYmd) {
+      return `${String(matchYmd[3]).padStart(2, "0")}/${String(matchYmd[2]).padStart(2, "0")}/${matchYmd[1]}`;
+    }
+    const matchDmy = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+    if (matchDmy) {
+      return `${String(matchDmy[1]).padStart(2, "0")}/${String(matchDmy[2]).padStart(2, "0")}/${matchDmy[3]}`;
+    }
+  }
   const d = dateObj instanceof Date ? dateObj : new Date(dateObj);
-  if (isNaN(d.getTime())) return "";
+  if (isNaN(d.getTime())) return String(dateObj);
   const day = String(d.getDate()).padStart(2, "0");
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const year = d.getFullYear();

@@ -424,8 +424,8 @@ export default function LoyaltyAudit({ onBack = null }) {
           stores: c.storesList.join(", "),
           salesmen: c.salesmenList.join(", "),
           users: c.usersList.join(", "),
-          minDate: c.minDate || "",
-          maxDate: c.maxDate || ""
+          minDate: formatDateDisplay(c.minDate) || "",
+          maxDate: formatDateDisplay(c.maxDate) || ""
         });
 
         // Highlight high risk in light red
@@ -467,7 +467,7 @@ export default function LoyaltyAudit({ onBack = null }) {
       filteredBills.forEach((b) => {
         wsBills.addRow({
           billNo: b.billNo,
-          billDate: b.billDate,
+          billDate: formatDateDisplay(b.billDate) || b.billDate,
           billTime: b.billTime || "",
           store: b.store,
           salesman: b.salesman || "N/A",
@@ -667,7 +667,7 @@ export default function LoyaltyAudit({ onBack = null }) {
               Cloud Database Active: <strong>{bills.length.toLocaleString()}</strong> bills recorded
               {metadata?.minDate && metadata?.maxDate && (
                 <span className="ml-1 text-gray-400">
-                  ({metadata.minDate} to {metadata.maxDate})
+                  ({formatDateDisplay(metadata.minDate)} to {formatDateDisplay(metadata.maxDate)})
                 </span>
               )}
             </span>
@@ -1267,7 +1267,7 @@ export default function LoyaltyAudit({ onBack = null }) {
                       {b.billNo}
                     </td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
-                      <div>{b.billDate}</div>
+                      <div>{formatDateDisplay(b.billDate) || b.billDate}</div>
                       {b.billTime && <div className="text-[10px] text-gray-400">{b.billTime}</div>}
                     </td>
                     <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-200 truncate max-w-xs">
@@ -1480,7 +1480,7 @@ export default function LoyaltyAudit({ onBack = null }) {
                           {b.billNo}
                         </td>
                         <td className="px-3 py-2 text-gray-600 dark:text-gray-300">
-                          {b.billDate} {b.billTime && <span className="text-[10px] text-gray-400">({b.billTime})</span>}
+                          {formatDateDisplay(b.billDate) || b.billDate} {b.billTime && <span className="text-[10px] text-gray-400">({b.billTime})</span>}
                         </td>
                         <td className="px-3 py-2 font-medium text-gray-800 dark:text-gray-200">
                           {b.store}

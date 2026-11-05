@@ -482,11 +482,19 @@ export class SyncService implements OnApplicationBootstrap {
       .where('ds.date IS NOT NULL')
       .getRawOne();
 
+    const cleanDateOnly = (val: any) => {
+      if (!val) return null;
+      if (val instanceof Date) return val.toISOString().split('T')[0];
+      const s = String(val).trim();
+      const match = s.match(/^(\d{4}-\d{2}-\d{2})/);
+      return match ? match[1] : s.split('T')[0];
+    };
+
     return {
       totalRows: count,
       totalRecords: count,
-      minDate: dateRange?.minDate || null,
-      maxDate: dateRange?.maxDate || null,
+      minDate: cleanDateOnly(dateRange?.minDate),
+      maxDate: cleanDateOnly(dateRange?.maxDate),
       files: files.map(f => ({ fileId: f.fileId, fileName: f.fileName, count: Number(f.count) })),
       updatedAt: latest ? latest.createdAt : null,
     };
@@ -641,12 +649,20 @@ export class SyncService implements OnApplicationBootstrap {
       .orderBy('la.createdAt', 'DESC')
       .getOne();
 
+    const cleanDateOnly = (val: any) => {
+      if (!val) return null;
+      if (val instanceof Date) return val.toISOString().split('T')[0];
+      const s = String(val).trim();
+      const match = s.match(/^(\d{4}-\d{2}-\d{2})/);
+      return match ? match[1] : s.split('T')[0];
+    };
+
     return {
       totalRows: count,
       totalBills: count,
       uniqueMobiles: Number(uniqueMobiles?.count || 0),
-      minDate: dateRange?.minDate || null,
-      maxDate: dateRange?.maxDate || null,
+      minDate: cleanDateOnly(dateRange?.minDate),
+      maxDate: cleanDateOnly(dateRange?.maxDate),
       files: files.map(f => ({ fileId: f.fileId, fileName: f.fileName, count: Number(f.count) })),
       updatedAt: latest ? latest.createdAt : null,
     };
