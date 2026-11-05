@@ -316,7 +316,8 @@ export function getTargetDate(worksheet, jsonData) {
 // Local Database implementation using IndexedDB (Replaces Firebase)
 function getDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('DashboardDB', 2);
+    // Version 4: Upgraded from v2/v3 so any client on older/mismatched versions upgrades cleanly
+    const request = indexedDB.open('DashboardDB', 4);
     request.onupgradeneeded = (e) => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains('historicalData')) {
@@ -327,7 +328,16 @@ function getDB() {
       }
     };
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
+    request.onerror = () => {
+      // Robust fallback: If any version mismatch error occurs, open without version to reuse existing DB
+      if (request.error && request.error.name === 'VersionError') {
+        const fallback = indexedDB.open('DashboardDB');
+        fallback.onsuccess = () => resolve(fallback.result);
+        fallback.onerror = () => reject(fallback.error);
+      } else {
+        reject(request.error);
+      }
+    };
   });
 }
 
