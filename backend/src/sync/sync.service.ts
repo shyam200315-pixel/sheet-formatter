@@ -4,6 +4,7 @@ import { Repository, IsNull } from 'typeorm';
 import { SalesRecord } from './entities/sync.entity.js';
 import { TargetSetting } from './entities/target.entity.js';
 import { DeadStockRecord } from './entities/deadstock.entity.js';
+import { LoyaltyAuditRecord } from './entities/loyalty.entity.js';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { Subject } from 'rxjs';
@@ -37,6 +38,8 @@ export class SyncService implements OnApplicationBootstrap {
     private targetRepository: Repository<TargetSetting>,
     @InjectRepository(DeadStockRecord)
     private deadStockRepository: Repository<DeadStockRecord>,
+    @InjectRepository(LoyaltyAuditRecord)
+    private loyaltyRepository: Repository<LoyaltyAuditRecord>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
@@ -519,6 +522,160 @@ export class SyncService implements OnApplicationBootstrap {
     return { success: true, deletedCount: result.affected || 0 };
   }
 
+  // =========================================================================
+  // TABLE 3: LOYALTY & CUSTOMER AUDIT DEDICATED SYNC
+  // =========================================================================
+
+  async saveLoyaltyData(data: any[], isAppend: boolean = false) {
+    if (!isAppend) {
+      await this.loyaltyRepository.clear();
+    }
+
+    if (!data || data.length === 0) {
+      this.updates$.next({ type: 'loyalty_update' });
+      return { success: true, count: 0, updatedAt: new Date() };
+    }
+
+    const records = data.map(row => {
+      const fileId = row._fileId || "loyalty_default";
+      
+      let formattedDate: string | null = null;
+      const rawDate = row.billDate || row.date || row["BILL DATE"] || row["DATE"];
+      if (rawDate !== null && rawDate !== undefined && rawDate !== "") {
+        if (typeof rawDate === 'number') {
+          const d = new Date(Math.round((rawDate - 25569) * 86400 * 1000));
+          if (!isNaN(d.getTime())) formattedDate = d.toISOString().split('T')[0];
+        } else {
+          const dateStr = String(rawDate).trim();
+          const matchDmy = dateStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+.*)?$/);
+          if (matchDmy) {
+            formattedDate = `${matchDmy[3]}-${matchDmy[2].padStart(2,'0')}-${matchDmy[1].padStart(2,'0')}`;
+          } else {
+            const matchYmd = dateStr.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})(?:\s+.*)?$/);
+            if (matchYmd) {
+              formattedDate = `${matchYmd[1]}-${matchYmd[2].padStart(2,'0')}-${matchYmd[3].padStart(2,'0')}`;
+            } else {
+              const d = new Date(dateStr);
+              if (!isNaN(d.getTime())) formattedDate = d.toISOString().split('T')[0];
+            }
+          }
+        }
+      }
+
+      // Clean mobile number (keep digits only)
+      let mobile = String(row.customerMobile || row["RETAIL CUSTOMER MOBILE NO."] || row["CUSTOMER MOBILE"] || row.mobile || "").trim();
+      mobile = mobile.replace(/\D/g, '');
+      if (mobile.length > 10 && mobile.startsWith('91')) {
+        mobile = mobile.slice(-10);
+      }
+
+      const custName = String(row.customerName || row["RETAIL CUSTOMER FIRST NAME"] || row["CUSTOMER NAME"] || row.name || "").trim();
+      const store = String(row.store || row["BRANCH NAME"] || row.branch || "").trim();
+      const salesman = String(row.salesman || row["SALESMAN"] || row.salesPerson || "").trim();
+      const userName = String(row.userName || row["USER NAME"] || "").trim();
+      const billNo = String(row.billNo || row["BILL NO."] || row["NEW VOUCHER NO."] || row.bill || "").trim();
+      const billTime = String(row.billTime || row["BILL TIME"] || "").trim();
+      const billAmount = Number(row.billAmount || row["NET SALE AMOUNT"] || row.amount || 0) || 0;
+      const pointsRedeemed = Number(row.pointsRedeemed || row["POINTS REDEEMED"] || 0) || 0;
+      const itemsCount = Number(row.itemsCount || row.items || 1) || 1;
+
+      return this.loyaltyRepository.create({
+        billNo,
+        billDate: formattedDate,
+        billTime,
+        store,
+        salesman,
+        userName,
+        customerMobile: mobile || null,
+        customerName: custName || null,
+        billAmount,
+        pointsRedeemed,
+        itemsCount,
+        fileName: row._fileName || "Daily Sales File",
+        fileId: fileId,
+      });
+    });
+
+    // Chunked insert in batches of 2000
+    for (let i = 0; i < records.length; i += 2000) {
+      await this.loyaltyRepository.createQueryBuilder().insert().into(LoyaltyAuditRecord).values(records.slice(i, i + 2000)).execute();
+    }
+
+    this.updates$.next({ type: 'loyalty_update' });
+    return { success: true, count: records.length, updatedAt: new Date() };
+  }
+
+  async getLoyaltyData() {
+    const records = await this.loyaltyRepository.createQueryBuilder('la')
+      .orderBy('la.billDate', 'DESC')
+      .addOrderBy('la.createdAt', 'DESC')
+      .getMany();
+
+    return records || [];
+  }
+
+  async getLoyaltyMetadata() {
+    const count = await this.loyaltyRepository.count();
+    const files = await this.loyaltyRepository.createQueryBuilder('la')
+      .select('la.fileId', 'fileId')
+      .addSelect('la.fileName', 'fileName')
+      .addSelect('COUNT(*)', 'count')
+      .groupBy('la.fileId')
+      .addGroupBy('la.fileName')
+      .getRawMany();
+
+    const dateRange = await this.loyaltyRepository.createQueryBuilder('la')
+      .select('MIN(la.billDate)', 'minDate')
+      .addSelect('MAX(la.billDate)', 'maxDate')
+      .where('la.billDate IS NOT NULL')
+      .getRawOne();
+
+    const uniqueMobiles = await this.loyaltyRepository.createQueryBuilder('la')
+      .select('COUNT(DISTINCT la.customerMobile)', 'count')
+      .where("la.customerMobile IS NOT NULL AND la.customerMobile != ''")
+      .getRawOne();
+
+    const latest = await this.loyaltyRepository.createQueryBuilder('la')
+      .orderBy('la.createdAt', 'DESC')
+      .getOne();
+
+    return {
+      totalRows: count,
+      totalBills: count,
+      uniqueMobiles: Number(uniqueMobiles?.count || 0),
+      minDate: dateRange?.minDate || null,
+      maxDate: dateRange?.maxDate || null,
+      files: files.map(f => ({ fileId: f.fileId, fileName: f.fileName, count: Number(f.count) })),
+      updatedAt: latest ? latest.createdAt : null,
+    };
+  }
+
+  async clearLoyaltyData() {
+    await this.loyaltyRepository.clear();
+    this.updates$.next({ type: 'loyalty_update' });
+    return { success: true };
+  }
+
+  async deleteLoyaltyByDate(date: string) {
+    const result = await this.loyaltyRepository.createQueryBuilder()
+      .delete()
+      .from(LoyaltyAuditRecord)
+      .where('billDate = :date', { date })
+      .execute();
+    this.updates$.next({ type: 'loyalty_update' });
+    return { success: true, deletedCount: result.affected || 0 };
+  }
+
+  async deleteLoyaltyFile(fileId: string) {
+    const result = await this.loyaltyRepository.createQueryBuilder()
+      .delete()
+      .from(LoyaltyAuditRecord)
+      .where('fileId = :fileId', { fileId })
+      .execute();
+    this.updates$.next({ type: 'loyalty_update' });
+    return { success: true, deletedCount: result.affected || 0 };
+  }
+
   async getStorageStats() {
     let totalBytes = 0;
     let totalPretty = '0 MB';
@@ -593,10 +750,25 @@ export class SyncService implements OnApplicationBootstrap {
     // Targets count
     const targetCount = await this.targetRepository.count();
 
+    // Loyalty Audit count
+    const loyaltyCount = await this.loyaltyRepository.count();
+    const loyaltyFilesRaw = await this.loyaltyRepository.createQueryBuilder('la')
+      .select('la.fileId', 'fileId')
+      .addSelect('la.fileName', 'fileName')
+      .addSelect('COUNT(*)', 'count')
+      .addSelect('MIN(la.billDate)', 'minDate')
+      .addSelect('MAX(la.billDate)', 'maxDate')
+      .addSelect('MAX(la.createdAt)', 'uploadedAt')
+      .groupBy('la.fileId')
+      .addGroupBy('la.fileName')
+      .orderBy('MAX(la.createdAt)', 'DESC')
+      .getRawMany();
+
     const histBytes = tableMap['sales_record']?.bytes || (salesCount * 250);
     const dsBytes = tableMap['dead_stock_record']?.bytes || (deadStockCount * 300);
     const targetBytes = tableMap['target_settings']?.bytes || (targetCount * 1024);
-    const systemBytes = Math.max(0, totalBytes - (histBytes + dsBytes + targetBytes));
+    const loyaltyBytes = tableMap['loyalty_audit_record']?.bytes || (loyaltyCount * 280);
+    const systemBytes = Math.max(0, totalBytes - (histBytes + dsBytes + targetBytes + loyaltyBytes));
 
     return {
       success: true,
@@ -646,6 +818,25 @@ export class SyncService implements OnApplicationBootstrap {
           files: deadStockFilesRaw.map(f => ({
             fileId: f.fileId,
             fileName: f.fileName || 'Uploaded Item File',
+            count: Number(f.count || 0),
+            minDate: f.minDate,
+            maxDate: f.maxDate,
+            uploadedAt: f.uploadedAt
+          }))
+        },
+        {
+          id: 'loyalty-audit',
+          title: 'Loyalty & Customer Audit Database',
+          description: 'Bill-level customer and salesman records to detect suspicious repeat billing',
+          table: 'loyalty_audit_record',
+          bytes: loyaltyBytes,
+          pretty: tableMap['loyalty_audit_record']?.pretty || `${(loyaltyBytes / (1024 * 1024)).toFixed(1)} MB`,
+          rowCount: loyaltyCount,
+          percent: totalBytes > 0 ? Number(((loyaltyBytes / totalBytes) * 100).toFixed(1)) : 0,
+          color: '#ec4899', // Pink
+          files: loyaltyFilesRaw.map(f => ({
+            fileId: f.fileId,
+            fileName: f.fileName || 'Daily Sales File',
             count: Number(f.count || 0),
             minDate: f.minDate,
             maxDate: f.maxDate,

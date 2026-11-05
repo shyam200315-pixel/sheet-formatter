@@ -88,6 +88,40 @@ export class SyncController {
     return this.syncService.deleteDeadStockByDate(date);
   }
 
+  // Loyalty & Customer Audit Endpoints
+  @Post('loyalty/upload')
+  async uploadLoyaltyData(@Body() body: { data: any[], isAppend?: boolean }) {
+    if (!body || !body.data) {
+      throw new Error("Invalid payload: 'data' property is required.");
+    }
+    return this.syncService.saveLoyaltyData(body.data, body.isAppend);
+  }
+
+  @Get('loyalty/download')
+  async downloadLoyaltyData() {
+    return this.syncService.getLoyaltyData();
+  }
+
+  @Get('loyalty/metadata')
+  async getLoyaltyMetadata() {
+    return this.syncService.getLoyaltyMetadata();
+  }
+
+  @Delete('loyalty/clear')
+  async clearLoyaltyData() {
+    return this.syncService.clearLoyaltyData();
+  }
+
+  @Delete('loyalty/file/:fileId')
+  async deleteLoyaltyFile(@Param('fileId') fileId: string) {
+    return this.syncService.deleteLoyaltyFile(decodeURIComponent(fileId));
+  }
+
+  @Delete('loyalty/date/:date')
+  async deleteLoyaltyByDate(@Param('date') date: string) {
+    return this.syncService.deleteLoyaltyByDate(date);
+  }
+
   
   @Get('storage')
   async getStorageStats() {

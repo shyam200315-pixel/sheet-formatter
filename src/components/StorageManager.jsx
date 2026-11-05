@@ -28,6 +28,9 @@ import {
   deleteDeadStockDateFromCloud,
   clearHistoricalData,
   clearDeadStockFromCloud,
+  deleteLoyaltyFileFromCloud,
+  deleteLoyaltyDateFromCloud,
+  clearLoyaltyFromCloud,
   formatDateDisplay,
   parseBillDate
 } from "../helpers";
@@ -50,13 +53,14 @@ export default function StorageManager({ onBack }) {
     actionType: "", // 'delete-file' | 'delete-date' | 'clear-table'
     targetId: "",
     targetName: "",
-    featureId: "", // 'historical-sales' | 'dead-stock-bestsellers'
+    featureId: "", // 'historical-sales' | 'dead-stock-bestsellers' | 'loyalty-audit'
     isProcessing: false
   });
 
   // Date picker cleanup state
   const [histDeleteDate, setHistDeleteDate] = useState("");
   const [dsDeleteDate, setDsDeleteDate] = useState("");
+  const [loyaltyDeleteDate, setLoyaltyDeleteDate] = useState("");
 
   const fetchStats = async (isManual = false) => {
     if (isManual) setIsRefreshing(true);
@@ -130,6 +134,9 @@ export default function StorageManager({ onBack }) {
         } else if (featureId === "dead-stock-bestsellers") {
           await deleteDeadStockFileFromCloud(targetId);
           toast.success("Dead Stock file deleted successfully!");
+        } else if (featureId === "loyalty-audit") {
+          await deleteLoyaltyFileFromCloud(targetId);
+          toast.success("Loyalty file deleted successfully!");
         }
       } else if (actionType === "delete-date") {
         if (featureId === "historical-sales") {
@@ -140,6 +147,10 @@ export default function StorageManager({ onBack }) {
           await deleteDeadStockDateFromCloud(targetId);
           toast.success(`Dead Stock sales for ${targetId} deleted!`);
           setDsDeleteDate("");
+        } else if (featureId === "loyalty-audit") {
+          await deleteLoyaltyDateFromCloud(targetId);
+          toast.success(`Loyalty records for ${targetId} deleted!`);
+          setLoyaltyDeleteDate("");
         }
       } else if (actionType === "clear-table") {
         if (featureId === "historical-sales") {
@@ -148,6 +159,9 @@ export default function StorageManager({ onBack }) {
         } else if (featureId === "dead-stock-bestsellers") {
           await clearDeadStockFromCloud();
           toast.success("Dead Stock database cleared!");
+        } else if (featureId === "loyalty-audit") {
+          await clearLoyaltyFromCloud();
+          toast.success("Loyalty database cleared!");
         }
       }
 
@@ -247,11 +261,13 @@ export default function StorageManager({ onBack }) {
 
   const histFeature = stats?.features?.find(f => f.id === "historical-sales");
   const dsFeature = stats?.features?.find(f => f.id === "dead-stock-bestsellers");
+  const loyaltyFeature = stats?.features?.find(f => f.id === "loyalty-audit");
   const targetFeature = stats?.features?.find(f => f.id === "store-targets");
 
   // Percentage of each category relative to total 512 MB quota
   const histPercentOfQuota = stats?.quotaBytes && histFeature ? ((histFeature.bytes / stats.quotaBytes) * 100) : 0;
   const dsPercentOfQuota = stats?.quotaBytes && dsFeature ? ((dsFeature.bytes / stats.quotaBytes) * 100) : 0;
+  const loyaltyPercentOfQuota = stats?.quotaBytes && loyaltyFeature ? ((loyaltyFeature.bytes / stats.quotaBytes) * 100) : 0;
   const sysPercentOfQuota = stats?.quotaBytes && stats.systemOverhead ? ((stats.systemOverhead.bytes / stats.quotaBytes) * 100) : 0;
 
   return (
@@ -351,6 +367,12 @@ export default function StorageManager({ onBack }) {
             className="bg-purple-500 h-full transition-all duration-500 hover:opacity-90"
             title={`Dead Stock & Best Sellers: ${dsFeature?.pretty || "5.1 MB"}`}
           />
+          {/* Pink: Loyalty & Customer Audit */}
+          <div
+            style={{ width: `${Math.max(loyaltyPercentOfQuota, 0.8)}%` }}
+            className="bg-pink-500 h-full transition-all duration-500 hover:opacity-90"
+            title={`Loyalty & Customer Audit: ${loyaltyFeature?.pretty || "0.1 MB"}`}
+          />
           {/* Slate: System Overhead & Indexes */}
           <div
             style={{ width: `${Math.max(sysPercentOfQuota, 0.8)}%` }}
@@ -360,7 +382,7 @@ export default function StorageManager({ onBack }) {
         </div>
 
         {/* Legend */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-medium pt-2 border-t border-gray-100 dark:border-slate-800">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs font-medium pt-2 border-t border-gray-100 dark:border-slate-800">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-blue-500 shrink-0 shadow-sm" />
             <div>
@@ -372,15 +394,23 @@ export default function StorageManager({ onBack }) {
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-purple-500 shrink-0 shadow-sm" />
             <div>
-              <div className="text-gray-900 dark:text-white font-semibold">Dead Stock & Best Sellers</div>
+              <div className="text-gray-900 dark:text-white font-semibold">Dead Stock</div>
               <div className="text-gray-500 dark:text-gray-400">{dsFeature?.pretty || "5.1 MB"} ({dsFeature?.percent || 0}%)</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-pink-500 shrink-0 shadow-sm" />
+            <div>
+              <div className="text-gray-900 dark:text-white font-semibold">Loyalty Audit</div>
+              <div className="text-gray-500 dark:text-gray-400">{loyaltyFeature?.pretty || "0.1 MB"} ({loyaltyFeature?.percent || 0}%)</div>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-slate-500 shrink-0 shadow-sm" />
             <div>
-              <div className="text-gray-900 dark:text-white font-semibold">System & Indexes</div>
+              <div className="text-gray-900 dark:text-white font-semibold">System Indexes</div>
               <div className="text-gray-500 dark:text-gray-400">{stats?.systemOverhead?.pretty || "7.4 MB"}</div>
             </div>
           </div>
@@ -388,7 +418,7 @@ export default function StorageManager({ onBack }) {
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-gray-200 dark:bg-slate-700 shrink-0 shadow-sm" />
             <div>
-              <div className="text-gray-900 dark:text-white font-semibold">Available Free Space</div>
+              <div className="text-gray-900 dark:text-white font-semibold">Available Space</div>
               <div className="text-gray-500 dark:text-gray-400">{freeMb} MB ({(100 - usedPercent).toFixed(1)}%)</div>
             </div>
           </div>
@@ -711,6 +741,168 @@ export default function StorageManager({ onBack }) {
                         <tr>
                           <td colSpan="5" className="px-4 py-6 text-center text-gray-400">
                             No files found in Dead Stock Database.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Feature: Loyalty & Customer Audit Database */}
+        <div className="bg-white/80 dark:bg-slate-900/80 rounded-2xl border border-gray-200 dark:border-slate-800 overflow-hidden shadow-sm transition-all">
+          <div className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-pink-50/50 to-transparent dark:from-pink-950/20">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-pink-100 dark:bg-pink-950 text-pink-600 dark:text-pink-400 rounded-xl mt-1">
+                <ShieldAlert size={24} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                    Loyalty & Customer Audit Database
+                  </h3>
+                  <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-pink-100 text-pink-700 dark:bg-pink-900/60 dark:text-pink-300">
+                    {loyaltyFeature?.pretty || "0.1 MB"}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-xl">
+                  {loyaltyFeature?.description || "Bill-level customer and salesman records to detect suspicious repeat billing"}
+                </p>
+                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600 dark:text-gray-400 mt-2 font-medium">
+                  <span>🛡️ {loyaltyFeature?.rowCount?.toLocaleString() || 0} Total Bills</span>
+                  <span>•</span>
+                  <span>📁 {loyaltyFeature?.files?.length || 0} Uploaded Files</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 self-end md:self-center">
+              <button
+                onClick={() => setExpandedFeature(expandedFeature === "loyalty-audit" ? "" : "loyalty-audit")}
+                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 transition-colors cursor-pointer"
+              >
+                <span>{expandedFeature === "loyalty-audit" ? "Hide Files" : "Manage Files"}</span>
+                {expandedFeature === "loyalty-audit" ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </button>
+
+              <button
+                onClick={() => handleOpenDeleteModal({
+                  title: "Clear Loyalty Database",
+                  message: "Are you sure you want to delete ALL customer bills from the Loyalty Audit database? This action cannot be undone.",
+                  actionType: "clear-table",
+                  featureId: "loyalty-audit"
+                })}
+                className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-colors cursor-pointer"
+                title="Wipe Loyalty Table"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+          </div>
+
+          {/* Expandable File List & Cleanup for Loyalty Audit */}
+          {expandedFeature === "loyalty-audit" && (
+            <div className="p-6 border-t border-gray-100 dark:border-slate-800 space-y-6">
+              
+              {/* Cleanup by Date Control */}
+              <div className="bg-gray-50 dark:bg-slate-800/40 p-4 rounded-xl border border-gray-200 dark:border-slate-700/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div>
+                  <div className="text-xs font-bold text-gray-800 dark:text-gray-200">
+                    Clean Space by Specific Date:
+                  </div>
+                  <div className="text-[11px] text-gray-500 dark:text-gray-400">
+                    Remove customer bills for a specific date (e.g. 2026-11-04)
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <input
+                    type="date"
+                    value={loyaltyDeleteDate}
+                    onChange={(e) => setLoyaltyDeleteDate(e.target.value)}
+                    className="bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 text-xs rounded-lg px-2.5 py-1.5 text-gray-900 dark:text-white"
+                  />
+                  <button
+                    onClick={() => {
+                      if (!loyaltyDeleteDate) return toast.error("Please pick a date to delete");
+                      handleOpenDeleteModal({
+                        title: `Delete Loyalty Records for ${loyaltyDeleteDate}`,
+                        message: `Are you sure you want to delete all customer bills for date ${loyaltyDeleteDate}?`,
+                        actionType: "delete-date",
+                        targetId: loyaltyDeleteDate,
+                        featureId: "loyalty-audit"
+                      });
+                    }}
+                    disabled={!loyaltyDeleteDate}
+                    className="px-3 py-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/50 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 text-xs font-semibold rounded-lg border border-red-200 dark:border-red-800 transition-colors disabled:opacity-50 cursor-pointer"
+                  >
+                    Delete Date
+                  </button>
+                </div>
+              </div>
+
+              {/* Uploaded Files Table */}
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">
+                  Uploaded Files in Loyalty Database ({loyaltyFeature?.files?.length || 0})
+                </h4>
+
+                <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-slate-700">
+                  <table className="w-full text-xs text-left">
+                    <thead className="text-[11px] text-gray-500 dark:text-gray-400 uppercase bg-gray-50 dark:bg-slate-800/60 border-b border-gray-200 dark:border-slate-700">
+                      <tr>
+                        <th className="px-4 py-3 font-semibold">File Name</th>
+                        <th className="px-4 py-3 font-semibold text-right">Bills</th>
+                        <th className="px-4 py-3 font-semibold">Date Coverage</th>
+                        <th className="px-4 py-3 font-semibold">Uploaded On</th>
+                        <th className="px-4 py-3 font-semibold text-center w-20">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-slate-800 bg-white/50 dark:bg-slate-900/50">
+                      {loyaltyFeature?.files?.map((file) => (
+                        <tr key={file.fileId} className="hover:bg-gray-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                          <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">
+                            <div className="flex items-center gap-2">
+                              <ShieldAlert size={15} className="text-pink-500 shrink-0" />
+                              <span className="truncate max-w-xs" title={file.fileName}>{file.fileName}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-right font-bold text-gray-700 dark:text-gray-300">
+                            {file.count.toLocaleString()}
+                          </td>
+                          <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
+                            {file.minDate && file.maxDate ? (
+                              <span>{formatRawDate(file.minDate)} → {formatRawDate(file.maxDate)}</span>
+                            ) : "Single Date"}
+                          </td>
+                          <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
+                            {file.uploadedAt ? new Date(file.uploadedAt).toLocaleDateString() : "Historical"}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <button
+                              onClick={() => handleOpenDeleteModal({
+                                title: `Delete "${file.fileName}"`,
+                                message: `Are you sure you want to delete file "${file.fileName}"? This will remove ${file.count.toLocaleString()} bills from the Loyalty Audit database.`,
+                                actionType: "delete-file",
+                                targetId: file.fileId,
+                                targetName: file.fileName,
+                                featureId: "loyalty-audit"
+                              })}
+                              className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer"
+                              title="Delete this file"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {(!loyaltyFeature?.files || loyaltyFeature.files.length === 0) && (
+                        <tr>
+                          <td colSpan="5" className="px-4 py-6 text-center text-gray-400">
+                            No files found in Loyalty Database.
                           </td>
                         </tr>
                       )}

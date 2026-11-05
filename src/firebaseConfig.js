@@ -38,6 +38,7 @@ export function getSyncStatus() {
 
 let targetListeners = [];
 let deadStockListeners = [];
+let loyaltyListeners = [];
 
 export function subscribeToTargetUpdates(listener) {
   targetListeners.push(listener);
@@ -53,6 +54,13 @@ export function subscribeToDeadStockUpdates(listener) {
   };
 }
 
+export function subscribeToLoyaltyUpdates(listener) {
+  loyaltyListeners.push(listener);
+  return () => {
+    loyaltyListeners = loyaltyListeners.filter(l => l !== listener);
+  };
+}
+
 export function subscribeToCloudUpdates(onUpdate) {
   const eventSource = new EventSource(`${API_BASE}/updates`);
   eventSource.onmessage = (event) => {
@@ -65,6 +73,10 @@ export function subscribeToCloudUpdates(onUpdate) {
       } else if (parsedData.type === 'deadstock_update') {
         deadStockListeners.forEach(listener => {
           try { listener(parsedData.data); } catch (err) { console.warn("DeadStock listener error:", err); }
+        });
+      } else if (parsedData.type === 'loyalty_update') {
+        loyaltyListeners.forEach(listener => {
+          try { listener(parsedData.data); } catch (err) { console.warn("Loyalty listener error:", err); }
         });
       } else if (parsedData.type === 'update') {
         onUpdate();
@@ -393,6 +405,122 @@ export async function deleteDeadStockDateFromCloud(dateStr) {
     return await response.json();
   } catch (e) {
     console.warn("DeadStock Cloud Delete Date Warning:", e.message);
+    return { success: false, deletedCount: 0 };
+  }
+}
+
+// =========================================================================
+// TABLE 3: LOYALTY & CUSTOMER AUDIT CLOUD API
+// =========================================================================
+
+export async function saveLoyaltyToCloud(data, onProgress = null, appendMode = false) {
+  try {
+    if (!data || data.length === 0) {
+      if (!appendMode) await clearLoyaltyFromCloud();
+      return true;
+    }
+
+    const batchSize = 5000;
+    const totalBatches = Math.ceil(data.length / batchSize);
+
+    for (let i = 0; i < totalBatches; i++) {
+      const batchData = data.slice(i * batchSize, (i + 1) * batchSize);
+      if (onProgress) {
+        onProgress({
+          uploadedChunks: i + 1,
+          totalChunks: totalBatches,
+          uploadedRows: Math.min((i + 1) * batchSize, data.length),
+          totalRows: data.length
+        });
+      }
+
+      const isAppend = appendMode ? true : (i > 0);
+      const response = await fetch(`${API_BASE}/loyalty/upload`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: batchData, isAppend })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}: ${await response.text()}`);
+      }
+    }
+
+    return true;
+  } catch (err) {
+    console.warn("Loyalty Save Cloud Warning:", err.message);
+    throw err;
+  }
+}
+
+export async function loadLoyaltyFromCloud() {
+  try {
+    const response = await fetch(`${API_BASE}/loyalty/download`, {
+      method: 'GET',
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+      }
+    });
+
+    if (response.status === 404) return [];
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (e) {
+    console.warn("Loyalty Cloud Load Warning:", e.message);
+    return [];
+  }
+}
+
+export async function getLoyaltyCloudMetadata() {
+  try {
+    const response = await fetch(`${API_BASE}/loyalty/metadata`, {
+      method: 'GET',
+      cache: 'no-store'
+    });
+    if (response.ok) return await response.json();
+    return null;
+  } catch (e) {
+    console.warn("Loyalty Cloud Metadata Warning:", e.message);
+    return null;
+  }
+}
+
+export async function clearLoyaltyFromCloud() {
+  try {
+    const response = await fetch(`${API_BASE}/loyalty/clear`, {
+      method: 'DELETE'
+    });
+    return response.ok;
+  } catch (e) {
+    console.warn("Loyalty Cloud Clear Warning:", e.message);
+    return false;
+  }
+}
+
+export async function deleteLoyaltyFileFromCloud(fileId) {
+  try {
+    const response = await fetch(`${API_BASE}/loyalty/file/${encodeURIComponent(fileId)}`, {
+      method: 'DELETE'
+    });
+    if (!response.ok) return false;
+    return await response.json();
+  } catch (e) {
+    console.warn("Loyalty Cloud Delete File Warning:", e.message);
+    return { success: false, deletedCount: 0 };
+  }
+}
+
+export async function deleteLoyaltyDateFromCloud(dateStr) {
+  try {
+    const response = await fetch(`${API_BASE}/loyalty/date/${encodeURIComponent(dateStr)}`, {
+      method: 'DELETE'
+    });
+    if (!response.ok) return false;
+    return await response.json();
+  } catch (e) {
+    console.warn("Loyalty Cloud Delete Date Warning:", e.message);
     return { success: false, deletedCount: 0 };
   }
 }

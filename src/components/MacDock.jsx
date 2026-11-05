@@ -13,12 +13,14 @@ import {
   Lock,
   Wallet,
   FileCheck,
-  Database
+  Database,
+  ShieldAlert
 } from 'lucide-react';
 
 const DOCK_ITEMS = [
   { id: 'home', label: 'Home', icon: Home, color: 'text-blue-500' },
   { id: 'validator', label: 'Daily Sales', icon: Calculator, color: 'text-sky-500' },
+  { id: 'loyalty-audit', label: 'Loyalty Audit', icon: ShieldAlert, color: 'text-pink-500' },
   { id: 'storage-manager', label: 'Cloud Storage', icon: Database, color: 'text-indigo-600' },
   { id: 'wooqer-reports', label: 'Wooqer Reports', icon: FileCheck, color: 'text-blue-600' },
   { id: 'store-cash', label: 'Store Cash', icon: Wallet, color: 'text-emerald-500' },

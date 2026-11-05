@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as XLSX from "xlsx";
-import { findHeaderRowIndex, getTargetDate, parseBillDate, appendHistoricalData, syncDailyRowsToHistoricalData, syncDailyRowsToDeadStockData, loadHistoricalData, MASTER_STORES, normalizeStoreName, getKnownStores, saveKnownStores } from "./helpers";
+import { findHeaderRowIndex, getTargetDate, parseBillDate, appendHistoricalData, syncDailyRowsToHistoricalData, syncDailyRowsToDeadStockData, syncDailyRowsToLoyaltyAudit, loadHistoricalData, MASTER_STORES, normalizeStoreName, getKnownStores, saveKnownStores } from "./helpers";
 import FileDropZone from "./components/FileDropZone";
 import DashboardView from "./components/DashboardView";
 import OrderProcessing from "./components/OrderProcessing";
@@ -28,13 +28,15 @@ import {
   TrendingUp,
   ArrowLeft,
   Database,
-  AlertTriangle
+  AlertTriangle,
+  ShieldAlert
 } from 'lucide-react';
 import HistoricalSales from "./components/HistoricalSales";
 import DeadStockAnalyzer from "./components/DeadStockAnalyzer";
 import InstitutionalChecker from "./components/InstitutionalChecker";
 import StoreCashAnalyzer from "./components/StoreCashAnalyzer";
 import WooqerReports from "./components/WooqerReports";
+import LoyaltyAudit from "./components/LoyaltyAudit";
 import TargetUpdateModal from "./components/TargetUpdateModal";
 import { getLocalStoreTargets, calculateGrandTotalTarget, saveLocalStoreTargets } from "./targetManager";
 import { loadTargetsFromCloud, subscribeToTargetUpdates } from "./firebaseConfig";
@@ -85,6 +87,15 @@ const TOOLS = [
     color: "bg-rose-100",
     borderColor: "border-rose-200",
     hoverBorder: "hover:border-rose-400"
+  },
+  {
+    id: "loyalty-audit",
+    title: "Loyalty & Customer Audit",
+    description: "Detect repeat customer numbers, employee loyalty fraud, and multi-store billing anomalies.",
+    icon: <ShieldAlert className="w-8 h-8 text-pink-600" />,
+    color: "bg-pink-100",
+    borderColor: "border-pink-200",
+    hoverBorder: "hover:border-pink-400"
   },
   {
     id: "storage-manager",
@@ -499,7 +510,7 @@ export default function App() {
 
           // 1. Sync to Historical Database (revenue & bill totals)
           const histResult = await syncDailyRowsToHistoricalData(jsonData, worksheet, (progress) => {
-            const percent = Math.round((progress.uploadedRows / progress.totalRows) * 50);
+            const percent = Math.round((progress.uploadedRows / progress.totalRows) * 33);
             toast.custom((t) => renderProgressToast(t, `Syncing Historical DB...`, percent), { id: toastId, duration: 999999 });
           });
 
@@ -507,11 +518,22 @@ export default function App() {
           let dsResult = { syncedCount: 0, isItemWise: false };
           try {
             dsResult = await syncDailyRowsToDeadStockData(jsonData, worksheet, (progress) => {
-              const percent = 50 + Math.round((progress.uploadedRows / progress.totalRows) * 50);
+              const percent = 33 + Math.round((progress.uploadedRows / progress.totalRows) * 33);
               toast.custom((t) => renderProgressToast(t, `Syncing Dead Stock & Best Sellers...`, percent), { id: toastId, duration: 999999 });
             });
           } catch (dsErr) {
             console.warn("DeadStock auto-sync error:", dsErr);
+          }
+
+          // 3. Sync to Loyalty & Customer Audit Database (customer bills & loyalty fraud detection)
+          let loyaltyResult = { syncedCount: 0, hasCustomerData: false };
+          try {
+            loyaltyResult = await syncDailyRowsToLoyaltyAudit(jsonData, worksheet, (progress) => {
+              const percent = 66 + Math.round((progress.uploadedRows / progress.totalRows) * 34);
+              toast.custom((t) => renderProgressToast(t, `Syncing Loyalty Audit...`, percent), { id: toastId, duration: 999999 });
+            });
+          } catch (loyaltyErr) {
+            console.warn("Loyalty auto-sync error:", loyaltyErr);
           }
 
           toast.dismiss(toastId);
@@ -522,6 +544,9 @@ export default function App() {
           }
           if (dsResult && dsResult.syncedCount > 0) {
             syncedMessages.push(`📦 ${dsResult.syncedCount.toLocaleString()} items to Dead Stock & Best Sellers`);
+          }
+          if (loyaltyResult && loyaltyResult.syncedCount > 0) {
+            syncedMessages.push(`🛡️ ${loyaltyResult.syncedCount.toLocaleString()} bills to Loyalty Audit`);
           }
 
           if (syncedMessages.length > 0) {
@@ -897,6 +922,13 @@ export default function App() {
           {visitedTabs.has("best-sellers") && (
             <div className={activeTab === "best-sellers" ? "w-full block" : "hidden"}>
               <BestSellers onBack={() => setActiveTab("home")} />
+            </div>
+          )}
+
+          {/* Loyalty & Customer Audit */}
+          {visitedTabs.has("loyalty-audit") && (
+            <div className={activeTab === "loyalty-audit" ? "w-full block" : "hidden"}>
+              <LoyaltyAudit onBack={() => setActiveTab("home")} />
             </div>
           )}
 

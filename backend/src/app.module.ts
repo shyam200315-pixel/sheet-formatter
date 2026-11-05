@@ -9,6 +9,7 @@ import { SyncModule } from './sync/sync.module.js';
 import { SalesRecord } from './sync/entities/sync.entity.js';
 import { TargetSetting } from './sync/entities/target.entity.js';
 import { DeadStockRecord } from './sync/entities/deadstock.entity.js';
+import { LoyaltyAuditRecord } from './sync/entities/loyalty.entity.js';
 
 @Module({
   imports: [
@@ -32,7 +33,7 @@ import { DeadStockRecord } from './sync/entities/deadstock.entity.js';
               type: 'postgres',
               url: databaseUrl,
               ssl: isSsl ? { rejectUnauthorized: false } : false,
-              entities: [SalesRecord, TargetSetting, DeadStockRecord],
+              entities: [SalesRecord, TargetSetting, DeadStockRecord, LoyaltyAuditRecord],
               synchronize: true,
             } as unknown as TypeOrmModuleOptions;
           }
@@ -45,7 +46,7 @@ import { DeadStockRecord } from './sync/entities/deadstock.entity.js';
             password: configService.get<string>('DB_PASSWORD', 'password'),
             database: configService.get<string>('DB_NAME', 'sheet_formatter'),
             ssl: isSsl ? { rejectUnauthorized: false } : false,
-            entities: [SalesRecord, TargetSetting, DeadStockRecord],
+            entities: [SalesRecord, TargetSetting, DeadStockRecord, LoyaltyAuditRecord],
             synchronize: true,
           } as unknown as TypeOrmModuleOptions;
         }
@@ -54,7 +55,7 @@ import { DeadStockRecord } from './sync/entities/deadstock.entity.js';
         return {
           type: 'better-sqlite3',
           database: 'local-db.sqlite',
-          entities: [SalesRecord, TargetSetting, DeadStockRecord],
+          entities: [SalesRecord, TargetSetting, DeadStockRecord, LoyaltyAuditRecord],
           synchronize: true,
         } as unknown as TypeOrmModuleOptions;
       },

@@ -356,6 +356,13 @@ import {
   deleteDeadStockFileFromCloud,
   deleteDeadStockDateFromCloud,
   subscribeToDeadStockUpdates,
+  saveLoyaltyToCloud,
+  loadLoyaltyFromCloud,
+  getLoyaltyCloudMetadata,
+  clearLoyaltyFromCloud,
+  deleteLoyaltyFileFromCloud,
+  deleteLoyaltyDateFromCloud,
+  subscribeToLoyaltyUpdates,
   getCloudStorageStats
 } from "./firebaseConfig";
 export { 
@@ -369,6 +376,13 @@ export {
   deleteDeadStockFileFromCloud,
   deleteDeadStockDateFromCloud,
   subscribeToDeadStockUpdates,
+  saveLoyaltyToCloud,
+  loadLoyaltyFromCloud,
+  getLoyaltyCloudMetadata,
+  clearLoyaltyFromCloud,
+  deleteLoyaltyFileFromCloud,
+  deleteLoyaltyDateFromCloud,
+  subscribeToLoyaltyUpdates,
   getCloudStorageStats
 };
 
@@ -613,6 +627,233 @@ export async function syncDailyRowsToDeadStockData(jsonData, worksheet, onProgre
     targetDateStr: todayStr,
     syncedCount: targetDayRows.length,
     isItemWise: true
+  };
+}
+
+/**
+ * Synchronizes daily sales rows into Loyalty & Customer Audit Cloud database.
+ * Aggregates item-level rows into unique bill records before saving.
+ * Automatically deletes existing records for target date from cloud first to ensure zero duplicates.
+ * 
+ * @param {Array} jsonData 
+ * @param {Object} worksheet 
+ * @param {Function} [onProgress]
+ * @returns {Promise<{ targetDateStr: string, syncedCount: number, hasCustomerData: boolean }>}
+ */
+export async function syncDailyRowsToLoyaltyAudit(jsonData, worksheet, onProgress = null) {
+  if (!jsonData || !Array.isArray(jsonData) || jsonData.length === 0) {
+    return { targetDateStr: "", syncedCount: 0, hasCustomerData: false };
+  }
+
+  // 1. Detect if sheet contains Customer Mobile or Bill No columns
+  const sample = jsonData.find(r => r && typeof r === "object") || {};
+  const sampleKeys = Object.keys(sample).map(k => k.trim().toUpperCase());
+  const hasMobileCol = sampleKeys.some(k => 
+    k.includes("CUSTOMER MOBILE") || 
+    k.includes("MOBILE NO") || 
+    k.includes("RETAIL CUSTOMER") ||
+    k.includes("CONTACT NO") ||
+    k.includes("PHONE")
+  );
+  const hasBillCol = sampleKeys.some(k => 
+    k.includes("BILL NO") || 
+    k.includes("VOUCHER NO") || 
+    k.includes("INVOICE NO")
+  );
+
+  if (!hasMobileCol && !hasBillCol) {
+    return { targetDateStr: "", syncedCount: 0, hasCustomerData: false };
+  }
+
+  // 2. Establish latest target date
+  const { today, todayStr } = getTargetDate(worksheet, jsonData);
+  if (!today || isNaN(today.getTime())) {
+    return { targetDateStr: "", syncedCount: 0, hasCustomerData: true };
+  }
+
+  const targetDay = today.getDate();
+  const targetMonth = today.getMonth();
+  const targetYear = today.getFullYear();
+
+  // 3. Filter rows matching ONLY the target date
+  const targetDayRows = jsonData.filter(row => {
+    if (!row || typeof row !== "object") return false;
+    let dVal = row["BILL DATE"] || row["DATE"] || row["BILLDATE"] || row["INVOICE DATE"] || row["TRANSACTION DATE"];
+    if (!dVal) {
+      for (const k in row) {
+        if (k.trim().toUpperCase().includes("DATE")) {
+          dVal = row[k];
+          break;
+        }
+      }
+    }
+    if (!dVal) return false;
+    const parsed = parseBillDate(dVal);
+    if (!parsed || isNaN(parsed.getTime())) return false;
+    return (
+      parsed.getDate() === targetDay &&
+      parsed.getMonth() === targetMonth &&
+      parsed.getFullYear() === targetYear
+    );
+  });
+
+  if (targetDayRows.length === 0) {
+    return { targetDateStr: todayStr, syncedCount: 0, hasCustomerData: true };
+  }
+
+  // 4. Aggregate item rows into unique bill records
+  const targetDateFormatted = `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}-${String(targetDay).padStart(2, '0')}`;
+  const dailyFileId = `daily_sync_${targetYear}_${targetMonth + 1}_${targetDay}`;
+  const dailyFileName = `Daily Collection (${todayStr})`;
+
+  const billsMap = new Map();
+
+  targetDayRows.forEach((row, idx) => {
+    // Resolve bill number
+    let billNo = "";
+    for (const k in row) {
+      const uk = k.trim().toUpperCase();
+      if (uk.includes("BILL NO") || uk.includes("VOUCHER NO") || uk.includes("INVOICE NO") || uk === "BILL" || uk === "BILLNO") {
+        billNo = String(row[k] || "").trim();
+        if (billNo) break;
+      }
+    }
+
+    // Resolve store
+    let storeRaw = "";
+    for (const k in row) {
+      const uk = k.trim().toUpperCase();
+      if (uk.includes("BRANCH NAME") || uk.includes("STORE NAME") || uk === "BRANCH" || uk === "STORE") {
+        storeRaw = String(row[k] || "").trim();
+        if (storeRaw) break;
+      }
+    }
+    const store = normalizeStoreName(storeRaw) || storeRaw;
+
+    // Resolve customer mobile
+    let rawMobile = "";
+    for (const k in row) {
+      const uk = k.trim().toUpperCase();
+      if (uk.includes("CUSTOMER MOBILE") || uk.includes("MOBILE NO") || uk.includes("PHONE") || uk.includes("CONTACT")) {
+        rawMobile = String(row[k] || "").trim();
+        if (rawMobile) break;
+      }
+    }
+    let cleanedMobile = rawMobile.replace(/\D/g, "");
+    if (cleanedMobile.length > 10 && cleanedMobile.startsWith("91")) {
+      cleanedMobile = cleanedMobile.slice(-10);
+    }
+
+    // Resolve customer name
+    let customerName = "";
+    for (const k in row) {
+      const uk = k.trim().toUpperCase();
+      if (uk.includes("CUSTOMER NAME") || uk.includes("CUSTOMER FIRST") || uk.includes("RETAIL CUSTOMER") || uk === "CUSTOMER") {
+        customerName = String(row[k] || "").trim();
+        if (customerName) break;
+      }
+    }
+
+    // Resolve salesman
+    let salesman = "";
+    for (const k in row) {
+      const uk = k.trim().toUpperCase();
+      if (uk.includes("SALESMAN") || uk.includes("SALES MAN") || uk.includes("SALESPERSON") || uk.includes("EXECUTIVE")) {
+        salesman = String(row[k] || "").trim();
+        if (salesman) break;
+      }
+    }
+
+    // Resolve user name / cashier
+    let userName = "";
+    for (const k in row) {
+      const uk = k.trim().toUpperCase();
+      if (uk.includes("USER NAME") || uk.includes("USERNAME") || uk.includes("CASHIER")) {
+        userName = String(row[k] || "").trim();
+        if (userName) break;
+      }
+    }
+
+    // Resolve bill time
+    let billTime = "";
+    for (const k in row) {
+      const uk = k.trim().toUpperCase();
+      if (uk.includes("BILL TIME") || uk.includes("TIME") || uk.includes("VOUCHER TIME")) {
+        billTime = String(row[k] || "").trim();
+        if (billTime) break;
+      }
+    }
+
+    // Amount & points
+    let netAmount = 0;
+    for (const k in row) {
+      const uk = k.trim().toUpperCase();
+      if (uk.includes("NET SALE AMOUNT") || uk.includes("NET AMOUNT") || uk === "AMOUNT" || uk.includes("NET VALUE")) {
+        netAmount = Number(row[k]) || 0;
+        break;
+      }
+    }
+
+    let pointsRedeemed = 0;
+    for (const k in row) {
+      const uk = k.trim().toUpperCase();
+      if (uk.includes("POINTS REDEEMED") || uk.includes("POINTS")) {
+        pointsRedeemed = Number(row[k]) || 0;
+        break;
+      }
+    }
+
+    // Unique bill key (composite to ensure distinct bills across stores)
+    const billKey = billNo ? `${store}___${billNo}` : `${store}___${cleanedMobile || 'UNKNOWN'}___${idx}`;
+
+    if (!billsMap.has(billKey)) {
+      billsMap.set(billKey, {
+        billNo: billNo || `BILL-${idx + 1}`,
+        billDate: targetDateFormatted,
+        billTime: billTime,
+        store: store,
+        salesman: salesman,
+        userName: userName,
+        customerMobile: cleanedMobile || null,
+        customerName: customerName || null,
+        billAmount: netAmount,
+        pointsRedeemed: pointsRedeemed,
+        itemsCount: 1,
+        _fileId: dailyFileId,
+        _fileName: dailyFileName,
+      });
+    } else {
+      const existing = billsMap.get(billKey);
+      existing.billAmount = Math.round((existing.billAmount + netAmount) * 100) / 100;
+      existing.pointsRedeemed = Math.round((existing.pointsRedeemed + pointsRedeemed) * 100) / 100;
+      existing.itemsCount += 1;
+      if (!existing.customerMobile && cleanedMobile) existing.customerMobile = cleanedMobile;
+      if (!existing.customerName && customerName) existing.customerName = customerName;
+      if (!existing.salesman && salesman) existing.salesman = salesman;
+      if (!existing.userName && userName) existing.userName = userName;
+      if (!existing.billTime && billTime) existing.billTime = billTime;
+    }
+  });
+
+  const bills = Array.from(billsMap.values());
+  if (bills.length === 0) {
+    return { targetDateStr: todayStr, syncedCount: 0, hasCustomerData: true };
+  }
+
+  // 5. Delete existing records for target date from cloud loyalty table
+  try {
+    await deleteLoyaltyDateFromCloud(targetDateFormatted);
+  } catch (delErr) {
+    console.warn("Loyalty cloud date delete warning:", delErr);
+  }
+
+  // 6. Append new bills to Cloud
+  await saveLoyaltyToCloud(bills, onProgress, true);
+
+  return {
+    targetDateStr: todayStr,
+    syncedCount: bills.length,
+    hasCustomerData: true
   };
 }
 
