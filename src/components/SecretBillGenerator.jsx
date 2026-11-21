@@ -94,6 +94,49 @@ const DEFAULT_SAMPLE_STATE = {
   ]
 };
 
+const STORE_PRESETS = {
+  "WMP003 - IND - MR 09 ROAD": {
+    address: "Shop No: 03 Gr FloorGold Mark Arcade, Plot No:4Scheme\nNo 53, Nr Barfani Dham,Indore- 452007",
+    stateGst: "State:Madhya Pradesh GST:23AADCS9958B1ZA",
+  },
+  "WMP001 - BPL - SEHORE CITY": {
+    address: "Shop No. 4 & 5, Near Town Hall, Main Market, Sehore - 466001",
+    stateGst: "State:Madhya Pradesh GST:23AADCS9958B1ZA",
+  },
+  "WMP002 - BPL - GULMOHAR COLONY": {
+    address: "Plot No. 12, Gulmohar Colony, E-8, Arera Colony, Bhopal - 462039",
+    stateGst: "State:Madhya Pradesh GST:23AADCS9958B1ZA",
+  },
+  "WMP004 - IND - ANNAPURNA RD": {
+    address: "Shop No. 101, Annapurna Road, Near Mandir, Indore - 452009",
+    stateGst: "State:Madhya Pradesh GST:23AADCS9958B1ZA",
+  },
+  "WMP005 - STA - SATNA": {
+    address: "Rewa Road, Near Circuit House, Satna - 485001",
+    stateGst: "State:Madhya Pradesh GST:23AADCS9958B1ZA",
+  },
+  "WMP006 - BPL - KOLAR ROAD": {
+    address: "Kolar Road, Sarvadharma Colony, Bhopal - 462042",
+    stateGst: "State:Madhya Pradesh GST:23AADCS9958B1ZA",
+  },
+  "WMP007 - REW - REWA": {
+    address: "Civil Lines, Near College Chowk, Rewa - 486001",
+    stateGst: "State:Madhya Pradesh GST:23AADCS9958B1ZA",
+  },
+  "WMP008 - SVP - SHIVPURI": {
+    address: "AB Road, Near Madhav Chowk, Shivpuri - 473551",
+    stateGst: "State:Madhya Pradesh GST:23AADCS9958B1ZA",
+  },
+  "WMH001 - NED - VAZIRABAD": {
+    address: "Shop No. 2, Station Road, Vazirabad, Nanded - 431601",
+    stateGst: "State:Maharashtra GST:27AADCS9958B1Z6",
+  },
+  "WMH007 - PUN - RAVET PUNE": {
+    address: "Shop No. 4, Shinde Complex, Ravet, Pune - 412101",
+    stateGst: "State:Maharashtra GST:27AADCS9958B1Z6",
+  }
+};
+
 export default function SecretBillGenerator({ onBack }) {
   // Authentication State with password 'bill'
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -122,14 +165,16 @@ export default function SecretBillGenerator({ onBack }) {
     if (!store) return;
     const storeCode = store.split('-')[0].trim();
     const isMH = storeCode.toUpperCase().startsWith("WMH");
+    const preset = STORE_PRESETS[store.toUpperCase()] || STORE_PRESETS[store];
     
     setBillData(prev => ({
       ...prev,
       storeCodeName: store,
-      storeStateGst: isMH ? "State:Maharashtra GST:27AADCS9958B1Z6" : "State:Madhya Pradesh GST:23AADCS9958B1ZA",
+      storeAddress: preset?.address || prev.storeAddress || `${store.split('-').slice(1).join(' ').trim()}`,
+      storeStateGst: preset?.stateGst || (isMH ? "State:Maharashtra GST:27AADCS9958B1Z6" : "State:Madhya Pradesh GST:23AADCS9958B1ZA"),
       storeEmail: `${storeCode.toLowerCase()}@pigeonstores.com`
     }));
-    toast.success(`Switched store: ${store}`);
+    toast.success(`Loaded ${store}`);
   };
 
   // Auto-save form state locally
@@ -830,35 +875,39 @@ export default function SecretBillGenerator({ onBack }) {
                 boxSizing: "border-box"
               }}
             >
-              {/* Header Logo & Store info */}
-              <div className="text-center mb-2">
-                <div className="flex justify-center mb-1.5">
+              {/* Header Logo & Store info (Auto-balancing layout for short or long addresses) */}
+              <div className="text-center mb-2 px-1 flex flex-col items-center justify-center">
+                <div className="flex justify-center mb-1">
                   <img
                     src="/pigeon-bill-logo.png"
                     alt="Pigeon Logo"
-                    className="h-10 object-contain"
+                    className="h-10 max-h-10 w-auto object-contain"
                   />
                 </div>
-                <div className="font-extrabold text-[12.5px] uppercase tracking-wide text-black">
+                <div className="font-extrabold text-[12.5px] uppercase tracking-wide text-black leading-tight">
                   {billData.companyName || "STOVE KRAFT LIMITED"}
                 </div>
-                <div className="font-bold text-[11px] text-black mt-0.5">
-                  {billData.storeCodeName}
-                </div>
-                <div className="text-[9.5px] leading-tight whitespace-pre-line text-black mt-0.5">
-                  {billData.storeAddress}
-                </div>
-                <div className="text-[9.5px] font-medium text-black mt-0.5">
-                  {billData.storeStateGst}
-                </div>
-                {billData.storeTel && (
-                  <div className="text-[9.5px] text-black">Tel No: {billData.storeTel}</div>
+                {billData.storeCodeName && (
+                  <div className="font-bold text-[11px] text-black mt-0.5 leading-snug">
+                    {billData.storeCodeName}
+                  </div>
                 )}
-                {billData.storeEmail && (
-                  <div className="text-[9.5px] text-black">Email id: {billData.storeEmail}</div>
+                {billData.storeAddress && (
+                  <div className="text-[9.5px] leading-tight text-black mt-0.5 max-w-[94%] mx-auto whitespace-pre-line font-normal">
+                    {billData.storeAddress}
+                  </div>
                 )}
-                {billData.storeCin && (
-                  <div className="text-[9.5px] text-black">CIN No.: {billData.storeCin}</div>
+                {billData.storeStateGst && (
+                  <div className="text-[9.5px] font-medium text-black mt-0.5 leading-tight">
+                    {billData.storeStateGst}
+                  </div>
+                )}
+                {(billData.storeTel || billData.storeEmail || billData.storeCin) && (
+                  <div className="text-[9px] text-black mt-0.5 flex flex-wrap items-center justify-center gap-x-2 leading-tight">
+                    {billData.storeTel && <span>Tel No: {billData.storeTel}</span>}
+                    {billData.storeEmail && <span>Email id: {billData.storeEmail}</span>}
+                    {billData.storeCin && <span>CIN No.: {billData.storeCin}</span>}
+                  </div>
                 )}
               </div>
 
