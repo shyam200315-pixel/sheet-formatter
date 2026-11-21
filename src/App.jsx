@@ -6,7 +6,7 @@ import DashboardView from "./components/DashboardView";
 import OrderProcessing from "./components/OrderProcessing";
 import RequirementGenerator from "./components/RequirementGenerator";
 import MRPChecker from "./components/MRPChecker";
-import QuotationGenerator from "./components/QuotationGenerator";
+import SecretBillGenerator from "./components/SecretBillGenerator";
 import StockAnalyzer from "./components/StockAnalyzer";
 import InwardTracker from "./components/InwardTracker";
 import BestSellers from "./components/BestSellers";
@@ -161,13 +161,13 @@ const TOOLS = [
     hoverBorder: "hover:border-amber-400"
   },
   {
-    id: "quotation",
-    title: "Proforma Invoice",
-    description: "Quickly generate professional PDF & Word proforma invoices for customers.",
-    icon: <FileText className="w-8 h-8 text-rose-600" />,
-    color: "bg-rose-100",
-    borderColor: "border-rose-200",
-    hoverBorder: "hover:border-rose-400"
+    id: "secret",
+    title: "SECRET",
+    description: "",
+    icon: <Lock className="w-8 h-8 text-slate-700 dark:text-slate-300" />,
+    color: "bg-slate-100 dark:bg-slate-800",
+    borderColor: "border-slate-200 dark:border-slate-700",
+    hoverBorder: "hover:border-slate-400"
   },
   {
     id: "historical-sales",
@@ -254,7 +254,7 @@ export default function App() {
       'stock': 'Stock & Scrap Analyzer',
       'inward-tracker': 'Inward Tracker',
       'mrp': 'MRP & Scheme Checker',
-      'quotation': 'Proforma Invoice'
+      'secret': 'SECRET'
     };
 
     const handleKeyDown = (e) => {
@@ -271,7 +271,7 @@ export default function App() {
         const dockIds = [
           'home', 'store-cash', 'institutional', 'validator', 
           'dead-stock', 'storage-manager', 'best-sellers', 'orders', 'generator', 
-          'stock', 'inward-tracker', 'mrp', 'quotation'
+          'stock', 'inward-tracker', 'mrp', 'secret'
         ];
 
         setActiveTab(currentTab => {
@@ -869,10 +869,10 @@ export default function App() {
             </div>
           )}
 
-          {/* Proforma Invoice */}
-          {visitedTabs.has("quotation") && (
-            <div className={activeTab === "quotation" ? "w-full block" : "hidden"}>
-              <QuotationGenerator />
+          {/* SECRET Bill Studio */}
+          {visitedTabs.has("secret") && (
+            <div className={activeTab === "secret" ? "w-full block" : "hidden"}>
+              <SecretBillGenerator onBack={() => setActiveTab("home")} />
             </div>
           )}
 
