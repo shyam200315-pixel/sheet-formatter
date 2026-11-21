@@ -22,6 +22,7 @@ import toast from "react-hot-toast";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import { getKnownStores, MASTER_STORES } from "../helpers";
+import { PIGEON_LOGO_DATA_URI } from "./pigeonLogoBase64";
 
 // Helper: Convert number to uppercase Indian words
 function numberToWords(num) {
@@ -334,21 +335,27 @@ export default function SecretBillGenerator({ onBack }) {
   // PDF Export
   const handleDownloadPdf = async () => {
     const element = billRef.current;
-    if (!element) return;
+    if (!element) {
+      toast.error("Invoice element not found");
+      return;
+    }
 
     setIsGeneratingPdf(true);
-    const toastId = toast.loading("Generating High-Resolution PDF...");
+    const toastId = toast.loading("Generating PDF...", { id: "pdf-download" });
 
     try {
+      // 1. Generate canvas from the bill container
       const canvas = await html2canvas(element, {
-        scale: 2.8,
+        scale: 2.2,
         useCORS: true,
-        logging: false,
+        allowTaint: true,
         backgroundColor: "#ffffff",
-        windowWidth: 794 // 210mm at 96dpi approx
+        logging: false
       });
 
       const imgData = canvas.toDataURL("image/png");
+
+      // 2. Initialize jsPDF
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -356,9 +363,6 @@ export default function SecretBillGenerator({ onBack }) {
       });
 
       const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-
-      // Render centered with clean 125mm thermal width on A4
       const printWidth = 125;
       const printHeight = (canvas.height * printWidth) / canvas.width;
       const xPos = (pageWidth - printWidth) / 2;
@@ -369,10 +373,16 @@ export default function SecretBillGenerator({ onBack }) {
       const cleanInvoiceNo = (billData.invoiceNo || "Invoice").replace(/[\/\\?%*:|"<>]/g, "_");
       pdf.save(`${cleanInvoiceNo}.pdf`);
 
-      toast.success("PDF Downloaded successfully!", { id: toastId });
+      toast.success("PDF Downloaded successfully!", { id: "pdf-download" });
     } catch (err) {
-      console.error("PDF export error:", err);
-      toast.error("Failed to generate PDF", { id: toastId });
+      console.error("PDF generation error:", err);
+      // Fallback: If canvas download is blocked by browser security or extensions, trigger system print
+      try {
+        toast("Opening Print dialog to save as PDF...", { id: "pdf-download", icon: "🖨️" });
+        window.print();
+      } catch (printErr) {
+        toast.error("Unable to generate PDF", { id: "pdf-download" });
+      }
     } finally {
       setIsGeneratingPdf(false);
     }
@@ -879,9 +889,9 @@ export default function SecretBillGenerator({ onBack }) {
               <div className="text-center mb-2 px-1 flex flex-col items-center justify-center">
                 <div className="flex justify-center mb-1">
                   <img
-                    src="/pigeon-bill-logo.png"
+                    src={PIGEON_LOGO_DATA_URI}
                     alt="Pigeon Logo"
-                    className="h-10 max-h-10 w-auto object-contain"
+                    className="h-11 max-h-11 w-auto object-contain mx-auto"
                   />
                 </div>
                 <div className="font-extrabold text-[12.5px] uppercase tracking-wide text-black leading-tight">
@@ -911,13 +921,13 @@ export default function SecretBillGenerator({ onBack }) {
                 )}
               </div>
 
-              {/* TAX INVOICE Header Box */}
+              {/* TAX INVOICE Header Box with Vertical Divider */}
               <div className="border border-black mb-1">
                 <div className="border-b border-black text-center font-bold text-xs py-0.5 bg-gray-50 tracking-wider">
                   {billData.invoiceType}
                 </div>
-                <div className="grid grid-cols-2 text-[10px] p-1 gap-x-2 leading-relaxed">
-                  <div>
+                <div className="grid grid-cols-2 text-[10px] leading-relaxed">
+                  <div className="p-1.5 border-r border-black space-y-0.5">
                     <div className="flex justify-between">
                       <span className="font-semibold">Invoice No.:</span>
                       <span>{billData.invoiceNo}</span>
@@ -931,7 +941,7 @@ export default function SecretBillGenerator({ onBack }) {
                       <span>{billData.time}</span>
                     </div>
                   </div>
-                  <div>
+                  <div className="p-1.5 space-y-0.5">
                     <div className="flex justify-between">
                       <span className="font-semibold">Salesman Name:</span>
                       <span className="uppercase">{billData.salesmanName}</span>
@@ -946,15 +956,15 @@ export default function SecretBillGenerator({ onBack }) {
 
               {/* Customer Details Box */}
               <div className="border border-black mb-1 text-[10px]">
-                <div className="border-b border-black font-bold px-1 py-0.5 bg-gray-50">
+                <div className="border-b border-black font-bold px-1.5 py-0.5 bg-gray-50">
                   Customer Details
                 </div>
-                <div className="p-1 flex justify-between">
-                  <span className="font-bold">{billData.customerName || "Customer"}</span>
-                  <span className="font-semibold">{billData.customerMobile || "N/A"}</span>
+                <div className="p-1.5 flex justify-between items-center">
+                  <span className="font-bold text-[10.5px]">{billData.customerName || "Customer"}</span>
+                  <span className="font-bold text-[10.5px] tracking-wide font-mono">{billData.customerMobile || "N/A"}</span>
                 </div>
                 {billData.customerGst && (
-                  <div className="px-1 pb-1 text-[9.5px] font-medium">
+                  <div className="px-1.5 pb-1 text-[9.5px] font-medium border-t border-black pt-0.5">
                     GST No. : {billData.customerGst}
                   </div>
                 )}
@@ -994,9 +1004,9 @@ export default function SecretBillGenerator({ onBack }) {
                       const net = Number(item.amount) || (gross - d);
 
                       return (
-                        <tr key={item.id || idx} className="border-b border-gray-300 align-top">
+                        <tr key={item.id || idx} className="border-b border-black align-top">
                           <td className="border-r border-black p-1 leading-tight text-left">
-                            <div className="font-medium">{item.name}</div>
+                            <div className="font-semibold text-black">{item.name}</div>
                             <div className="text-[8.5px] text-gray-700">
                               {item.hsn}/{item.gstPercent}%
                             </div>
@@ -1023,7 +1033,7 @@ export default function SecretBillGenerator({ onBack }) {
                     {/* Total Row */}
                     <tr className="border-t border-black font-bold bg-gray-50">
                       <td className="border-r border-black p-1 text-left uppercase">
-                        Total
+                        TOTAL
                       </td>
                       <td className="border-r border-black p-1 text-center">
                         {calculated.totalQty}
@@ -1052,7 +1062,7 @@ export default function SecretBillGenerator({ onBack }) {
                 </div>
                 <table className="w-full text-[9px] border-collapse text-center">
                   <thead>
-                    <tr className="border-b border-black font-semibold">
+                    <tr className="border-b border-black font-bold bg-gray-50">
                       <th className="border-r border-black p-0.5">GST Rate</th>
                       <th className="border-r border-black p-0.5">Taxable Value</th>
                       <th className="border-r border-black p-0.5">CGST</th>
@@ -1063,13 +1073,13 @@ export default function SecretBillGenerator({ onBack }) {
                   </thead>
                   <tbody>
                     {calculated.taxRows.map((r, i) => (
-                      <tr key={i} className="border-b border-gray-200">
+                      <tr key={i} className="border-b border-black">
                         <td className="border-r border-black p-0.5">{r.gstRate}</td>
                         <td className="border-r border-black p-0.5">{r.taxableValue}</td>
                         <td className="border-r border-black p-0.5">{r.cgst}</td>
                         <td className="border-r border-black p-0.5">{r.sgst}</td>
                         <td className="border-r border-black p-0.5">{r.igst}</td>
-                        <td className="p-0.5">{r.totalInvoiceAmount}</td>
+                        <td className="p-0.5 font-medium">{r.totalInvoiceAmount}</td>
                       </tr>
                     ))}
                     <tr className="border-t border-black font-bold bg-gray-50">
