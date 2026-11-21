@@ -15,11 +15,13 @@ import {
   CreditCard,
   CheckCircle2,
   HelpCircle,
-  Eye
+  Eye,
+  Store
 } from "lucide-react";
 import toast from "react-hot-toast";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
+import { getKnownStores, MASTER_STORES } from "../helpers";
 
 // Helper: Convert number to uppercase Indian words
 function numberToWords(num) {
@@ -47,7 +49,7 @@ function numberToWords(num) {
 
 const DEFAULT_SAMPLE_STATE = {
   invoiceType: "TAX INVOICE", // or "PROFORMA INVOICE"
-  companyName: "Stove Kraft Limited",
+  companyName: "STOVE KRAFT LIMITED",
   storeCodeName: "Wmp003 - Ind - Mr 09 Road",
   storeAddress: "Shop No: 03 Gr FloorGold Mark Arcade, Plot No:4Scheme\nNo 53, Nr Barfani Dham,Indore- 452007",
   storeStateGst: "State:Madhya Pradesh GST:23AADCS9958B1ZA",
@@ -114,6 +116,21 @@ export default function SecretBillGenerator({ onBack }) {
   });
 
   const billRef = useRef(null);
+  const knownStores = useMemo(() => getKnownStores(), []);
+
+  const handleStoreSelect = (store) => {
+    if (!store) return;
+    const storeCode = store.split('-')[0].trim();
+    const isMH = storeCode.toUpperCase().startsWith("WMH");
+    
+    setBillData(prev => ({
+      ...prev,
+      storeCodeName: store,
+      storeStateGst: isMH ? "State:Maharashtra GST:27AADCS9958B1Z6" : "State:Madhya Pradesh GST:23AADCS9958B1ZA",
+      storeEmail: `${storeCode.toLowerCase()}@pigeonstores.com`
+    }));
+    toast.success(`Switched store: ${store}`);
+  };
 
   // Auto-save form state locally
   useEffect(() => {
@@ -467,7 +484,92 @@ export default function SecretBillGenerator({ onBack }) {
         {/* ======================================================== */}
         <div className="lg:col-span-5 space-y-4">
           
-          {/* Card 1: Bill Meta & Store */}
+          {/* Card 1: Store & Branch Settings */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-gray-200 dark:border-slate-800 shadow-sm space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-slate-800">
+              <span className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                <Store size={14} className="text-indigo-500" />
+                Store & Branch Settings
+              </span>
+            </div>
+
+            <div className="space-y-2 text-xs">
+              <div>
+                <label className="block text-gray-500 mb-1 font-medium">Quick Select Branch</label>
+                <select
+                  value={knownStores.includes(billData.storeCodeName) ? billData.storeCodeName : ""}
+                  onChange={(e) => handleStoreSelect(e.target.value)}
+                  className="w-full px-2.5 py-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-semibold border border-indigo-200 dark:border-indigo-900/50 rounded-lg focus:outline-none"
+                >
+                  <option value="">-- Choose Store / Custom --</option>
+                  {knownStores.map((st) => (
+                    <option key={st} value={st}>
+                      {st}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-gray-500 mb-1 font-medium">Store Code & Name *</label>
+                  <input
+                    type="text"
+                    value={billData.storeCodeName}
+                    onChange={(e) => setBillData(prev => ({ ...prev, storeCodeName: e.target.value }))}
+                    placeholder="e.g. Wmp003 - Ind - Mr 09 Road"
+                    className="w-full px-2.5 py-1.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-gray-900 dark:text-white font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-500 mb-1 font-medium">Company Header</label>
+                  <input
+                    type="text"
+                    value={billData.companyName}
+                    onChange={(e) => setBillData(prev => ({ ...prev, companyName: e.target.value }))}
+                    placeholder="STOVE KRAFT LIMITED"
+                    className="w-full px-2.5 py-1.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-gray-900 dark:text-white font-semibold uppercase"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-gray-500 mb-1 font-medium">Store Address *</label>
+                <textarea
+                  rows={2}
+                  value={billData.storeAddress}
+                  onChange={(e) => setBillData(prev => ({ ...prev, storeAddress: e.target.value }))}
+                  placeholder="Shop No, Arcade, Area, City, Pincode"
+                  className="w-full px-2.5 py-1.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-gray-900 dark:text-white font-sans text-xs"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-gray-500 mb-1 font-medium">State & GSTIN</label>
+                  <input
+                    type="text"
+                    value={billData.storeStateGst}
+                    onChange={(e) => setBillData(prev => ({ ...prev, storeStateGst: e.target.value }))}
+                    placeholder="State:Madhya Pradesh GST:..."
+                    className="w-full px-2.5 py-1.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-gray-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-500 mb-1 font-medium">Store Email</label>
+                  <input
+                    type="text"
+                    value={billData.storeEmail}
+                    onChange={(e) => setBillData(prev => ({ ...prev, storeEmail: e.target.value }))}
+                    placeholder="wmp003@pigeonstores.com"
+                    className="w-full px-2.5 py-1.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-gray-900 dark:text-white"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Bill Meta & Invoice Details */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-gray-200 dark:border-slate-800 shadow-sm space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-slate-800">
               <span className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
@@ -545,51 +647,6 @@ export default function SecretBillGenerator({ onBack }) {
                 </select>
               </div>
             </div>
-
-            {/* Store details collapsible toggle */}
-            <details className="text-xs pt-1 border-t border-gray-100 dark:border-slate-800">
-              <summary className="cursor-pointer text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-semibold py-1">
-                ⚙ Store Information & Address
-              </summary>
-              <div className="space-y-2 pt-2">
-                <div>
-                  <label className="block text-gray-500 mb-1">Store Code & Name</label>
-                  <input
-                    type="text"
-                    value={billData.storeCodeName}
-                    onChange={(e) => setBillData(prev => ({ ...prev, storeCodeName: e.target.value }))}
-                    className="w-full px-2 py-1 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded text-gray-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-500 mb-1">Address</label>
-                  <textarea
-                    rows={2}
-                    value={billData.storeAddress}
-                    onChange={(e) => setBillData(prev => ({ ...prev, storeAddress: e.target.value }))}
-                    className="w-full px-2 py-1 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded text-gray-900 dark:text-white font-sans text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-500 mb-1">State & GST</label>
-                  <input
-                    type="text"
-                    value={billData.storeStateGst}
-                    onChange={(e) => setBillData(prev => ({ ...prev, storeStateGst: e.target.value }))}
-                    className="w-full px-2 py-1 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded text-gray-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-500 mb-1">Store Email</label>
-                  <input
-                    type="text"
-                    value={billData.storeEmail}
-                    onChange={(e) => setBillData(prev => ({ ...prev, storeEmail: e.target.value }))}
-                    className="w-full px-2 py-1 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded text-gray-900 dark:text-white"
-                  />
-                </div>
-              </div>
-            </details>
           </div>
 
           {/* Card 2: Customer Details */}
@@ -775,33 +832,33 @@ export default function SecretBillGenerator({ onBack }) {
             >
               {/* Header Logo & Store info */}
               <div className="text-center mb-2">
-                <div className="flex justify-center mb-1">
+                <div className="flex justify-center mb-1.5">
                   <img
-                    src="/pigeon.png"
+                    src="/pigeon-bill-logo.png"
                     alt="Pigeon Logo"
-                    className="h-8 object-contain"
+                    className="h-10 object-contain"
                   />
                 </div>
-                <div className="font-bold text-xs uppercase tracking-tight">
-                  {billData.companyName}
+                <div className="font-extrabold text-[12.5px] uppercase tracking-wide text-black">
+                  {billData.companyName || "STOVE KRAFT LIMITED"}
                 </div>
-                <div className="font-semibold text-[10.5px]">
+                <div className="font-bold text-[11px] text-black mt-0.5">
                   {billData.storeCodeName}
                 </div>
-                <div className="text-[9.5px] leading-tight whitespace-pre-line text-gray-900 mt-0.5">
+                <div className="text-[9.5px] leading-tight whitespace-pre-line text-black mt-0.5">
                   {billData.storeAddress}
                 </div>
-                <div className="text-[9.5px] font-medium mt-0.5">
+                <div className="text-[9.5px] font-medium text-black mt-0.5">
                   {billData.storeStateGst}
                 </div>
                 {billData.storeTel && (
-                  <div className="text-[9.5px]">Tel No: {billData.storeTel}</div>
+                  <div className="text-[9.5px] text-black">Tel No: {billData.storeTel}</div>
                 )}
                 {billData.storeEmail && (
-                  <div className="text-[9.5px]">Email id: {billData.storeEmail}</div>
+                  <div className="text-[9.5px] text-black">Email id: {billData.storeEmail}</div>
                 )}
                 {billData.storeCin && (
-                  <div className="text-[9.5px]">CIN No.: {billData.storeCin}</div>
+                  <div className="text-[9.5px] text-black">CIN No.: {billData.storeCin}</div>
                 )}
               </div>
 
