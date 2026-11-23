@@ -139,12 +139,15 @@ const STORE_PRESETS = {
 };
 
 export default function SecretBillGenerator({ onBack }) {
-  // Authentication State with password 'bill'
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem("secret_bill_session_unlocked") === "true";
-  });
+  // Authentication State with password 'bill' - Always re-locks on page refresh
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+  useEffect(() => {
+    // Ensure any legacy session keys are completely cleared
+    sessionStorage.removeItem("secret_bill_session_unlocked");
+  }, []);
 
   // Bill Form Data
   const [billData, setBillData] = useState(() => {
@@ -187,7 +190,6 @@ export default function SecretBillGenerator({ onBack }) {
     e.preventDefault();
     if (passwordInput.trim().toLowerCase() === "bill") {
       setIsAuthenticated(true);
-      sessionStorage.setItem("secret_bill_session_unlocked", "true");
       toast.success("Access Granted");
     } else {
       toast.error("Incorrect Password");
@@ -197,7 +199,6 @@ export default function SecretBillGenerator({ onBack }) {
 
   const handleLock = () => {
     setIsAuthenticated(false);
-    sessionStorage.removeItem("secret_bill_session_unlocked");
     toast.success("Locked");
   };
 
