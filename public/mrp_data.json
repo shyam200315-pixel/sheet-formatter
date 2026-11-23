@@ -486,25 +486,28 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "10040087": {
-    "name": "SAP",
+    "name": "SAP SPARE / ACCESSORY",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "SPARES"
   },
   "11900109": {
-    "name": "3 Li t r e",
+    "name": "3 LITRE PRESSURE COOKER INNER LID",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "PRESSURE COOKER"
   },
   "13001478": {
-    "name": "(72 X 130 MTR) TRANSPARENT TAPE",
+    "name": "TRANSPARENT PACKING TAPE 72 X 130 MTR",
     "old_mrp": 0,
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "file2"
+    "source": "file2",
+    "category": "CONSUMABLE"
   },
   "15000305": {
     "name": "COFFEE MAKER - EXCHANGE RETURN",
@@ -12065,11 +12068,12 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "16002253": {
-    "name": "(IDIYAPPAM)",
+    "name": "PIGEON IDIYAPPAM STAND / PLATES",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "KITCHEN UTILITY"
   },
   "16002255": {
     "name": "PG HAND STEAMER 1200W - BLUE",
@@ -12526,11 +12530,12 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "16002273": {
-    "name": "LARGE",
+    "name": "PIGEON LARGE KNIFE",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "KITCHEN UTILITY"
   },
   "16002280": {
     "name": "PIGEON EDGE  CERAMIC KNIFE SET 4 INCH",
@@ -14194,11 +14199,12 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "16002431": {
-    "name": "IDLY MAKER (3 PLATES)",
+    "name": "PIGEON IDLY MAKER (3 PLATES)",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "KITCHEN UTILITY"
   },
   "16002432": {
     "name": "IDLY MAKER 5 PLATE (DIF PLTS)",
@@ -14309,18 +14315,20 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "16002442": {
-    "name": "BOARD COMBO-LARGE",
+    "name": "PIGEON CHOPPING BOARD COMBO - LARGE",
     "old_mrp": "Not Available",
     "new_mrp": 870,
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "KITCHEN UTILITY"
   },
   "16002443": {
-    "name": "CHOPPING BOARD SMALL",
+    "name": "PIGEON CHOPPING BOARD SMALL",
     "old_mrp": "Not Available",
     "new_mrp": 245,
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "KITCHEN UTILITY"
   },
   "16002461": {
     "name": "PG CLEAR GLASS WATER BOTTLE 750ML - BLUE",
@@ -19348,11 +19356,12 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "19000004": {
-    "name": "TRIO - 3 BURNER",
+    "name": "PIGEON TRIO - 3 BURNER LPG STOVE",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "COOKTOP"
   },
   "19000005": {
     "name": "STAINLESS STEEL LPG STOVES- 3 BR 123",
@@ -19436,11 +19445,12 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "19000013": {
-    "name": "Aut o",
+    "name": "PIGEON AUTO IGNITION 2 BR",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "COOKTOP"
   },
   "19000014": {
     "name": "STAINLESS STEEL LPG STOVES  3BR TRIO AUT",
@@ -34783,11 +34793,12 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "19001935": {
-    "name": "Blue",
+    "name": "PIGEON WATER BOTTLE - BLUE",
     "old_mrp": "Not Available",
     "new_mrp": 1329,
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "FLASK & BOTTLES"
   },
   "19001936": {
     "name": "PG - CLASSIC AL CKR 8 LTR INNER LID",
@@ -35675,11 +35686,12 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "19002212": {
-    "name": "FLASH MOP",
+    "name": "PIGEON FLASH MOP",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "CLEANING UTILITY"
   },
   "19002244": {
     "name": "PIGEON GCT BRUNET  2BR WITH HOSE PIPE",
@@ -47999,11 +48011,12 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "19003637": {
-    "name": "GREEN",
+    "name": "PIGEON WATER BOTTLE - GREEN",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "FLASK & BOTTLES"
   },
   "19003638": {
     "name": "PG STEAM IRON 2400W - BLACK",
@@ -51177,11 +51190,12 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "19004011": {
-    "name": "SPARKLE MOP",
+    "name": "PIGEON SPARKLE MOP",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "CLEANING UTILITY"
   },
   "19004012": {
     "name": "PG-SPARKLE MOP DELUXE",
@@ -51937,18 +51951,20 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "19004053": {
-    "name": "ELEGANCE - 3 BURNER",
+    "name": "PIGEON ELEGANCE - 3 BURNER GLASS TOP",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "COOKTOP"
   },
   "19004054": {
-    "name": "ELEGANCE - 4 BURNER",
+    "name": "PIGEON ELEGANCE - 4 BURNER GLASS TOP",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "COOKTOP"
   },
   "19004057": {
     "name": "PIGEON OTG 20L - WITH ROTISSERIE (M) BR",
@@ -52892,11 +52908,12 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "19004229": {
-    "name": "HEALTHIFRY+6.5L AIRFRYER",
+    "name": "PIGEON HEALTHIFRY+ 6.5L AIR FRYER",
     "old_mrp": 10995,
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "file2"
+    "source": "file2",
+    "category": "APPLIANCES"
   },
   "19004230": {
     "name": "PIGEON MIXER ORB - ALPINE GREEN 3 JAR 75",
@@ -56097,11 +56114,12 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "19004503": {
-    "name": "RELAX SCALP MASSAGER",
+    "name": "PIGEON RELAX SCALP MASSAGER",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "PERSONAL CARE"
   },
   "19004504": {
     "name": "Item from PDF: 19004504",
@@ -56111,18 +56129,20 @@
     "source": "pdf_update"
   },
   "19004505": {
-    "name": "QUICK ELECTRIC CHOPPER",
+    "name": "PIGEON QUICK ELECTRIC CHOPPER",
     "old_mrp": "Not Available",
     "new_mrp": 3495,
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "APPLIANCES"
   },
   "19004506": {
-    "name": "SHARP ELECTRIC CHOPPER",
+    "name": "PIGEON SHARP ELECTRIC CHOPPER",
     "old_mrp": "Not Available",
     "new_mrp": 4994,
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "APPLIANCES"
   },
   "19004510": {
     "name": "PIGEON CERAMIC FRY PAN 260",
@@ -56885,11 +56905,12 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "19004550": {
-    "name": "FLEXI 9 IN 1",
+    "name": "PIGEON FLEXI 9 IN 1 MULTI COOKER",
     "old_mrp": "Not Available",
     "new_mrp": 3495,
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "KITCHEN UTILITY"
   },
   "19004556": {
     "name": "PG CRUISE ICT + CAST-I TAWA250 COMBO",
@@ -57696,53 +57717,60 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "19004645": {
-    "name": "ALL CLAD TRI-PLY 1 LITRE",
+    "name": "PG ALL CLAD TRI-PLY CASSEROLE 1 LITRE",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "COOKWARE"
   },
   "19004646": {
-    "name": "1. 5   Li tr e",
+    "name": "PG ALL CLAD TRI-PLY CASSEROLE 1.5 LITRE",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "COOKWARE"
   },
   "19004647": {
-    "name": "2.5 Li tr e",
+    "name": "PG ALL CLAD TRI-PLY CASSEROLE 2.5 LITRE",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "COOKWARE"
   },
   "19004648": {
-    "name": "3  Li tr e",
+    "name": "PG ALL CLAD TRI-PLY CASSEROLE 3 LITRE",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "COOKWARE"
   },
   "19004649": {
-    "name": "3.5 Li tr e",
+    "name": "PG ALL CLAD TRI-PLY CASSEROLE 3.5 LITRE",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "COOKWARE"
   },
   "19004650": {
-    "name": "5 Li tr e",
+    "name": "PG ALL CLAD TRI-PLY CASSEROLE 5 LITRE",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "COOKWARE"
   },
   "19004651": {
-    "name": "6 Li tr e",
+    "name": "PG ALL CLAD TRI-PLY CASSEROLE 6 LITRE",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "COOKWARE"
   },
   "19004654": {
     "name": "PG 1.5 LTR SPARK DIGITAL KETTLE",
@@ -59239,11 +59267,12 @@
     "source": "pdf_update"
   },
   "19004858": {
-    "name": "3GLACIER 750 ML",
+    "name": "PIGEON GLACIER STAINLESS STEEL BOTTLE 750 ML",
     "old_mrp": "Not Available",
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "pdf"
+    "source": "pdf",
+    "category": "FLASK & BOTTLES"
   },
   "19004871": {
     "name": "Item from PDF: 19004871",
@@ -60924,31 +60953,35 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "CMF": {
-    "name": "Color Me Flyer",
+    "name": "Color Me Flyer Marketing Material",
     "old_mrp": 0,
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "file2"
+    "source": "file2",
+    "category": "MARKETING"
   },
   "CT": {
     "name": "Customer Testimonial card",
     "old_mrp": 0,
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "file2"
+    "source": "file2",
+    "category": "MARKETING"
   },
   "POS ROLL": {
-    "name": "PRINTED POS ROLL",
+    "name": "PRINTED THERMAL POS ROLL",
     "old_mrp": 0,
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "file2"
+    "source": "file2",
+    "category": "CONSUMABLE"
   },
   "VM": {
-    "name": "VM KIT - New Store",
+    "name": "VM KIT - New Store Display Kit",
     "old_mrp": 0,
     "new_mrp": "Not Available",
     "difference": "N/A",
-    "source": "file2"
+    "source": "file2",
+    "category": "MARKETING"
   }
 }

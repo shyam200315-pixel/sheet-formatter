@@ -12,23 +12,125 @@ export default function RequirementGenerator() {
   const [inputText, setInputText] = useState("");
   const [masterDict, setMasterDict] = useState({});
   const [mrpDict, setMrpDict] = useState({});
+  const [sapMapping, setSapMapping] = useState({});
   const [parsedData, setParsedData] = useState([]);
   const [error, setError] = useState("");
   const [storeCode, setStoreCode] = useState("");
   const [storeName, setStoreName] = useState("");
 
-  // Load master.json and mrp_data.json on mount
+  // Load master.json, mrp_data.json, and sap_mapping.json on mount
   useEffect(() => {
-    fetch("/master.json")
-      .then((res) => res.json())
-      .then((data) => setMasterDict(data || {}))
-      .catch((err) => console.error("Failed to load master dictionary:", err));
-
-    fetch("/mrp_data.json")
-      .then((res) => res.json())
-      .then((data) => setMrpDict(data || {}))
-      .catch((err) => console.error("Failed to load mrp dictionary:", err));
+    Promise.all([
+      fetch("/master.json").then((res) => res.json()).catch(() => ({})),
+      fetch("/mrp_data.json").then((res) => res.json()).catch(() => ({})),
+      fetch("/sap_mapping.json").then((res) => res.json()).catch(() => ({}))
+    ]).then(([masterData, mrpData, sapData]) => {
+      setMasterDict(masterData || {});
+      setMrpDict(mrpData || {});
+      setSapMapping(sapData || {});
+    });
   }, []);
+
+  const handleStoreCodeChange = (val) => {
+    setStoreCode(val);
+    if (!storeName && val && val.trim().length >= 6) {
+      const canonical = normalizeStoreName(val.trim());
+      const parts = canonical.split(" - ");
+      if (parts.length > 1) {
+        setStoreName(parts[parts.length - 1]);
+      }
+    }
+  };
+
+  const resolveItem = (rawCode) => {
+    if (!rawCode) return { code: rawCode, name: "UNKNOWN ITEM", category: "UNKNOWN CATEGORY" };
+    const clean = rawCode.toString().trim().toUpperCase();
+
+    // 1. Direct match in mrpDict (mrpDict has official rich product descriptions & categories)
+    if (mrpDict[clean] && mrpDict[clean].name && !mrpDict[clean].name.startsWith("Item from PDF:")) {
+      const item = mrpDict[clean];
+      return {
+        code: clean,
+        name: item.name,
+        category: item.category || item.sub_category || masterDict[clean]?.group || "GENERAL"
+      };
+    }
+
+    // 2. Direct match in masterDict
+    if (masterDict[clean] && masterDict[clean].name && !masterDict[clean].name.startsWith("Item from PDF:")) {
+      const item = masterDict[clean];
+      const cat = (item.group && item.group !== "UNKNOWN CATEGORY" && item.group !== "From Catalogue")
+        ? item.group
+        : (item.category && item.category !== "From Catalogue" ? item.category : (mrpDict[clean]?.category || "GENERAL"));
+      return {
+        code: clean,
+        name: item.name,
+        category: cat
+      };
+    }
+
+    // 3. Exact match in sap_mapping (e.g. 5-digit SAP code -> 8-digit HANA code)
+    if (sapMapping[clean]) {
+      const hanaCode = sapMapping[clean];
+      const target = mrpDict[hanaCode] || masterDict[hanaCode];
+      if (target && target.name && !target.name.startsWith("Item from PDF:")) {
+        return {
+          code: hanaCode,
+          name: target.name,
+          category: target.category || target.group || mrpDict[hanaCode]?.category || "GENERAL"
+        };
+      }
+    }
+
+    // 4. Reverse lookup in mrpDict by sap_code (e.g. item.sap_code === clean)
+    for (const [hCode, item] of Object.entries(mrpDict)) {
+      if (item.sap_code && item.sap_code.trim().toUpperCase() === clean) {
+        return {
+          code: hCode,
+          name: item.name,
+          category: item.category || item.sub_category || "GENERAL"
+        };
+      }
+    }
+
+    // 5. Reverse lookup in mrpDict by ean_code (13-digit barcode)
+    for (const [hCode, item] of Object.entries(mrpDict)) {
+      if (item.ean_code && item.ean_code.trim() === clean) {
+        return {
+          code: hCode,
+          name: item.name,
+          category: item.category || item.sub_category || "GENERAL"
+        };
+      }
+    }
+
+    // 6. Suffix / partial match like in MRPChecker
+    for (const [hCode, item] of Object.entries(mrpDict)) {
+      if (hCode.endsWith(clean) || (item.sap_code && item.sap_code.endsWith(clean))) {
+        return {
+          code: hCode,
+          name: item.name,
+          category: item.category || item.sub_category || "GENERAL"
+        };
+      }
+    }
+
+    // 7. Fallback if any record exists
+    const fallback = mrpDict[clean] || masterDict[clean];
+    if (fallback) {
+      return {
+        code: clean,
+        name: fallback.name || "UNKNOWN ITEM",
+        category: fallback.category || fallback.group || "UNKNOWN CATEGORY"
+      };
+    }
+
+    return {
+      code: clean,
+      name: "UNKNOWN ITEM",
+      category: "UNKNOWN CATEGORY"
+    };
+  };
 
   const handleFileUpload = (file) => {
     setError("");
@@ -65,28 +167,53 @@ export default function RequirementGenerator() {
 
     const lines = inputText.split(/\r?\n/);
     const results = [];
+    let detectedStore = storeCode;
+    let detectedName = storeName;
     
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const codeMatch = /\b(\d{5,8})\b/.exec(line);
+      const line = lines[i].trim();
+      if (!line) continue;
+
+      // Skip header lines
+      if (/^\s*(store\s*code|item\s*code|item\s*description|category|req\s*qty|date|state)\b/i.test(line)) {
+        continue;
+      }
+
+      // Auto-detect store code if not already set (e.g., WMH006, WMP003)
+      if (!detectedStore) {
+        const storeMatch = /\b(W[Mm][HhPp]\d{3})\b/i.exec(line);
+        if (storeMatch) {
+          detectedStore = storeMatch[1].toUpperCase();
+          setStoreCode(detectedStore);
+          if (!detectedName) {
+            const canonical = normalizeStoreName(detectedStore);
+            const parts = canonical.split(" - ");
+            if (parts.length > 1) {
+              detectedName = parts[parts.length - 1];
+              setStoreName(detectedName);
+            }
+          }
+        }
+      }
+
+      const codeMatch = /\b(\d{5,8}|890\d{10})\b/.exec(line);
       
       if (codeMatch) {
-        const code = codeMatch[1];
+        const rawCode = codeMatch[1];
         let qty = "1"; // Default quantity
         
         // 1. Check for explicit 'Qty X' on the same line
-        const qtyMatch = /qty\s*=?\s*(\d+)/i.exec(line);
+        const qtyMatch = /(?:qty|quantity)\s*[:=]?\s*(\d+)/i.exec(line);
         if (qtyMatch) {
           qty = qtyMatch[1];
         } 
         // 2. Check for explicit 'Qty X' on the next line (if next line doesn't have its own item code)
-        else if (i + 1 < lines.length && /qty\s*=?\s*(\d+)/i.test(lines[i + 1]) && !/\b\d{5,8}\b/.test(lines[i + 1])) {
-          qty = /qty\s*=?\s*(\d+)/i.exec(lines[i + 1])[1];
+        else if (i + 1 < lines.length && /(?:qty|quantity)\s*[:=]?\s*(\d+)/i.test(lines[i + 1]) && !/\b(\d{5,8}|890\d{10})\b/.test(lines[i + 1])) {
+          qty = /(?:qty|quantity)\s*[:=]?\s*(\d+)/i.exec(lines[i + 1])[1];
         } 
         // 3. Fallback: Find the last realistic number (1-4 digits) AFTER the item code on the same line
         else {
-          // By only looking AFTER the code, we completely ignore any serial numbers that appear before it
-          const textAfterCode = line.substring(codeMatch.index + code.length);
+          const textAfterCode = line.substring(codeMatch.index + rawCode.length);
           const numbers = [];
           const numRegex = /\b\d{1,4}\b/g;
           let numMatch;
@@ -100,18 +227,18 @@ export default function RequirementGenerator() {
           }
         }
         
-        const masterInfo = masterDict[code] || mrpDict[code] || { name: "UNKNOWN ITEM", group: "UNKNOWN CATEGORY" };
+        const itemInfo = resolveItem(rawCode);
         results.push({
-          code: code,
-          name: masterInfo.name || "UNKNOWN ITEM",
-          category: masterInfo.group || masterInfo.category || "UNKNOWN CATEGORY",
+          code: itemInfo.code || rawCode,
+          name: itemInfo.name,
+          category: itemInfo.category,
           qty: qty
         });
       }
     }
 
     if (results.length === 0) {
-      setError("No valid item codes (5 to 8 digits) found in the text.");
+      setError("No valid item codes found in the text.");
       return;
     }
 
@@ -215,7 +342,7 @@ export default function RequirementGenerator() {
             <input
               type="text"
               value={storeCode}
-              onChange={(e) => setStoreCode(e.target.value)}
+              onChange={(e) => handleStoreCodeChange(e.target.value)}
               placeholder="e.g., WMH001"
               className="w-full p-3 border border-[#dadce0] rounded-md focus:border-[#1a73e8] focus:ring-1 focus:ring-[#1a73e8] outline-none bg-white/60 dark:bg-slate-800/60"
             />
