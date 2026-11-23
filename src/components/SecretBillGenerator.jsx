@@ -19,7 +19,7 @@ import {
   Store
 } from "lucide-react";
 import toast from "react-hot-toast";
-import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 import { jsPDF } from "jspdf";
 import { getKnownStores, MASTER_STORES } from "../helpers";
 import { PIGEON_LOGO_DATA_URI } from "./pigeonLogoBase64";
@@ -333,10 +333,64 @@ export default function SecretBillGenerator({ onBack }) {
     };
   }, [billData.items]);
 
+  // Generate PDF instance using html-to-image (fully compatible with modern Tailwind CSS v4 oklch colors)
+  const generatePdfInstance = async () => {
+    const element = billRef.current;
+    if (!element) throw new Error("Invoice element not found");
+
+    // Capture DOM using native SVG foreignObject renderer (no regex CSS color parser issues)
+    const imgData = await toPng(element, {
+      backgroundColor: "#ffffff",
+      pixelRatio: 2.5,
+      cacheBust: true
+    });
+
+    const img = new Image();
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = reject;
+      img.src = imgData;
+    });
+
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4"
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth(); // 210mm
+    const printWidth = 125;
+    const imgWidth = img.naturalWidth || element.offsetWidth || 470;
+    const imgHeight = img.naturalHeight || element.offsetHeight || 800;
+    const printHeight = (imgHeight * printWidth) / imgWidth;
+    const xPos = (pageWidth - printWidth) / 2;
+
+    // For 1, 2, or 3 items, printHeight is ~180-220mm, fitting easily on 1 page (up to 282mm height)
+    if (printHeight <= 282) {
+      pdf.addImage(imgData, "PNG", xPos, 8, printWidth, printHeight);
+    } else {
+      // Multi-page slicing only when there are many items
+      let heightLeft = printHeight;
+      let position = 8;
+      const pageContentHeight = 280;
+
+      pdf.addImage(imgData, "PNG", xPos, position, printWidth, printHeight);
+      heightLeft -= pageContentHeight;
+
+      while (heightLeft > 0) {
+        position = position - pageContentHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", xPos, position, printWidth, printHeight);
+        heightLeft -= pageContentHeight;
+      }
+    }
+
+    return pdf;
+  };
+
   // PDF Export
   const handleDownloadPdf = async () => {
-    const element = billRef.current;
-    if (!element) {
+    if (!billRef.current) {
       toast.error("Invoice element not found");
       return;
     }
@@ -345,57 +399,17 @@ export default function SecretBillGenerator({ onBack }) {
     const toastId = toast.loading("Generating PDF...", { id: "pdf-download" });
 
     try {
-      // 1. Generate canvas from the bill container
-      const canvas = await html2canvas(element, {
-        scale: 2.5,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-        logging: false,
-        windowWidth: 1200
-      });
-
-      const imgData = canvas.toDataURL("image/png");
-
-      // 2. Initialize jsPDF
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4"
-      });
-
-      const pageWidth = pdf.internal.pageSize.getWidth(); // 210mm
-      const printWidth = 125;
-      const printHeight = (canvas.height * printWidth) / canvas.width;
-      const xPos = (pageWidth - printWidth) / 2;
-
-      // If printHeight fits on 1 page (up to 282mm height):
-      if (printHeight <= 282) {
-        // Fits strictly on 1 single page!
-        pdf.addImage(imgData, "PNG", xPos, 8, printWidth, printHeight);
-      } else {
-        // Multi-page slicing only when there are many items
-        let heightLeft = printHeight;
-        let position = 8;
-        const pageContentHeight = 280;
-
-        pdf.addImage(imgData, "PNG", xPos, position, printWidth, printHeight);
-        heightLeft -= pageContentHeight;
-
-        while (heightLeft > 0) {
-          position = position - pageContentHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, "PNG", xPos, position, printWidth, printHeight);
-          heightLeft -= pageContentHeight;
-        }
-      }
+      const pdf = await generatePdfInstance();
 
       // Customer name format: "Tax invoice for {customerName}.pdf"
       const customer = (billData.customerName || "").trim();
       const cleanCustomer = customer.replace(/[\\/:*?"<>|]/g, "").trim();
+      const docType = (billData.invoiceType || "TAX INVOICE").trim().toLowerCase().includes("proforma")
+        ? "Proforma invoice"
+        : "Tax invoice";
       const fileName = cleanCustomer 
-        ? `Tax invoice for ${cleanCustomer}.pdf` 
-        : `Tax invoice for ${(billData.invoiceNo || "Customer").replace(/[\/\\?%*:|"<>]/g, "_")}.pdf`;
+        ? `${docType} for ${cleanCustomer}.pdf` 
+        : `${docType} for ${(billData.invoiceNo || "Customer").replace(/[\/\\?%*:|"<>]/g, "_")}.pdf`;
 
       pdf.save(fileName);
       toast.success("PDF Downloaded successfully!", { id: "pdf-download" });
@@ -409,53 +423,14 @@ export default function SecretBillGenerator({ onBack }) {
 
   // Direct Browser Print via clean PDF Blob (NO website headers/footers)
   const handlePrint = async () => {
-    const element = billRef.current;
-    if (!element) {
+    if (!billRef.current) {
       window.print();
       return;
     }
 
     const toastId = toast.loading("Preparing clean print...", { id: "pdf-print" });
     try {
-      const canvas = await html2canvas(element, {
-        scale: 2.5,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-        logging: false,
-        windowWidth: 1200
-      });
-
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4"
-      });
-
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const printWidth = 125;
-      const printHeight = (canvas.height * printWidth) / canvas.width;
-      const xPos = (pageWidth - printWidth) / 2;
-
-      if (printHeight <= 282) {
-        pdf.addImage(imgData, "PNG", xPos, 8, printWidth, printHeight);
-      } else {
-        let heightLeft = printHeight;
-        let position = 8;
-        const pageContentHeight = 280;
-
-        pdf.addImage(imgData, "PNG", xPos, position, printWidth, printHeight);
-        heightLeft -= pageContentHeight;
-
-        while (heightLeft > 0) {
-          position = position - pageContentHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, "PNG", xPos, position, printWidth, printHeight);
-          heightLeft -= pageContentHeight;
-        }
-      }
-
+      const pdf = await generatePdfInstance();
       const blob = pdf.output("blob");
       const blobUrl = URL.createObjectURL(blob);
 
