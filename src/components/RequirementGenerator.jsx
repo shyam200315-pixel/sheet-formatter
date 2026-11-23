@@ -11,17 +11,23 @@ import { normalizeStoreName } from "../helpers";
 export default function RequirementGenerator() {
   const [inputText, setInputText] = useState("");
   const [masterDict, setMasterDict] = useState({});
+  const [mrpDict, setMrpDict] = useState({});
   const [parsedData, setParsedData] = useState([]);
   const [error, setError] = useState("");
   const [storeCode, setStoreCode] = useState("");
   const [storeName, setStoreName] = useState("");
 
-  // Load master.json on mount
+  // Load master.json and mrp_data.json on mount
   useEffect(() => {
     fetch("/master.json")
       .then((res) => res.json())
-      .then((data) => setMasterDict(data))
+      .then((data) => setMasterDict(data || {}))
       .catch((err) => console.error("Failed to load master dictionary:", err));
+
+    fetch("/mrp_data.json")
+      .then((res) => res.json())
+      .then((data) => setMrpDict(data || {}))
+      .catch((err) => console.error("Failed to load mrp dictionary:", err));
   }, []);
 
   const handleFileUpload = (file) => {
@@ -94,11 +100,11 @@ export default function RequirementGenerator() {
           }
         }
         
-        const masterInfo = masterDict[code] || { name: "UNKNOWN ITEM", group: "UNKNOWN CATEGORY" };
+        const masterInfo = masterDict[code] || mrpDict[code] || { name: "UNKNOWN ITEM", group: "UNKNOWN CATEGORY" };
         results.push({
           code: code,
-          name: masterInfo.name,
-          category: masterInfo.group,
+          name: masterInfo.name || "UNKNOWN ITEM",
+          category: masterInfo.group || masterInfo.category || "UNKNOWN CATEGORY",
           qty: qty
         });
       }

@@ -1461,12 +1461,18 @@
     "category": "From Catalogue"
   },
   "16002095": {
-    "name": "12\"  2m m",
-    "category": "From Catalogue"
+    "name": "PG SS STEELO KADAI 11 INCH  2 MM",
+    "group": "NONSTICK COOKWARE",
+    "category": "NONSTICK COOKWARE",
+    "sub_category": "KADAI 11 IN",
+    "gst": "GST 18%"
   },
   "16002096": {
-    "name": "13\"  2mm",
-    "category": "From Catalogue"
+    "name": "PG SS STEELO KADAI 12 INCH  2 MM",
+    "group": "NONSTICK COOKWARE",
+    "category": "NONSTICK COOKWARE",
+    "sub_category": "KADAI 12 IN",
+    "gst": "GST 18%"
   },
   "16002097": {
     "name": "PG SS STEELO KADAI 12 INCH WITH SB",
@@ -7345,6 +7351,27 @@
     "group": "CHIMNEY",
     "category": "CHIMNEY",
     "sub_category": "CHIMNEY",
+    "gst": "GST 18%"
+  },
+  "19004833": {
+    "name": "PG TRIPLY FLAT TAWA -280 BELLY",
+    "group": "COOKWARE",
+    "category": "COOKWARE",
+    "sub_category": "TAWA",
+    "gst": "GST 18%"
+  },
+  "19004835": {
+    "name": "PG TRIPLY FRY PAN -240 BELLY",
+    "group": "COOKWARE",
+    "category": "COOKWARE",
+    "sub_category": "FRY PAN 240 MM",
+    "gst": "GST 18%"
+  },
+  "19004836": {
+    "name": "PG TRIPLY KADAI-240 BELLY",
+    "group": "COOKWARE",
+    "category": "COOKWARE",
+    "sub_category": "KADAI",
     "gst": "GST 18%"
   },
   "19004842": {
