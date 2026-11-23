@@ -346,11 +346,12 @@ export default function SecretBillGenerator({ onBack }) {
     try {
       // 1. Generate canvas from the bill container
       const canvas = await html2canvas(element, {
-        scale: 2.2,
+        scale: 2.5,
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
-        logging: false
+        logging: false,
+        windowWidth: 1200
       });
 
       const imgData = canvas.toDataURL("image/png");
@@ -362,35 +363,133 @@ export default function SecretBillGenerator({ onBack }) {
         format: "a4"
       });
 
-      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageWidth = pdf.internal.pageSize.getWidth(); // 210mm
       const printWidth = 125;
       const printHeight = (canvas.height * printWidth) / canvas.width;
       const xPos = (pageWidth - printWidth) / 2;
-      const yPos = 8;
 
-      pdf.addImage(imgData, "PNG", xPos, yPos, printWidth, printHeight);
+      // If printHeight fits on 1 page (up to 282mm height):
+      if (printHeight <= 282) {
+        // Fits strictly on 1 single page!
+        pdf.addImage(imgData, "PNG", xPos, 8, printWidth, printHeight);
+      } else {
+        // Multi-page slicing only when there are many items
+        let heightLeft = printHeight;
+        let position = 8;
+        const pageContentHeight = 280;
 
-      const cleanInvoiceNo = (billData.invoiceNo || "Invoice").replace(/[\/\\?%*:|"<>]/g, "_");
-      pdf.save(`${cleanInvoiceNo}.pdf`);
+        pdf.addImage(imgData, "PNG", xPos, position, printWidth, printHeight);
+        heightLeft -= pageContentHeight;
 
+        while (heightLeft > 0) {
+          position = position - pageContentHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, "PNG", xPos, position, printWidth, printHeight);
+          heightLeft -= pageContentHeight;
+        }
+      }
+
+      // Customer name format: "Tax invoice for {customerName}.pdf"
+      const customer = (billData.customerName || "").trim();
+      const cleanCustomer = customer.replace(/[\\/:*?"<>|]/g, "").trim();
+      const fileName = cleanCustomer 
+        ? `Tax invoice for ${cleanCustomer}.pdf` 
+        : `Tax invoice for ${(billData.invoiceNo || "Customer").replace(/[\/\\?%*:|"<>]/g, "_")}.pdf`;
+
+      pdf.save(fileName);
       toast.success("PDF Downloaded successfully!", { id: "pdf-download" });
     } catch (err) {
       console.error("PDF generation error:", err);
-      // Fallback: If canvas download is blocked by browser security or extensions, trigger system print
-      try {
-        toast("Opening Print dialog to save as PDF...", { id: "pdf-download", icon: "🖨️" });
-        window.print();
-      } catch (printErr) {
-        toast.error("Unable to generate PDF", { id: "pdf-download" });
-      }
+      toast.error("Failed to generate PDF: " + (err.message || "Unknown error"), { id: "pdf-download" });
     } finally {
       setIsGeneratingPdf(false);
     }
   };
 
-  // Direct Browser Print
-  const handlePrint = () => {
-    window.print();
+  // Direct Browser Print via clean PDF Blob (NO website headers/footers)
+  const handlePrint = async () => {
+    const element = billRef.current;
+    if (!element) {
+      window.print();
+      return;
+    }
+
+    const toastId = toast.loading("Preparing clean print...", { id: "pdf-print" });
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2.5,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+        windowWidth: 1200
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4"
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const printWidth = 125;
+      const printHeight = (canvas.height * printWidth) / canvas.width;
+      const xPos = (pageWidth - printWidth) / 2;
+
+      if (printHeight <= 282) {
+        pdf.addImage(imgData, "PNG", xPos, 8, printWidth, printHeight);
+      } else {
+        let heightLeft = printHeight;
+        let position = 8;
+        const pageContentHeight = 280;
+
+        pdf.addImage(imgData, "PNG", xPos, position, printWidth, printHeight);
+        heightLeft -= pageContentHeight;
+
+        while (heightLeft > 0) {
+          position = position - pageContentHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, "PNG", xPos, position, printWidth, printHeight);
+          heightLeft -= pageContentHeight;
+        }
+      }
+
+      const blob = pdf.output("blob");
+      const blobUrl = URL.createObjectURL(blob);
+
+      const iframe = document.createElement("iframe");
+      iframe.style.position = "fixed";
+      iframe.style.right = "0";
+      iframe.style.bottom = "0";
+      iframe.style.width = "0";
+      iframe.style.height = "0";
+      iframe.style.border = "0";
+      iframe.src = blobUrl;
+      document.body.appendChild(iframe);
+
+      iframe.onload = () => {
+        setTimeout(() => {
+          try {
+            iframe.focus();
+            iframe.contentWindow.print();
+            toast.success("Print dialog opened!", { id: "pdf-print" });
+          } catch (e) {
+            window.print();
+          }
+          setTimeout(() => {
+            try {
+              document.body.removeChild(iframe);
+              URL.revokeObjectURL(blobUrl);
+            } catch (e) {}
+          }, 60000);
+        }, 300);
+      };
+    } catch (e) {
+      console.error("Print error:", e);
+      toast.dismiss(toastId);
+      window.print();
+    }
   };
 
   // ----------------------------------------------------
@@ -447,7 +546,21 @@ export default function SecretBillGenerator({ onBack }) {
     <div className="w-full pb-20 animate-in fade-in duration-300">
       {/* Print-specific style */}
       <style>{`
+        @page {
+          size: A4 portrait;
+          margin: 0 !important;
+        }
         @media print {
+          @page {
+            margin: 0 !important;
+          }
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
           body * {
             visibility: hidden !important;
           }
@@ -457,14 +570,17 @@ export default function SecretBillGenerator({ onBack }) {
           #printable-bill {
             position: absolute !important;
             left: 50% !important;
-            top: 0 !important;
+            top: 4mm !important;
             transform: translateX(-50%) !important;
             width: 125mm !important;
-            padding: 0 !important;
+            max-width: 125mm !important;
+            padding: 2mm 5mm !important;
             box-shadow: none !important;
             border: none !important;
             margin: 0 !important;
             background: #ffffff !important;
+            page-break-after: avoid !important;
+            page-break-inside: avoid !important;
           }
         }
       `}</style>
@@ -878,7 +994,7 @@ export default function SecretBillGenerator({ onBack }) {
             <div
               id="printable-bill"
               ref={billRef}
-              className="bg-white text-black p-5 rounded-none shadow-2xl border border-gray-300 w-[125mm] max-w-full font-sans text-[11px] leading-tight select-text"
+              className="bg-white text-black p-3.5 rounded-none shadow-2xl border border-gray-300 w-[125mm] max-w-full font-sans text-[10.5px] leading-tight select-text"
               style={{
                 fontFamily: "Arial, Helvetica, sans-serif",
                 color: "#000000",
@@ -886,12 +1002,12 @@ export default function SecretBillGenerator({ onBack }) {
               }}
             >
               {/* Header Logo & Store info (Auto-balancing layout for short or long addresses) */}
-              <div className="text-center mb-2 px-1 flex flex-col items-center justify-center">
-                <div className="flex justify-center mb-1">
+              <div className="text-center mb-1.5 px-1 flex flex-col items-center justify-center">
+                <div className="flex justify-center mb-0.5">
                   <img
                     src={PIGEON_LOGO_DATA_URI}
                     alt="Pigeon Logo"
-                    className="h-11 max-h-11 w-auto object-contain mx-auto"
+                    className="h-10 max-h-10 w-auto object-contain mx-auto"
                   />
                 </div>
                 <div className="font-extrabold text-[12.5px] uppercase tracking-wide text-black leading-tight">
@@ -1112,17 +1228,17 @@ export default function SecretBillGenerator({ onBack }) {
               </div>
 
               {/* Bill Amount in words */}
-              <div className="border border-black p-1 text-[9px] mb-2 leading-tight uppercase font-medium">
+              <div className="border border-black p-1 text-[8.5px] mb-1 leading-tight uppercase font-medium">
                 Bill Amount in words : {calculated.amountInWords}
               </div>
 
               {/* Savings Announcement */}
-              <div className="text-center font-bold text-[10.5px] my-2">
+              <div className="text-center font-bold text-[10px] my-1">
                 You Have Saved Total Rs.{calculated.totalDiscount} On This Bill.
               </div>
 
               {/* Terms & Conditions */}
-              <div className="border-t border-gray-300 pt-2 text-[8px] leading-normal text-gray-900">
+              <div className="border-t border-gray-300 pt-1 text-[7.5px] leading-tight text-gray-900">
                 <div className="font-bold underline mb-0.5">
                   Terms & Conditions(Check Back)
                 </div>
@@ -1134,17 +1250,15 @@ export default function SecretBillGenerator({ onBack }) {
                   <li>Supply to an unregistertered customer, IRN/E-INVOICE is not applicable under the CGST Rules</li>
                 </ol>
 
-                <div className="mt-2 text-[8px]">
-                  <div>For any query, please get in touch with our Customer Care Team</div>
-                  <div>Customer Care Number – +91 63649 14202</div>
-                  <div>WhatsApp Number – +91 63649 14202</div>
-                  <div>E-mail id – customercare@stovekraft.com</div>
+                <div className="mt-1 text-[7.5px] leading-tight">
+                  <div>For any query, please get in touch with our Customer Care Team:</div>
+                  <div>Phone/WhatsApp: +91 63649 14202 | Email: customercare@stovekraft.com</div>
                 </div>
 
                 {/* Simulated Barcode */}
-                <div className="text-center my-2">
+                <div className="text-center my-1">
                   <div className="inline-flex flex-col items-center">
-                    <div className="h-6 w-28 flex items-stretch justify-center gap-[1.5px] overflow-hidden bg-white">
+                    <div className="h-5 w-28 flex items-stretch justify-center gap-[1.5px] overflow-hidden bg-white">
                       {[1,3,1,2,4,1,2,3,1,2,1,4,2,1,3,2,1,4,1,3,2,1,2,3,1,4,2].map((w, i) => (
                         <div
                           key={i}
@@ -1153,17 +1267,17 @@ export default function SecretBillGenerator({ onBack }) {
                         />
                       ))}
                     </div>
-                    <div className="text-[9px] font-mono tracking-widest mt-0.5">
+                    <div className="text-[8.5px] font-mono tracking-widest mt-0.5">
                       {billData.barcodeText || "375751"}
                     </div>
                   </div>
                 </div>
 
-                <div className="text-center italic text-[8px] text-gray-600">
+                <div className="text-center italic text-[7.5px] text-gray-600">
                   This is a computer generated invoice, required no signature.
                 </div>
 
-                <div className="text-center font-bold text-[9.5px] mt-2 space-y-0.5">
+                <div className="text-center font-bold text-[9px] mt-1 space-y-0.5">
                   <div>Thank You For Visit</div>
                   <div>Visit Again !!</div>
                 </div>
