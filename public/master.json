@@ -32,7 +32,7 @@
     "group": "SPARES",
     "category": "SPARES",
     "sub_category": "SPARE",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "10000510": {
     "name": "SILENT - CHUTNEY  BLADE",
@@ -312,6 +312,27 @@
     "group": "EXCHANGE",
     "category": "EXCHANGE",
     "sub_category": "NA",
+    "gst": "GST 5%"
+  },
+  "15000460": {
+    "name": "CHIMNEY-EXCHANGE RETURN - GILMA",
+    "group": "EXCHANGE",
+    "category": "EXCHANGE",
+    "sub_category": "NA",
+    "gst": "GST 18%"
+  },
+  "15000463": {
+    "name": "GILMA COOKTOP-EXCHANGE RETURN",
+    "group": "EXCHANGE",
+    "category": "EXCHANGE",
+    "sub_category": "NA",
+    "gst": "GST 18%"
+  },
+  "15000465": {
+    "name": "ILMA HOB-EXCHANGE RETURN",
+    "group": "EXCHANGE",
+    "category": "EXCHANGE",
+    "sub_category": "NA",
     "gst": "GST 18%"
   },
   "16000004": {
@@ -336,7 +357,7 @@
     "gst": "GST 18%"
   },
   "16000019": {
-    "name": "PIGEON`MULTI PIRPOSE KITCHEN SCISSOR",
+    "name": "PIGEON MULTI PIRPOSE KITCHEN SCISSOR",
     "group": "KITCHEN UTILITY",
     "category": "KITCHEN UTILITY",
     "sub_category": "SCISSOR",
@@ -351,7 +372,10 @@
   },
   "16000023": {
     "name": "PIGEON HOSE PIPE 1.5 METER",
-    "group": "SPARES"
+    "group": "SPARES",
+    "category": "SPARES",
+    "sub_category": "HOSE PIPE",
+    "gst": "GST 18%"
   },
   "16000039": {
     "name": "IVORY IRON",
@@ -502,8 +526,10 @@
   },
   "16000205": {
     "name": "PIGEON LED LAMP ILLUME",
+    "group": "EMERGENCY LAMPS",
     "category": "EMERGENCY LAMPS",
-    "group": "EMERGENCY LAMPS"
+    "sub_category": "LAMPS",
+    "gst": "GST 18%"
   },
   "16000211": {
     "name": "GILMA CHIMNEY - MARVEL 60",
@@ -713,7 +739,7 @@
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "750 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16000349": {
     "name": "PIGEON OTG WITH ROTISSERIE 30 LTR",
@@ -741,7 +767,7 @@
     "group": "LED",
     "category": "LED",
     "sub_category": "SLIM PANEL",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16000357": {
     "name": "PG LED JOYBOX SLIM PANEL 6W SQUARE-6500K",
@@ -776,7 +802,7 @@
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "750 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16000376": {
     "name": "PIGEON EMERGENCY LAMP - FLARE",
@@ -1718,8 +1744,10 @@
   },
   "16000792": {
     "name": "PIGEON LUMINO PRO EMERGENCY LIGHT",
+    "group": "EMERGENCY LAMPS",
     "category": "EMERGENCY LAMPS",
-    "group": "EMERGENCY LAMPS"
+    "sub_category": "LAMPS",
+    "gst": "GST 18%"
   },
   "16000793": {
     "name": "GILMA HOB 2BR FOLDABLE",
@@ -1730,25 +1758,31 @@
   },
   "16000797": {
     "name": "PG-RUBBER GASKET -2/3 LTR - INNER LID",
-    "group": "SPARES"
+    "group": "SPARES",
+    "category": "SPARES",
+    "sub_category": "SPARE GASKET",
+    "gst": "GST 18%"
   },
   "16000798": {
     "name": "PG-RUBBER GASKET -5 LTR - INNER LID",
-    "group": "SPARES"
+    "group": "SPARES",
+    "category": "SPARES",
+    "sub_category": "SPARE GASKET",
+    "gst": "GST 18%"
   },
   "16000800": {
     "name": "PIGEON SPL SS CONICAL CASSEROLE 16 CM GL",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "CASSEROLE 160 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16000801": {
     "name": "PIGEON SPL SS CONICAL CASSEROLE 20 CM GL",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "CASSEROLE 180 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16000802": {
     "name": "PIGEON SPL SS CASROLE 3 SET(16 18 20 CM)",
@@ -1860,42 +1894,42 @@
     "group": "CAST IRON",
     "category": "CAST IRON",
     "sub_category": "PANNIYARKAL_9 ROUND",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16000892": {
     "name": "PG CAST IRON FRY PAN 200 MM",
     "group": "CAST IRON",
     "category": "CAST IRON",
     "sub_category": "FRY PAN_200 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16000893": {
     "name": "PG CAST IRON CONCAVE TAWA 250 MM",
     "group": "CAST IRON",
     "category": "CAST IRON",
     "sub_category": "TAWA_250 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16000894": {
     "name": "PG CAST IRON GRILL PAN 250 MM",
     "group": "CAST IRON",
     "category": "CAST IRON",
     "sub_category": "GRILL PAN_250 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16000895": {
     "name": "PG CAST IRON KADAI 260 MM",
     "group": "CAST IRON",
     "category": "CAST IRON",
     "sub_category": "KADAI_260 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16000896": {
     "name": "PG CAST IRON FRY PAN 250 MM",
     "group": "CAST IRON",
     "category": "CAST IRON",
     "sub_category": "FRY PAN_250 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16000897": {
     "name": "PG LED DIVA TORCH - 0.75W - RED",
@@ -1982,15 +2016,18 @@
     "gst": "GST 18%"
   },
   "16000935": {
-    "name": "B&D - BXCM0101IN - One Cup Coffee Maker - 1",
-    "group": "Black + Decker"
+    "name": "B&D-BXCM0101IN-ONE CUP COFFEE MAKER - 1",
+    "group": "BLACK + DECKER",
+    "category": "BLACK + DECKER",
+    "sub_category": "COFFEE MAKER",
+    "gst": "GST 18%"
   },
   "16000938": {
     "name": "PG CAST IRON LONG HANDLE D0SA TAWA 300",
     "group": "CAST IRON",
     "category": "CAST IRON",
     "sub_category": "DOSA TAWA_300 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16000939": {
     "name": "PG CAST IRON LONG HANDLE D0SA TAWA 280",
@@ -2053,14 +2090,14 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GRAVY POT 900 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16001404": {
     "name": "PIGEON SS GRAVY POT 500ML",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GRAVY POT 500ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16001768": {
     "name": "XCORD 2 PIN X 5 MTR - RED",
@@ -2826,23 +2863,25 @@
     "gst": "GST 5%"
   },
   "16002094": {
-    "name": "STAINLESS STEEL STEELO KADAI 10\" 2MM",
+    "name": "PG SS STEELO KADAI 10 INCH  2 MM",
+    "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
-    "group": "NONSTICK COOKWARE"
+    "sub_category": "KADAI 10 IN",
+    "gst": "GST 5%"
   },
   "16002095": {
     "name": "PG SS STEELO KADAI 11 INCH  2 MM",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "KADAI 11 IN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16002096": {
-    "name": "PG SS STEELO KADAI 12 INCH  2 MM",
+    "name": "PG SS STEELO KADAI 12 INCH 2 MM",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "KADAI 12 IN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16002097": {
     "name": "PG SS STEELO KADAI 12 INCH WITH SB",
@@ -2926,12 +2965,14 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TOPE SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16002109": {
-    "name": "TOPE SET 10” TO 14”",
+    "name": "PG SS STEELO TOPE SET 10 TO 14 REG",
+    "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
-    "group": "NONSTICK COOKWARE"
+    "sub_category": "TOPE SET",
+    "gst": "GST 5%"
   },
   "16002110": {
     "name": "PG SS STEELO STEAMER 20 CM",
@@ -3148,14 +3189,14 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "MASALA BOX 200 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16002233": {
     "name": "PG SS Steelo Masala Box 20CM Orange",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "MASALA BOX 200 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16002234": {
     "name": "GILMA CHIMNEY NEXON 75",
@@ -3176,28 +3217,28 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "DINNER SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16002241": {
     "name": "PG SS STEELO 42 Pcs Dinner set",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "DINNER SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16002242": {
     "name": "PG SS STEELO 32 Pcs Dinner set",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "DINNER SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16002243": {
     "name": "PG SS STEELO 25 Pcs Dinner set",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "DINNER SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16002244": {
     "name": "Item from PDF: 16002244",
@@ -3227,8 +3268,10 @@
   },
   "16002256": {
     "name": "PG HAND STEAMER 1200W - PINK",
+    "group": "SMALL APPLIANCES",
     "category": "SMALL APPLIANCES",
-    "group": "SMALL APPLIANCES"
+    "sub_category": "STEAMER",
+    "gst": "GST 18%"
   },
   "16002257": {
     "name": "GILMA CHIMNEY OMEGA 90",
@@ -3373,7 +3416,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "SAUCEPAN 10 INCH",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16002293": {
     "name": "PIGEON CHIMNEY - XTREME - 60",
@@ -3569,42 +3612,42 @@
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "500 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16002375": {
     "name": "PIGEON SIPLZZLE 750ML - PINK",
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "750 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16002376": {
     "name": "PIGEON SIPLZZLE 500ML - YELLOW",
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "500 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16002377": {
     "name": "PIGEON SIPLZZLE 750ML - YELLOW",
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "750 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16002378": {
     "name": "PIGEON SIPLZZLE 500ML - BLUE",
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "500 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16002379": {
     "name": "PIGEON SIPLZZLE 750ML - BLUE",
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "750 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16002380": {
     "name": "PIGEON EDGE CARBON KNIFE SET 7PCS",
@@ -3660,14 +3703,14 @@
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "500 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16002391": {
     "name": "PIGEON SIPLZZLE 750ML - GREEN",
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "750 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16002394": {
     "name": "GILMA CHIMNEY CLARA 60",
@@ -3723,7 +3766,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "16002416": {
     "name": "PIGEON CHIMNEY - AURA- 60",
@@ -4076,6 +4119,13 @@
     "sub_category": "NON STICK COOKWARE",
     "gst": "GST 5%"
   },
+  "16002622": {
+    "name": "PIGEON AIR PURIFIER",
+    "group": "SMALL APPLIANCES",
+    "category": "SMALL APPLIANCES",
+    "sub_category": "AIR PURIFIER",
+    "gst": "GST 18%"
+  },
   "16002630": {
     "name": "PIGEON MIXER GRINDER - SMARTI 550W",
     "group": "MIXER GRINDER",
@@ -4097,6 +4147,13 @@
     "sub_category": "MIXER GRINDER",
     "gst": "GST 18%"
   },
+  "16002636": {
+    "name": "GILMA HOB FLARA 4",
+    "group": "HOB",
+    "category": "HOB",
+    "sub_category": "4 BURNER",
+    "gst": "GST 18%"
+  },
   "16002640": {
     "name": "GILMA COOKTOP RIO 2BR",
     "group": "COOKTOP",
@@ -4109,6 +4166,13 @@
     "group": "COOKTOP",
     "category": "COOKTOP",
     "sub_category": "COOKTOP",
+    "gst": "GST 18%"
+  },
+  "16002642": {
+    "name": "GILMA COOKTOP RIO 4BR",
+    "group": "COOKTOP",
+    "category": "COOKTOP",
+    "sub_category": "4 BURNER GLASS",
     "gst": "GST 18%"
   },
   "16002643": {
@@ -4175,24 +4239,24 @@
     "gst": "GST 18%"
   },
   "16002652": {
-    "name": "Item from PDF: 16002652",
-    "group": "GENERAL",
-    "category": "GENERAL",
-    "sub_category": "",
+    "name": "PIGEON LPG STOVE - IGNX 2BR (SABAF)",
+    "group": "COOKTOP",
+    "category": "COOKTOP",
+    "sub_category": "2 BURNER",
     "gst": "GST 18%"
   },
   "16002653": {
-    "name": "Item from PDF: 16002653",
-    "group": "GENERAL",
-    "category": "GENERAL",
-    "sub_category": "",
+    "name": "PIGEON LPG STOVE - IGNX 3BR (SABAF)",
+    "group": "COOKTOP",
+    "category": "COOKTOP",
+    "sub_category": "3 BURNER",
     "gst": "GST 18%"
   },
   "16002654": {
-    "name": "Item from PDF: 16002654",
-    "group": "GENERAL",
-    "category": "GENERAL",
-    "sub_category": "",
+    "name": "PIGEON LPG STOVE - IGNX 4BR (SABAF)",
+    "group": "COOKTOP",
+    "category": "COOKTOP",
+    "sub_category": "4 BURNER",
     "gst": "GST 18%"
   },
   "17012507": {
@@ -4207,35 +4271,35 @@
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012509": {
     "name": "SAMPLES - FRY PAN MEDIUM-50",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012510": {
     "name": "SAMPLES - KADAI-150",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012511": {
     "name": "SAMPLES - KADAI-50",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012512": {
     "name": "SAMPLES -3LAYER PREMIUM TAWA-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012513": {
     "name": "SAMPLES -ATTA MAKER-1500",
@@ -4263,21 +4327,21 @@
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012517": {
     "name": "SAMPLES -BIRIYANI POT-300",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012518": {
     "name": "SAMPLES -BIRIYANI POT-500",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012519": {
     "name": "SAMPLES -BLENDER-200",
@@ -4291,105 +4355,105 @@
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012521": {
     "name": "SAMPLES -CAT IRON KADAI-500",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012522": {
     "name": "SAMPLES -CERAMIC FRY PAN 200-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012523": {
     "name": "SAMPLES -CERAMIC FRY PAN 300-500",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012524": {
     "name": "SAMPLES -CERAMIC FRY PAN IB-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012525": {
     "name": "SAMPLES -CERAMIC FRY PAN-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012526": {
     "name": "SAMPLES -CERAMIC FRY PAN-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012527": {
     "name": "SAMPLES -CERAMIC FRY PAN-50",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012528": {
     "name": "SAMPLES -CERAMIC KADAI-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012529": {
     "name": "SAMPLES -CERAMIC SAUCE PAN-50",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012530": {
     "name": "SAMPLES -CERAMIC SQUARE FRY PAN-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012531": {
     "name": "SAMPLES -CERAMIC SQUARE FRY PAN-150",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012532": {
     "name": "SAMPLES -CERAMIC TAWA-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012533": {
     "name": "SAMPLES -COOKER BOTTOM-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012534": {
     "name": "SAMPLES -COOKWARE GIFT SET-500",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012535": {
     "name": "SAMPLES -FIBER CHOPING BOARD-50",
@@ -4473,77 +4537,77 @@
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012547": {
     "name": "SAMPLES -FRY PAN -200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012548": {
     "name": "SAMPLES -FRY PAN MEDIUM-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012549": {
     "name": "SAMPLES -FRY PAN MEDIUM-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012550": {
     "name": "SAMPLES -FRY PAN SMALL-50",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012551": {
     "name": "SAMPLES -FRY PAN-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012552": {
     "name": "SAMPLES -FRY PAN-150",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012553": {
     "name": "SAMPLES -FRY PAN-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012554": {
     "name": "SAMPLES -FRY PAN-250",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012555": {
     "name": "SAMPLES -FRY PAN-300",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012556": {
     "name": "SAMPLES -FRY PAN-50",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012557": {
     "name": "SAMPLES -GARMET STEAMER-1800",
@@ -4571,49 +4635,49 @@
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012561": {
     "name": "SAMPLES -GRAVY POT -200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012562": {
     "name": "SAMPLES -GRAVY POT -250",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012563": {
     "name": "SAMPLES -GRAVY POT -300",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012564": {
     "name": "SAMPLES -HA TITANIUM  CONCAVE TAWA -250",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012565": {
     "name": "SAMPLES -HATITANIUM CONCAVE TAWA 300-250",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012566": {
     "name": "SAMPLES -HA TITANIUM  CONCAVE TAWA-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012567": {
     "name": "SAMPLES -HOLDER-40",
@@ -4669,42 +4733,42 @@
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012575": {
     "name": "SAMPLES -KADAI-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012576": {
     "name": "SAMPLES -KADAI-150",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012577": {
     "name": "SAMPLES -KADAI-250",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012578": {
     "name": "SAMPLES -KADAI-300",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012579": {
     "name": "SAMPLES -KADAI-500",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012580": {
     "name": "SAMPLES -KETTLE-250",
@@ -4760,21 +4824,21 @@
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012588": {
     "name": "SAMPLES -NONSTICK PANNIYAKAL-300",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012589": {
     "name": "SAMPLES -NONSTICK TAWA-150",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012590": {
     "name": "SAMPLES -OTG & AIR FRYER-3000",
@@ -4823,77 +4887,77 @@
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012597": {
     "name": "SAMPLES -PG SS STEELO COOKWARE-500",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012598": {
     "name": "SAMPLES -PG SS STEELO FRY PAN-250",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012599": {
     "name": "SAMPLES -PG SS STEELO FRY PAN-500",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012600": {
     "name": "SAMPLES -PG SS STEELO KADAI & LID-300",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012601": {
     "name": "SAMPLES -PG SS STEELO KADAI-250",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012602": {
     "name": "SAMPLES -PG SS STEELO KADAI-300",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012603": {
     "name": "SAMPLES -PG SS STEELO KADAI-500",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012604": {
     "name": "SAMPLES -PG SS STEELO SAUCE PAN-250",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012605": {
     "name": "SAMPLES -PRESURE COOKER-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012606": {
     "name": "SAMPLES -PRESURE COOKER-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012607": {
     "name": "SAMPLES -SANDWITCH WITH STEAMER-500",
@@ -4907,70 +4971,70 @@
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012609": {
     "name": "SAMPLES -SAUCE PAN -150",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012610": {
     "name": "SAMPLES -SAUCE PAN -50",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012611": {
     "name": "SAMPLES -SAUCE PAN MEDIUM-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012612": {
     "name": "SAMPLES -SAUCE PAN MEDIUM-150",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012613": {
     "name": "SAMPLES -SAUCE PAN SMALL-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012614": {
     "name": "SAMPLES -SAUCE PAN-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012615": {
     "name": "SAMPLES -SAUCE PAN-150",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012616": {
     "name": "SAMPLES -SAUCE PAN-25",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012617": {
     "name": "SAMPLES -SAUCE PAN-50",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012618": {
     "name": "SAMPLES -SS BOILER-300",
@@ -4984,161 +5048,161 @@
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012620": {
     "name": "SAMPLES -SS COOKPOT SMALL-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012621": {
     "name": "SAMPLES -SS COOKPOT-500",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012622": {
     "name": "SAMPLES -SS FRY PAN HEAVY BOTTOM-300",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012623": {
     "name": "SAMPLES -SS FRY PAN-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012624": {
     "name": "SAMPLES -SS FRY PAN-150",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012625": {
     "name": "SAMPLES -SS KADAI 200-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012626": {
     "name": "SAMPLES -SS KADAI 250-150",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012627": {
     "name": "SAMPLES -SS KADAI 300-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012628": {
     "name": "SAMPLES -SS KADAI-500",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012629": {
     "name": "SAMPLES -SS SAUCE PAN-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012630": {
     "name": "SAMPLES -SS SAUCE PAN-150",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012631": {
     "name": "SAMPLES -SS SAUCE PAN-250",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012632": {
     "name": "SAMPLES -SS SAUCE PAN-300",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012633": {
     "name": "SAMPLES -SS STEELO KADAI-500",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012634": {
     "name": "SAMPLES -SS STEELO SAUCEPAN-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012635": {
     "name": "SAMPLES -SS TRIPLY KADAI-750",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012636": {
     "name": "SAMPLES -STEEL POT-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012637": {
     "name": "SAMPLES -TADKA PAN-150",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012638": {
     "name": "SAMPLES -TAWA-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012639": {
     "name": "SAMPLES -TAWA-150",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012640": {
     "name": "SAMPLES -TAWA-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012641": {
     "name": "SAMPLES -TAWA-250",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012642": {
     "name": "SAMPLES -WATER BOTTLE-50",
@@ -5159,42 +5223,42 @@
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012651": {
     "name": "SAMPLES-DEEP FRYPAN 24CM-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012652": {
     "name": "SAMPLES-FRYPAN 24C-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012653": {
     "name": "SAMPLES-FRYPAN WITH LID 28CM-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012654": {
     "name": "SAMPLES-FRYPAN WITH LID-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012655": {
     "name": "SAMPLES-FRYPAN-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012656": {
     "name": "SAMPLES-GARMENT STEAMER-350",
@@ -5222,35 +5286,35 @@
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012660": {
     "name": "SAMPLES-KADAI WITH LID 28CM-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012661": {
     "name": "SAMPLES-KADAI-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012662": {
     "name": "SAMPLES-MASALA BOX-80",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012663": {
     "name": "SAMPLES-MILK PAN-80",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012664": {
     "name": "SAMPLES-MIXER GRINDER-450",
@@ -5278,35 +5342,35 @@
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012668": {
     "name": "SAMPLES-NONSTCK TAWA-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012669": {
     "name": "SAMPLES-NONSTICK CHAIPAN-150",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012670": {
     "name": "SAMPLES-NONSTICK FRYPAN-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012671": {
     "name": "SAMPLES-NONSTICK KADAI-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012672": {
     "name": "SAMPLES-ROOM HEATER-300",
@@ -5320,14 +5384,14 @@
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012674": {
     "name": "SAMPLES-SAUEPAN-150",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012675": {
     "name": "SAMPLES-SLOW JUCIER-500",
@@ -5348,91 +5412,91 @@
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012678": {
     "name": "SAMPLES-STAIN STEEL SAUEPAN-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012679": {
     "name": "SAMPLES-STAINLESS STEEL FRY PAN-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012680": {
     "name": "SAMPLES-STAINLESS STEEL KADAI LID-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012681": {
     "name": "SAMPLES-STAINLESS STEEL KADAI LID-300",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012682": {
     "name": "SAMPLES-STAINLESS STEEL KADAI LID-350",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012683": {
     "name": "SAMPLES-STAINLESS STEEL KADAI-150",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012684": {
     "name": "SAMPLES-STAINLESS STEEL KADAI-200",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012685": {
     "name": "SAMPLES-STAINLESS STEEL KADAI-250",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012686": {
     "name": "SAMPLES-STAINLESS STEEL KADAI-300",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012687": {
     "name": "SAMPLES-STAINLESS STEEL KADAI-350",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012688": {
     "name": "SAMPLES-STAINLESS STEEL SAUCE PAN-100",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012689": {
     "name": "SAMPLES-STAINLESS STEEL SAUCE PAN-150",
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012690": {
     "name": "SAMPLES-STEAM IRON-200",
@@ -5446,7 +5510,7 @@
     "group": "PROMO ITEM",
     "category": "PROMO ITEM",
     "sub_category": "FACTORY SECONDS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "17012692": {
     "name": "SAMPLES-TOSTER & BOILER-150",
@@ -5590,11 +5654,17 @@
   },
   "18008480": {
     "name": "SILICON SS 3LTR COOKER GASKET - IH",
-    "group": "SPARES"
+    "group": "SPARES",
+    "category": "SPARES",
+    "sub_category": "SPARE GASKET",
+    "gst": "GST 18%"
   },
   "18008481": {
     "name": "SILICON SS 5LTR COOKER GASKET - IH",
-    "group": "SPARES"
+    "group": "SPARES",
+    "category": "SPARES",
+    "sub_category": "SPARE GASKET",
+    "gst": "GST 18%"
   },
   "19000002": {
     "name": "STAINLESS STEEL LPG STOVES 2 BR DUO",
@@ -5660,20 +5730,20 @@
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
     "sub_category": "PRESSURE COOKER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000017": {
     "name": "ALUMINIUM PRESSURE COOKER   2 LTR",
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
-    "sub_category": "2 LTR_OUT",
+    "sub_category": "2 LTR",
     "gst": "GST 5%"
   },
   "19000018": {
     "name": "ALUMINIUM PRESSURE COOKER  3 LTR",
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
-    "sub_category": "3 LTR_OUT",
+    "sub_category": "3 LTR",
     "gst": "GST 5%"
   },
   "19000019": {
@@ -5737,7 +5807,7 @@
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
     "sub_category": "7.5 LTR_OUT",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000029": {
     "name": "PIGEON CLASSIC CALIDA PRESSURE COOKER 3 LTR INNER LID IB",
@@ -5961,7 +6031,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "APPACHETTY",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000074": {
     "name": "GILMA  LPG STOVE 3 BR NERO AUTO",
@@ -6084,8 +6154,10 @@
   },
   "19000132": {
     "name": "PIGEON BLACKLINE -3 BR  SMART",
+    "group": "COOKTOP",
     "category": "COOKTOP",
-    "group": "COOKTOP"
+    "sub_category": "3 BURNER",
+    "gst": "GST 18%"
   },
   "19000133": {
     "name": "PIGEON FAVORITE PRESSURE COOKER 3 LTR OUTER LID",
@@ -6103,8 +6175,10 @@
   },
   "19000150": {
     "name": "PIGEON MIXER GRINDER- EGNITE",
+    "group": "MIXER GRINDER",
     "category": "MIXER GRINDER",
-    "group": "MIXER GRINDER"
+    "sub_category": "750 W",
+    "gst": "GST 18%"
   },
   "19000164": {
     "name": "PG AL CKR INL- 3 LTR SPECIAL IB",
@@ -6205,20 +6279,32 @@
     "gst": "GST 18%"
   },
   "19000209": {
-    "name": "AL OUTERLID COOKER GASKET - MINI",
-    "group": "SPARES"
+    "name": "PG SPARE GASKET OUT LID ALU - MINI",
+    "group": "SPARES",
+    "category": "SPARES",
+    "sub_category": "SPARE GASKET",
+    "gst": "GST 18%"
   },
   "19000210": {
     "name": "PIGEON AL OUTERLID COOKER GASKET - JUNIO",
-    "group": "SPARES"
+    "group": "SPARES",
+    "category": "SPARES",
+    "sub_category": "SPARE GASKET",
+    "gst": "GST 18%"
   },
   "19000211": {
     "name": "PIGEON SPR GASKET OUT LID ALU - SR",
-    "group": "SPARES"
+    "group": "SPARES",
+    "category": "SPARES",
+    "sub_category": "SPARE GASKET",
+    "gst": "GST 18%"
   },
   "19000212": {
     "name": "PIGEON SPARE SAFETY PLUG OUT LID",
-    "group": "SPARES"
+    "group": "SPARES",
+    "category": "SPARES",
+    "sub_category": "SAFETY PLUG",
+    "gst": "GST 5%"
   },
   "19000244": {
     "name": "ALUMINIUM PRESSURE COOKER  2 3 LTR - OUT",
@@ -6316,7 +6402,7 @@
     "group": "COOKWARE",
     "category": "COOKWARE",
     "sub_category": "TAWA",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000271": {
     "name": "PG - SPL  CKR COMBI 2+3+5 OUT  IB",
@@ -6344,7 +6430,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000281": {
     "name": "PIGEON SPL  CKR 5 LTR INN LID IB",
@@ -6379,7 +6465,7 @@
     "group": "COOKWARE",
     "category": "COOKWARE",
     "sub_category": "2 LTR",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000289": {
     "name": "PIGEON GLASSTOP - 3BR ULTRA",
@@ -6393,42 +6479,42 @@
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
     "sub_category": "4 LTR_OUT",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000292": {
     "name": "PIGEON SWIFT PRESSURE COOKER 6 LTR IB - HA",
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
     "sub_category": "6 LTR_OUT",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000293": {
     "name": "PIGEON SWIFT PRESSURE KADAI 2 LTR IB - HA",
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
     "sub_category": "2 LTR_OUT",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000294": {
     "name": "PIGEON SWIFT PRESSURE KADAI 3 LTR IB - HA",
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
     "sub_category": "3 LTR_OUT",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000295": {
     "name": "PIGEON SWIFT PRESSURE COOKER JR COMBI IB - HA (2+4)",
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
     "sub_category": "COMBO_OUT",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000296": {
     "name": "PIGEON SWIFT PRESSURE COOKER SR COMBI IB - HA (3+6)",
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
     "sub_category": "COMBO_OUT",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000301": {
     "name": "B+D - BXIR1601IN - 1600W Steam Iron",
@@ -6533,7 +6619,7 @@
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
     "sub_category": "COMBO_OUT",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000321": {
     "name": "PIGEON STORM SERIES TAWA 250",
@@ -6708,21 +6794,21 @@
     "group": "COOKWARE",
     "category": "COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000362": {
     "name": "PIGEON FLAT TAWA -250 - IB  PEACOCK GREE",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TAWA",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000365": {
     "name": "PIGEON KADAI -240 - IB  PEACOCK GREEN  -",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "KADAI 250 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000366": {
     "name": "PIGEON GLASSTOP SPECIAL 2BR (ECONOMY)",
@@ -6823,8 +6909,11 @@
     "gst": "GST 18%"
   },
   "19000406": {
-    "name": "B+D - BXIR1602IN - 1600 Watts Steam Iron",
-    "group": "Black + Decker"
+    "name": "B+D BXIR1602IN 1600W STEAM IRON",
+    "group": "BLACK + DECKER",
+    "category": "BLACK + DECKER",
+    "sub_category": "IRONS",
+    "gst": "GST 18%"
   },
   "19000419": {
     "name": "PIGEON GLASSTOP SCARLET 3 BR",
@@ -6873,7 +6962,7 @@
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
     "sub_category": "1.5 LTR_OUT",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000450": {
     "name": "PIGEON  GLASSTOP - INFINITY 2 BR AUTO SABAF",
@@ -6992,7 +7081,7 @@
     "group": "COOKWARE",
     "category": "COOKWARE",
     "sub_category": "3 LTR",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000491": {
     "name": "PIGEON SPL  CKR 5 LTR INN LID",
@@ -7237,7 +7326,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000709": {
     "name": "PIGEON RC NONSTICK MIO GIFT SET 8 PCS -",
@@ -7251,35 +7340,35 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TAWA 280 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000712": {
     "name": "PIGEON RC NONSTICK MIO KADAI 240",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "KADAI 250 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000714": {
     "name": "BIG LOTS - 14 PCS NONSTICK -  Article No",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000715": {
     "name": "BIG LOTS - FORGED FRYPAN 8 - Article No",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000739": {
     "name": "BIG LOTS - Flared Fry Pan 8    - Articl",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000745": {
     "name": "PIGEON NONSTICK 4 PC- CARLO",
@@ -7293,28 +7382,28 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000763": {
     "name": "WALMART - FLARED FRY PAN 24 CM - MODULAR",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000769": {
     "name": "WALMART - FLARED FRY PAN 24 CM",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000772": {
     "name": "PIGEON RC NONSTICK FLAT TAWA   -250 - Ex",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TAWA",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000774": {
     "name": "PIGEON FAVOURITE GIFT SET 7 PCS",
@@ -7328,84 +7417,84 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000777": {
     "name": "TEFAL SIMPLY CHEF FLAT TAWA - 26 CM (RED",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TAWA 260 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000778": {
     "name": "TEFAL SIMPLY CHEF FRY PAN -20 CM (RED)",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN 10 IN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000779": {
     "name": "TEFAL SIMPLY CHEF FRY PAN - 24 CM (RED)",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN 240 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000780": {
     "name": "TEFAL SIMPLY CHEF FRY PAN - 28 CM (RED)",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN 280 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000781": {
     "name": "TEFAL SIMPLY CHEF TANDOORI KADAI - 20 CM",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "KADAI_200 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000782": {
     "name": "TEFAL SIMPLY CHEF TANDOORI KADAI - 24 CM",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "KADAI_240 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000783": {
     "name": "TEFAL SIMPLY CHEF TANDOORI KADAI - 28 CM",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "KADAI 280 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000785": {
     "name": "TEFAL_SIMPLY CHEF_4 PC SET",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000787": {
     "name": "WAL MART - MEXICO - 1 QT SAUCE PAN WITH",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000788": {
     "name": "WAL MART - MEXICO - 2 QT DUTCH OVEN WITH",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000795": {
     "name": "PG RC-NST FAVOURITE FLATTAWA-280IB (DMH)",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TAWA",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000798": {
     "name": "PIGEON RC_NON STICK FAVOURITE  4-PC GIFT",
@@ -7419,28 +7508,28 @@
     "group": "SMALL APPLIANCES",
     "category": "SMALL APPLIANCES",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000801": {
     "name": "BIGLOTS_11 FORGED CHICKEN FRYER_COPPER",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000805": {
     "name": "JC PENNY_3 PCS FRY PAN SET_FLARED EDGE_E",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000808": {
     "name": "JC PENNY_2 PCS FRY PAN SET_FLARED EDGE_R",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000809": {
     "name": "PIGEON DUO PACK - FT 250 + FP 220",
@@ -7461,21 +7550,21 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "NON STICK COOKWARE",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000814": {
     "name": "PIGEON RC NON STICK - 9 PCS GIFTSET - CU",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000817": {
     "name": "PIGEON BASICS RC  GIFT SET NON IB (T250,",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000818": {
     "name": "PIGEON NON STICK DUO PACK - (FT 250, FP",
@@ -7489,42 +7578,42 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN 240 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000821": {
     "name": "WALMART US_ 3PC SAUCE PAN SET_1QT SAUCE",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000834": {
     "name": "PIGEON EPICURE NONSTICK 4 PCS GIFT SET I",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000835": {
     "name": "PIGEON FAVORITE  3 PCS GIFT SET NON IB -",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000837": {
     "name": "SKL-10FPST-FG-W SARTEN 26 CM STONE FORGE",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000840": {
     "name": "SKL-5QDOST-FG-W CASSEROLA 24CM STONE FOR",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000841": {
     "name": "PIGEON CHEF DELIGHT GIFT SET 7 PCS - NON",
@@ -7538,42 +7627,42 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "SAUCEPAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000843": {
     "name": "PIGEON NUTRICOOK NONSTICK RC FRY PAN 260",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN 260 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000844": {
     "name": "PIGEON NUTRICOOK NONSTICK RC TAWA 280 4",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TAWA 280 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000845": {
     "name": "PIGEON NUTRICOOK NONSTICK RC KADAI 240 W",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "KADAI_240 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000854": {
     "name": "PIGEON ESSENTIALS 4 PC GIFT SET NON IB-R",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000865": {
     "name": "WALMART US_ DOUBLE GRIDDLE_BLACK_ SKANDI",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000870": {
     "name": "PIGEON RC FAVORITE DUO PACK  - 1.7",
@@ -7587,21 +7676,21 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000882": {
     "name": "PIGEON CLASSIC PRESSURE COOKER 3 LTR INNER LID",
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
     "sub_category": "3 LTR_INN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000884": {
     "name": "PIGEON CLASSIC PRESSURE COOKER 5 LTR INNER LID",
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
     "sub_category": "5 LTR_INN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000885": {
     "name": "PIGEON CLASSIC CALIDA PRESSURE COOKER 5 LTR INNER LID IB",
@@ -7643,11 +7732,14 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TAWA",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000936": {
     "name": "PIGEON JUICER JAR 1 Ltr",
-    "group": "MIXER GRINDER SPARE"
+    "group": "MIXER GRINDER SPARE",
+    "category": "MIXER GRINDER SPARE",
+    "sub_category": "JUICE JAR",
+    "gst": "GST 18%"
   },
   "19000946": {
     "name": "PIGEON MIXER GRINDER VIOLA- LX",
@@ -7696,7 +7788,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19000995": {
     "name": "PG - SUPER COOKER 5 LTR -RED - E- CO",
@@ -7710,28 +7802,28 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001002": {
     "name": "BELK_8PC COOKWARE SET_RED_FLARED EDGE_RE",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001003": {
     "name": "BELK_10PC COOKWARE SET_BLACK_FLARED EDGE",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001005": {
     "name": "BELK_10PC COOKWARE SET_RED_FLARED EDGE_R",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001007": {
     "name": "PIGEON S KIT MINI INN  IB (3+F240+K240)",
@@ -7745,14 +7837,14 @@
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "750 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001017": {
     "name": "PIGEON SS WATER BOTTLE  750ML  - BLING (PACK OF THREE)",
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "750 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001022": {
     "name": "PIGEON - VITA GIFT SET -  (TAWA 250, KAD",
@@ -7773,7 +7865,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "COPPER SERIES",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001065": {
     "name": "PIGEON - EASY CLEAN - SPIN MOP WITH WHEE",
@@ -7864,14 +7956,14 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001118": {
     "name": "BELK_2PC FRY PAN SET NS_BLK_ST EDGE_RET",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001121": {
     "name": "PIGEON SPIN MOP - LX",
@@ -7892,7 +7984,7 @@
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
     "sub_category": "5 LTR_OUT",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001129": {
     "name": "PIGEON SPL OUT  LID CKR - 3 LTR SS",
@@ -8032,33 +8124,35 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001228": {
     "name": "EPOCA-10FP COPPER ROLLER FORGED",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001229": {
     "name": "EPOCA-12FP COPPER ROLLER FORGED",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001230": {
     "name": "EPOCA-2QT SP COPPER ROLLER FORGED",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001243": {
-    "name": "ULTIMATE - 3 BURNER",
+    "name": "PG- GCT ULTIMATE 3 BURNER - NON AUTO",
+    "group": "COOKTOP",
     "category": "COOKTOP",
-    "group": "COOKTOP"
+    "sub_category": "3 BURNER",
+    "gst": "GST 18%"
   },
   "19001248": {
     "name": "GILMA REGALIA GLASS COOK TOP 2BR AUTO",
@@ -8100,7 +8194,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TAWA",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001256": {
     "name": "PIGEON GCT-2BR ULTRA DUAL TONE GLASS",
@@ -8142,21 +8236,21 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001268": {
     "name": "WALMART USA - 10PC COPPER FORGED SET",
     "group": "COOKWARE",
     "category": "COOKWARE",
     "sub_category": "10 LTR",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001269": {
     "name": "WALMART USA 12INCH FRYPAN-COPPER FORGED",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001270": {
     "name": "PIGEON STAINLESS STEEL SHINE 2B",
@@ -8194,8 +8288,11 @@
     "gst": "GST 18%"
   },
   "19001293": {
-    "name": "B+D - BXIC0101IN - Induction Cook top",
-    "group": "Black + Decker"
+    "name": "BD - IND COOKTOP - BXIC0101IN",
+    "group": "BLACK + DECKER",
+    "category": "BLACK + DECKER",
+    "sub_category": "INDUCTION COOKTOP",
+    "gst": "GST 18%"
   },
   "19001296": {
     "name": "PIGEON CHOPPER VALUE PACK (MINI+XL)",
@@ -8216,21 +8313,21 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TAWA 300 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001305": {
     "name": "TEFAL SIMPLY CHEF_PANNIYARAKAL 12 ROUNDS",
     "group": "CAST IRON",
     "category": "CAST IRON",
     "sub_category": "PANNIYARKAL 12 ROUND",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001307": {
     "name": "TEFAL SET (TAWA-26 FP-20 RED SIMPLYCHEF)",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001314": {
     "name": "PIGEON BLENDO PORTABLE BLENDER",
@@ -8272,7 +8369,7 @@
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
     "sub_category": "3 LTR",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001330": {
     "name": "PG LED JOY BULB 12 WATTS B22 6500K",
@@ -8314,7 +8411,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001341": {
     "name": "PG - IND COOKTOP - RADIANT INFRA",
@@ -8363,7 +8460,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001357": {
     "name": "PG-CKR HANDLE JR 2/3LTR-OUTER LID",
@@ -8433,7 +8530,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "KADAI_200 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001401": {
     "name": "SUPER LED BULB B22 10 WATT 6500K- 4PC PK",
@@ -8447,7 +8544,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001415": {
     "name": "B+D BXBL6002IN 600W HB CHOP WHISK CUP",
@@ -8479,7 +8576,10 @@
   },
   "19001423": {
     "name": "PIGEON SS CHUTNEY JAR 0.5 L",
-    "group": "MIXER GRINDER SPARE"
+    "group": "MIXER GRINDER SPARE",
+    "category": "MIXER GRINDER SPARE",
+    "sub_category": "CHUTNEY JAR",
+    "gst": "GST 18%"
   },
   "19001430": {
     "name": "PG LED JOYBULB B22 30W 6500K",
@@ -8528,7 +8628,7 @@
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
     "sub_category": "2 LTR_OUT",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001440": {
     "name": "PG - SPL PLUS HA 2 LTR IB OUTER",
@@ -8601,14 +8701,18 @@
     "gst": "GST 5%"
   },
   "19001488": {
-    "name": "MULTI KADAI - RED",
+    "name": "PG NON STICK MULTI KADAI (RED)",
+    "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
-    "group": "NONSTICK COOKWARE"
+    "sub_category": "KADAI",
+    "gst": "GST 5%"
   },
   "19001489": {
-    "name": "YELLOW",
+    "name": "PG NON STICK MULTI KADAI (YELLOW)",
+    "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
-    "group": "NONSTICK COOKWARE"
+    "sub_category": "KADAI",
+    "gst": "GST 5%"
   },
   "19001492": {
     "name": "PIGEON WET GRINDER SUPREMO PLUS",
@@ -8629,14 +8733,14 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001499": {
     "name": "WALMART USA 11IN SQ GRIDDLE-HEAVY WEIGHT",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001507": {
     "name": "PG ERC JOY UNLIMITED 1.8 LTR DX",
@@ -8703,26 +8807,31 @@
   },
   "19001517": {
     "name": "PIGEON SS CHUTNEY JAR 0.4 L",
-    "group": "MIXER GRINDER SPARE"
+    "group": "MIXER GRINDER SPARE",
+    "category": "MIXER GRINDER SPARE",
+    "sub_category": "CHUTNEY JAR",
+    "gst": "GST 18%"
   },
   "19001520": {
-    "name": "MULTI KADAI - GREY",
+    "name": "PG NON STICK MULTI KADAI (HA GERY)",
+    "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
-    "group": "NONSTICK COOKWARE"
+    "sub_category": "KADAI",
+    "gst": "GST 5%"
   },
   "19001522": {
     "name": "WALMART USA 7 PC SET - BEIGE",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001523": {
     "name": "CT 10INCH FRYPAN - FLARED RED",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRYPAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001614": {
     "name": "PIGEON STAKBOX 6 PCS CONTAINER SET_RED",
@@ -8967,7 +9076,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001659": {
     "name": "PIGEON GLASSTOP - 2BR AYUSH BLK",
@@ -8985,6 +9094,13 @@
   },
   "19001663": {
     "name": "PG - 1.2 LTR MULTIPURPOSE KESSEL",
+    "group": "KETTLE",
+    "category": "KETTLE",
+    "sub_category": "1.2 LTR",
+    "gst": "GST 18%"
+  },
+  "19001664": {
+    "name": "PG–FAVOURITE1.2 LTR MULTIPURPOSE KESSEL",
     "group": "KETTLE",
     "category": "KETTLE",
     "sub_category": "1.2 LTR",
@@ -9058,7 +9174,7 @@
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
     "sub_category": "5 LTR_OUT",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001732": {
     "name": "PIGEON SPIN MOP REFILL_PACK OF 1",
@@ -9086,14 +9202,14 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001765": {
     "name": "PG CANDY 12 PCS GIFT (RC)",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001766": {
     "name": "PG ERC RUBY 1.8 LTR DX",
@@ -9128,22 +9244,28 @@
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
     "sub_category": "3 LTR_OUT",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001865": {
     "name": "PG-SUPER COOKER SS 3 LTR PRO",
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
     "sub_category": "3 LTR_OUT",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001874": {
-    "name": "SPARE GASKET OUT LID SS- SMALL",
-    "group": "SPARES"
+    "name": "PG SPARE GASKET OUT LID SS- SMALL",
+    "group": "SPARES",
+    "category": "SPARES",
+    "sub_category": "SPARE GASKET",
+    "gst": "GST 18%"
   },
   "19001875": {
-    "name": "SPARE GASKET OUT LID SS- MEDIUM",
-    "group": "SPARES"
+    "name": "PG SPARE GASKET OUT LID SS- MEDIUM",
+    "group": "SPARES",
+    "category": "SPARES",
+    "sub_category": "SPARE GASKET",
+    "gst": "GST 18%"
   },
   "19001879": {
     "name": "PIGEON GCT ASTER 2B DUO PACK NS COMBO",
@@ -9157,42 +9279,42 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN 8 INCH",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001884": {
     "name": "10 inch Frying pan COPPER Series (RC)",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN 10 INCH",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001885": {
     "name": "1 QT Sauce Pan COPPER Series (RC)",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001886": {
     "name": "2 QT Sauce Pan COPPER Series (RC)",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "PANS",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001887": {
     "name": "11.5 inch Jumbo Cooker COPPER Series (RC)",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "COPPER SERIES",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001888": {
     "name": "4 QT Dutch Oven COPPER Series (RC)",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "COPPER SERIES",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001889": {
     "name": "PIGEON RIO INNER LID  3 LTR",
@@ -9241,7 +9363,7 @@
     "group": "PRESSURE COOKERS",
     "category": "PRESSURE COOKERS",
     "sub_category": "4 LTR_OUT",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001905": {
     "name": "PG ELITE SHINE 3PLY CKR 5LTR OUTER",
@@ -9273,8 +9395,10 @@
   },
   "19001922": {
     "name": "PIGEON  FEMME 750 W 3 JAR RED",
+    "group": "MIXER GRINDER",
     "category": "MIXER GRINDER",
-    "group": "MIXER GRINDER"
+    "sub_category": "750 W",
+    "gst": "GST 18%"
   },
   "19001923": {
     "name": "PIGEON HANDY CHOPPER - 900ML (FK)",
@@ -9335,7 +9459,7 @@
     "group": "LUNCH BOX",
     "category": "LUNCH BOX",
     "sub_category": "PO3",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001946": {
     "name": "PIGEON FAVOURITE GIFT SET 7 PCS-BLACK",
@@ -9356,28 +9480,28 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001957": {
     "name": "MASTER CHEF 7 PCS GIFT SET-MUSTARD",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "NON STICK COOKWARE",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001962": {
     "name": "MASTER CHEF 4PCS GIFT SET",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001971": {
     "name": "PIGEON VIBRANT HA COOKER + COOKWARE COMBO 5 IN 1 COMBO",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19001999": {
     "name": "PG LED ALPHA FLOOD LIGHT 100W 6K",
@@ -9419,7 +9543,7 @@
     "group": "CAST IRON",
     "category": "CAST IRON",
     "sub_category": "NON STICK COOKWARE",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19002179": {
     "name": "PG STAKBOX O.5L SET OF 4_GREEN(BR)",
@@ -11972,35 +12096,35 @@
     "group": "BLACK + DECKER",
     "category": "BLACK + DECKER",
     "sub_category": "FRYPAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19002692": {
     "name": "B+D TAWA 250 MM",
     "group": "BLACK + DECKER",
     "category": "BLACK + DECKER",
     "sub_category": "TAWA",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19002693": {
     "name": "B+D TAWA 280 MM",
     "group": "BLACK + DECKER",
     "category": "BLACK + DECKER",
     "sub_category": "TAWA",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19002696": {
     "name": "PG ELITE - SS TRIPLY CASSEROLE 20cm",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "CASSEROLE 200 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19002697": {
     "name": "PG ELITE - SS TRIPLY CASSEROLE 22cm",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "CASSEROLE 220 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19002698": {
     "name": "PG ELITE - SS TRIPLY CASSEROLE 24cm",
@@ -12084,21 +12208,21 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TOPE 140 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19002710": {
     "name": "PG ELITE - SS TRIPLY TOPE 16cm",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TOPE 160 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19002711": {
     "name": "PG ELITE - SS TRIPLY TOPE 18cm",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TOPE 180 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19002712": {
     "name": "PG ELITE - SS TRIPLY TOPE 20cm",
@@ -12189,7 +12313,7 @@
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "700 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19002874": {
     "name": "Kitchen Cabinet BMS601S1BHRAL w/o G",
@@ -12434,7 +12558,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003040": {
     "name": "PIGEON HEALTHYFRY DIGITAL AIRFRYER",
@@ -12602,7 +12726,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003244": {
     "name": "PG X-CORD1 FLEX BOX 2PIN 4 MTR-RED",
@@ -12651,7 +12775,7 @@
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "700 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003291": {
     "name": "PIGEON INOX HYDRA 900ML PACK OF 3",
@@ -12665,7 +12789,7 @@
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "700 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003293": {
     "name": "PIGEON INOX HYDRA 900ML PACK OF 4",
@@ -12679,21 +12803,21 @@
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "700 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003295": {
     "name": "PG INOX HYDRA PLUS 900ML PACK OF 3",
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "900 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003296": {
     "name": "PG INOX HYDRA PLUS 700ML PACK OF 4",
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "700 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003297": {
     "name": "PG INOX HYDRA PLUS 900ML PACK OF 4",
@@ -12791,7 +12915,7 @@
     "group": "LUNCH BOX",
     "category": "LUNCH BOX",
     "sub_category": "PO4",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003315": {
     "name": "PG HEAT N TREAT LUNCH BOX PK 4 - BLUE",
@@ -12847,7 +12971,7 @@
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "900 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003350": {
     "name": "PIGEON CHOPPING BOARD COMBO-BROWN",
@@ -12875,7 +12999,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003408": {
     "name": "PG HA TIT FLAT KADHAI 250 IB WITH SS LID",
@@ -12906,9 +13030,11 @@
     "gst": "GST 5%"
   },
   "19003412": {
-    "name": "STEEL Li d",
+    "name": "PG HA TIT DEEP KADHAI 350 WITH SS LID",
+    "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
-    "group": "NONSTICK COOKWARE"
+    "sub_category": "KADAI 350 MM",
+    "gst": "GST 5%"
   },
   "19003413": {
     "name": "PG RC NONSTICK MIO GIFT SET 8 PCS- BLACK",
@@ -12929,7 +13055,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003421": {
     "name": "PG ELITE SHINE TRIO COMBI 3PLY 235L CKR",
@@ -12950,7 +13076,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TAWA",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003446": {
     "name": "PG ICT PRIME 1800W",
@@ -12964,336 +13090,336 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003456": {
     "name": "PG-SS KT-LADLE 2",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "LADLE",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003457": {
     "name": "PG-SS KT-LADLE 3",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "LADLE",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003458": {
     "name": "PG-SS KT-LADLE 4",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "LADLE",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003459": {
     "name": "PG-SS KT-LADLE 5",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "LADLE",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003460": {
     "name": "PG-SS KT-LADLE 6",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "LADLE",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003461": {
     "name": "PG-SS KT-SKIMMER PLAIN 3",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SKIMMER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003462": {
     "name": "PG-SS KT-SKIMMER PLAIN 4",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SKIMMER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003463": {
     "name": "PG-SS KT-SKIMMER PLAIN 5",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SKIMMER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003464": {
     "name": "PG-SS KT-SKIMMER PLAIN 6",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SKIMMER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003465": {
     "name": "PG-SS KT-SLOTTED SKIMMER 3",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SKIMMER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003466": {
     "name": "PG-SS KT-SLOTTED SKIMMER 4",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SKIMMER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003467": {
     "name": "PG-SS KT-SLOTTED SKIMMER 5",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SKIMMER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003468": {
     "name": "PG-SS KT-SLOTTED SKIMMER 6",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SKIMMER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003469": {
     "name": "PG-SS KT-TURNER SOLID 4",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "TURNER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003470": {
     "name": "PG-SS KT-TURNER SOLID 5",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "TURNER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003471": {
     "name": "PG-SS KT-TURNER SOLID 6",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "TURNER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003472": {
     "name": "PG-SS KT-SLOTTED TURNER 4",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "TURNER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003473": {
     "name": "PG-SS KT-SLOTTED TURNER 5",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "TURNER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003474": {
     "name": "PG-SS KT-SLOTTED TURNER 6",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "TURNER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003475": {
     "name": "PG-SS KT-SOLID SPOON 3",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SPOON",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003476": {
     "name": "PG-SS KT-SOLID SPOON 4",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SPOON",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003477": {
     "name": "PG-SS KT-SOLID SPOON 5",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SPOON",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003478": {
     "name": "PG-SS KT-SOLID SPOON 6",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SPOON",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003479": {
     "name": "PG-SS KT-RICE SERVER 1",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "RICE SERVER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003480": {
     "name": "PG-SS KT-RICE SERVER 2",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "RICE SERVER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003481": {
     "name": "PG-SS KT-RICE SERVER 3",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "RICE SERVER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003482": {
     "name": "PG-SS KT-RICE MASTER 1",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "RICE SERVER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003483": {
     "name": "PG-SS KT-RICE MASTER 2",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "RICE SERVER",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003484": {
     "name": "PG-SS KT-RICE MASTER 3",
     "group": "KITCHEN UTILITY",
     "category": "KITCHEN UTILITY",
     "sub_category": "(NIL)",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003496": {
     "name": "PG-ARTEZ PLAIN-COFFEE SPOON",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SPOON",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003497": {
     "name": "PG-ARTEZ PLAIN-TEA SPOON",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SPOON",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003499": {
     "name": "PG-ARTEZ PLAIN-ICE CREAM SPOON",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SPOON",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003500": {
     "name": "PG-ARTEZ PLAIN-BABY SPOON",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SPOON",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003501": {
     "name": "PG-ARTEZ PLAIN-BABY FORK",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "FORK",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003504": {
     "name": "PG-ARTEZ PLAIN-DESSERT SPOON",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SPOON",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003505": {
     "name": "PG-ARTEZ PLAIN-DESSERT FORK",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "FORK",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003506": {
     "name": "PG-ARTEZ PLAIN-DESSERT SOUP SPOON",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SPOON",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003524": {
     "name": "PG-PINTILINE-COFFEE SPOON",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SPOON",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003525": {
     "name": "PG-PINTILINE-TEA SPOON",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SPOON",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003528": {
     "name": "PG-PINTILINE-BABY SPOON",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SPOON",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003529": {
     "name": "PG-PINTILINE-BABY FORK",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "FORK",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003532": {
     "name": "PG-PINTILINE-DESSERT SPOON",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SPOON",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003534": {
     "name": "PG-PINTILINE-DESSERT SOUP SPOON",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "CUTTING BOARD",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003539": {
     "name": "PG-SHELL-TEA SPOON",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SPOON",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003542": {
     "name": "PG-SHELL-BABY SPOON",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SPOON",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003543": {
     "name": "PG-SHELL-BABY FORK",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "FORK",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003546": {
     "name": "PG-SHELL-DESSERT SPOON",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "SPOON",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003547": {
     "name": "PG-SHELL-DESSERT FORK",
@@ -13416,8 +13542,10 @@
   },
   "19003621": {
     "name": "PIGEON PANINI SANDWICH GRILLER BLACK",
+    "group": "SMALL APPLIANCES",
     "category": "SMALL APPLIANCES",
-    "group": "SMALL APPLIANCES"
+    "sub_category": "SANDWICH GRILLER",
+    "gst": "GST 18%"
   },
   "19003623": {
     "name": "PG -INOX SIGMA OUTER LID SS CKR 5L",
@@ -13448,9 +13576,11 @@
     "gst": "GST 18%"
   },
   "19003635": {
-    "name": "STEAM IRON - PINK - 1600W",
+    "name": "PG STEAM IRON 1600W - PINK",
+    "group": "SMALL APPLIANCES",
     "category": "SMALL APPLIANCES",
-    "group": "SMALL APPLIANCES"
+    "sub_category": "IRONS",
+    "gst": "GST 18%"
   },
   "19003636": {
     "name": "PG STEAM IRON 1600W - RED",
@@ -13532,14 +13662,14 @@
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "900 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003659": {
     "name": "PG INOX HYDRA COLOUR BOTTLE 900ML-BLUE",
     "group": "WATER BOTTLE",
     "category": "WATER BOTTLE",
     "sub_category": "900 ML",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003779": {
     "name": "PG DELUXE PRIM 3L AL OUT CKR IB THICK BA",
@@ -13553,14 +13683,14 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TAWA 280 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003789": {
     "name": "PG OLIVE FRY PAN 240",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN 240 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003790": {
     "name": "PG DELUXE PRIM 5L AL OUT CKR IB THICK BA",
@@ -13577,12 +13707,18 @@
     "gst": "GST 18%"
   },
   "19003794": {
-    "name": "B+D BXIR2602IN -2600 watts steam iron with LED- cordless",
-    "group": "Black + Decker"
+    "name": "B+D BXIR2602IN -2600 WATTS STEAM IRON WI",
+    "group": "BLACK + DECKER",
+    "category": "BLACK + DECKER",
+    "sub_category": "IRONS",
+    "gst": "GST 18%"
   },
   "19003795": {
-    "name": "B+D BXIR2603IN -2600 watts steam iron with LED- cordless",
-    "group": "Black + Decker"
+    "name": "B+D BXIR2603IN -2600 WATTS STEAM IRON WI",
+    "group": "BLACK + DECKER",
+    "category": "BLACK + DECKER",
+    "sub_category": "IRONS",
+    "gst": "GST 18%"
   },
   "19003796": {
     "name": "Customized Wardrobe",
@@ -13624,14 +13760,14 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003812": {
     "name": "3PC HEAVY WEIGHT FRYPAN SET",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003813": {
     "name": "PG POP-UP TOASTER -BLACK.",
@@ -13694,11 +13830,14 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003833": {
-    "name": "B+D - BXIR1603IN - 1600 Watts Steam Iron",
-    "group": "Black + Decker"
+    "name": "BD - BXIR1603IN-1600 WATTS STEAM IRON",
+    "group": "BLACK + DECKER",
+    "category": "BLACK + DECKER",
+    "sub_category": "IRONS",
+    "gst": "GST 18%"
   },
   "19003834": {
     "name": "BD - BXIR1604IN-1600 WATTS STEAM IRON",
@@ -13708,12 +13847,18 @@
     "gst": "GST 18%"
   },
   "19003835": {
-    "name": "B+D - BXIR1802IN - 1800W Steam Iron with Detachable Tank",
-    "group": "Black + Decker"
+    "name": "BD - BXIR1802IN-1800W STEAM IRON  DETACH",
+    "group": "BLACK + DECKER",
+    "category": "BLACK + DECKER",
+    "sub_category": "IRONS",
+    "gst": "GST 18%"
   },
   "19003836": {
-    "name": "B+D - BXIR1803IN - 1800W Steam Iron with Detachable Tank",
-    "group": "Black + Decker"
+    "name": "BD - BXIR1803IN-1800W STEAM IRON  DETACH",
+    "group": "BLACK + DECKER",
+    "category": "BLACK + DECKER",
+    "sub_category": "IRONS",
+    "gst": "GST 18%"
   },
   "19003837": {
     "name": "BD - BXIR2002IN-2000W STEAM IRON  AUTO S",
@@ -13737,8 +13882,11 @@
     "gst": "GST 18%"
   },
   "19003840": {
-    "name": "B+D - BXIR2204IN - 2200W Steam Iron with Cordless",
-    "group": "Black + Decker"
+    "name": "BD - BXIR2204IN-2200W STEAM IRON  CORDLE",
+    "group": "BLACK + DECKER",
+    "category": "BLACK + DECKER",
+    "sub_category": "IRONS",
+    "gst": "GST 18%"
   },
   "19003841": {
     "name": "BD - BXIR2205IN-2200W STEAM IRON  CERAMI",
@@ -13748,8 +13896,11 @@
     "gst": "GST 18%"
   },
   "19003842": {
-    "name": "B+D - BXIR2402IN - 2400W Steam Iron with Auto Shut Off",
-    "group": "Black + Decker"
+    "name": "BD - BXIR2402IN-2400W STEAM IRON  AUTO S",
+    "group": "BLACK + DECKER",
+    "category": "BLACK + DECKER",
+    "sub_category": "IRONS",
+    "gst": "GST 18%"
   },
   "19003843": {
     "name": "B+D GCT 3BR – WHITE",
@@ -13955,9 +14106,11 @@
     "gst": "GST 18%"
   },
   "19003917": {
-    "name": "HANA Code: 19003918 | MRP: `2995",
+    "name": "PIGEON PRETTI  VOLUMIZER",
+    "group": "PERSONAL CARE",
     "category": "PERSONAL CARE",
-    "group": "PERSONAL CARE"
+    "sub_category": "WOMEN VOLUMIZER",
+    "gst": "GST 18%"
   },
   "19003918": {
     "name": "PIGEON MAGNI  2 IN 1  VOLUMIZER",
@@ -13992,7 +14145,7 @@
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "COMBI",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003934": {
     "name": "Bhavan additional order",
@@ -14006,7 +14159,7 @@
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003937": {
     "name": "PG MAGNI TOUCH ATTA KNEADER-BLUE",
@@ -14071,6 +14224,13 @@
     "sub_category": "0.5 LTR",
     "gst": "GST 18%"
   },
+  "19003961": {
+    "name": "PIGEON HANDY HAND BLENDER",
+    "group": "SMALL APPLIANCES",
+    "category": "SMALL APPLIANCES",
+    "sub_category": "HAND BLENDER",
+    "gst": "GST 18%"
+  },
   "19003964": {
     "name": "PIGEON HEALTHIFRY+  DIGITAL AIR FRYER",
     "group": "SMALL APPLIANCES",
@@ -14090,28 +14250,28 @@
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003971": {
     "name": "CUTLERY COMBI SET-8",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "COMBI",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003972": {
     "name": "CUTLERY COMBI SET-9",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "COMBI",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003973": {
     "name": "CUTLERY COMBI SET-10",
     "group": "CUTLERY",
     "category": "CUTLERY",
     "sub_category": "COMBI",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003978": {
     "name": "PG PERFECTO EGG BOILER",
@@ -14132,7 +14292,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRYPAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19003984": {
     "name": "PG HOT KETTLE PLUS 1.5 LTRS - GREEN",
@@ -14170,7 +14330,7 @@
     "gst": "GST 5%"
   },
   "19003992": {
-    "name": "PG LED N'JOY EMERGENCY BULB 9W",
+    "name": "PG LED N JOY EMERGENCY BULB 9W",
     "group": "LED",
     "category": "LED",
     "sub_category": "LED EMERGENCY BULB",
@@ -14434,21 +14594,21 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN 200 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004079": {
     "name": "CARBONI   FRY PAN 220 IB",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN 220 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004080": {
     "name": "PG SS COOKER ALU COOKWARE INSTI COMBO NS",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004087": {
     "name": "PG LED JOY BULB 9 WATTS 2PC PACK 6500K",
@@ -14476,28 +14636,28 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TAWA 250 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004100": {
     "name": "CARBONI TAWA 280 IB",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TAWA 280 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004101": {
     "name": "CARBONI TAWA 310 IB",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TAWA 310 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004179": {
     "name": "GEORGE HOME NONSTICK AL SAUCEPAN SET 3PC",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004180": {
     "name": "PIGEON NEO PORTABLE BLENDER - GREEN",
@@ -14546,35 +14706,35 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004199": {
     "name": "GEORGE HOME NONSTICK AL S-POT 24CM",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004201": {
     "name": "GEORGE HOME NONSTICK AL S-POT 32CM",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004204": {
     "name": "OPP ALU FRYING PAN 24CM",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004205": {
     "name": "GEORGE HOME NONSTICK AL CHIP PAN 20CM",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004210": {
     "name": "PIGEON GLASSTOP - 3BR AYUSH BLK",
@@ -14587,6 +14747,13 @@
     "name": "PIGEON GLASSTOP - 3BR AYUSH XL",
     "group": "COOKTOP",
     "category": "COOKTOP",
+    "sub_category": "3 BURNER",
+    "gst": "GST 18%"
+  },
+  "19004213": {
+    "name": "PIGEON GLASSTOP  - BRUNET 3BR - AUTO",
+    "group": "HOB",
+    "category": "HOB",
     "sub_category": "3 BURNER",
     "gst": "GST 18%"
   },
@@ -14664,6 +14831,13 @@
     "sub_category": "IRONS",
     "gst": "GST 18%"
   },
+  "19004251": {
+    "name": "PG HEALTIFRY+ DIGITAL AIR FRYER-BLACK",
+    "group": "SMALL APPLIANCES",
+    "category": "SMALL APPLIANCES",
+    "sub_category": "AIR FRYER",
+    "gst": "GST 18%"
+  },
   "19004252": {
     "name": "PG HEALTIFRY+ DIGITAL AIR FRYER-BLUE",
     "group": "SMALL APPLIANCES",
@@ -14732,7 +14906,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004290": {
     "name": "PIGEON HEALTHIFRY+ STELLAR 5.5L AIRFRYER",
@@ -14984,7 +15158,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "NON STICK COOKWARE",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004367": {
     "name": "PG INOX ERC 1L DX",
@@ -15023,13 +15197,17 @@
   },
   "19004376": {
     "name": "PIGEON  LEG & CALF MASSAGER NEURA",
+    "group": "OTHER UTILITY",
     "category": "OTHER UTILITY",
-    "group": "OTHER UTILITY"
+    "sub_category": "BODY MASSAGER",
+    "gst": "GST 5%"
   },
   "19004377": {
     "name": "PIGEON  LEG  MASSAGER SYNA",
+    "group": "OTHER UTILITY",
     "category": "OTHER UTILITY",
-    "group": "OTHER UTILITY"
+    "sub_category": "BODY MASSAGER",
+    "gst": "GST 5%"
   },
   "19004378": {
     "name": "PIGEON GUN MASSAGER VIBE",
@@ -15128,6 +15306,13 @@
     "category": "HOB",
     "sub_category": "4 BURNER",
     "gst": "GST 18%"
+  },
+  "19004398": {
+    "name": "10PC HG NS CERAMIC COOKWARE-WASHEDSTONE",
+    "group": "NONSTICK COOKWARE",
+    "category": "NONSTICK COOKWARE",
+    "sub_category": "NON STICK COOKWARE",
+    "gst": "GST 5%"
   },
   "19004404": {
     "name": "PG ERC JOY UNLIMITED 0.6 L DX",
@@ -15269,6 +15454,13 @@
     "sub_category": "EPC_6 LTR",
     "gst": "GST 18%"
   },
+  "19004468": {
+    "name": "PG HEALTIFRY+DIGITAL AIRFRYER-GREY",
+    "group": "SMALL APPLIANCES",
+    "category": "SMALL APPLIANCES",
+    "sub_category": "AIR FRYER",
+    "gst": "GST 18%"
+  },
   "19004469": {
     "name": "PIGEON CERAMIC FRY PAN 200",
     "group": "NONSTICK COOKWARE",
@@ -15295,21 +15487,21 @@
     "group": "COOKWARE",
     "category": "COOKWARE",
     "sub_category": "(NIL)",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004484": {
     "name": "6PC STACKABLE COOKWARE SET GREEN LILY",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004485": {
     "name": "6PC STACKABLE COOKWARE SET ROYAL BLUE",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004489": {
     "name": "PIGEON STARK PLUS OLIVE 1000ML(GREEN)",
@@ -15341,8 +15533,10 @@
   },
   "19004499": {
     "name": "PIGEON BLOOM HAIR DRYER  BLUE",
+    "group": "PERSONAL CARE",
     "category": "PERSONAL CARE",
-    "group": "PERSONAL CARE"
+    "sub_category": "HAIR DRYER",
+    "gst": "GST 18%"
   },
   "19004500": {
     "name": "PIGEON BLOOM HAIR DRYER  PINK",
@@ -15357,10 +15551,10 @@
     "group": "PERSONAL CARE"
   },
   "19004504": {
-    "name": "Item from PDF: 19004504",
-    "group": "GENERAL",
-    "category": "GENERAL",
-    "sub_category": "",
+    "name": "PIGEON RAPID ELECTRIC CHOPPER",
+    "group": "KITCHEN UTILITY",
+    "category": "KITCHEN UTILITY",
+    "sub_category": "CHOPPER",
     "gst": "GST 18%"
   },
   "19004505": {
@@ -15427,21 +15621,21 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TAWA 260 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004533": {
     "name": "Pigeon Ceramic Concave Tawa 280",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TAWA 280 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004534": {
     "name": "Pigeon Ceramic Flat Tawa 250",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TAWA 250 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004535": {
     "name": "PG Marvel Ceramic Flat Tawa 280 IB",
@@ -15462,14 +15656,14 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "TAWA 240 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004538": {
     "name": "Pigeon Ceramic Kadai 240",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "KADAI_240 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004539": {
     "name": "PG Marvel Ceramic Kadai 260 IB",
@@ -15490,35 +15684,35 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "SAUCEPAN 180 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004542": {
     "name": "Pigeon Ceramic Pantastic 6Pcs Set",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004543": {
     "name": "Pigeon Ceramic Stackable Set Grey",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004544": {
     "name": "Pigeon Ceramic Stackable Set Green",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004545": {
     "name": "Pigeon Ceramic 3 Pcs Gift",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004546": {
     "name": "PIGEON EDGE SHARP 5INCH KNIFE",
@@ -15542,9 +15736,11 @@
     "gst": "GST 18%"
   },
   "19004550": {
-    "name": "PIGEON FLEXI 9 IN 1 MULTI COOKER",
+    "name": "PIGEON FLEXI 9 IN 1 ELECTRIC  SCRUBBER",
+    "group": "KITCHEN UTILITY",
     "category": "KITCHEN UTILITY",
-    "group": "KITCHEN UTILITY"
+    "sub_category": "(NIL)",
+    "gst": "GST 18%"
   },
   "19004556": {
     "name": "PG CRUISE ICT + CAST-I TAWA250 COMBO",
@@ -15559,6 +15755,13 @@
     "category": "PRESSURE COOKERS",
     "sub_category": "3 LTR_OUT",
     "gst": "GST 5%"
+  },
+  "19004559": {
+    "name": "PIGEON DIECAST FRY PAN",
+    "group": "COOKWARE",
+    "category": "COOKWARE",
+    "sub_category": "DIECAST FRY PAN",
+    "gst": "GST 18%"
   },
   "19004560": {
     "name": "PG ERC Inox Pro With Steamer 1LDX Yellow",
@@ -15602,6 +15805,27 @@
     "sub_category": "SINGLE POT",
     "gst": "GST 18%"
   },
+  "19004570": {
+    "name": "PIGEON DIECAST KADAI",
+    "group": "COOKWARE",
+    "category": "COOKWARE",
+    "sub_category": "DIECAST KADAI",
+    "gst": "GST 18%"
+  },
+  "19004571": {
+    "name": "PIGEON DIECAST HANDI",
+    "group": "COOKWARE",
+    "category": "COOKWARE",
+    "sub_category": "DIECAST HANDI",
+    "gst": "GST 18%"
+  },
+  "19004572": {
+    "name": "PIGEON DIECAST TAWA",
+    "group": "COOKWARE",
+    "category": "COOKWARE",
+    "sub_category": "DIECAST TAWA",
+    "gst": "GST 18%"
+  },
   "19004573": {
     "name": "PG PERSONAL BLENDER - PURE",
     "group": "MIXER GRINDER",
@@ -15642,14 +15866,14 @@
     "group": "CAST IRON",
     "category": "CAST IRON",
     "sub_category": "PANNIYARKAL",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004597": {
-    "name": "Item from PDF: 19004597",
-    "group": "GENERAL",
-    "category": "GENERAL",
-    "sub_category": "",
-    "gst": "GST 18%"
+    "name": "PG IMPERI CAST IRON DH FLAT DOSA TAWA280",
+    "group": "CAST IRON",
+    "category": "CAST IRON",
+    "sub_category": "TAWA",
+    "gst": "GST 5%"
   },
   "19004598": {
     "name": "PIGEON CHIMNEY  - BLACK DIAMOND -60",
@@ -15726,6 +15950,20 @@
     "group": "MIXER GRINDER",
     "category": "MIXER GRINDER",
     "sub_category": "MIXER GRINDER",
+    "gst": "GST 18%"
+  },
+  "19004614": {
+    "name": "PG QUICK BLEND - 3 JAR",
+    "group": "MIXER GRINDER",
+    "category": "MIXER GRINDER",
+    "sub_category": "MIXER GRINDER",
+    "gst": "GST 18%"
+  },
+  "19004615": {
+    "name": "PIGEON MIXER GRINDER - NEX GRIND",
+    "group": "MIXER GRINDER",
+    "category": "MIXER GRINDER",
+    "sub_category": "FOOD PROCESSING",
     "gst": "GST 18%"
   },
   "19004620": {
@@ -15821,16 +16059,16 @@
   },
   "19004662": {
     "name": "PG BASICS PRO 6PCS SET NON-IB",
-    "group": "SPARES",
-    "category": "SPARES",
-    "sub_category": "(NIL)",
-    "gst": "GST 18%"
+    "group": "NONSTICK COOKWARE",
+    "category": "NONSTICK COOKWARE",
+    "sub_category": "GIFT SET",
+    "gst": "GST 5%"
   },
   "19004663": {
-    "name": "Item from PDF: 19004663",
-    "group": "GENERAL",
-    "category": "GENERAL",
-    "sub_category": "",
+    "name": "PG CORDLESS DRY IRON 1300W - PINK",
+    "group": "SMALL APPLIANCES",
+    "category": "SMALL APPLIANCES",
+    "sub_category": "IRONS",
     "gst": "GST 18%"
   },
   "19004664": {
@@ -15852,77 +16090,77 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "COPPER SERIES",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004677": {
     "name": "GULDORING 3L POT SL 40609454 BLKGREY",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004678": {
     "name": "GULDORING FP 32CM 50609477 BLKGREY",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004694": {
     "name": "GULDORING 2L SP SL 00609465 BLKGREY",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004701": {
     "name": "GULDORING 5L POT SL 50609458 BLKGREY",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004707": {
     "name": "GULDORING FP 16CM 30611136 BLKGREY IN",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004713": {
     "name": "GULDORING FP 20CM 80609485 BLKGREY",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004717": {
     "name": "GULDORING FP 28CM 50609482 BLKGREY NA",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004719": {
     "name": "GULDORING FP 24CM 70609481 BLKGREY NA",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "COPPER SERIES",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004720": {
     "name": "GULDORING 1L SP SL 90609461 BLKGREY NA",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004724": {
     "name": "GULDORING 28CM ST GL 00611147 BLKGREY IN",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004730": {
     "name": "PG HEAVY BOTTOM SS FRY PAN 200MM",
@@ -15994,6 +16232,13 @@
     "sub_category": "MIXER GRINDER",
     "gst": "GST 18%"
   },
+  "19004760": {
+    "name": "PG ERC 1L SS BOWL",
+    "group": "ELECTRIC RICE COOKER",
+    "category": "ELECTRIC RICE COOKER",
+    "sub_category": "COOKER",
+    "gst": "GST 5%"
+  },
   "19004762": {
     "name": "PG UN CORD CORDLESS STEAM IRON - 2200W",
     "group": "SMALL APPLIANCES",
@@ -16034,7 +16279,7 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004798": {
     "name": "PG MIXER GRINDER - SWIFTY 550",
@@ -16055,13 +16300,20 @@
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004803": {
     "name": "32CM STOCKPOT WITH LID WITH PALLET",
     "group": "NONSTICK COOKWARE",
     "category": "NONSTICK COOKWARE",
     "sub_category": "FRY PAN",
+    "gst": "GST 5%"
+  },
+  "19004805": {
+    "name": "PIGEON IVO HEALTHIFRY 5.4L AIR FRYER",
+    "group": "SMALL APPLIANCES",
+    "category": "SMALL APPLIANCES",
+    "sub_category": "AIR FRYER",
     "gst": "GST 18%"
   },
   "19004808": {
@@ -16174,21 +16426,35 @@
     "group": "COOKWARE",
     "category": "COOKWARE",
     "sub_category": "TAWA",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
+  },
+  "19004834": {
+    "name": "PG TRIPLY CONCAVE TAWA -250 BELLY",
+    "group": "COOKWARE",
+    "category": "COOKWARE",
+    "sub_category": "COOKER",
+    "gst": "GST 5%"
   },
   "19004835": {
     "name": "PG TRIPLY FRY PAN -240 BELLY",
     "group": "COOKWARE",
     "category": "COOKWARE",
     "sub_category": "FRY PAN 240 MM",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "19004836": {
     "name": "PG TRIPLY KADAI-240 BELLY",
     "group": "COOKWARE",
     "category": "COOKWARE",
     "sub_category": "KADAI",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
+  },
+  "19004837": {
+    "name": "PG TRIPLY CONCAVE TAWA-280 BELLY",
+    "group": "COOKWARE",
+    "category": "COOKWARE",
+    "sub_category": "COOKER",
+    "gst": "GST 5%"
   },
   "19004838": {
     "name": "Item from PDF: 19004838",
@@ -16251,6 +16517,13 @@
     "sub_category": "",
     "gst": "GST 18%"
   },
+  "19004879": {
+    "name": "CERASTEEL 3PC GIFT(T-280,F-240,K-240)C",
+    "group": "NONSTICK COOKWARE",
+    "category": "NONSTICK COOKWARE",
+    "sub_category": "CASSEROLE 240 MM",
+    "gst": "GST 5%"
+  },
   "19004885": {
     "name": "Item from PDF: 19004885",
     "group": "GENERAL",
@@ -16270,6 +16543,13 @@
     "group": "CHIMNEY",
     "category": "CHIMNEY",
     "sub_category": "CHIMNEY",
+    "gst": "GST 18%"
+  },
+  "19004930": {
+    "name": "PIGEON HEALTHIFRY DIGITAL AIRFRYER - CSD",
+    "group": "SMALL APPLIANCES",
+    "category": "SMALL APPLIANCES",
+    "sub_category": "AIR FRYER",
     "gst": "GST 18%"
   },
   "19004931": {
@@ -16552,6 +16832,13 @@
     "sub_category": "PRESSURE COOKER",
     "gst": "GST 5%"
   },
+  "19005150": {
+    "name": "PIGEON GLASSTOP - RAPIDO HYBRID 2100W",
+    "group": "COOKTOP",
+    "category": "COOKTOP",
+    "sub_category": "COOKTOP",
+    "gst": "GST 18%"
+  },
   "19005153": {
     "name": "JODI TWO ZONE ELECTRIC COOKTOP",
     "group": "INDUCTION COOKTOP",
@@ -16564,6 +16851,13 @@
     "group": "SMALL APPLIANCES",
     "category": "SMALL APPLIANCES",
     "sub_category": "AIR PURIFIER",
+    "gst": "GST 18%"
+  },
+  "19005165": {
+    "name": "PIGEON HERITAGE ELECTRIC KETTLE 1L",
+    "group": "KETTLE",
+    "category": "KETTLE",
+    "sub_category": "ELECTRIC KETTLE",
     "gst": "GST 18%"
   },
   "22000001": {
@@ -16585,7 +16879,7 @@
     "group": "GIFT COUPONS",
     "category": "GIFT COUPONS",
     "sub_category": "GIFT COUPON",
-    "gst": "GST 18%"
+    "gst": "GST TAXFREE"
   },
   "22000007": {
     "name": "Modular Kitchen Cabinet",
@@ -16655,7 +16949,7 @@
     "group": "EXCHANGE",
     "category": "EXCHANGE",
     "sub_category": "NA",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "25000010": {
     "name": "OTG-EXCHANGE RETURN",
@@ -16669,7 +16963,7 @@
     "group": "EXCHANGE",
     "category": "EXCHANGE",
     "sub_category": "NA",
-    "gst": "GST 18%"
+    "gst": "GST 5%"
   },
   "25000014": {
     "name": "CHOPPER-EXCHANGE RETURN",
@@ -16781,6 +17075,13 @@
     "group": "MODULAR KITCHEN",
     "category": "MODULAR KITCHEN",
     "sub_category": "MODULAR KITCHEN",
+    "gst": "GST 18%"
+  },
+  "35000013": {
+    "name": "Gilma 55Cm Trolley Scheme.",
+    "group": "PROMO ITEM",
+    "category": "PROMO ITEM",
+    "sub_category": "TROLLEY",
     "gst": "GST 18%"
   },
   "35000016": {

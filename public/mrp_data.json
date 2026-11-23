@@ -797,6 +797,48 @@
     "october_scheme": false,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
+  "15000460": {
+    "name": "CHIMNEY-EXCHANGE RETURN - GILMA",
+    "brand": "GILMA",
+    "old_mrp": 0.6,
+    "new_mrp": 0.6,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "EXCHANGE",
+    "sub_category": "NA",
+    "sap_code": "15000460",
+    "sap_code_with_color": "15000460 NA",
+    "ean_code": "",
+    "sp_rate": null
+  },
+  "15000463": {
+    "name": "GILMA COOKTOP-EXCHANGE RETURN",
+    "brand": "GILMA",
+    "old_mrp": 0.6,
+    "new_mrp": 0.6,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "EXCHANGE",
+    "sub_category": "NA",
+    "sap_code": "15000463",
+    "sap_code_with_color": "15000463 NA",
+    "ean_code": "",
+    "sp_rate": null
+  },
+  "15000465": {
+    "name": "ILMA HOB-EXCHANGE RETURN",
+    "brand": "GILMA",
+    "old_mrp": 0.6,
+    "new_mrp": 0.6,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "EXCHANGE",
+    "sub_category": "NA",
+    "sap_code": "15000465",
+    "sap_code_with_color": "15000465 NA",
+    "ean_code": "",
+    "sp_rate": null
+  },
   "16000004": {
     "name": "PIGEON BLACKLINE 4 BR  SQUARE -JUMBO BUR",
     "brand": "PIGEON",
@@ -5447,7 +5489,7 @@
     "sub_category": "KETTLE",
     "sap_code": "14431",
     "sap_code_with_color": "14431 NA",
-    "ean_code": "8904216514318",
+    "ean_code": "16000661",
     "sp_rate": 1458,
     "offers": [
       {
@@ -10619,7 +10661,7 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "16002096": {
-    "name": "PG SS STEELO KADAI 12 INCH  2 MM",
+    "name": "PG SS STEELO KADAI 12 INCH 2 MM",
     "brand": "PIGEON",
     "old_mrp": 1475,
     "new_mrp": 1475,
@@ -12411,7 +12453,7 @@
     "name": "PIGEON HOB 3 BURNER - LINEA",
     "brand": "PIGEON",
     "old_mrp": 28495,
-    "new_mrp": 24495,
+    "new_mrp": 28495,
     "difference": -4000,
     "source": "october_offer_09102026",
     "category": "HOB",
@@ -15234,7 +15276,7 @@
     "name": "GILMA HOB VEXOR 4XL  FFD",
     "brand": "GILMA",
     "old_mrp": 52990,
-    "new_mrp": 52990,
+    "new_mrp": 57990,
     "difference": 0,
     "source": "october_offer_09102026",
     "category": "HOB",
@@ -15301,6 +15343,17 @@
     "active_offer_label": "Buy 1 @ 30% & Buy 2+ @ 40%",
     "october_scheme": true,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
+  },
+  "16002622": {
+    "name": "PIGEON AIR PURIFIER",
+    "brand": "PIGEON",
+    "old_mrp": 7999,
+    "new_mrp": 7999,
+    "difference": 0,
+    "source": "new_launches_2026",
+    "category": "SMALL APPLIANCES",
+    "sub_category": "AIR PURIFIER",
+    "sap_code": "16002622"
   },
   "16002630": {
     "name": "PIGEON MIXER GRINDER - SMARTI 550W",
@@ -15383,6 +15436,20 @@
     "october_scheme": true,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
+  "16002636": {
+    "name": "GILMA HOB FLARA 4",
+    "brand": "GILMA",
+    "old_mrp": 38990,
+    "new_mrp": 38990,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "HOB",
+    "sub_category": "4 BURNER",
+    "sap_code": "16002636",
+    "sap_code_with_color": "16002636 NA",
+    "ean_code": "8904216542380",
+    "sp_rate": null
+  },
   "16002640": {
     "name": "GILMA COOKTOP RIO 2BR",
     "brand": "GILMA",
@@ -15418,6 +15485,20 @@
     "active_offer_label": null,
     "october_scheme": false,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
+  },
+  "16002642": {
+    "name": "GILMA COOKTOP RIO 4BR",
+    "brand": "GILMA",
+    "old_mrp": 12490,
+    "new_mrp": 12490,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "COOKTOP",
+    "sub_category": "4 BURNER GLASS",
+    "sap_code": "16002642",
+    "sap_code_with_color": "16002642 NA",
+    "ean_code": "8904216541949",
+    "sp_rate": null
   },
   "16002643": {
     "name": "GILMA COOKTOP ROVIX 2BR",
@@ -15582,25 +15663,43 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "16002652": {
-    "name": "Item from PDF: 16002652",
+    "name": "PIGEON LPG STOVE - IGNX 2BR (SABAF)",
     "old_mrp": "Not Available",
     "new_mrp": 15499,
     "difference": "N/A",
-    "source": "pdf_update"
+    "source": "pdf_update",
+    "category": "COOKTOP",
+    "sub_category": "2 BURNER",
+    "sap_code": "16002652",
+    "sap_code_with_color": "16002652 NA",
+    "ean_code": "8904216542243",
+    "brand": "PIGEON"
   },
   "16002653": {
-    "name": "Item from PDF: 16002653",
+    "name": "PIGEON LPG STOVE - IGNX 3BR (SABAF)",
     "old_mrp": "Not Available",
     "new_mrp": 19499,
     "difference": "N/A",
-    "source": "pdf_update"
+    "source": "pdf_update",
+    "category": "COOKTOP",
+    "sub_category": "3 BURNER",
+    "sap_code": "16002653",
+    "sap_code_with_color": "16002653 NA",
+    "ean_code": "8904216542250",
+    "brand": "PIGEON"
   },
   "16002654": {
-    "name": "Item from PDF: 16002654",
+    "name": "PIGEON LPG STOVE - IGNX 4BR (SABAF)",
     "old_mrp": "Not Available",
     "new_mrp": 23999,
     "difference": "N/A",
-    "source": "pdf_update"
+    "source": "pdf_update",
+    "category": "COOKTOP",
+    "sub_category": "4 BURNER",
+    "sap_code": "16002654",
+    "sap_code_with_color": "16002654 NA",
+    "ean_code": "8904216542267",
+    "brand": "PIGEON"
   },
   "17012507": {
     "name": "SAMPLES - ALL IN 1 GROOMING KIT-150",
@@ -20891,7 +20990,7 @@
     "name": "PIGEON WONDER CAST  PANNIYARKAL ( 7 ROUN",
     "brand": "PIGEON",
     "old_mrp": 1345,
-    "new_mrp": 1385,
+    "new_mrp": 1499,
     "difference": 40,
     "source": "october_offer_09102026",
     "category": "NONSTICK COOKWARE",
@@ -27140,7 +27239,7 @@
     "category": "NONSTICK COOKWARE",
     "sub_category": "GIFT SET",
     "sap_code": "14242",
-    "sap_code_with_color": "14242  BL",
+    "sap_code_with_color": "14242\r\n BL",
     "ean_code": "8904216512420",
     "sp_rate": 716,
     "offers": [
@@ -33495,6 +33594,20 @@
     "active_offer_label": "Flat 40% Off",
     "october_scheme": true,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
+  },
+  "19001664": {
+    "name": "PG–FAVOURITE1.2 LTR MULTIPURPOSE KESSEL",
+    "brand": "PIGEON",
+    "old_mrp": 1695,
+    "new_mrp": 1695,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "KETTLE",
+    "sub_category": "1.2 LTR",
+    "sap_code": "19001664",
+    "sap_code_with_color": "19001664 NA",
+    "ean_code": "8904216514318",
+    "sp_rate": 1695
   },
   "19001665": {
     "name": "PG AMAZE 1.2 LTR MULTIPURPOSE KESSEL",
@@ -50619,6 +50732,20 @@
     "october_scheme": true,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
+  "19003961": {
+    "name": "PIGEON HANDY HAND BLENDER",
+    "brand": "PIGEON",
+    "old_mrp": 2199,
+    "new_mrp": 2199,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "SMALL APPLIANCES",
+    "sub_category": "HAND BLENDER",
+    "sap_code": "16222",
+    "sap_code_with_color": "16222 NA",
+    "ean_code": "8904216532220",
+    "sp_rate": null
+  },
   "19003964": {
     "name": "PIGEON HEALTHIFRY+  DIGITAL AIR FRYER",
     "brand": "PIGEON",
@@ -50664,7 +50791,7 @@
     "sub_category": "9 L",
     "sap_code": "16239",
     "sap_code_with_color": "16239 NA",
-    "ean_code": "8904216532398",
+    "ean_code": "19003969",
     "sp_rate": 4750,
     "offers": [
       {
@@ -52853,6 +52980,20 @@
     "october_scheme": true,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
+  "19004213": {
+    "name": "PIGEON GLASSTOP  - BRUNET 3BR - AUTO",
+    "brand": "PIGEON",
+    "old_mrp": 6999,
+    "new_mrp": 6999,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "HOB",
+    "sub_category": "3 BURNER",
+    "sap_code": "16477",
+    "sap_code_with_color": "16477 NA",
+    "ean_code": "8904216534774",
+    "sp_rate": null
+  },
   "19004214": {
     "name": "PIGEON SANDWICH GRILLER BLACK",
     "brand": "PIGEON",
@@ -53151,6 +53292,20 @@
     "active_offer_label": "Buy 1 @ 30% & Buy 2+ @ 40%",
     "october_scheme": true,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
+  },
+  "19004251": {
+    "name": "PG HEALTIFRY+ DIGITAL AIR FRYER-BLACK",
+    "brand": "PIGEON",
+    "old_mrp": 5995,
+    "new_mrp": 5995,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "SMALL APPLIANCES",
+    "sub_category": "AIR FRYER",
+    "sap_code": "19004251",
+    "sap_code_with_color": "19004251 NA",
+    "ean_code": "8904216535047",
+    "sp_rate": null
   },
   "19004252": {
     "name": "PG HEALTIFRY+ DIGITAL AIR FRYER-BLUE",
@@ -55165,6 +55320,20 @@
     "october_scheme": true,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
+  "19004398": {
+    "name": "10PC HG NS CERAMIC COOKWARE-WASHEDSTONE",
+    "brand": "OEM",
+    "old_mrp": 1,
+    "new_mrp": 1,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "NONSTICK COOKWARE",
+    "sub_category": "NON STICK COOKWARE",
+    "sap_code": "19004398",
+    "sap_code_with_color": "19004398",
+    "ean_code": "8904216536358",
+    "sp_rate": 4269.92
+  },
   "19004404": {
     "name": "PG ERC JOY UNLIMITED 0.6 L DX",
     "brand": "PIGEON",
@@ -55740,6 +55909,20 @@
     "october_scheme": true,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
+  "19004468": {
+    "name": "PG HEALTIFRY+DIGITAL AIRFRYER-GREY",
+    "brand": "PIGEON",
+    "old_mrp": 5995,
+    "new_mrp": 5995,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "SMALL APPLIANCES",
+    "sub_category": "AIR FRYER",
+    "sap_code": "19004468",
+    "sap_code_with_color": "19004468 NA",
+    "ean_code": "8904216537171",
+    "sp_rate": null
+  },
   "19004469": {
     "name": "PIGEON CERAMIC FRY PAN 200",
     "brand": "PIGEON",
@@ -56122,11 +56305,17 @@
     "category": "PERSONAL CARE"
   },
   "19004504": {
-    "name": "Item from PDF: 19004504",
+    "name": "PIGEON RAPID ELECTRIC CHOPPER",
     "old_mrp": "Not Available",
     "new_mrp": 2195,
     "difference": "N/A",
-    "source": "pdf_update"
+    "source": "pdf_update",
+    "category": "KITCHEN UTILITY",
+    "sub_category": "CHOPPER",
+    "sap_code": "19004504",
+    "sap_code_with_color": "19004504 NA",
+    "ean_code": "8904216537324",
+    "brand": "PIGEON"
   },
   "19004505": {
     "name": "PIGEON QUICK ELECTRIC CHOPPER",
@@ -56905,12 +57094,17 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "19004550": {
-    "name": "PIGEON FLEXI 9 IN 1 MULTI COOKER",
+    "name": "PIGEON FLEXI 9 IN 1 ELECTRIC  SCRUBBER",
     "old_mrp": "Not Available",
     "new_mrp": 3495,
     "difference": "N/A",
     "source": "pdf",
-    "category": "KITCHEN UTILITY"
+    "category": "KITCHEN UTILITY",
+    "sub_category": "(NIL)",
+    "sap_code": "19004550",
+    "sap_code_with_color": "19004550 NA",
+    "ean_code": "8904216537713",
+    "brand": "PIGEON"
   },
   "19004556": {
     "name": "PG CRUISE ICT + CAST-I TAWA250 COMBO",
@@ -56965,6 +57159,17 @@
     "active_offer_label": "Buy 1 @ 30% & Buy 2+ @ 40%",
     "october_scheme": true,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
+  },
+  "19004559": {
+    "name": "PIGEON DIECAST FRY PAN",
+    "brand": "PIGEON",
+    "old_mrp": 1995,
+    "new_mrp": 1995,
+    "difference": 0,
+    "source": "new_launches_2026",
+    "category": "COOKWARE",
+    "sub_category": "DIECAST FRY PAN",
+    "sap_code": "19004559"
   },
   "19004560": {
     "name": "PG ERC Inox Pro With Steamer 1LDX Yellow",
@@ -57127,6 +57332,39 @@
     "active_offer_label": "Buy 1 @ 30% & Buy 2+ @ 40%",
     "october_scheme": true,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
+  },
+  "19004570": {
+    "name": "PIGEON DIECAST KADAI",
+    "brand": "PIGEON",
+    "old_mrp": 2295,
+    "new_mrp": 2295,
+    "difference": 0,
+    "source": "new_launches_2026",
+    "category": "COOKWARE",
+    "sub_category": "DIECAST KADAI",
+    "sap_code": "19004570"
+  },
+  "19004571": {
+    "name": "PIGEON DIECAST HANDI",
+    "brand": "PIGEON",
+    "old_mrp": 2895,
+    "new_mrp": 2895,
+    "difference": 0,
+    "source": "new_launches_2026",
+    "category": "COOKWARE",
+    "sub_category": "DIECAST HANDI",
+    "sap_code": "19004571"
+  },
+  "19004572": {
+    "name": "PIGEON DIECAST TAWA",
+    "brand": "PIGEON",
+    "old_mrp": 2195,
+    "new_mrp": 2195,
+    "difference": 0,
+    "source": "new_launches_2026",
+    "category": "COOKWARE",
+    "sub_category": "DIECAST TAWA",
+    "sap_code": "19004572"
   },
   "19004573": {
     "name": "PG PERSONAL BLENDER - PURE",
@@ -57291,11 +57529,17 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "19004597": {
-    "name": "Item from PDF: 19004597",
+    "name": "PG IMPERI CAST IRON DH FLAT DOSA TAWA280",
     "old_mrp": "Not Available",
     "new_mrp": 1299,
     "difference": "N/A",
-    "source": "pdf_update"
+    "source": "pdf_update",
+    "category": "CAST IRON",
+    "sub_category": "TAWA",
+    "sap_code": "19004597",
+    "sap_code_with_color": "19004597 NA",
+    "ean_code": "8904216538192",
+    "brand": "PIGEON"
   },
   "19004598": {
     "name": "PIGEON CHIMNEY  - BLACK DIAMOND -60",
@@ -57594,6 +57838,34 @@
     "october_scheme": true,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
+  "19004614": {
+    "name": "PG QUICK BLEND - 3 JAR",
+    "brand": "PIGEON",
+    "old_mrp": 3395,
+    "new_mrp": 3395,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "MIXER GRINDER",
+    "sub_category": "MIXER GRINDER",
+    "sap_code": "19004614",
+    "sap_code_with_color": "19004614 NA",
+    "ean_code": "19004614",
+    "sp_rate": 3395
+  },
+  "19004615": {
+    "name": "PIGEON MIXER GRINDER - NEX GRIND",
+    "brand": "PIGEON",
+    "old_mrp": 12995,
+    "new_mrp": 12995,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "MIXER GRINDER",
+    "sub_category": "FOOD PROCESSING",
+    "sap_code": "19004615",
+    "sap_code_with_color": "19004615 NA",
+    "ean_code": "8904216538406",
+    "sp_rate": null
+  },
   "19004620": {
     "name": "PG NUTRI BLENDER-400W - 3JAR",
     "brand": "PIGEON",
@@ -57857,11 +58129,11 @@
     "name": "PG BASICS PRO 6PCS SET NON-IB",
     "brand": "PIGEON",
     "old_mrp": 1,
-    "new_mrp": 1,
+    "new_mrp": 3395,
     "difference": 0,
     "source": "october_offer_09102026",
-    "category": "SPARES",
-    "sub_category": "(NIL)",
+    "category": "NONSTICK COOKWARE",
+    "sub_category": "GIFT SET",
     "sap_code": "19004662",
     "sap_code_with_color": "19004662 NA",
     "ean_code": "8904216538796",
@@ -57872,11 +58144,17 @@
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
   "19004663": {
-    "name": "Item from PDF: 19004663",
+    "name": "PG CORDLESS DRY IRON 1300W - PINK",
     "old_mrp": "Not Available",
     "new_mrp": 1459,
     "difference": "N/A",
-    "source": "pdf_update"
+    "source": "pdf_update",
+    "category": "SMALL APPLIANCES",
+    "sub_category": "IRONS",
+    "sap_code": "19004663",
+    "sap_code_with_color": "19004663 NA",
+    "ean_code": "8904216539298",
+    "brand": "PIGEON"
   },
   "19004664": {
     "name": "PG ALL IN ONE SUPER COOKER 3 LTR -SS",
@@ -58548,6 +58826,20 @@
     "october_scheme": true,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
+  "19004760": {
+    "name": "PG ERC 1L SS BOWL",
+    "brand": "PIGEON",
+    "old_mrp": 1,
+    "new_mrp": 1,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "ELECTRIC RICE COOKER",
+    "sub_category": "COOKER",
+    "sap_code": "19004760",
+    "sap_code_with_color": "19004760 NA",
+    "ean_code": "8904216539496",
+    "sp_rate": null
+  },
   "19004762": {
     "name": "PG UN CORD CORDLESS STEAM IRON - 2200W",
     "brand": "PIGEON",
@@ -58764,6 +59056,17 @@
     "active_offer_label": "Buy 1 @ 30% & Buy 2+ @ 40%",
     "october_scheme": true,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
+  },
+  "19004805": {
+    "name": "PIGEON IVO HEALTHIFRY 5.4L AIR FRYER",
+    "brand": "PIGEON",
+    "old_mrp": 12995,
+    "new_mrp": 12995,
+    "difference": 0,
+    "source": "new_launches_2026",
+    "category": "SMALL APPLIANCES",
+    "sub_category": "AIR FRYER",
+    "sap_code": "19004805"
   },
   "19004808": {
     "name": "PIGEON FAVO+280 TAWA",
@@ -59130,6 +59433,20 @@
     "october_scheme": true,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
+  "19004834": {
+    "name": "PG TRIPLY CONCAVE TAWA -250 BELLY",
+    "brand": "PIGEON",
+    "old_mrp": 1695,
+    "new_mrp": 1695,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "COOKWARE",
+    "sub_category": "COOKER",
+    "sap_code": "19004834",
+    "sap_code_with_color": "19004834 NA",
+    "ean_code": "8904216540065",
+    "sp_rate": null
+  },
   "19004835": {
     "name": "PG TRIPLY FRY PAN -240 BELLY",
     "brand": "PIGEON",
@@ -59183,6 +59500,20 @@
     "active_offer_label": "Buy 1 @ 30% & Buy 2+ @ 40%",
     "october_scheme": true,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
+  },
+  "19004837": {
+    "name": "PG TRIPLY CONCAVE TAWA-280 BELLY",
+    "brand": "PIGEON",
+    "old_mrp": 1795,
+    "new_mrp": 1795,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "COOKWARE",
+    "sub_category": "COOKER",
+    "sap_code": "19004837",
+    "sap_code_with_color": "19004837 NA",
+    "ean_code": "8904216540096",
+    "sp_rate": null
   },
   "19004838": {
     "name": "Item from PDF: 19004838",
@@ -59288,6 +59619,20 @@
     "difference": "N/A",
     "source": "pdf_update"
   },
+  "19004879": {
+    "name": "CERASTEEL 3PC GIFT(T-280,F-240,K-240)C",
+    "brand": "PIGEON",
+    "old_mrp": 3995,
+    "new_mrp": 3995,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "NONSTICK COOKWARE",
+    "sub_category": "CASSEROLE 240 MM",
+    "sap_code": "19004879",
+    "sap_code_with_color": "19004879 NA",
+    "ean_code": "8904216540522",
+    "sp_rate": 2244.32
+  },
   "19004885": {
     "name": "Item from PDF: 19004885",
     "old_mrp": "Not Available",
@@ -59348,6 +59693,20 @@
     "active_offer_label": "Flat 40% Off on Hob & Chimney",
     "october_scheme": true,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
+  },
+  "19004930": {
+    "name": "PIGEON HEALTHIFRY DIGITAL AIRFRYER - CSD",
+    "brand": "PIGEON",
+    "old_mrp": 7995,
+    "new_mrp": 7995,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "SMALL APPLIANCES",
+    "sub_category": "AIR FRYER",
+    "sap_code": "19004930",
+    "sap_code_with_color": "19004930 NA",
+    "ean_code": "8904216540768",
+    "sp_rate": 7995
   },
   "19004931": {
     "name": "PIGEON HEALTHIFRY+ DIGITAL AF 5.4L - GT",
@@ -60315,6 +60674,20 @@
     "october_scheme": true,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
   },
+  "19005150": {
+    "name": "PIGEON GLASSTOP - RAPIDO HYBRID 2100W",
+    "brand": "PIGEON",
+    "old_mrp": 14999,
+    "new_mrp": 14999,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "COOKTOP",
+    "sub_category": "COOKTOP",
+    "sap_code": "19005150",
+    "sap_code_with_color": "19005150 NA",
+    "ean_code": "8904216542236",
+    "sp_rate": null
+  },
   "19005153": {
     "name": "JODI TWO ZONE ELECTRIC COOKTOP",
     "brand": "PIGEON",
@@ -60375,6 +60748,17 @@
     "active_offer_label": "Flat Rate ₹4,495",
     "october_scheme": true,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
+  },
+  "19005165": {
+    "name": "PIGEON HERITAGE ELECTRIC KETTLE 1L",
+    "brand": "PIGEON",
+    "old_mrp": 1795,
+    "new_mrp": 1795,
+    "difference": 0,
+    "source": "new_launches_2026",
+    "category": "KETTLE",
+    "sub_category": "ELECTRIC KETTLE",
+    "sap_code": "19005165"
   },
   "22000001": {
     "name": "Customer Site vIsit services",
@@ -60933,6 +61317,20 @@
     "active_offer_label": null,
     "october_scheme": false,
     "extra_bill_slab": "Extra 5% on ₹3,999+, 10% on ₹7,000+, 15% on ₹10,000+"
+  },
+  "35000013": {
+    "name": "Gilma 55Cm Trolley Scheme.",
+    "brand": "(NIL)",
+    "old_mrp": 9999,
+    "new_mrp": 9999,
+    "difference": 0,
+    "source": "official_master_2026",
+    "category": "PROMO ITEM",
+    "sub_category": "TROLLEY",
+    "sap_code": "0",
+    "sap_code_with_color": "0 NA",
+    "ean_code": "",
+    "sp_rate": null
   },
   "35000016": {
     "name": "KNOB SPECIAL",
