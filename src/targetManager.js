@@ -35,7 +35,7 @@ export const MASTER_STORES_INFO = [
 
 /**
  * Returns complete dynamic store list:
- * Combines base master stores + all stores discovered in getKnownStores() (localStorage) + any custom target keys
+ * Combines base master stores + all stores discovered in getKnownStores() (localStorage) + optional custom target keys
  */
 export function getDynamicStoresInfo(targetsMap = null) {
   const storeMap = new Map();
@@ -77,10 +77,17 @@ export function getDynamicStoresInfo(targetsMap = null) {
     console.warn("Could not load dynamic known stores:", e);
   }
 
-  // 3. Discover from current targetsMap keys
-  const current = targetsMap || getLocalStoreTargets();
-  if (current && typeof current === "object") {
-    Object.keys(current).forEach(key => {
+  // 3. Discover from targetsMap keys or raw localStorage (SAFE: no recursive getLocalStoreTargets call)
+  let rawMap = targetsMap;
+  if (!rawMap) {
+    try {
+      const raw = localStorage.getItem(TARGETS_STORAGE_KEY);
+      if (raw) rawMap = JSON.parse(raw);
+    } catch (e) {}
+  }
+
+  if (rawMap && typeof rawMap === "object") {
+    Object.keys(rawMap).forEach(key => {
       const trimmed = key.trim();
       const codeMatch = trimmed.match(/^(WM[HM]\d{3})/i);
       if (codeMatch) {
@@ -91,7 +98,7 @@ export function getDynamicStoresInfo(targetsMap = null) {
             code,
             state: isMP ? "MP" : "MH",
             name: trimmed.length > 6 ? trimmed : code,
-            defaultTarget: Number(current[key]) || 500000
+            defaultTarget: Number(rawMap[key]) || 500000
           });
         }
       }
@@ -110,11 +117,29 @@ export function getDynamicStoresInfo(targetsMap = null) {
  */
 export function getDefaultStoreTargetsMap() {
   const map = {};
-  const allStores = getDynamicStoresInfo();
-  allStores.forEach(store => {
+
+  // Base master stores
+  MASTER_STORES_INFO.forEach(store => {
     map[store.code] = store.defaultTarget;
     map[store.name] = store.defaultTarget;
   });
+
+  // Known dynamic stores
+  try {
+    const known = getKnownStores();
+    if (Array.isArray(known)) {
+      known.forEach(storeStr => {
+        if (!storeStr || typeof storeStr !== "string") return;
+        const trimmed = storeStr.trim();
+        const codeMatch = trimmed.match(/^(WM[HM]\d{3})/i);
+        const code = codeMatch ? codeMatch[1].toUpperCase() : trimmed.split(" ")[0].toUpperCase();
+        if (!map[code]) {
+          map[code] = 500000;
+          map[trimmed] = 500000;
+        }
+      });
+    }
+  } catch (e) {}
 
   // Common aliases
   map["WMH007 - PUN -RAVET PUNE"] = 800000;
