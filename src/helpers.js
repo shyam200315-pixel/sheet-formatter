@@ -17,7 +17,6 @@ export const MASTER_STORES = [
   "WMH008 - STR - SATARA",
   "WMH009 - KOP - KOLHAPUR",
   "WMH011 - BDL - BADLAPUR",
-  "WMH012 - MH STORE",
   // Madhya Pradesh (8 stores)
   "WMP001 - BPL - SEHORE CITY",
   "WMP002 - BPL - GULMOHAR COLONY",

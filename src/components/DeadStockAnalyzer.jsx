@@ -1108,8 +1108,7 @@ export default function DeadStockAnalyzer({ onBack }) {
     "WMH007": "CFFAFE",
     "WMH008": "FCE7F3",
     "WMH009": "CCFBF1",
-    "WMH011": "D1EDBF",
-    "WMH012": "FDE047"
+    "WMH011": "D1EDBF"
   };
 
   // Export Surplus Excel
