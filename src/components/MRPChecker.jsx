@@ -479,9 +479,16 @@ export default function MRPChecker() {
                       className="flex flex-col text-left p-3 rounded-xl bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 border border-gray-200 dark:border-slate-700 hover:border-[#1a73e8] transition-all group"
                     >
                       <div className="flex items-center justify-between w-full">
-                        <span className="font-mono text-xs font-bold text-[#1a73e8] dark:text-blue-400 group-hover:underline">
-                          {res.hanaCode}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono text-xs font-bold text-[#1a73e8] dark:text-blue-400 group-hover:underline">
+                            {res.hanaCode}
+                          </span>
+                          {res.data.mrp_source === "bulk_file" && (
+                            <span className="text-[9.5px] font-bold text-purple-700 dark:text-purple-300 bg-purple-100/70 dark:bg-purple-950/60 px-1.5 py-0.2 rounded border border-purple-200 dark:border-purple-800">
+                              Bulk MRP
+                            </span>
+                          )}
+                        </div>
                         {resOffer && (
                           <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
                             ₹{resOffer.price.toLocaleString('en-IN')} {resOffer.discountPct ? `(${resOffer.discountPct}% Off)` : ''}
@@ -635,9 +642,11 @@ export default function MRPChecker() {
                 </div>
                 
                 {/* New MRP */}
-                <div className="bg-white/80 dark:bg-slate-800/80 rounded-2xl p-4 sm:p-5 border-2 border-blue-500/30 dark:border-blue-400/30 shadow-sm flex flex-col items-center justify-center text-center relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-2 h-2 bg-blue-500 rounded-bl-full"></div>
-                  <span className="text-xs font-bold text-[#1a73e8] dark:text-blue-400 uppercase tracking-wider mb-1">New MRP (26-27)</span>
+                <div className={`bg-white/80 dark:bg-slate-800/80 rounded-2xl p-4 sm:p-5 border-2 ${activeItem.data.mrp_source === "bulk_file" ? "border-purple-500/50 dark:border-purple-400/50" : "border-blue-500/30 dark:border-blue-400/30"} shadow-sm flex flex-col items-center justify-center text-center relative overflow-hidden`}>
+                  <div className={`absolute top-0 right-0 w-2 h-2 ${activeItem.data.mrp_source === "bulk_file" ? "bg-purple-500" : "bg-blue-500"} rounded-bl-full`}></div>
+                  <span className={`text-xs font-bold ${activeItem.data.mrp_source === "bulk_file" ? "text-purple-600 dark:text-purple-400" : "text-[#1a73e8] dark:text-blue-400"} uppercase tracking-wider mb-1`}>
+                    New MRP (26-27)
+                  </span>
                   <span className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">
                     {activeItem.data.new_mrp && activeItem.data.new_mrp !== "Not Available" 
                       ? `₹${Number(activeItem.data.new_mrp).toLocaleString('en-IN')}` 
@@ -645,6 +654,15 @@ export default function MRPChecker() {
                           ? `₹${Number(activeItem.data.old_mrp).toLocaleString('en-IN')}` 
                           : <span className="text-sm font-normal text-gray-400">N/A</span>)}
                   </span>
+                  {activeItem.data.mrp_source === "bulk_file" ? (
+                    <span className="mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                      ⚡ From Bulk File
+                    </span>
+                  ) : (
+                    <span className="mt-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/50 text-[#1a73e8] dark:text-blue-300 border border-blue-100 dark:border-blue-900">
+                      Retail Master
+                    </span>
+                  )}
                 </div>
 
                 {/* Offer / Effective Price */}
@@ -750,11 +768,29 @@ export default function MRPChecker() {
               </div>
 
               {/* Source Info Badges */}
-              {activeItem.data.source && (
-                <div className="flex items-start gap-3 text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/30 p-4 rounded-2xl text-xs border border-amber-200 dark:border-amber-800">
-                  <Info size={18} className="mt-0.5 flex-shrink-0" />
+              {activeItem.data.mrp_source === "bulk_file" ? (
+                <div className="flex items-start gap-3 text-purple-900 dark:text-purple-200 bg-purple-50/90 dark:bg-purple-950/40 p-4 rounded-2xl text-xs border border-purple-200/80 dark:border-purple-800/60 shadow-sm">
+                  <Info size={18} className="mt-0.5 flex-shrink-0 text-purple-600 dark:text-purple-400" />
                   <div>
-                    <strong>Note:</strong> Pricing and scheme discounts are synced with October 2026 Master Catalogue.
+                    <strong className="block text-sm font-bold text-purple-950 dark:text-purple-100">
+                      📌 MRP Source: Bulk / Institutional Data File (Higher MRP Selected)
+                    </strong>
+                    <p className="mt-1 text-purple-800 dark:text-purple-300 leading-relaxed text-[11.5px]">
+                      Is item ki MRP <strong>Bulk Data sheet se li gayi hai</strong> kyunki Bulk file me MRP jyada thi (Bulk MRP: <strong>₹{Number(activeItem.data.bulk_mrp || activeItem.data.new_mrp).toLocaleString('en-IN')}</strong> vs Retail Master MRP: <strong>₹{Number(activeItem.data.retail_master_mrp || activeItem.data.old_mrp).toLocaleString('en-IN')}</strong>). Rule ke hisaab se higher MRP ko adopt kiya gaya hai.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-start gap-3 text-blue-900 dark:text-blue-200 bg-blue-50/90 dark:bg-blue-950/40 p-4 rounded-2xl text-xs border border-blue-200/80 dark:border-blue-800/60 shadow-sm">
+                  <Info size={18} className="mt-0.5 flex-shrink-0 text-[#1a73e8] dark:text-blue-400" />
+                  <div>
+                    <strong className="block text-sm font-bold text-blue-950 dark:text-blue-100">
+                      📌 MRP Source: Official Retail Master Catalog
+                    </strong>
+                    <p className="mt-1 text-blue-800 dark:text-blue-300 leading-relaxed text-[11.5px]">
+                      Is item ki MRP <strong>Official Retail Master Sheet</strong> se li gayi hai
+                      {activeItem.data.bulk_mrp ? ` (Bulk Data file me iski MRP ₹${Number(activeItem.data.bulk_mrp).toLocaleString('en-IN')} thi jo kam/barabar thi, isliye higher Retail MRP ₹${Number(activeItem.data.new_mrp || activeItem.data.old_mrp).toLocaleString('en-IN')} rakhi gayi hai).` : `.`}
+                    </p>
                   </div>
                 </div>
               )}
