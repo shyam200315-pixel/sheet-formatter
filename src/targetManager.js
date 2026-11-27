@@ -1,15 +1,15 @@
 import * as XLSX from "xlsx";
-import { normalizeStoreName } from "./helpers";
+import { normalizeStoreName, getKnownStores, saveKnownStores } from "./helpers";
 
 export const TARGETS_STORAGE_KEY = "store_targets_custom_v1";
 export const TARGET_PASSWORD_KEY = "validator_target_password";
 export const DEFAULT_TARGET_PASSWORD = "shyam";
 
 /**
- * 18 Official Master Stores with baseline targets
+ * Baseline Master Stores with initial target defaults
  */
 export const MASTER_STORES_INFO = [
-  // Maharashtra (10 stores) - Total: ₹79,00,000
+  // Maharashtra stores
   { code: "WMH001", state: "MH", name: "WMH001 - NED - VAZIRABAD", defaultTarget: 450000 },
   { code: "WMH002", state: "MH", name: "WMH002 - NED - BHAGYA NAGAR", defaultTarget: 450000 },
   { code: "WMH003", state: "MH", name: "WMH003 - BDE - BEED", defaultTarget: 1000000 },
@@ -20,8 +20,9 @@ export const MASTER_STORES_INFO = [
   { code: "WMH008", state: "MH", name: "WMH008 - STR - SATARA", defaultTarget: 700000 },
   { code: "WMH009", state: "MH", name: "WMH009 - KOP - KOLHAPUR", defaultTarget: 600000 },
   { code: "WMH011", state: "MH", name: "WMH011 - BDL - BADLAPUR", defaultTarget: 800000 },
+  { code: "WMH012", state: "MH", name: "WMH012 - MH STORE", defaultTarget: 600000 },
 
-  // Madhya Pradesh (8 stores) - Total: ₹29,40,000
+  // Madhya Pradesh stores
   { code: "WMP001", state: "MP", name: "WMP001 - BPL - SEHORE CITY", defaultTarget: 300000 },
   { code: "WMP002", state: "MP", name: "WMP002 - BPL - GULMOHAR COLONY", defaultTarget: 400000 },
   { code: "WMP003", state: "MP", name: "WMP003 - IND - MR 09 ROAD", defaultTarget: 400000 },
@@ -33,11 +34,84 @@ export const MASTER_STORES_INFO = [
 ];
 
 /**
+ * Returns complete dynamic store list:
+ * Combines base master stores + all stores discovered in getKnownStores() (localStorage) + any custom target keys
+ */
+export function getDynamicStoresInfo(targetsMap = null) {
+  const storeMap = new Map();
+
+  // 1. Base master stores
+  MASTER_STORES_INFO.forEach(store => {
+    storeMap.set(store.code, { ...store });
+  });
+
+  // 2. Discover from getKnownStores()
+  try {
+    const known = getKnownStores();
+    if (Array.isArray(known)) {
+      known.forEach(storeStr => {
+        if (!storeStr || typeof storeStr !== "string") return;
+        const trimmed = storeStr.trim();
+        const codeMatch = trimmed.match(/^(WM[HM]\d{3})/i);
+        const code = codeMatch ? codeMatch[1].toUpperCase() : trimmed.split(" ")[0].toUpperCase();
+        const isMP = code.startsWith("WMP") || trimmed.toUpperCase().includes("MADHYA") || trimmed.toUpperCase().includes("MP");
+        const state = isMP ? "MP" : "MH";
+
+        if (!storeMap.has(code)) {
+          storeMap.set(code, {
+            code,
+            state,
+            name: trimmed,
+            defaultTarget: 500000
+          });
+        } else {
+          // If known store name has more descriptive branch name, update it
+          const existing = storeMap.get(code);
+          if (trimmed.length > existing.name.length || existing.name === code || existing.name.includes("MH STORE")) {
+            existing.name = trimmed;
+          }
+        }
+      });
+    }
+  } catch (e) {
+    console.warn("Could not load dynamic known stores:", e);
+  }
+
+  // 3. Discover from current targetsMap keys
+  const current = targetsMap || getLocalStoreTargets();
+  if (current && typeof current === "object") {
+    Object.keys(current).forEach(key => {
+      const trimmed = key.trim();
+      const codeMatch = trimmed.match(/^(WM[HM]\d{3})/i);
+      if (codeMatch) {
+        const code = codeMatch[1].toUpperCase();
+        if (!storeMap.has(code)) {
+          const isMP = code.startsWith("WMP");
+          storeMap.set(code, {
+            code,
+            state: isMP ? "MP" : "MH",
+            name: trimmed.length > 6 ? trimmed : code,
+            defaultTarget: Number(current[key]) || 500000
+          });
+        }
+      }
+    });
+  }
+
+  // Return sorted: MP stores together, MH stores together, then by store code
+  return Array.from(storeMap.values()).sort((a, b) => {
+    if (a.state !== b.state) return a.state.localeCompare(b.state);
+    return a.code.localeCompare(b.code);
+  });
+}
+
+/**
  * Creates the base targets dictionary indexed by store code (e.g. WMP001) and canonical names
  */
 export function getDefaultStoreTargetsMap() {
   const map = {};
-  MASTER_STORES_INFO.forEach(store => {
+  const allStores = getDynamicStoresInfo();
+  allStores.forEach(store => {
     map[store.code] = store.defaultTarget;
     map[store.name] = store.defaultTarget;
   });
@@ -83,12 +157,13 @@ export function saveLocalStoreTargets(targetsMap) {
 }
 
 /**
- * Calculate grand total monthly target from the 18 master stores
+ * Calculate grand total monthly target across all dynamic stores
  */
 export function calculateGrandTotalTarget(targetsMap) {
   if (!targetsMap) return 10840000;
   let total = 0;
-  MASTER_STORES_INFO.forEach(store => {
+  const allStores = getDynamicStoresInfo(targetsMap);
+  allStores.forEach(store => {
     const val = targetsMap[store.code] ?? targetsMap[store.name] ?? store.defaultTarget;
     total += Number(val) || 0;
   });
@@ -96,12 +171,13 @@ export function calculateGrandTotalTarget(targetsMap) {
 }
 
 /**
- * Calculate MP-only commitment/target total
+ * Calculate MP-only commitment/target total across all dynamic MP stores
  */
 export function calculateMPCommitment(targetsMap) {
   if (!targetsMap) return 2940000;
   let total = 0;
-  MASTER_STORES_INFO.filter(s => s.state === "MP").forEach(store => {
+  const allStores = getDynamicStoresInfo(targetsMap);
+  allStores.filter(s => s.state === "MP").forEach(store => {
     const val = targetsMap[store.code] ?? targetsMap[store.name] ?? store.defaultTarget;
     total += Number(val) || 0;
   });
@@ -120,7 +196,7 @@ export function getStoreTargetValue(storeName, targetsMap = null) {
   if (currentMap[canonical] !== undefined) return currentMap[canonical];
   if (currentMap[storeName] !== undefined) return currentMap[storeName];
 
-  // 2. Match by store code extracted (e.g. WMP001 or WMH003)
+  // 2. Match by store code extracted (e.g. WMP001, WMH003, WMH012)
   const codeMatch = storeName.match(/(WM[HP]\s*[-_]?\s*\d{1,3})/i);
   if (codeMatch) {
     const cleanDigits = codeMatch[1].replace(/\D/g, "");
@@ -148,24 +224,38 @@ export function getStoreTargetValue(storeName, targetsMap = null) {
 }
 
 /**
- * Helper to match a user input token (like "wmp001" or "sehore") to a master store
+ * Helper to match a user input token (like "wmp001", "wmh012", "sehore") to a master store
  */
 export function matchStoreFromToken(token) {
   if (!token) return null;
   const clean = String(token).trim().toUpperCase();
+  const allStores = getDynamicStoresInfo();
 
-  // Try store code pattern: e.g. WMP001, WMP1, WMP-001, WMH005
+  // Try store code pattern: e.g. WMP001, WMP1, WMP-001, WMH005, WMH012
   const codeMatch = clean.match(/(WM[HP])\s*[-_]?\s*(\d{1,3})/i);
   if (codeMatch) {
     const prefix = codeMatch[1].toUpperCase();
     const num = codeMatch[2].padStart(3, "0");
     const formatted = `${prefix}${num}`;
-    const found = MASTER_STORES_INFO.find(s => s.code === formatted);
+    const found = allStores.find(s => s.code === formatted);
     if (found) return found;
+
+    // Dynamically auto-create any newly typed store code (e.g. WMH012, WMH013, WMP009)
+    const isMP = prefix.startsWith("WMP");
+    const newStore = {
+      code: formatted,
+      state: isMP ? "MP" : "MH",
+      name: String(token).trim().length > 6 ? String(token).trim().toUpperCase() : `${formatted} - ${isMP ? 'MP' : 'MH'} STORE`,
+      defaultTarget: 500000
+    };
+    try {
+      saveKnownStores([newStore.name]);
+    } catch (e) {}
+    return newStore;
   }
 
   // Direct code match
-  const directMatch = MASTER_STORES_INFO.find(s => s.code === clean);
+  const directMatch = allStores.find(s => s.code === clean);
   if (directMatch) return directMatch;
 
   // City or keyword match
@@ -194,7 +284,7 @@ export function matchStoreFromToken(token) {
 
   for (const item of keywordMap) {
     if (clean.includes(item.key)) {
-      return MASTER_STORES_INFO.find(s => s.code === item.code) || null;
+      return allStores.find(s => s.code === item.code) || null;
     }
   }
 
