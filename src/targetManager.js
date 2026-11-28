@@ -1,15 +1,15 @@
 import * as XLSX from "xlsx";
-import { normalizeStoreName } from "./helpers";
+import { normalizeStoreName, getKnownStores } from "./helpers.js";
 
 export const TARGETS_STORAGE_KEY = "store_targets_custom_v1";
 export const TARGET_PASSWORD_KEY = "validator_target_password";
 export const DEFAULT_TARGET_PASSWORD = "shyam";
 
 /**
- * 18 Official Master Stores with baseline targets
+ * Baseline Master Stores with standard targets
  */
 export const MASTER_STORES_INFO = [
-  // Maharashtra (10 stores) - Total: ₹79,00,000
+  // Maharashtra (11 stores)
   { code: "WMH001", state: "MH", name: "WMH001 - NED - VAZIRABAD", defaultTarget: 450000 },
   { code: "WMH002", state: "MH", name: "WMH002 - NED - BHAGYA NAGAR", defaultTarget: 450000 },
   { code: "WMH003", state: "MH", name: "WMH003 - BDE - BEED", defaultTarget: 1000000 },
@@ -20,8 +20,9 @@ export const MASTER_STORES_INFO = [
   { code: "WMH008", state: "MH", name: "WMH008 - STR - SATARA", defaultTarget: 700000 },
   { code: "WMH009", state: "MH", name: "WMH009 - KOP - KOLHAPUR", defaultTarget: 600000 },
   { code: "WMH011", state: "MH", name: "WMH011 - BDL - BADLAPUR", defaultTarget: 800000 },
+  { code: "WMH012", state: "MH", name: "WMH012 - MH STORE", defaultTarget: 500000 },
 
-  // Madhya Pradesh (8 stores) - Total: ₹29,40,000
+  // Madhya Pradesh (8 stores)
   { code: "WMP001", state: "MP", name: "WMP001 - BPL - SEHORE CITY", defaultTarget: 300000 },
   { code: "WMP002", state: "MP", name: "WMP002 - BPL - GULMOHAR COLONY", defaultTarget: 400000 },
   { code: "WMP003", state: "MP", name: "WMP003 - IND - MR 09 ROAD", defaultTarget: 400000 },
@@ -33,14 +34,101 @@ export const MASTER_STORES_INFO = [
 ];
 
 /**
+ * Returns dynamic store list:
+ * Combines base master stores + all stores discovered in getKnownStores() (localStorage) + optional custom target keys
+ * (SAFE: Never calls getLocalStoreTargets or getDefaultStoreTargetsMap to guarantee 0 recursion)
+ */
+export function getDynamicStoresInfo(targetsMap = null) {
+  const storeMap = new Map();
+
+  // 1. Base master stores
+  MASTER_STORES_INFO.forEach(store => {
+    storeMap.set(store.code, { ...store });
+  });
+
+  // 2. Discover from getKnownStores() (saved from uploaded sales sheets)
+  try {
+    const known = getKnownStores();
+    if (Array.isArray(known)) {
+      known.forEach(storeStr => {
+        if (!storeStr || typeof storeStr !== "string") return;
+        const trimmed = storeStr.trim();
+        const codeMatch = trimmed.match(/^(WM[HM]\d{1,3})/i);
+        const code = codeMatch ? codeMatch[1].toUpperCase() : trimmed.split(/[\s-]/)[0].toUpperCase();
+        if (code && !storeMap.has(code)) {
+          const isMP = code.startsWith("WMP") || trimmed.toUpperCase().includes(" - MP ");
+          storeMap.set(code, {
+            code,
+            state: isMP ? "MP" : "MH",
+            name: trimmed.length > code.length ? trimmed : `${code} - STORE`,
+            defaultTarget: 500000
+          });
+        }
+      });
+    }
+  } catch (e) {
+    console.warn("Could not load dynamic known stores:", e);
+  }
+
+  // 3. Discover from targetsMap keys or raw localStorage (SAFE: no recursive getLocalStoreTargets call)
+  let rawMap = targetsMap;
+  if (!rawMap) {
+    try {
+      const raw = localStorage.getItem(TARGETS_STORAGE_KEY);
+      if (raw) rawMap = JSON.parse(raw);
+    } catch (e) {}
+  }
+
+  if (rawMap && typeof rawMap === "object") {
+    Object.keys(rawMap).forEach(key => {
+      const trimmed = key.trim();
+      const codeMatch = trimmed.match(/^(WM[HM]\d{1,3})/i);
+      if (codeMatch) {
+        const code = codeMatch[1].toUpperCase();
+        if (!storeMap.has(code)) {
+          const isMP = code.startsWith("WMP");
+          storeMap.set(code, {
+            code,
+            state: isMP ? "MP" : "MH",
+            name: trimmed.length > 6 ? trimmed : code,
+            defaultTarget: Number(rawMap[key]) || 500000
+          });
+        }
+      }
+    });
+  }
+
+  return Array.from(storeMap.values());
+}
+
+/**
  * Creates the base targets dictionary indexed by store code (e.g. WMP001) and canonical names
  */
 export function getDefaultStoreTargetsMap() {
   const map = {};
+
+  // Base master stores
   MASTER_STORES_INFO.forEach(store => {
     map[store.code] = store.defaultTarget;
     map[store.name] = store.defaultTarget;
   });
+
+  // Known dynamic stores
+  try {
+    const known = getKnownStores();
+    if (Array.isArray(known)) {
+      known.forEach(storeStr => {
+        if (!storeStr || typeof storeStr !== "string") return;
+        const trimmed = storeStr.trim();
+        const codeMatch = trimmed.match(/^(WM[HM]\d{1,3})/i);
+        const code = codeMatch ? codeMatch[1].toUpperCase() : trimmed.split(/[\s-]/)[0].toUpperCase();
+        if (code && !map[code]) {
+          map[code] = 500000;
+          map[trimmed] = 500000;
+        }
+      });
+    }
+  } catch (e) {}
 
   // Common aliases
   map["WMH007 - PUN -RAVET PUNE"] = 800000;
@@ -83,12 +171,13 @@ export function saveLocalStoreTargets(targetsMap) {
 }
 
 /**
- * Calculate grand total monthly target from the 18 master stores
+ * Calculate grand total monthly target across all dynamic stores
  */
 export function calculateGrandTotalTarget(targetsMap) {
-  if (!targetsMap) return 10840000;
+  if (!targetsMap) return 11340000;
   let total = 0;
-  MASTER_STORES_INFO.forEach(store => {
+  const allStores = getDynamicStoresInfo(targetsMap);
+  allStores.forEach(store => {
     const val = targetsMap[store.code] ?? targetsMap[store.name] ?? store.defaultTarget;
     total += Number(val) || 0;
   });
@@ -96,12 +185,13 @@ export function calculateGrandTotalTarget(targetsMap) {
 }
 
 /**
- * Calculate MP-only commitment/target total
+ * Calculate MP-only commitment/target total across all MP stores
  */
 export function calculateMPCommitment(targetsMap) {
   if (!targetsMap) return 2940000;
   let total = 0;
-  MASTER_STORES_INFO.filter(s => s.state === "MP").forEach(store => {
+  const allStores = getDynamicStoresInfo(targetsMap);
+  allStores.filter(s => s.state === "MP").forEach(store => {
     const val = targetsMap[store.code] ?? targetsMap[store.name] ?? store.defaultTarget;
     total += Number(val) || 0;
   });
@@ -148,25 +238,30 @@ export function getStoreTargetValue(storeName, targetsMap = null) {
 }
 
 /**
- * Helper to match a user input token (like "wmp001" or "sehore") to a master store
+ * Helper to match a user input token (like "wmp001", "wmh012", or "sehore") to any dynamic store
  */
-export function matchStoreFromToken(token) {
+export function matchStoreFromToken(token, targetsMap = null) {
   if (!token) return null;
   const clean = String(token).trim().toUpperCase();
+  const allStores = getDynamicStoresInfo(targetsMap);
 
-  // Try store code pattern: e.g. WMP001, WMP1, WMP-001, WMH005
+  // Try store code pattern: e.g. WMP001, WMP1, WMP-001, WMH005, WMH012
   const codeMatch = clean.match(/(WM[HP])\s*[-_]?\s*(\d{1,3})/i);
   if (codeMatch) {
     const prefix = codeMatch[1].toUpperCase();
     const num = codeMatch[2].padStart(3, "0");
     const formatted = `${prefix}${num}`;
-    const found = MASTER_STORES_INFO.find(s => s.code === formatted);
+    const found = allStores.find(s => s.code === formatted);
     if (found) return found;
   }
 
   // Direct code match
-  const directMatch = MASTER_STORES_INFO.find(s => s.code === clean);
+  const directMatch = allStores.find(s => s.code === clean);
   if (directMatch) return directMatch;
+
+  // Exact name match
+  const nameMatch = allStores.find(s => s.name.toUpperCase() === clean);
+  if (nameMatch) return nameMatch;
 
   // City or keyword match
   const keywordMap = [
@@ -194,7 +289,7 @@ export function matchStoreFromToken(token) {
 
   for (const item of keywordMap) {
     if (clean.includes(item.key)) {
-      return MASTER_STORES_INFO.find(s => s.code === item.code) || null;
+      return allStores.find(s => s.code === item.code) || null;
     }
   }
 
@@ -263,19 +358,19 @@ export function parseTargetText(rawText, currentTargetsMap) {
 
     if (parts.length >= 2) {
       // First try part 0 as store, part 1 as amount
-      storeMatched = matchStoreFromToken(parts[0]);
+      storeMatched = matchStoreFromToken(parts[0], currentTargetsMap);
       amountFound = parseAmount(parts[1]);
 
       // If not, try part 1 as store, part 0 as amount
       if (!storeMatched && parseAmount(parts[0]) > 0) {
-        storeMatched = matchStoreFromToken(parts[1]);
+        storeMatched = matchStoreFromToken(parts[1], currentTargetsMap);
         amountFound = parseAmount(parts[0]);
       }
     } else {
       // Single line like "WMP001 300000" split by simple space
       const sub = line.split(/\s+/);
       if (sub.length >= 2) {
-        storeMatched = matchStoreFromToken(sub[0]);
+        storeMatched = matchStoreFromToken(sub[0], currentTargetsMap);
         amountFound = parseAmount(sub.slice(1).join(""));
       }
     }
@@ -381,7 +476,7 @@ export async function parseTargetExcelFile(file, currentTargetsMap) {
           } else {
             // Fallback: look for store-like column and number column
             for (let c = 0; c < row.length; c++) {
-              const matched = matchStoreFromToken(row[c]);
+              const matched = matchStoreFromToken(row[c], currentTargetsMap);
               if (matched) {
                 storeToken = row[c];
                 // look for amount in adjacent columns
@@ -399,7 +494,7 @@ export async function parseTargetExcelFile(file, currentTargetsMap) {
             }
           }
 
-          const matchedStore = matchStoreFromToken(storeToken);
+          const matchedStore = matchStoreFromToken(storeToken, currentTargetsMap);
           if (matchedStore && targetVal > 0) {
             const oldVal = previewMap[matchedStore.code] ?? previewMap[matchedStore.name] ?? matchedStore.defaultTarget;
             previewMap[matchedStore.code] = targetVal;

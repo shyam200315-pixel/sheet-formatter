@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Lock,
@@ -19,11 +19,15 @@ import {
   EyeOff,
   Copy,
   Save,
-  HelpCircle
+  HelpCircle,
+  Plus,
+  Store,
+  Building2
 } from "lucide-react";
 import toast from "react-hot-toast";
 import {
   MASTER_STORES_INFO,
+  getDynamicStoresInfo,
   TARGET_PASSWORD_KEY,
   DEFAULT_TARGET_PASSWORD,
   parseTargetText,
@@ -32,6 +36,7 @@ import {
   calculateMPCommitment,
   saveLocalStoreTargets
 } from "../targetManager";
+import { saveKnownStores } from "../helpers";
 import { saveTargetsToCloud } from "../firebaseConfig";
 
 export default function TargetUpdateModal({
@@ -53,7 +58,21 @@ export default function TargetUpdateModal({
   const [selectedFile, setSelectedFile] = useState(null);
   const [isProcessingFile, setIsProcessingFile] = useState(false);
 
-  // Manual Quick Edit State (all 18 stores)
+  // Dynamic Stores & Custom Store Adding
+  const [customStoreCounter, setCustomStoreCounter] = useState(0);
+  const [showAddStoreForm, setShowAddStoreForm] = useState(false);
+  const [newStoreName, setNewStoreName] = useState("");
+  const [newStoreTarget, setNewStoreTarget] = useState("");
+
+  const allStores = useMemo(() => {
+    return getDynamicStoresInfo(currentTargetsMap);
+  }, [currentTargetsMap, customStoreCounter]);
+
+  const mpStores = useMemo(() => allStores.filter(s => s.state === "MP"), [allStores]);
+  const mhStores = useMemo(() => allStores.filter(s => s.state === "MH"), [allStores]);
+  const otherStores = useMemo(() => allStores.filter(s => s.state !== "MP" && s.state !== "MH"), [allStores]);
+
+  // Manual Quick Edit State (all dynamic stores)
   const [manualTargets, setManualTargets] = useState({});
 
   // Preview & Confirmation Data
@@ -70,14 +89,14 @@ export default function TargetUpdateModal({
       setPasswordInput("");
       setPasswordError("");
 
-      // Initialize manual targets
+      // Initialize manual targets for all dynamic stores
       const initialManual = {};
-      MASTER_STORES_INFO.forEach(s => {
+      allStores.forEach(s => {
         initialManual[s.code] = currentTargetsMap[s.code] ?? currentTargetsMap[s.name] ?? s.defaultTarget;
       });
       setManualTargets(initialManual);
     }
-  }, [isOpen, currentTargetsMap]);
+  }, [isOpen, currentTargetsMap, allStores]);
 
   if (!isOpen) return null;
 
@@ -95,9 +114,41 @@ export default function TargetUpdateModal({
     }
   };
 
+  // Handle Add Custom Store directly in modal
+  const handleAddCustomStore = (e) => {
+    if (e) e.preventDefault();
+    const cleanName = newStoreName.trim().toUpperCase();
+    if (!cleanName) {
+      toast.error("Please enter a store code or name (e.g. WMH013 - NASHIK).");
+      return;
+    }
+
+    const codeMatch = cleanName.match(/^(WM[HM]\d{1,3})/i);
+    const code = codeMatch ? codeMatch[1].toUpperCase() : cleanName.split(/[\s-]/)[0].toUpperCase();
+    const targetAmt = Number(newStoreTarget) || 500000;
+
+    // Save to known master stores
+    try {
+      saveKnownStores([cleanName]);
+    } catch (err) {}
+
+    // Add to current manual targets state
+    setManualTargets(prev => ({
+      ...prev,
+      [code]: targetAmt,
+      [cleanName]: targetAmt
+    }));
+
+    setCustomStoreCounter(c => c + 1);
+    setNewStoreName("");
+    setNewStoreTarget("");
+    setShowAddStoreForm(false);
+    toast.success(`Store ${code} added to targets!`);
+  };
+
   // Populate sample MP text format
   const handleLoadMPSample = () => {
-    const sample = MASTER_STORES_INFO.filter(s => s.state === "MP")
+    const sample = mpStores
       .map(s => `${s.code}  ${currentTargetsMap[s.code] ?? s.defaultTarget}`)
       .join("\n");
     setTextInput(sample);
@@ -105,7 +156,7 @@ export default function TargetUpdateModal({
 
   // Populate sample all stores format
   const handleLoadAllSample = () => {
-    const sample = MASTER_STORES_INFO
+    const sample = allStores
       .map(s => `${s.code}  ${currentTargetsMap[s.code] ?? s.defaultTarget}`)
       .join("\n");
     setTextInput(sample);
@@ -152,7 +203,7 @@ export default function TargetUpdateModal({
     const updates = [];
     const previewMap = { ...currentTargetsMap };
 
-    MASTER_STORES_INFO.forEach(store => {
+    allStores.forEach(store => {
       const newTarget = Number(manualTargets[store.code]) || 0;
       const oldTarget = currentTargetsMap[store.code] ?? currentTargetsMap[store.name] ?? store.defaultTarget;
       previewMap[store.code] = newTarget;
@@ -347,7 +398,7 @@ export default function TargetUpdateModal({
                       : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                   }`}
                 >
-                  <Sliders className="w-4 h-4" /> Quick Edit (18 Stores)
+                  <Sliders className="w-4 h-4" /> Quick Edit ({allStores.length} Stores)
                 </button>
               </div>
 
@@ -455,56 +506,141 @@ export default function TargetUpdateModal({
               {/* TAB 3: MANUAL QUICK EDIT */}
               {inputTab === "manual" && (
                 <div className="space-y-3">
+                  {/* Top Bar with Add Store Button */}
+                  <div className="flex items-center justify-between pb-1">
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      Store Target List ({allStores.length} Stores)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddStoreForm(!showAddStoreForm)}
+                      className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-medium"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> {showAddStoreForm ? "Cancel Add" : "Add New Store"}
+                    </button>
+                  </div>
+
+                  {/* Add New Store Form */}
+                  {showAddStoreForm && (
+                    <div className="p-3 bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl space-y-2">
+                      <div className="text-xs font-semibold text-blue-800 dark:text-blue-300 flex items-center gap-1.5">
+                        <Building2 className="w-3.5 h-3.5" /> Add Store to Target Manager
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          value={newStoreName}
+                          onChange={(e) => setNewStoreName(e.target.value)}
+                          placeholder="e.g. WMH013 - NASHIK"
+                          className="px-3 py-1.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:ring-1 focus:ring-blue-500 font-medium text-slate-800 dark:text-slate-200"
+                        />
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            value={newStoreTarget}
+                            onChange={(e) => setNewStoreTarget(e.target.value)}
+                            placeholder="Target ₹ (e.g. 500000)"
+                            className="w-full px-3 py-1.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:ring-1 focus:ring-blue-500 font-mono text-slate-800 dark:text-slate-200"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleAddCustomStore}
+                            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium shrink-0"
+                          >
+                            Add
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="max-h-80 overflow-y-auto pr-1 space-y-2 border border-slate-200 dark:border-slate-800 rounded-xl p-2 bg-slate-50/40 dark:bg-slate-850/40">
                     {/* MP Stores */}
-                    <div className="text-[11px] font-semibold tracking-wider text-purple-600 dark:text-purple-400 px-2 pt-1 uppercase">
-                      Madhya Pradesh Stores (8)
-                    </div>
-                    {MASTER_STORES_INFO.filter(s => s.state === "MP").map(store => (
-                      <div
-                        key={store.code}
-                        className="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs"
-                      >
-                        <div className="min-w-0 pr-2">
-                          <span className="font-semibold text-slate-800 dark:text-slate-200">{store.code}</span>
-                          <span className="text-slate-400 ml-1.5 truncate hidden sm:inline">{store.name.split("-").slice(1).join("-")}</span>
+                    {mpStores.length > 0 && (
+                      <>
+                        <div className="text-[11px] font-semibold tracking-wider text-purple-600 dark:text-purple-400 px-2 pt-1 uppercase">
+                          Madhya Pradesh Stores ({mpStores.length})
                         </div>
-                        <div className="flex items-center gap-1">
-                          <span className="text-slate-400">₹</span>
-                          <input
-                            type="number"
-                            value={manualTargets[store.code] || ""}
-                            onChange={(e) => setManualTargets({ ...manualTargets, [store.code]: Number(e.target.value) })}
-                            className="w-28 px-2 py-1 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-right font-mono font-medium text-slate-800 dark:text-slate-100"
-                          />
-                        </div>
-                      </div>
-                    ))}
+                        {mpStores.map(store => (
+                          <div
+                            key={store.code}
+                            className="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs"
+                          >
+                            <div className="min-w-0 pr-2">
+                              <span className="font-semibold text-slate-800 dark:text-slate-200">{store.code}</span>
+                              <span className="text-slate-400 ml-1.5 truncate hidden sm:inline">{store.name.split("-").slice(1).join("-") || store.name}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span className="text-slate-400">₹</span>
+                              <input
+                                type="number"
+                                value={manualTargets[store.code] || ""}
+                                onChange={(e) => setManualTargets({ ...manualTargets, [store.code]: Number(e.target.value) })}
+                                className="w-28 px-2 py-1 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-right font-mono font-medium text-slate-800 dark:text-slate-100"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </>
+                    )}
 
                     {/* MH Stores */}
-                    <div className="text-[11px] font-semibold tracking-wider text-blue-600 dark:text-blue-400 px-2 pt-3 uppercase">
-                      Maharashtra Stores (10)
-                    </div>
-                    {MASTER_STORES_INFO.filter(s => s.state === "MH").map(store => (
-                      <div
-                        key={store.code}
-                        className="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs"
-                      >
-                        <div className="min-w-0 pr-2">
-                          <span className="font-semibold text-slate-800 dark:text-slate-200">{store.code}</span>
-                          <span className="text-slate-400 ml-1.5 truncate hidden sm:inline">{store.name.split("-").slice(1).join("-")}</span>
+                    {mhStores.length > 0 && (
+                      <>
+                        <div className="text-[11px] font-semibold tracking-wider text-blue-600 dark:text-blue-400 px-2 pt-3 uppercase">
+                          Maharashtra Stores ({mhStores.length})
                         </div>
-                        <div className="flex items-center gap-1">
-                          <span className="text-slate-400">₹</span>
-                          <input
-                            type="number"
-                            value={manualTargets[store.code] || ""}
-                            onChange={(e) => setManualTargets({ ...manualTargets, [store.code]: Number(e.target.value) })}
-                            className="w-28 px-2 py-1 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-right font-mono font-medium text-slate-800 dark:text-slate-100"
-                          />
+                        {mhStores.map(store => (
+                          <div
+                            key={store.code}
+                            className="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs"
+                          >
+                            <div className="min-w-0 pr-2">
+                              <span className="font-semibold text-slate-800 dark:text-slate-200">{store.code}</span>
+                              <span className="text-slate-400 ml-1.5 truncate hidden sm:inline">{store.name.split("-").slice(1).join("-") || store.name}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span className="text-slate-400">₹</span>
+                              <input
+                                type="number"
+                                value={manualTargets[store.code] || ""}
+                                onChange={(e) => setManualTargets({ ...manualTargets, [store.code]: Number(e.target.value) })}
+                                className="w-28 px-2 py-1 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-right font-mono font-medium text-slate-800 dark:text-slate-100"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </>
+                    )}
+
+                    {/* Other Stores */}
+                    {otherStores.length > 0 && (
+                      <>
+                        <div className="text-[11px] font-semibold tracking-wider text-emerald-600 dark:text-emerald-400 px-2 pt-3 uppercase">
+                          Other Stores ({otherStores.length})
                         </div>
-                      </div>
-                    ))}
+                        {otherStores.map(store => (
+                          <div
+                            key={store.code}
+                            className="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-xs"
+                          >
+                            <div className="min-w-0 pr-2">
+                              <span className="font-semibold text-slate-800 dark:text-slate-200">{store.code}</span>
+                              <span className="text-slate-400 ml-1.5 truncate hidden sm:inline">{store.name.split("-").slice(1).join("-") || store.name}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span className="text-slate-400">₹</span>
+                              <input
+                                type="number"
+                                value={manualTargets[store.code] || ""}
+                                onChange={(e) => setManualTargets({ ...manualTargets, [store.code]: Number(e.target.value) })}
+                                className="w-28 px-2 py-1 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-right font-mono font-medium text-slate-800 dark:text-slate-100"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </>
+                    )}
                   </div>
 
                   <div className="pt-2 flex justify-end">
