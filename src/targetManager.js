@@ -20,7 +20,7 @@ export const MASTER_STORES_INFO = [
   { code: "WMH008", state: "MH", name: "WMH008 - STR - SATARA", defaultTarget: 700000 },
   { code: "WMH009", state: "MH", name: "WMH009 - KOP - KOLHAPUR", defaultTarget: 600000 },
   { code: "WMH011", state: "MH", name: "WMH011 - BDL - BADLAPUR", defaultTarget: 800000 },
-  { code: "WMH012", state: "MH", name: "WMH012 - MH STORE", defaultTarget: 500000 },
+  { code: "WMH012", state: "MH", name: "WMH012 - ANG - AHILYANAGAR", defaultTarget: 0 },
 
   // Madhya Pradesh (8 stores)
   { code: "WMP001", state: "MP", name: "WMP001 - BPL - SEHORE CITY", defaultTarget: 300000 },
@@ -137,6 +137,9 @@ export function getDefaultStoreTargetsMap() {
   map["WMH009 - KOP -  KOLHAPUR"] = 600000;
   map["WMP005 - STN - SATNA"] = 300000;
   map["WMP006 - BPL -  KOLAR ROAD"] = 300000;
+  map["WMH012"] = 0;
+  map["WMH012 - ANG - AHILYANAGAR"] = 0;
+  map["WMH012 - MH STORE"] = 0;
 
   return map;
 }
@@ -150,6 +153,10 @@ export function getLocalStoreTargets() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === "object") {
+        if (parsed["WMH012"] === 500000) {
+          parsed["WMH012"] = 0;
+          parsed["WMH012 - ANG - AHILYANAGAR"] = 0;
+        }
         return { ...getDefaultStoreTargetsMap(), ...parsed };
       }
     }
@@ -174,7 +181,7 @@ export function saveLocalStoreTargets(targetsMap) {
  * Calculate grand total monthly target across all dynamic stores
  */
 export function calculateGrandTotalTarget(targetsMap) {
-  if (!targetsMap) return 11340000;
+  if (!targetsMap) return 10840000;
   let total = 0;
   const allStores = getDynamicStoresInfo(targetsMap);
   allStores.forEach(store => {
@@ -285,6 +292,9 @@ export function matchStoreFromToken(token, targetsMap = null) {
     { key: "SATARA", code: "WMH008" },
     { key: "KOLHAPUR", code: "WMH009" },
     { key: "BADLAPUR", code: "WMH011" },
+    { key: "AHILYANAGAR", code: "WMH012" },
+    { key: "AHMEDNAGAR", code: "WMH012" },
+    { key: "ANG", code: "WMH012" },
   ];
 
   for (const item of keywordMap) {

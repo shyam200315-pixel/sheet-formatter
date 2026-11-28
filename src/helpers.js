@@ -17,7 +17,7 @@ export const MASTER_STORES = [
   "WMH008 - STR - SATARA",
   "WMH009 - KOP - KOLHAPUR",
   "WMH011 - BDL - BADLAPUR",
-  "WMH012 - MH STORE",
+  "WMH012 - ANG - AHILYANAGAR",
   // Madhya Pradesh (8 stores)
   "WMP001 - BPL - SEHORE CITY",
   "WMP002 - BPL - GULMOHAR COLONY",
@@ -44,7 +44,11 @@ export function getKnownStores() {
       if (Array.isArray(parsed)) {
         parsed.forEach(s => {
           if (s && typeof s === "string" && s.trim()) {
-            storeSet.add(s.trim());
+            if (s.includes("WMH012")) {
+              storeSet.add("WMH012 - ANG - AHILYANAGAR");
+            } else {
+              storeSet.add(s.trim());
+            }
           }
         });
       }
@@ -154,6 +158,8 @@ export function normalizeStoreName(storeName) {
     result = "WMH009 - KOP - KOLHAPUR";
   } else if (clean.includes("BADLAPUR")) {
     result = "WMH011 - BDL - BADLAPUR";
+  } else if (clean.includes("AHILYANAGAR") || clean.includes("AHMEDNAGAR") || clean.includes("WMH012") || clean.includes("ANG")) {
+    result = "WMH012 - ANG - AHILYANAGAR";
   } else {
     // 2. Exact match against master store cleaned strings
     const matchMaster = CLEANED_MASTER_STORES.find(entry => entry.clean === clean);

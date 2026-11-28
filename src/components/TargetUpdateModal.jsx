@@ -94,6 +94,9 @@ export default function TargetUpdateModal({
       allStores.forEach(s => {
         initialManual[s.code] = currentTargetsMap[s.code] ?? currentTargetsMap[s.name] ?? s.defaultTarget;
       });
+      if (initialManual["WMH012"] === 500000 || initialManual["WMH012"] === undefined) {
+        initialManual["WMH012"] = 0;
+      }
       setManualTargets(initialManual);
     }
   }, [isOpen, currentTargetsMap, allStores]);
